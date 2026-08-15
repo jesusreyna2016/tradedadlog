@@ -216,7 +216,7 @@
   });
   (function(){
     try{ var s=localStorage.getItem('tdl_lang'); if(s) lang=s; }catch(_){}
-    if(navigator.language && navigator.language.slice(0,2)==='es' && !localStorage.getItem('tdl_lang')) lang='es';
+    // Default language is always English; ES only if the user chose it before (saved above).
     document.querySelectorAll('#lang button').forEach(function(x){ x.classList.toggle('on', x.getAttribute('data-l')===lang); });
     document.getElementById('yr').textContent=new Date().getFullYear();
     render();
