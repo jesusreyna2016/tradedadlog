@@ -148,6 +148,7 @@
   var IC={
     journal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><rect x="5" y="12" width="3.4" height="6" rx="1"/><rect x="10.3" y="7" width="3.4" height="11" rx="1"/><rect x="15.6" y="4" width="3.4" height="14" rx="1"/></svg>',
     chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 3 3 4-6 3 4"/><path d="M3 21h18"/><path d="M3 3v18"/></svg>',
+    calc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 11h0M12 11h0M16 11h0M8 15h0M12 15h0M16 15h0"/></svg>',
     x:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>'
   };
   // ---- data (add new tools here as you build them) ----
@@ -156,6 +157,10 @@
       title:'Trading Journal',
       sub:{en:'Free discipline-first journal: leaks, tilt score, routine & calendar.',
            es:'Journal gratis centrado en disciplina: fugas, score de tilt, rutina y calendario.'} },
+    { ic:IC.calc, tone:'', url:'https://propfirm-calc.netlify.app/', badge:'live',
+      title:'Propfirm System Calculator',
+      sub:{en:'Accounts to hit your goal, Monte Carlo blow-up risk, real net after tax & pipeline.',
+           es:'Cuentas para tu meta, riesgo de blow-up Monte Carlo, neto real tras impuestos y pipeline.'} },
     { ic:IC.chart, tone:'a2', url:null, badge:'soon',
       title:'TradingView Indicators',
       sub:{en:'Pine scripts for bias, sessions, ORB & discipline. Dropping soon.',
