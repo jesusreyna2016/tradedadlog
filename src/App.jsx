@@ -197,10 +197,8 @@ export default function App() {
         </motion.div>
         {/* header */}
         <header className="text-center">
-          <motion.div variants={item(reduce)} className="relative z-10 mx-auto -mt-12 mb-4 grid size-[88px] place-items-center rounded-3xl border border-gold/35 bg-gradient-to-br from-gold/25 to-surface ring-[6px] ring-ground shadow-[0_20px_44px_-18px_rgba(0,0,0,0.7)]">
-            <span className="font-display text-[30px] font-bold leading-none tracking-tight">
-              <span className="text-ink">T</span><span className="text-gold">D</span>
-            </span>
+          <motion.div variants={item(reduce)} className="relative z-10 mx-auto -mt-12 mb-4 size-[96px] overflow-hidden rounded-full border-2 border-gold/45 ring-[6px] ring-ground shadow-[0_20px_44px_-18px_rgba(0,0,0,0.7)]">
+            <img src="/avatar.jpg" alt="Jesus with his family at the lake" className="size-full object-cover" style={{ objectPosition: 'center 30%' }} />
           </motion.div>
           <motion.h1 variants={item(reduce)} className="font-display text-[28px] font-bold tracking-tight text-ink">TradeDadLog</motion.h1>
           <motion.div variants={item(reduce)} className="mt-1.5">
@@ -223,8 +221,11 @@ export default function App() {
 
         {/* story */}
         <SectionLabel>{t.sStory}</SectionLabel>
-        <motion.div variants={item(reduce)} className="space-y-2.5 rounded-2xl border border-hair border-l-[3px] border-l-gold bg-gold/[0.04] p-4 text-[14px] leading-relaxed text-muted">
-          {t.story.map((p, i) => <p key={i}>{p}</p>)}
+        <motion.div variants={item(reduce)} className="overflow-hidden rounded-2xl border border-hair border-l-[3px] border-l-gold bg-gold/[0.04]">
+          <img src="/story.jpg" alt="My two boys sharing popcorn at the lake at sunset" loading="lazy" className="block max-h-[240px] w-full object-cover" style={{ objectPosition: 'center 42%' }} />
+          <div className="space-y-2.5 p-4 text-[14px] leading-relaxed text-muted">
+            {t.story.map((p, i) => <p key={i}>{p}</p>)}
+          </div>
         </motion.div>
 
         {/* footer */}
