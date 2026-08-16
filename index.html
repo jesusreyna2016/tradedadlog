@@ -1,238 +1,36 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>TradeDadLog, free tools for disciplined traders</title>
-<meta name="description" content="Free, no-BS tools for traders who want discipline: a trading journal, TradingView indicators and more. Built by a futures trader and dad.">
-<meta name="theme-color" content="#0a0d11">
+<meta name="description" content="Free, no-BS tools for traders who want discipline: a trading journal, TradingView indicators and more. Built by a futures trader and dad." />
+<meta name="theme-color" content="#0a0d11" />
 <!-- Open Graph / Twitter -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://tradedadlog.netlify.app/">
-<meta property="og:title" content="TradeDadLog, free tools for disciplined traders">
-<meta property="og:description" content="A trading journal, TradingView indicators and more. Free, private, built by a futures trader and dad.">
-<meta property="og:image" content="https://tradedadlog.netlify.app/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@TradeDadLog">
-<meta name="twitter:title" content="TradeDadLog, free tools for disciplined traders">
-<meta name="twitter:description" content="A trading journal, TradingView indicators and more. Free, private, built by a futures trader and dad.">
-<meta name="twitter:image" content="https://tradedadlog.netlify.app/og.png">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%230a0d11'/%3E%3Cpath d='M20 66 L40 52 L56 60 L80 30' fill='none' stroke='%2334c98a' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='80' cy='30' r='6' fill='%23c79235'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="apple-mobile-web-app-title" content="TradeDadLog">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#0a0d11; --surf:#11161c; --surf2:#161e26; --hair:#242f3a;
-    --ink:#e9eef3; --muted:#8695a6; --faint:#5a6875;
-    --gold:#c79235; --goldink:#130c02; --pos:#34c98a; --a2:#6f8cf5;
-    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    --disp:'Space Grotesk',var(--sans);
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0}
-  body{
-    font-family:var(--sans); color:var(--ink); background:var(--bg);
-    min-height:100dvh; line-height:1.5; -webkit-font-smoothing:antialiased;
-    padding:calc(env(safe-area-inset-top) + 34px) 18px calc(env(safe-area-inset-bottom) + 44px);
-    position:relative; overflow-x:hidden;
-  }
-  /* background glows + dot grid */
-  body::before{
-    content:""; position:fixed; inset:0; z-index:-2;
-    background:
-      radial-gradient(60% 42% at 50% -6%, color-mix(in srgb,var(--gold) 22%,transparent), transparent 70%),
-      radial-gradient(50% 40% at 92% 12%, color-mix(in srgb,var(--a2) 15%,transparent), transparent 70%),
-      var(--bg);
-  }
-  body::after{
-    content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.5;
-    background-image:radial-gradient(color-mix(in srgb,var(--ink) 8%,transparent) 1px, transparent 1px);
-    background-size:22px 22px;
-    -webkit-mask-image:radial-gradient(70% 55% at 50% 0%, #000, transparent 75%);
-            mask-image:radial-gradient(70% 55% at 50% 0%, #000, transparent 75%);
-  }
-  .wrap{ max-width:540px; margin:0 auto }
-
-  /* lang toggle */
-  .lang{ position:fixed; top:calc(env(safe-area-inset-top) + 14px); right:16px; z-index:5;
-    display:flex; gap:2px; background:color-mix(in srgb,var(--surf) 80%,transparent); border:1px solid var(--hair);
-    border-radius:999px; padding:3px; backdrop-filter:blur(8px) }
-  .lang button{ font:600 12px/1 var(--sans); color:var(--muted); background:none; border:0; padding:6px 11px; border-radius:999px; cursor:pointer }
-  .lang button.on{ background:var(--gold); color:var(--goldink) }
-
-  /* header */
-  header{ text-align:center; margin-bottom:26px }
-  .ava{ width:88px; height:88px; margin:0 auto 16px; border-radius:24px; display:flex; align-items:center; justify-content:center;
-    background:linear-gradient(150deg, color-mix(in srgb,var(--gold) 30%,var(--surf)), var(--surf) 70%);
-    border:1px solid color-mix(in srgb,var(--gold) 35%,var(--hair));
-    box-shadow:0 20px 44px -18px rgba(0,0,0,.7), inset 0 1px 0 color-mix(in srgb,#fff 8%,transparent);
-    font:700 30px/1 var(--disp); letter-spacing:-.02em; color:var(--ink); position:relative }
-  .ava b{ color:var(--gold) }
-  .ava .spark{ position:absolute; right:-6px; bottom:-6px; width:30px; height:30px; border-radius:50%;
-    background:var(--bg); border:1px solid var(--hair); display:flex; align-items:center; justify-content:center; font-size:15px }
-  h1{ font:700 27px/1.1 var(--disp); letter-spacing:-.02em; margin:0 }
-  .handle{ margin-top:6px }
-  .handle a{ color:var(--gold); text-decoration:none; font:600 14px/1 var(--mono) }
-  .tag{ color:var(--muted); font-size:15px; margin:14px auto 0; max-width:400px }
-
-  /* section label */
-  .slab{ display:flex; align-items:center; gap:10px; margin:30px 4px 12px; color:var(--faint);
-    font:700 10.5px/1 var(--mono); letter-spacing:.14em }
-  .slab::after{ content:""; flex:1; height:1px; background:var(--hair) }
-
-  /* link cards */
-  .links{ display:flex; flex-direction:column; gap:11px }
-  .lk{ display:flex; align-items:center; gap:14px; text-decoration:none; color:inherit;
-    background:var(--surf); border:1px solid var(--hair); border-radius:15px; padding:15px 16px;
-    transition:transform .16s ease, border-color .16s, box-shadow .16s; position:relative }
-  a.lk:hover{ transform:translateY(-2px); border-color:color-mix(in srgb,var(--gold) 46%,var(--hair));
-    box-shadow:0 16px 34px -20px rgba(0,0,0,.6) }
-  .lk.soon{ opacity:.72; cursor:default }
-  .lk-ic{ width:46px; height:46px; flex:none; border-radius:13px; display:flex; align-items:center; justify-content:center;
-    background:color-mix(in srgb,var(--gold) 13%,transparent); border:1px solid color-mix(in srgb,var(--gold) 26%,transparent); color:var(--gold) }
-  .lk-ic.a2{ background:color-mix(in srgb,var(--a2) 14%,transparent); border-color:color-mix(in srgb,var(--a2) 30%,transparent); color:var(--a2) }
-  .lk-ic.pos{ background:color-mix(in srgb,var(--pos) 13%,transparent); border-color:color-mix(in srgb,var(--pos) 28%,transparent); color:var(--pos) }
-  .lk-ic svg{ width:23px; height:23px }
-  .lk-tx{ flex:1; min-width:0 }
-  .lk-tx h3{ margin:0; font:700 16px/1.25 var(--disp) }
-  .lk-tx p{ margin:3px 0 0; color:var(--muted); font-size:13px }
-  .lk-ar{ color:var(--faint); flex:none; transition:transform .16s, color .16s }
-  a.lk:hover .lk-ar{ transform:translateX(3px); color:var(--gold) }
-  .badge{ font:700 9px/1 var(--mono); letter-spacing:.08em; padding:4px 8px; border-radius:999px; flex:none }
-  .badge.live{ color:var(--pos); background:color-mix(in srgb,var(--pos) 15%,transparent) }
-  .badge.soon{ color:var(--wait,#e8933a); background:color-mix(in srgb,#e8933a 15%,transparent) }
-
-  /* mission note */
-  .mission{ margin-top:26px; border:1px solid var(--hair); border-left:3px solid var(--gold);
-    border-radius:12px; padding:14px 16px; background:color-mix(in srgb,var(--gold) 5%,var(--surf)); color:var(--muted); font-size:13.5px }
-  .mission b{ color:var(--ink) }
-  .story{ margin-top:2px; color:var(--muted); font-size:14px; line-height:1.68 }
-  .story b{ color:var(--ink) }
-  .story p{ margin:0 0 10px }
-  .story p:last-child{ margin:0 }
-
-  footer{ text-align:center; margin-top:34px; color:var(--faint); font-size:12px; line-height:1.7 }
-  footer a{ color:var(--muted); text-decoration:none }
-  .hide{ display:none !important }
-</style>
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://tradedadlog.netlify.app/" />
+<meta property="og:title" content="TradeDadLog, free tools for disciplined traders" />
+<meta property="og:description" content="A trading journal, TradingView indicators and more. Free, private, built by a futures trader and dad." />
+<meta property="og:image" content="https://tradedadlog.netlify.app/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@TradeDadLog" />
+<meta name="twitter:title" content="TradeDadLog, free tools for disciplined traders" />
+<meta name="twitter:description" content="A trading journal, TradingView indicators and more. Free, private, built by a futures trader and dad." />
+<meta name="twitter:image" content="https://tradedadlog.netlify.app/og.png" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%230a0d11'/%3E%3Cpath d='M20 66 L40 52 L56 60 L80 30' fill='none' stroke='%2334c98a' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='80' cy='30' r='6' fill='%23c79235'/%3E%3C/svg%3E" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="TradeDadLog" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+<script type="module" src="/src/main.jsx"></script>
 </head>
 <body>
-  <div class="lang" id="lang">
-    <button data-l="en" class="on">EN</button><button data-l="es">ES</button>
-  </div>
-
-  <div class="wrap">
-    <header>
-      <div class="ava">T<b>D</b><span class="spark">📈</span></div>
-      <h1>TradeDadLog</h1>
-      <div class="handle"><a href="https://x.com/TradeDadLog" target="_blank" rel="noopener">@TradeDadLog</a></div>
-      <p class="tag" data-t="tag">Futures trader & dad. I build free, no-BS tools to trade with discipline, and share everything I make.</p>
-    </header>
-
-    <div class="slab" data-t="s_tools">TOOLS</div>
-    <div class="links" id="tools"></div>
-
-    <div class="slab" data-t="s_connect">CONNECT</div>
-    <div class="links" id="connect"></div>
-
-    <div class="slab" data-t="s_story">MY STORY</div>
-    <div class="story" data-t="story"><p>I'm a futures trader and a dad. A few years in, I realized my real problem was never analysis, it was my own discipline, and the debt that made every loss feel heavier.</p><p>I couldn't afford the fancy tools, so I started building the ones I actually needed. Now I give them away. If they help you keep more of your account and trade calmer, that's the whole point.</p></div>
-
-    <footer>
-      <div data-t="foot">Made by a dad who trades · <span id="yr"></span></div>
-      <div><a href="https://x.com/TradeDadLog" target="_blank" rel="noopener">x.com/TradeDadLog</a></div>
-    </footer>
-  </div>
-
-<script>
-  // ---- icons ----
-  var IC={
-    journal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><rect x="5" y="12" width="3.4" height="6" rx="1"/><rect x="10.3" y="7" width="3.4" height="11" rx="1"/><rect x="15.6" y="4" width="3.4" height="14" rx="1"/></svg>',
-    chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 3 3 4-6 3 4"/><path d="M3 21h18"/><path d="M3 3v18"/></svg>',
-    calc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 11h0M12 11h0M16 11h0M8 15h0M12 15h0M16 15h0"/></svg>',
-    x:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>'
-  };
-  // ---- data (add new tools here as you build them) ----
-  var TOOLS=[
-    { ic:IC.journal, tone:'pos', url:'https://trading-jo.netlify.app/', badge:'live',
-      title:'Trading Journal',
-      sub:{en:'Free discipline-first journal: leaks, tilt score, routine & calendar.',
-           es:'Journal gratis centrado en disciplina: fugas, score de tilt, rutina y calendario.'} },
-    { ic:IC.calc, tone:'', url:'https://propfirm-calc.netlify.app/', badge:'live',
-      title:'Propfirm System Calculator',
-      sub:{en:'Accounts to hit your goal, Monte Carlo blow-up risk, real net after tax & pipeline.',
-           es:'Cuentas para tu meta, riesgo de blow-up Monte Carlo, neto real tras impuestos y pipeline.'} },
-    { ic:IC.chart, tone:'a2', url:null, badge:'soon',
-      title:'TradingView Indicators',
-      sub:{en:'Pine scripts for bias, sessions, ORB & discipline. Dropping soon.',
-           es:'Scripts Pine de sesgo, sesiones, ORB y disciplina. Muy pronto.'} }
-  ];
-  var CONNECT=[
-    { ic:IC.x, tone:'', url:'https://x.com/TradeDadLog', badge:null, ext:true,
-      title:'Follow on X',
-      sub:{en:'Trades, lessons and new tools as I ship them.',
-           es:'Trades, lecciones y herramientas nuevas apenas las publico.'} }
-  ];
-
-  var I18N={
-    en:{ tag:"Futures trader & dad. I build free, no-BS tools to trade with discipline, and share everything I make.",
-         s_tools:"TOOLS", s_connect:"CONNECT", s_story:"MY STORY",
-         story:"<p>I'm a futures trader and a dad. A few years in, I realized my real problem was never analysis, it was my own discipline, and the debt that made every loss feel heavier.</p><p>I couldn't afford the fancy tools, so I started building the ones I actually needed. Now I give them away. If they help you keep more of your account and trade calmer, that's the whole point.</p>",
-         mission:"<b>Why free?</b> I got tired of paying for tools that didn't fix the real problem, my own discipline. So I'm building the ones I wish I had, and giving them away. If they help you keep more of your account, that's the win.",
-         foot:"Made by a dad who trades", soon:"SOON", live:"LIVE" },
-    es:{ tag:"Trader de futuros y papá. Construyo herramientas gratis y sin humo para operar con disciplina, y comparto todo lo que hago.",
-         s_tools:"HERRAMIENTAS", s_connect:"CONECTA", s_story:"MI HISTORIA",
-         story:"<p>Soy trader de futuros y papá. Con el tiempo entendí que mi problema real nunca fue el análisis, era mi propia disciplina, y las deudas que hacían cada pérdida más pesada.</p><p>No podía pagar las herramientas caras, así que empecé a construir las que de verdad necesitaba. Ahora las regalo. Si te ayudan a conservar más de tu cuenta y operar con más calma, esa es toda la idea.</p>",
-         mission:"<b>¿Por qué gratis?</b> Me cansé de pagar por herramientas que no arreglaban el problema real, mi propia disciplina. Así que construyo las que me hubiera gustado tener, y las regalo. Si te ayudan a conservar más de tu cuenta, esa es la victoria.",
-         foot:"Hecho por un papá que opera", soon:"PRONTO", live:"EN VIVO" }
-  };
-
-  var lang='en';
-  function esc(s){ return s; }
-  function cardHtml(it){
-    var t=(typeof it.title==='object')?(it.title[lang]||it.title.en):it.title;
-    var s=(typeof it.sub==='object')?(it.sub[lang]||it.sub.en):it.sub;
-    var badge=it.badge?('<span class="badge '+it.badge+'">'+(I18N[lang][it.badge]||it.badge.toUpperCase())+'</span>'):'';
-    var tail = it.url ? badge+'<span class="lk-ar">→</span>' : badge;
-    var inner='<span class="lk-ic '+(it.tone||'')+'">'+it.ic+'</span>'+
-              '<span class="lk-tx"><h3>'+t+'</h3><p>'+s+'</p></span>'+tail;
-    if(it.url){
-      var ext=it.ext?' target="_blank" rel="noopener"':'';
-      return '<a class="lk" href="'+it.url+'"'+ext+'>'+inner+'</a>';
-    }
-    return '<div class="lk soon">'+inner+'</div>';
-  }
-  function render(){
-    document.getElementById('tools').innerHTML=TOOLS.map(cardHtml).join('');
-    document.getElementById('connect').innerHTML=CONNECT.map(cardHtml).join('');
-    document.querySelectorAll('[data-t]').forEach(function(el){
-      var k=el.getAttribute('data-t'); if(I18N[lang][k]!=null) el.innerHTML=I18N[lang][k];
-    });
-    document.documentElement.lang=lang;
-  }
-  document.getElementById('lang').addEventListener('click',function(e){
-    var b=e.target.closest('button'); if(!b) return;
-    lang=b.getAttribute('data-l');
-    document.querySelectorAll('#lang button').forEach(function(x){ x.classList.toggle('on', x===b); });
-    try{ localStorage.setItem('tdl_lang',lang); }catch(_){}
-    render();
-  });
-  (function(){
-    try{ var s=localStorage.getItem('tdl_lang'); if(s) lang=s; }catch(_){}
-    // Default language is always English; ES only if the user chose it before (saved above).
-    document.querySelectorAll('#lang button').forEach(function(x){ x.classList.toggle('on', x.getAttribute('data-l')===lang); });
-    document.getElementById('yr').textContent=new Date().getFullYear();
-    render();
-  })();
-</script>
-<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "f7fe10c26e1347a8971d3e5302e16f26"}'></script><!-- End Cloudflare Web Analytics -->
+<div id="root"></div>
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "f7fe10c26e1347a8971d3e5302e16f26"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

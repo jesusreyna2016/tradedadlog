@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ground: #0a0d11;
+  --color-surface: #11161c;
+  --color-surface2: #161e26;
+  --color-hair: #232c39;
+  --color-ink: #f1f5f9;
+  --color-muted: #93a1b3;
+  --color-faint: #5b6675;
+  --color-gold: #c79235;
+  --color-goldlite: #e3b25a;
+  --color-pos: #34c98a;
+  --color-a2: #6f8cf5;
+
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--color-ground);
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* keyboard focus, visible and on-brand */
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* fixed decorative background: two brand glows + a masked dot grid */
+.bg-scene {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 40% at 50% -6%, color-mix(in srgb, var(--color-gold) 20%, transparent), transparent 70%),
+    radial-gradient(48% 38% at 92% 10%, color-mix(in srgb, var(--color-a2) 13%, transparent), transparent 70%),
+    var(--color-ground);
+}
+.bg-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  background-image: radial-gradient(color-mix(in srgb, var(--color-ink) 8%, transparent) 1px, transparent 1px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(70% 52% at 50% 0%, #000, transparent 76%);
+  mask-image: radial-gradient(70% 52% at 50% 0%, #000, transparent 76%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

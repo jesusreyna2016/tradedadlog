@@ -1,11 +1,22 @@
 # TradeDadLog
 
-Personal hub / link-in-bio for [@TradeDadLog](https://x.com/TradeDadLog) — free, no-BS tools for disciplined traders.
+Personal hub / link-in-bio for [@TradeDadLog](https://x.com/TradeDadLog): free, no-BS tools for disciplined traders.
 
-- **Trading Journal** — https://trading-jo.netlify.app/
-- **TradingView Indicators** — coming soon
+- **Trading Journal** https://trading-jo.netlify.app/
+- **Propfirm System Calculator** https://propfirm-calc.netlify.app/
+- **TradingView Indicators** (coming soon)
 
-Single self-contained `index.html` (no build step). Deployed on Netlify.
+## Stack
+Vite + React + Tailwind CSS v4 + framer-motion. Bilingual (EN/ES, English default). Deployed on Netlify.
 
-### Add a new tool
-Edit the `TOOLS` (or `CONNECT`) array near the top of the `<script>` in `index.html` — copy one object, set `title`, `sub` (en/es), `url` and `badge`. That's it.
+## Develop
+```
+npm install
+npm run dev      # local dev server
+npm run build    # production build to dist/
+```
+
+## Add a tool
+Edit the `TOOLS` (or `CONNECT`) array near the top of `src/App.jsx`: copy one object, set `title`, `sub` (en/es), `url`, `badge` and `icon`.
+
+Static assets (og.png, apple-touch-icon.png) live in `public/`.
