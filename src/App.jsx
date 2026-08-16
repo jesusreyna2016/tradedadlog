@@ -219,15 +219,6 @@ export default function App() {
           {CONNECT.map((d) => <LinkCard key={d.title} data={d} lang={lang} reduce={reduce} t={t} />)}
         </div>
 
-        {/* story */}
-        <SectionLabel>{t.sStory}</SectionLabel>
-        <motion.div variants={item(reduce)} className="overflow-hidden rounded-2xl border border-hair border-l-[3px] border-l-gold bg-gold/[0.04]">
-          <img src="/story.jpg" alt="My two boys sharing popcorn at the lake at sunset" loading="lazy" className="block max-h-[240px] w-full object-cover" style={{ objectPosition: 'center 42%' }} />
-          <div className="space-y-2.5 p-4 text-[14px] leading-relaxed text-muted">
-            {t.story.map((p, i) => <p key={i}>{p}</p>)}
-          </div>
-        </motion.div>
-
         {/* footer */}
         <motion.footer variants={item(reduce)} className="mt-9 text-center text-xs leading-7 text-faint">
           <div>{t.footNote} · {new Date().getFullYear()}</div>
