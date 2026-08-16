@@ -71,7 +71,7 @@ const TOOLS = [
   {
     icon: 'chart', tone: 'a2', url: '/indicators.html', badge: 'live',
     title: 'TradingView Indicators',
-    sub: { en: '2 free indicators for sessions and initial balance. Tap to open the list.', es: '2 indicadores gratis de sesiones e initial balance. Toca para ver la lista.' },
+    sub: { en: 'Free indicators for your TradingView charts.', es: 'Indicadores gratis para tus gráficos de TradingView.' },
   },
 ]
 const CONNECT = [
