@@ -68,9 +68,14 @@ const TOOLS = [
     sub: { en: 'Accounts to hit your goal, Monte Carlo blow-up risk, real net after tax and pipeline.', es: 'Cuentas para tu meta, riesgo de blow-up Monte Carlo, neto real tras impuestos y pipeline.' },
   },
   {
-    icon: 'chart', tone: 'a2', url: null, badge: 'soon',
-    title: 'TradingView Indicators',
-    sub: { en: 'Pine scripts for bias, sessions, ORB and discipline. Dropping soon.', es: 'Scripts Pine de sesgo, sesiones, ORB y disciplina. Muy pronto.' },
+    icon: 'chart', tone: 'a2', url: 'https://www.tradingview.com/script/lgQ7YDfX-Multi-Session-Opening-Ranges/', badge: 'live', ext: true,
+    title: 'Multi-Session Opening Ranges',
+    sub: { en: 'Opening range levels for multiple trading sessions, on your chart. Free on TradingView.', es: 'Niveles del rango de apertura de varias sesiones, en tu gráfico. Gratis en TradingView.' },
+  },
+  {
+    icon: 'chart', tone: 'a2', url: 'https://www.tradingview.com/script/fnMlBX39-Initial-Balance-with-Dashboard/', badge: 'live', ext: true,
+    title: 'Initial Balance with Dashboard',
+    sub: { en: 'Initial Balance range with a built-in stats dashboard. Free on TradingView.', es: 'Rango de Initial Balance con un dashboard de estadísticas. Gratis en TradingView.' },
   },
 ]
 const CONNECT = [
