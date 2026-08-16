@@ -188,11 +188,16 @@ export default function App() {
         variants={container}
         initial="hidden"
         animate="show"
-        className="mx-auto w-full max-w-[540px] px-[18px] pb-16 pt-[calc(env(safe-area-inset-top)+52px)]"
+        className="mx-auto w-full max-w-[540px] px-[18px] pb-16 pt-[calc(env(safe-area-inset-top)+48px)]"
       >
+        {/* cover photo */}
+        <motion.div variants={item(reduce)} className="relative overflow-hidden rounded-2xl border border-hair shadow-[0_18px_40px_-22px_rgba(0,0,0,0.7)]">
+          <img src="/family.jpg" alt="Sunset at the lake with my two boys" loading="eager" className="block h-[200px] w-full object-cover" style={{ objectPosition: 'center 46%' }} />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28" style={{ background: 'linear-gradient(to bottom, transparent, color-mix(in srgb, var(--color-ground) 78%, transparent))' }} />
+        </motion.div>
         {/* header */}
         <header className="text-center">
-          <motion.div variants={item(reduce)} className="mx-auto mb-4 grid size-[88px] place-items-center rounded-3xl border border-gold/35 bg-gradient-to-br from-gold/25 to-surface shadow-[0_20px_44px_-18px_rgba(0,0,0,0.7)]">
+          <motion.div variants={item(reduce)} className="relative z-10 mx-auto -mt-12 mb-4 grid size-[88px] place-items-center rounded-3xl border border-gold/35 bg-gradient-to-br from-gold/25 to-surface ring-[6px] ring-ground shadow-[0_20px_44px_-18px_rgba(0,0,0,0.7)]">
             <span className="font-display text-[30px] font-bold leading-none tracking-tight">
               <span className="text-ink">T</span><span className="text-gold">D</span>
             </span>
