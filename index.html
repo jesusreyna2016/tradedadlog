@@ -20,6 +20,10 @@
 <meta name="twitter:description" content="A trading journal, TradingView indicators and more. Free, private, built by a futures trader and dad.">
 <meta name="twitter:image" content="https://tradedadlog.netlify.app/og.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%230a0d11'/%3E%3Cpath d='M20 66 L40 52 L56 60 L80 30' fill='none' stroke='%2334c98a' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='80' cy='30' r='6' fill='%23c79235'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="TradeDadLog">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -110,6 +114,10 @@
   .mission{ margin-top:26px; border:1px solid var(--hair); border-left:3px solid var(--gold);
     border-radius:12px; padding:14px 16px; background:color-mix(in srgb,var(--gold) 5%,var(--surf)); color:var(--muted); font-size:13.5px }
   .mission b{ color:var(--ink) }
+  .story{ margin-top:2px; color:var(--muted); font-size:14px; line-height:1.68 }
+  .story b{ color:var(--ink) }
+  .story p{ margin:0 0 10px }
+  .story p:last-child{ margin:0 }
 
   footer{ text-align:center; margin-top:34px; color:var(--faint); font-size:12px; line-height:1.7 }
   footer a{ color:var(--muted); text-decoration:none }
@@ -135,7 +143,8 @@
     <div class="slab" data-t="s_connect">CONNECT</div>
     <div class="links" id="connect"></div>
 
-    <div class="mission" data-t="mission"><b>Why free?</b> I got tired of paying for tools that didn't fix the real problem, my own discipline. So I'm building the ones I wish I had, and giving them away. If they help you keep more of your account, that's the win.</div>
+    <div class="slab" data-t="s_story">MY STORY</div>
+    <div class="story" data-t="story"><p>I'm a futures trader and a dad. A few years in, I realized my real problem was never analysis, it was my own discipline, and the debt that made every loss feel heavier.</p><p>I couldn't afford the fancy tools, so I started building the ones I actually needed. Now I give them away. If they help you keep more of your account and trade calmer, that's the whole point.</p></div>
 
     <footer>
       <div data-t="foot">Made by a dad who trades · <span id="yr"></span></div>
@@ -175,11 +184,13 @@
 
   var I18N={
     en:{ tag:"Futures trader & dad. I build free, no-BS tools to trade with discipline, and share everything I make.",
-         s_tools:"TOOLS", s_connect:"CONNECT",
+         s_tools:"TOOLS", s_connect:"CONNECT", s_story:"MY STORY",
+         story:"<p>I'm a futures trader and a dad. A few years in, I realized my real problem was never analysis, it was my own discipline, and the debt that made every loss feel heavier.</p><p>I couldn't afford the fancy tools, so I started building the ones I actually needed. Now I give them away. If they help you keep more of your account and trade calmer, that's the whole point.</p>",
          mission:"<b>Why free?</b> I got tired of paying for tools that didn't fix the real problem, my own discipline. So I'm building the ones I wish I had, and giving them away. If they help you keep more of your account, that's the win.",
          foot:"Made by a dad who trades", soon:"SOON", live:"LIVE" },
     es:{ tag:"Trader de futuros y papá. Construyo herramientas gratis y sin humo para operar con disciplina, y comparto todo lo que hago.",
-         s_tools:"HERRAMIENTAS", s_connect:"CONECTA",
+         s_tools:"HERRAMIENTAS", s_connect:"CONECTA", s_story:"MI HISTORIA",
+         story:"<p>Soy trader de futuros y papá. Con el tiempo entendí que mi problema real nunca fue el análisis, era mi propia disciplina, y las deudas que hacían cada pérdida más pesada.</p><p>No podía pagar las herramientas caras, así que empecé a construir las que de verdad necesitaba. Ahora las regalo. Si te ayudan a conservar más de tu cuenta y operar con más calma, esa es toda la idea.</p>",
          mission:"<b>¿Por qué gratis?</b> Me cansé de pagar por herramientas que no arreglaban el problema real, mi propia disciplina. Así que construyo las que me hubiera gustado tener, y las regalo. Si te ayudan a conservar más de tu cuenta, esa es la victoria.",
          foot:"Hecho por un papá que opera", soon:"PRONTO", live:"EN VIVO" }
   };
