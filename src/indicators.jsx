@@ -106,9 +106,9 @@ function Page() {
               href={d.url}
               target="_blank"
               rel="noopener"
-              className="group flex items-center gap-4 rounded-2xl border border-hair bg-surface/80 p-4 no-underline backdrop-blur-sm transition-colors duration-200 hover:border-a2/50"
+              className="group flex items-center gap-4 rounded-2xl border border-hair bg-gradient-to-b from-surface/90 to-surface2/70 p-4 no-underline backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_12px_30px_-22px_rgba(0,0,0,0.7)] transition-[border-color,box-shadow] duration-200 hover:border-a2/50 hover:shadow-[0_18px_44px_-26px_var(--color-a2)]"
             >
-              <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-a2/25 bg-a2/12 text-a2">
+              <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-a2/25 bg-a2/12 text-a2 shadow-[0_0_20px_-7px_currentColor]">
                 <ChartIcon className="size-6" />
               </span>
               <span className="min-w-0 flex-1">

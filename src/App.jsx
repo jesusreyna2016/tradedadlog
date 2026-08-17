@@ -119,7 +119,7 @@ function LinkCard({ data, lang, reduce, t }) {
 
   const inner = (
     <>
-      <span className={`grid size-12 shrink-0 place-items-center rounded-xl border ${toneRing[data.tone]}`}>
+      <span className={`grid size-12 shrink-0 place-items-center rounded-xl border shadow-[0_0_20px_-7px_currentColor] ${toneRing[data.tone]}`}>
         <IconEl className="size-6" />
       </span>
       <span className="min-w-0 flex-1">
@@ -133,7 +133,7 @@ function LinkCard({ data, lang, reduce, t }) {
     </>
   )
 
-  const base = 'group flex items-center gap-4 rounded-2xl border border-hair bg-surface/80 p-4 backdrop-blur-sm'
+  const base = 'group flex items-center gap-4 rounded-2xl border border-hair bg-gradient-to-b from-surface/90 to-surface2/70 p-4 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_12px_30px_-22px_rgba(0,0,0,0.7)]'
 
   if (!data.url) {
     return (
@@ -147,7 +147,7 @@ function LinkCard({ data, lang, reduce, t }) {
       transition={{ type: 'spring', stiffness: 380, damping: 26 }}
       href={data.url}
       {...(data.ext ? { target: '_blank', rel: 'noopener' } : {})}
-      className={`${base} cursor-pointer no-underline transition-colors duration-200 hover:border-gold/50`}
+      className={`${base} cursor-pointer no-underline transition-[border-color,box-shadow] duration-200 hover:border-gold/50 hover:shadow-[0_18px_44px_-26px_var(--color-gold)]`}
     >
       {inner}
     </motion.a>
@@ -156,7 +156,8 @@ function LinkCard({ data, lang, reduce, t }) {
 
 function SectionLabel({ children }) {
   return (
-    <motion.div variants={item(false)} className="mt-8 mb-3 flex items-center gap-3 px-1">
+    <motion.div variants={item(false)} className="mt-8 mb-3 flex items-center gap-2.5 px-1">
+      <span className="h-3 w-[3px] rounded-full bg-gold shadow-[0_0_9px_-1px_var(--color-gold)]" />
       <span className="font-mono text-[10.5px] font-bold tracking-[0.16em] text-faint">{children}</span>
       <span className="h-px flex-1 bg-hair" />
     </motion.div>
