@@ -59,7 +59,7 @@ const Icon = {
 /* ---------------- data (add tools here as you ship them) ---------------- */
 const TOOLS = [
   {
-    icon: 'journal', tone: 'pos', url: 'https://trading-jo.netlify.app/', badge: 'live',
+    icon: 'journal', tone: 'pos', url: 'https://mywhyjournal.com/', badge: 'live',
     title: 'Trading Journal',
     sub: { en: 'Free discipline-first journal: leaks, tilt score, routine and calendar.', es: 'Journal gratis centrado en disciplina: fugas, score de tilt, rutina y calendario.' },
   },
