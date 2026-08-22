@@ -16,6 +16,8 @@ const T = {
     footNote: "Made by a dad who trades",
     live: "LIVE",
     soon: "SOON",
+    featured: "START HERE",
+    trust: ["100% free", "Private", "No sign-up"],
   },
   es: {
     tagline: "Trader de futuros y papá. Construyo herramientas gratis y sin humo para operar con disciplina, y comparto todo lo que hago.",
@@ -29,6 +31,8 @@ const T = {
     footNote: "Hecho por un papá que opera",
     live: "EN VIVO",
     soon: "PRONTO",
+    featured: "EMPIEZA AQUÍ",
+    trust: ["100% gratis", "Privado", "Sin registro"],
   },
 }
 
@@ -59,7 +63,7 @@ const Icon = {
 /* ---------------- data (add tools here as you ship them) ---------------- */
 const TOOLS = [
   {
-    icon: 'journal', tone: 'pos', url: 'https://mywhyjournal.com/', badge: 'live',
+    icon: 'journal', tone: 'pos', url: 'https://mywhyjournal.com/', badge: 'live', featured: true,
     title: 'Trading Journal',
     sub: { en: 'Free discipline-first journal: leaks, tilt score, routine and calendar.', es: 'Journal gratis centrado en disciplina: fugas, score de tilt, rutina y calendario.' },
   },
@@ -111,11 +115,13 @@ function useLang() {
 function LinkCard({ data, lang, reduce, t }) {
   const IconEl = Icon[data.icon]
   const sub = data.sub[lang] || data.sub.en
-  const badge = data.badge === 'live'
-    ? <span className="shrink-0 rounded-full bg-pos/15 px-2.5 py-1 font-mono text-[9px] font-bold tracking-wider text-pos">{t.live}</span>
-    : data.badge === 'soon'
-      ? <span className="shrink-0 rounded-full bg-gold/15 px-2.5 py-1 font-mono text-[9px] font-bold tracking-wider text-gold">{t.soon}</span>
-      : null
+  const badge = data.featured
+    ? <span className="shrink-0 rounded-full bg-gold/15 px-2.5 py-1 font-mono text-[9px] font-bold tracking-wider text-gold">{t.featured}</span>
+    : data.badge === 'live'
+      ? <span className="shrink-0 rounded-full bg-pos/15 px-2.5 py-1 font-mono text-[9px] font-bold tracking-wider text-pos">{t.live}</span>
+      : data.badge === 'soon'
+        ? <span className="shrink-0 rounded-full bg-gold/15 px-2.5 py-1 font-mono text-[9px] font-bold tracking-wider text-gold">{t.soon}</span>
+        : null
 
   const inner = (
     <>
@@ -133,7 +139,7 @@ function LinkCard({ data, lang, reduce, t }) {
     </>
   )
 
-  const base = 'group flex items-center gap-4 rounded-2xl border border-hair bg-gradient-to-b from-surface/90 to-surface2/70 p-4 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_12px_30px_-22px_rgba(0,0,0,0.7)]'
+  const base = `group flex items-center gap-4 rounded-2xl border bg-gradient-to-b from-surface/90 to-surface2/70 p-4 backdrop-blur-sm ${data.featured ? 'border-gold/45 shadow-[0_16px_40px_-24px_var(--color-gold)]' : 'border-hair shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_12px_30px_-22px_rgba(0,0,0,0.7)]'}`
 
   if (!data.url) {
     return (
@@ -207,6 +213,11 @@ export default function App() {
             <a href="https://x.com/TradeDadLog" target="_blank" rel="noopener" className="cursor-pointer font-mono text-sm font-semibold text-gold no-underline hover:text-goldlite">@TradeDadLog</a>
           </motion.div>
           <motion.p variants={item(reduce)} className="mx-auto mt-4 max-w-[400px] text-[15px] leading-relaxed text-muted">{t.tagline}</motion.p>
+          <motion.div variants={item(reduce)} className="mt-3.5 flex flex-wrap justify-center gap-2">
+            {t.trust.map((c) => (
+              <span key={c} className="rounded-full border border-hair bg-white/5 px-3 py-1 font-mono text-[10px] font-semibold tracking-wide text-muted">{c}</span>
+            ))}
+          </motion.div>
         </header>
 
         {/* tools */}
@@ -214,6 +225,19 @@ export default function App() {
         <div className="flex flex-col gap-3">
           {TOOLS.map((d) => <LinkCard key={d.title} data={d} lang={lang} reduce={reduce} t={t} />)}
         </div>
+
+        {/* my story */}
+        <SectionLabel>{t.sStory}</SectionLabel>
+        <motion.div
+          variants={item(reduce)}
+          className="rounded-2xl border border-hair border-l-2 border-l-gold/60 bg-gradient-to-b from-surface/90 to-surface2/70 p-5 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_12px_30px_-22px_rgba(0,0,0,0.7)]"
+        >
+          <div className="flex flex-col gap-3">
+            {t.story.map((p, i) => (
+              <p key={i} className="text-[13.5px] leading-relaxed text-muted">{p}</p>
+            ))}
+          </div>
+        </motion.div>
 
         {/* connect */}
         <SectionLabel>{t.sConnect}</SectionLabel>
