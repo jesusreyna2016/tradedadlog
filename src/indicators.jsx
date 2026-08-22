@@ -10,6 +10,7 @@ const T = {
     title: 'Indicators',
     lead: 'Free indicators I use on my own charts. Open one to view it on TradingView and add it to your chart.',
     open: 'Open on TradingView',
+    moreSoon: 'More indicators on the way. Follow on X to catch them as I ship them.',
     footNote: 'Made by a dad who trades',
   },
   es: {
@@ -18,6 +19,7 @@ const T = {
     title: 'Indicadores',
     lead: 'Indicadores gratis que uso en mis propios gráficos. Abre uno para verlo en TradingView y agregarlo a tu chart.',
     open: 'Abrir en TradingView',
+    moreSoon: 'Más indicadores en camino. Sígueme en X para no perdértelos.',
     footNote: 'Hecho por un papá que opera',
   },
 }
@@ -26,11 +28,13 @@ const INDICATORS = [
   {
     url: 'https://www.tradingview.com/script/lgQ7YDfX-Multi-Session-Opening-Ranges/',
     title: 'Multi-Session Opening Ranges',
+    tags: ['Sessions', 'Opening Range', 'Levels'],
     sub: { en: 'Opening range highs and lows for multiple trading sessions, drawn on your chart.', es: 'Máximos y mínimos del rango de apertura de varias sesiones, dibujados en tu gráfico.' },
   },
   {
     url: 'https://www.tradingview.com/script/fnMlBX39-Initial-Balance-with-Dashboard/',
     title: 'Initial Balance with Dashboard',
+    tags: ['Initial Balance', 'Dashboard', 'Stats'],
     sub: { en: 'The Initial Balance range with a built-in stats dashboard.', es: 'El rango de Initial Balance con un dashboard de estadísticas integrado.' },
   },
 ]
@@ -114,11 +118,28 @@ function Page() {
               <span className="min-w-0 flex-1">
                 <span className="block font-display text-[16px] font-bold leading-tight text-ink">{d.title}</span>
                 <span className="mt-1 block text-[13px] leading-snug text-muted">{d.sub[lang] || d.sub.en}</span>
+                {d.tags && (
+                  <span className="mt-2 flex flex-wrap gap-1.5">
+                    {d.tags.map((tg) => (
+                      <span key={tg} className="rounded-full border border-hair bg-white/5 px-2 py-0.5 font-mono text-[9.5px] font-semibold tracking-wide text-faint">{tg}</span>
+                    ))}
+                  </span>
+                )}
               </span>
               <span className="shrink-0 rounded-full bg-a2/15 px-2.5 py-1 font-mono text-[9px] font-bold tracking-wider text-a2">FREE</span>
               <svg className="size-4 shrink-0 text-faint transition-[transform,color] duration-200 group-hover:translate-x-0.5 group-hover:text-a2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M13 5l7 7-7 7" /></svg>
             </motion.a>
           ))}
+          <motion.a
+            variants={item(reduce)}
+            href="https://x.com/TradeDadLog"
+            target="_blank"
+            rel="noopener"
+            className="group flex items-center gap-3 rounded-2xl border border-dashed border-hair bg-surface/40 p-4 no-underline transition-colors duration-200 hover:border-a2/40"
+          >
+            <span className="grid size-9 shrink-0 place-items-center rounded-lg border border-hair text-lg leading-none text-faint transition-colors group-hover:text-a2">+</span>
+            <span className="min-w-0 flex-1 text-[13px] leading-snug text-muted">{t.moreSoon}</span>
+          </motion.a>
         </div>
 
         <motion.footer variants={item(reduce)} className="mt-10 text-center text-xs leading-7 text-faint">
