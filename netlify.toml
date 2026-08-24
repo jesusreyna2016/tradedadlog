@@ -18,3 +18,8 @@
   from = "/api/cc-plan"
   to = "/.netlify/functions/cc-plan"
   status = 200
+
+[[redirects]]
+  from = "/api/cc-news"
+  to = "/.netlify/functions/cc-news"
+  status = 200
