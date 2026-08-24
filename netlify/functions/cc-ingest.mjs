@@ -42,6 +42,16 @@ export default async (req) => {
       vwap: num(kv.vwap), pdh: num(kv.pdh), pdl: num(kv.pdl)
     },
     noTradeZone: (num(kv.ntz1)!=null && num(kv.ntz2)!=null) ? [num(kv.ntz1), num(kv.ntz2)] : null,
+    // contexto extra + senal en vivo
+    signal: kv.signal || null,      // REVERSAL_IFVG | REVERSAL | A_FAVOR_BORDE | NOTRADE | ESPERA
+    edge: kv.edge || null,          // VAH | VAL | POC | none
+    struct: kv.struct || null,      // "BOS up" / "CHoCH dn" / none
+    regime: kv.regime || null,      // Rango | Tendencia | Transición
+    vol: kv.vol || null,            // Expansión | Avanzado | Agotado
+    htf1: kv.htf1 || null,
+    htf2: kv.htf2 || null,
+    rs: kv.rs || null,
+    inNtz: kv.inntz === '1',
     updatedAt: new Date().toISOString()
   };
 
