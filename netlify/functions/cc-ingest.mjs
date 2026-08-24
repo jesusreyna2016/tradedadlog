@@ -32,6 +32,7 @@ export default async (req) => {
   if(!kv) return new Response('bad payload (esperaba cadena TDL1|...)', { status: 400 });
 
   const plan = {
+    ver: kv.ver || null,
     date: kv.date || null,
     dayType: kv.daytype || null,
     biasDir: kv.bias || null,
