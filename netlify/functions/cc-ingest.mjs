@@ -39,7 +39,9 @@ export default async (req) => {
     price: num(kv.price),
     levels: {
       vah: num(kv.vah), poc: num(kv.poc), val: num(kv.val),
-      vwap: num(kv.vwap), pdh: num(kv.pdh), pdl: num(kv.pdl)
+      vwap: num(kv.vwap), pdh: num(kv.pdh), pdl: num(kv.pdl),
+      dayOpen: num(kv.dayopen), orH: num(kv.orh), orL: num(kv.orl),
+      pwh: num(kv.pwh), pwl: num(kv.pwl), tdo: num(kv.tdo)
     },
     noTradeZone: (num(kv.ntz1)!=null && num(kv.ntz2)!=null) ? [num(kv.ntz1), num(kv.ntz2)] : null,
     // contexto extra + senal en vivo
