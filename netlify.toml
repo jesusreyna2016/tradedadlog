@@ -4,3 +4,17 @@
 
 [build.environment]
   NODE_VERSION = "20"
+
+[functions]
+  directory = "netlify/functions"
+
+# Rutas limpias para las funciones del Command Center
+[[redirects]]
+  from = "/api/cc-ingest"
+  to = "/.netlify/functions/cc-ingest"
+  status = 200
+
+[[redirects]]
+  from = "/api/cc-plan"
+  to = "/.netlify/functions/cc-plan"
+  status = 200
