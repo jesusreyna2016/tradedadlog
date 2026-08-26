@@ -1,9 +1,15 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TradeDadLog · Command Center</title>
+<script>
+/* ================= IDIOMA · globals disponibles para todos los modulos (EN default) ================= */
+window.CC_LANG = (function(){ try{ return localStorage.getItem('cc_lang')==='es'?'es':'en'; }catch(e){ return 'en'; } })();
+window.T = function(es,en){ return window.CC_LANG==='en'?en:es; };
+window.__i18nRefresh = [];
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -71,6 +77,12 @@ body::before{
 .clock{margin-left:auto;text-align:right}
 .clock .t{font-family:"Orbitron","JetBrains Mono",monospace;font-size:24px;font-weight:700;letter-spacing:1px;color:#fff}
 .clock .d{font-size:9px;letter-spacing:2px;color:var(--txt-dim);margin-top:1px}
+
+/* ---------- LANGBAR ---------- */
+.langbar{display:flex;gap:2px;padding:2px;border-radius:10px;border:1px solid var(--border);background:var(--panel-2);flex-shrink:0}
+.langbar button{font-family:"Chakra Petch","JetBrains Mono",sans-serif;font-size:9.5px;letter-spacing:1px;font-weight:700;padding:6px 10px;border-radius:8px;border:none;background:transparent;color:var(--txt-faint);cursor:pointer;transition:.15s}
+.langbar button:hover{color:var(--txt)}
+.langbar button[aria-pressed="true"]{background:var(--cyan-dim);color:var(--cyan)}
 
 /* ---------- TICKER ---------- */
 .ticker{display:flex;align-items:center;gap:14px;padding:9px 18px;border:1px solid var(--border);border-radius:12px;background:var(--panel);overflow:hidden}
@@ -385,17 +397,17 @@ body::before{
     <div class="bar"><i></i></div>
   </div>
 </div>
-<div class="mock" id="mock">MOCKUP · DATOS DE EJEMPLO</div>
+<div class="mock" id="mock" data-i18n-es="MOCKUP &middot; DATOS DE EJEMPLO" data-i18n-en="MOCKUP · SAMPLE DATA">MOCKUP · SAMPLE DATA</div>
 <div class="toast" id="ccToast"></div>
 
 <!-- TILT-LOCK OVERLAY -->
 <div class="overlay" id="overlay">
   <div class="lockcard">
     <div class="big" data-text="TILT-LOCK">TILT-LOCK</div>
-    <div class="sub">DOS PÉRDIDAS SEGUIDAS. YA NO OPERAS, COBRAS VENGANZA.<br>Respira. Esta cuenta te la protejo de ti mismo.</div>
+    <div class="sub" id="lockSub" data-i18n-html-es="DOS P&Eacute;RDIDAS SEGUIDAS. YA NO OPERAS, COBRAS VENGANZA.<br>Respira. Esta cuenta te la protejo de ti mismo." data-i18n-html-en="TWO LOSSES IN A ROW. YOU'RE NOT TRADING ANYMORE, YOU'RE SEEKING REVENGE.<br>Breathe. I'm protecting this account from you.">TWO LOSSES IN A ROW. YOU'RE NOT TRADING ANYMORE, YOU'RE SEEKING REVENGE.<br>Breathe. I'm protecting this account from you.</div>
     <div class="cd" id="lockcd">04:59</div>
-    <textarea placeholder="¿Qué acabas de romper? Escríbelo antes de que te deje volver..."></textarea>
-    <button class="btn" onclick="document.getElementById('overlay').classList.remove('show')">CERRAR</button>
+    <textarea id="lockTa" data-ph-es="&iquest;Qu&eacute; acabas de romper? Escr&iacute;belo antes de que te deje volver..." data-ph-en="What did you just break? Write it before I let you back in..." placeholder="What did you just break? Write it before I let you back in..."></textarea>
+    <button class="btn" onclick="document.getElementById('overlay').classList.remove('show')" data-i18n-es="CERRAR" data-i18n-en="CLOSE">CLOSE</button>
   </div>
 </div>
 
@@ -408,24 +420,28 @@ body::before{
       <div><h1>COMMAND CENTER</h1><span>TRADEDADLOG · NQ</span></div>
     </div>
     <div class="sessions" id="sessions">
-      <div class="sess" id="sessAsia">ASIA<b>17:00</b></div>
-      <div class="sess" id="sessLon">LONDRES<b>02:00</b></div>
-      <div class="sess" id="sessNY">NY<b>08:30</b></div>
+      <div class="sess" id="sessAsia" data-i18n-html-es="ASIA<b>17:00</b>" data-i18n-html-en="ASIA<b>17:00</b>">ASIA<b>17:00</b></div>
+      <div class="sess" id="sessLon" data-i18n-html-es="LONDRES<b>02:00</b>" data-i18n-html-en="LONDON<b>02:00</b>">LONDRES<b>02:00</b></div>
+      <div class="sess" id="sessNY" data-i18n-html-es="NY<b>08:30</b>" data-i18n-html-en="NY<b>08:30</b>">NY<b>08:30</b></div>
     </div>
     <div class="status">
-      <div class="chip sndbtn" id="sndBtn" title="Sonido on/off"><div class="ic" id="sndIc"><svg class="svgic" viewBox="0 0 24 24" width="15" height="15"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8a5 5 0 0 1 0 8" id="sndWave"/></svg></div></div>
-      <div class="chip lock demo-btn" onclick="document.getElementById('overlay').classList.add('show')" title="Ver el tilt-lock"><div class="ic"><svg class="svgic" viewBox="0 0 24 24" width="13" height="13"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div><div class="l" style="color:var(--lime)">TILT-LOCK</div><div class="l">1 pérdida y cierro el día &#9654;</div></div></div>
+      <div class="langbar" role="group" aria-label="Language">
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="es" aria-pressed="false">ES</button>
+      </div>
+      <div class="chip sndbtn" id="sndBtn" data-title-es="Sonido on/off" data-title-en="Sound on/off" title="Sound on/off"><div class="ic" id="sndIc"><svg class="svgic" viewBox="0 0 24 24" width="15" height="15"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8a5 5 0 0 1 0 8" id="sndWave"/></svg></div></div>
+      <div class="chip lock demo-btn" onclick="document.getElementById('overlay').classList.add('show')" data-title-es="Ver el tilt-lock" data-title-en="See the tilt-lock" title="See the tilt-lock"><div class="ic"><svg class="svgic" viewBox="0 0 24 24" width="13" height="13"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div><div class="l" style="color:var(--lime)">TILT-LOCK</div><div class="l" data-i18n-html-es="1 p&eacute;rdida y cierro el d&iacute;a &#9654;" data-i18n-html-en="1 loss and I close the day &#9654;">1 loss and I close the day &#9654;</div></div></div>
     </div>
     <div class="clock">
       <div class="t" id="clk">03:42:18</div>
-      <div class="d" id="ccDate">LUN · 24 AGO 2026 · GMT-6</div>
+      <div class="d" id="ccDate">MON · AUG 24 2026 · GMT-6</div>
     </div>
   </div>
 
   <!-- TICKER -->
   <div class="ticker">
-    <span class="lb">ANTES DE TOCAR EL MOUSE</span>
-    <span class="q" id="quote">"El plan sobre el impulso. No opero para sentir, opero para ejecutar."</span>
+    <span class="lb" data-i18n-es="ANTES DE TOCAR EL MOUSE" data-i18n-en="BEFORE YOU TOUCH THE MOUSE">BEFORE YOU TOUCH THE MOUSE</span>
+    <span class="q" id="quote">"The plan over the impulse. I don't trade to feel, I trade to execute."</span>
   </div>
 
   <style>
@@ -469,26 +485,26 @@ body::before{
   <div class="hero">
     <!-- ¿PUEDO OPERAR? -->
     <div class="hcol">
-      <div class="hlabel">¿Puedo operar ahora?</div>
-      <div class="hverdict no" id="pVerdict"><div class="big">NO ENTRES TODAVÍA</div><div class="sml">completa el checklist del portero</div></div>
+      <div class="hlabel" data-i18n-es="&iquest;Puedo operar ahora?" data-i18n-en="Can I trade right now?">Can I trade right now?</div>
+      <div class="hverdict no" id="pVerdict"><div class="big">DON'T ENTER YET</div><div class="sml">complete the gatekeeper checklist</div></div>
       <div class="hday">
         <div class="dots"><i id="pd1"></i><i id="pd2"></i><i id="pd3"></i></div>
-        <span style="font-size:9px;letter-spacing:1px;color:var(--txt-faint)">TRADES · MÁX 3</span>
-        <span class="pv ok" id="pDay">3 disponibles</span>
+        <span style="font-size:9px;letter-spacing:1px;color:var(--txt-faint)" data-i18n-es="TRADES · M&Aacute;X 3" data-i18n-en="TRADES · MAX 3">TRADES · MAX 3</span>
+        <span class="pv ok" id="pDay">3 available</span>
       </div>
       <div class="pbtns">
-        <button class="pbtn win" id="pWin">&#9650; Ganada</button>
-        <button class="pbtn loss" id="pLoss">&#9660; Perdida</button>
-        <button class="pbtn" id="pReset">Nuevo día</button>
-        <button class="pbtn" id="pProto" title="Abrir el protocolo post-trade">Protocolo</button>
+        <button class="pbtn win" id="pWin" data-i18n-html-es="&#9650; Ganada" data-i18n-html-en="&#9650; Win">&#9650; Win</button>
+        <button class="pbtn loss" id="pLoss" data-i18n-html-es="&#9660; Perdida" data-i18n-html-en="&#9660; Loss">&#9660; Loss</button>
+        <button class="pbtn" id="pReset" data-i18n-es="Nuevo d&iacute;a" data-i18n-en="New day">New day</button>
+        <button class="pbtn" id="pProto" data-title-es="Abrir el protocolo post-trade" data-title-en="Open the post-trade protocol" title="Open the post-trade protocol" data-i18n-es="Protocolo" data-i18n-en="Protocol">Protocol</button>
       </div>
     </div>
     <!-- SEÑAL EN VIVO -->
     <div class="hcol">
-      <div class="hlabel">Señal en vivo <span style="color:var(--txt-faint)" id="pTagWrap">· <span id="pTag">SEMANA DE RESET</span></span></div>
-      <div class="ccsignal wait" id="ccSignal"><b>ESPERA</b><span>sin borde todavía</span></div>
+      <div class="hlabel"><span data-i18n-es="Se&ntilde;al en vivo" data-i18n-en="Live signal">Live signal</span> <span style="color:var(--txt-faint)" id="pTagWrap">· <span id="pTag" data-i18n-es="SEMANA DE RESET" data-i18n-en="RESET WEEK">RESET WEEK</span></span></div>
+      <div class="ccsignal wait" id="ccSignal"><b>WAIT</b><span>no edge yet</span></div>
       <div class="ccctx" id="ccCtx"></div>
-      <div class="hrule" id="ruleToday">"Nivel de interés + a favor del sesgo + mi gatillo. Nunca en el aire ni por revancha."</div>
+      <div class="hrule" id="ruleToday">"Level of interest + with the bias + my trigger. Never in the air, never out of revenge."</div>
     </div>
     <!-- RACHA -->
     <div class="hcol">
@@ -504,133 +520,133 @@ body::before{
 
     <!-- 1. FILA CONTEXTO -->
     <div class="panel">
-      <div class="phead"><span class="dot" style="background:var(--amber);box-shadow:0 0 8px var(--amber)"></span><h2>El plan de hoy</h2><span class="pheadR"><span class="tag" id="planTag">SIN PLAN HOY</span><button class="editbtn" id="editPlan" title="Editar plan del día">&#9998;</button></span></div>
+      <div class="phead"><span class="dot" style="background:var(--amber);box-shadow:0 0 8px var(--amber)"></span><h2 data-i18n-es="El plan de hoy" data-i18n-en="Today's plan">Today's plan</h2><span class="pheadR"><span class="tag" id="planTag">NO PLAN YET</span><button class="editbtn" id="editPlan" data-title-es="Editar plan del d&iacute;a" data-title-en="Edit today's plan" title="Edit today's plan" data-i18n-html-es="&#9998;" data-i18n-html-en="&#9998;">&#9998;</button></span></div>
       <div class="planchips" id="planchips">
-        <div class="pchip"><div class="l">Tipo de día</div><div class="v" style="font-size:14px">&#8212;</div><div class="s">pega tu plan del indicador</div></div>
-        <div class="pchip danger"><div class="l">Zona de no-trade</div><div class="v">&#8212;</div><div class="s">tierra de nadie</div></div>
-        <div class="pchip line"><div class="l">Área de valor</div><div class="v">&#8212;</div><div class="s">zona de confluencia</div></div>
+        <div class="pchip"><div class="l" data-i18n-es="Tipo de d&iacute;a" data-i18n-en="Day type">Day type</div><div class="v" style="font-size:14px">&#8212;</div><div class="s" data-i18n-es="pega tu plan del indicador" data-i18n-en="paste your plan from the indicator">paste your plan from the indicator</div></div>
+        <div class="pchip danger"><div class="l" data-i18n-es="Zona de no-trade" data-i18n-en="No-trade zone">No-trade zone</div><div class="v">&#8212;</div><div class="s" data-i18n-es="tierra de nadie" data-i18n-en="no man's land">no man's land</div></div>
+        <div class="pchip line"><div class="l" data-i18n-es="&Aacute;rea de valor" data-i18n-en="Value area">Value area</div><div class="v">&#8212;</div><div class="s" data-i18n-es="zona de confluencia" data-i18n-en="confluence zone">confluence zone</div></div>
       </div>
       <div class="triggers" id="triggers">
-        <div class="trig long"><b>LARGO</b> &nbsp;a favor, en un nivel + tu gatillo: rebote/reclaim (VAL, VWAP, OR, PDH) con FVG o cambio de estructura. Nunca en el aire.</div>
-        <div class="trig short"><b>CORTO</b> &nbsp;a favor, en un nivel + tu gatillo: rechazo/pérdida (VAH, VWAP, OR, PDL) con FVG o cambio de estructura. Objetivo, el siguiente imán.</div>
+        <div class="trig long"><b>LONG</b> &nbsp;with the trend, on a level + your trigger: bounce/reclaim (VAL, VWAP, OR, PDH) with FVG or structure shift. Never in the air.</div>
+        <div class="trig short"><b>SHORT</b> &nbsp;with the trend, on a level + your trigger: rejection/loss (VAH, VWAP, OR, PDL) with FVG or structure shift. Target, the next magnet.</div>
       </div>
-      <div class="watchhead">Qué mirar hoy</div>
-      <div class="watch" id="ccWatch"><div class="wl">Pega tu plan del indicador para leer el contexto.</div></div>
-    </div>
-
-    <!-- 2. GATE DE ENTRADA · lo que decide si aprietas el gatillo -->
-    <div class="panel">
-      <div class="phead"><span class="dot"></span><h2>Antes de apretar el gatillo</h2><span class="tag" id="ckTag">0 / 7</span></div>
-      <div class="gate" id="gate">
-        <div class="grow"><span class="gl">Dirección de esta entrada</span>
-          <div class="gbtns"><button class="gb long" data-dir="LONG">LARGO</button><button class="gb short" data-dir="SHORT">CORTO</button></div>
-        </div>
-        <label class="gborde"><input type="checkbox" id="gBorde"><span>Es un borde a favor (rebote VAL / rechazo VAH), no fadeo la tendencia</span></label>
-        <div class="gmsg" id="gMsg">Declara tu dirección. Te aviso si vas contra el sesgo en vivo.</div>
-      </div>
-      <ul class="check" id="ckList">
-        <li data-ck><span class="box"></span>Precio en un nivel de interés: perfil &middot; VWAP &middot; OR &middot; PDH/PDL &middot; FVG <small>NO EN EL AIRE</small></li>
-        <li data-ck><span class="box"></span>Tengo un gatillo: FVG/iFVG &middot; reclaim &middot; rechazo &middot; cambio de estructura <small>GATILLO</small></li>
-        <li data-ck><span class="box"></span>El sesgo de Asia / del día apoya la dirección <small>A FAVOR</small></li>
-        <li data-ck><span class="box"></span>Confluencia extra: EMA 20/50 &middot; VWAP &middot; SMT <small>CONFIRMA</small></li>
-        <li data-ck><span class="box"></span>No es un largo forzado contra tu sesgo <small>FUGA #1</small></li>
-        <li data-ck><span class="box"></span>Stop, invalidación y tamaño mínimo definidos <small>ANTES</small></li>
-        <li data-ck><span class="box"></span>Tranquilo, no vengo a recuperar <small>HONESTO</small></li>
-      </ul>
-      <button class="pbtn loss" id="pBroke" style="width:100%;flex:none">Rompí una regla hoy · reinicia la racha</button>
+      <div class="watchhead" data-i18n-es="Qu&eacute; mirar hoy" data-i18n-en="What to watch today">What to watch today</div>
+      <div class="watch" id="ccWatch"><div class="wl">Paste your plan from the indicator to load the context.</div></div>
     </div>
 
     <!-- 3. SESGO Y NIVELES -->
     <div class="panel">
-      <div class="phead"><span class="dot"></span><h2>Sesgo &amp; Niveles</h2><span class="tag">NQ 1!</span></div>
+      <div class="phead"><span class="dot"></span><h2 data-i18n-es="Sesgo &amp; Niveles" data-i18n-en="Bias &amp; Levels">Bias &amp; Levels</h2><span class="tag">NQ 1!</span></div>
       <div style="display:flex;gap:9px" id="biasBoxes">
         <div style="flex:1;padding:9px 11px;border-radius:10px;background:var(--panel-2);border:1px solid var(--border)">
-          <div class="l" style="font-size:8px;letter-spacing:1.5px;color:var(--txt-faint);text-transform:uppercase">Sesgo del día</div>
+          <div class="l" style="font-size:8px;letter-spacing:1.5px;color:var(--txt-faint);text-transform:uppercase">Day bias</div>
           <div style="font-size:18px;font-weight:800;color:var(--lime);margin-top:2px">&#8212;</div>
-          <div style="font-size:9px;color:var(--txt-dim);margin-top:2px">marco mayor</div>
+          <div style="font-size:9px;color:var(--txt-dim);margin-top:2px">bigger frame</div>
         </div>
         <div style="flex:1;padding:9px 11px;border-radius:10px;background:var(--panel-2);border:1px solid var(--border)">
-          <div class="l" style="font-size:8px;letter-spacing:1.5px;color:var(--txt-faint);text-transform:uppercase">Sesgo de Asia</div>
+          <div class="l" style="font-size:8px;letter-spacing:1.5px;color:var(--txt-faint);text-transform:uppercase">Live bias</div>
           <div style="font-size:18px;font-weight:800;color:var(--lime);margin-top:2px">&#8212;</div>
-          <div style="font-size:9px;color:var(--txt-dim);margin-top:2px">sesión</div>
+          <div style="font-size:9px;color:var(--txt-dim);margin-top:2px">session</div>
         </div>
       </div>
       <div class="bias">
         <div class="big" id="biasBig">&#8212;</div>
-        <div class="meta" id="biasMeta">Pega tu plan para leer el sesgo y la alineación.</div>
-        <div class="conf"><div class="ring"><i>72</i></div><small>CONFLUENCIA</small></div>
+        <div class="meta" id="biasMeta">Paste your plan to read the bias and the alignment.</div>
+        <div class="conf"><div class="ring"><i>72</i></div><small data-i18n-es="CONFLUENCIA" data-i18n-en="CONFLUENCE">CONFLUENCE</small></div>
       </div>
       <div class="levels" id="levels">
         <div class="lvl"><span class="k">PRICE</span><div class="bar"><i class="c-cyan" style="left:90%;color:var(--cyan)"></i></div><span class="v c-cyan">&#8212;</span></div>
       </div>
     </div>
 
+    <!-- 2. GATE DE ENTRADA · lo que decide si aprietas el gatillo -->
     <div class="panel">
-      <div class="phead"><span class="dot" style="background:var(--violet);box-shadow:0 0 8px var(--violet)"></span><h2>Mapa de niveles</h2><span class="tag">TODOS · DIST. AL PRECIO</span></div>
+      <div class="phead"><span class="dot"></span><h2 data-i18n-es="Antes de apretar el gatillo" data-i18n-en="Before you pull the trigger">Before you pull the trigger</h2><span class="tag" id="ckTag">0 / 7</span></div>
+      <div class="gate" id="gate">
+        <div class="grow"><span class="gl" data-i18n-es="Direcci&oacute;n de esta entrada" data-i18n-en="Direction of this entry">Direction of this entry</span>
+          <div class="gbtns"><button class="gb long" data-dir="LONG" data-i18n-es="LARGO" data-i18n-en="LONG">LONG</button><button class="gb short" data-dir="SHORT" data-i18n-es="CORTO" data-i18n-en="SHORT">SHORT</button></div>
+        </div>
+        <label class="gborde"><input type="checkbox" id="gBorde"><span data-i18n-es="Es un borde a favor (rebote VAL / rechazo VAH), no fadeo la tendencia" data-i18n-en="It's an edge with the trend (VAL bounce / VAH rejection), not fading the trend">It's an edge with the trend (VAL bounce / VAH rejection), not fading the trend</span></label>
+        <div class="gmsg" id="gMsg">Declare your direction. I'll flag it if you go against the live bias.</div>
+      </div>
+      <ul class="check" id="ckList">
+        <li data-ck><span class="box"></span><span data-i18n-es="Precio en un nivel de inter&eacute;s: perfil &middot; VWAP &middot; OR &middot; PDH/PDL &middot; FVG" data-i18n-en="Price at a level of interest: profile &middot; VWAP &middot; OR &middot; PDH/PDL &middot; FVG">Price at a level of interest: profile &middot; VWAP &middot; OR &middot; PDH/PDL &middot; FVG</span> <small data-i18n-es="NO EN EL AIRE" data-i18n-en="NOT IN THE AIR">NOT IN THE AIR</small></li>
+        <li data-ck><span class="box"></span><span data-i18n-es="Tengo un gatillo: FVG/iFVG &middot; reclaim &middot; rechazo &middot; cambio de estructura" data-i18n-en="I have a trigger: FVG/iFVG &middot; reclaim &middot; rejection &middot; structure shift">I have a trigger: FVG/iFVG &middot; reclaim &middot; rejection &middot; structure shift</span> <small data-i18n-es="GATILLO" data-i18n-en="TRIGGER">TRIGGER</small></li>
+        <li data-ck><span class="box"></span><span data-i18n-es="El sesgo de Asia / del d&iacute;a apoya la direcci&oacute;n" data-i18n-en="The Asia / day bias supports the direction">The Asia / day bias supports the direction</span> <small data-i18n-es="A FAVOR" data-i18n-en="WITH THE BIAS">WITH THE BIAS</small></li>
+        <li data-ck><span class="box"></span><span data-i18n-es="Confluencia extra: EMA 20/50 &middot; VWAP &middot; SMT" data-i18n-en="Extra confluence: EMA 20/50 &middot; VWAP &middot; SMT">Extra confluence: EMA 20/50 &middot; VWAP &middot; SMT</span> <small data-i18n-es="CONFIRMA" data-i18n-en="CONFIRMS">CONFIRMS</small></li>
+        <li data-ck><span class="box"></span><span data-i18n-es="No es un largo forzado contra tu sesgo" data-i18n-en="It's not a long forced against your bias">It's not a long forced against your bias</span> <small data-i18n-es="FUGA #1" data-i18n-en="LEAK #1">LEAK #1</small></li>
+        <li data-ck><span class="box"></span><span data-i18n-es="Stop, invalidaci&oacute;n y tama&ntilde;o m&iacute;nimo definidos" data-i18n-en="Stop, invalidation and minimum size defined">Stop, invalidation and minimum size defined</span> <small data-i18n-es="ANTES" data-i18n-en="BEFORE">BEFORE</small></li>
+        <li data-ck><span class="box"></span><span data-i18n-es="Tranquilo, no vengo a recuperar" data-i18n-en="Calm, I'm not here to recover losses">Calm, I'm not here to recover losses</span> <small data-i18n-es="HONESTO" data-i18n-en="HONEST">HONEST</small></li>
+      </ul>
+      <button class="pbtn loss" id="pBroke" style="width:100%;flex:none" data-i18n-es="Romp&iacute; una regla hoy &middot; reinicia la racha" data-i18n-en="I broke a rule today · reset the streak">I broke a rule today · reset the streak</button>
+    </div>
+
+    <div class="panel">
+      <div class="phead"><span class="dot" style="background:var(--violet);box-shadow:0 0 8px var(--violet)"></span><h2 data-i18n-es="Mapa de niveles" data-i18n-en="Level map">Level map</h2><span class="tag" data-i18n-es="TODOS &middot; DIST. AL PRECIO" data-i18n-en="ALL · DIST. TO PRICE">ALL · DIST. TO PRICE</span></div>
       <div class="lad" id="lad">
-        <div class="lrow"><span class="dot2"></span><span class="pr">&#8212;</span><span class="lbl">Pega tu plan</span></div>
+        <div class="lrow"><span class="dot2"></span><span class="pr">&#8212;</span><span class="lbl">Paste your plan</span></div>
       </div>
     </div>
 
     <div class="panel">
-      <div class="phead"><span class="dot"></span><h2>Disciplina · 30 días</h2><span class="tag">SIN MENTIRAS</span></div>
+      <div class="phead"><span class="dot"></span><h2 data-i18n-es="Disciplina &middot; 30 d&iacute;as" data-i18n-en="Discipline · 30 days">Discipline · 30 days</h2><span class="tag" data-i18n-es="SIN MENTIRAS" data-i18n-en="NO LIES">NO LIES</span></div>
       <div class="dstats">
-        <div class="dstat"><div class="n c-lime" id="discStreak">0</div><div class="l">Racha fiel</div></div>
-        <div class="dstat"><div class="n c-cyan" id="discClean">0/0</div><div class="l">Limpios / operados</div></div>
-        <div class="dstat"><div class="n c-amber" id="discPct">&#8212;</div><div class="l">% disciplina</div></div>
+        <div class="dstat"><div class="n c-lime" id="discStreak">0</div><div class="l" data-i18n-es="Racha fiel" data-i18n-en="Faithful streak">Faithful streak</div></div>
+        <div class="dstat"><div class="n c-cyan" id="discClean">0/0</div><div class="l" data-i18n-es="Limpios / operados" data-i18n-en="Clean / traded">Clean / traded</div></div>
+        <div class="dstat"><div class="n c-amber" id="discPct">&#8212;</div><div class="l" data-i18n-es="% disciplina" data-i18n-en="% discipline">% discipline</div></div>
       </div>
       <div class="dbar"><i id="discBar" style="width:0%"></i></div>
       <div class="heat" id="discHeat"></div>
-      <div class="dlegend"><span><i style="background:var(--lime)"></i>Fiel al plan</span><span><i style="background:var(--red)"></i>Traicionaste</span><span><i style="background:rgba(255,255,255,0.08)"></i>Sin operar</span></div>
-      <div class="dnote" id="discNote">Marca cada día en el portero y aquí ves tu constancia real, no dinero fantasma.</div>
+      <div class="dlegend"><span><i style="background:var(--lime)"></i><span data-i18n-es="Fiel al plan" data-i18n-en="Followed the plan">Followed the plan</span></span><span><i style="background:var(--red)"></i><span data-i18n-es="Traicionaste" data-i18n-en="You broke it">You broke it</span></span><span><i style="background:rgba(255,255,255,0.08)"></i><span data-i18n-es="Sin operar" data-i18n-en="No trades">No trades</span></span></div>
+      <div class="dnote" id="discNote">Mark each day in the gatekeeper and here you'll see your real consistency, not phantom money.</div>
     </div>
 
     <div class="panel">
-      <div class="phead"><span class="dot"></span><h2>Bitácora de hoy</h2><span class="tag" id="feedTag">0 MOVIMIENTOS</span></div>
+      <div class="phead"><span class="dot"></span><h2 data-i18n-es="Bit&aacute;cora de hoy" data-i18n-en="Today's log">Today's log</h2><span class="tag" id="feedTag">0 MOVES</span></div>
       <div class="feed" id="feed">
-        <div class="empty">Sin movimientos hoy.<br>Cada trade que marcas en el portero (ganada / perdida) queda registrado aquí.</div>
+        <div class="empty">No moves today.<br>Every trade you mark in the gatekeeper (win / loss) gets logged here.</div>
       </div>
     </div>
 
     <!-- 4. NOTICIAS · puede cerrar la ventana de entrada -->
     <div class="panel full">
-      <div class="phead"><span class="dot" style="background:var(--red);box-shadow:0 0 8px var(--red)"></span><h2>Noticias de alto impacto</h2><span class="tag">FOREXFACTORY · HOY</span></div>
+      <div class="phead"><span class="dot" style="background:var(--red);box-shadow:0 0 8px var(--red)"></span><h2 data-i18n-es="Noticias de alto impacto" data-i18n-en="High-impact news">High-impact news</h2><span class="tag" data-i18n-es="FOREXFACTORY &middot; HOY" data-i18n-en="FOREXFACTORY · TODAY">FOREXFACTORY · TODAY</span></div>
       <div class="news">
         <div class="nrow hot"><span class="time">07:30</span><span class="cur">USD</span><span class="imp h3"><i></i><i></i><i></i></span><span class="ev">Core CPI m/m</span><span class="fc">prev <b>0.3%</b> · fcst 0.2%</span></div>
         <div class="nrow soon"><span class="time">08:30</span><span class="cur">USD</span><span class="imp h3"><i></i><i></i><i></i></span><span class="ev">Unemployment Claims</span><span class="fc">prev <b>221K</b> · fcst 225K</span></div>
-        <div class="nrow"><span class="time">10:00</span><span class="cur">USD</span><span class="imp h2"><i></i><i></i><i></i></span><span class="ev">Fed Williams habla</span><span class="fc">discurso</span></div>
+        <div class="nrow"><span class="time">10:00</span><span class="cur">USD</span><span class="imp h2"><i></i><i></i><i></i></span><span class="ev">Fed Williams speaks</span><span class="fc">speech</span></div>
         <div class="nrow"><span class="time">02:00</span><span class="cur">EUR</span><span class="imp h2"><i></i><i></i><i></i></span><span class="ev">German Final CPI</span><span class="fc">prev <b>2.2%</b></span></div>
       </div>
-      <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center">Tres barras rojas es alto impacto. No te hagas el héroe 15 min antes ni después.</div>
+      <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center" data-i18n-es="Tres barras rojas es alto impacto. No te hagas el h&eacute;roe 15 min antes ni despu&eacute;s." data-i18n-en="Three red bars is high impact. Don't be a hero 15 min before or after.">Three red bars is high impact. Don't be a hero 15 min before or after.</div>
     </div>
 
     <!-- 5. REGLAS Y DISCIPLINA -->
     <div class="panel full">
-      <div class="phead"><span class="dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan)"></span><h2>Salud del sistema</h2><span class="tag" id="sysTag">FUGA · BARRERA · ESTADO</span></div>
+      <div class="phead"><span class="dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan)"></span><h2 data-i18n-es="Salud del sistema" data-i18n-en="System health">System health</h2><span class="tag" id="sysTag" data-i18n-es="FUGA &middot; BARRERA &middot; ESTADO" data-i18n-en="LEAK · BARRIER · STATUS">LEAK · BARRIER · STATUS</span></div>
       <div class="sys" id="sys"></div>
-      <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center;margin-top:2px">Cada fuga tuya tiene una barrera que la ejecuta, no tu criterio en caliente.</div>
+      <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center;margin-top:2px" data-i18n-es="Cada fuga tuya tiene una barrera que la ejecuta, no tu criterio en caliente." data-i18n-en="Every leak of yours has a barrier that enforces it, not your judgment in the heat of the moment.">Every leak of yours has a barrier that enforces it, not your judgment in the heat of the moment.</div>
     </div>
 
     <!-- 6. RENDIMIENTO (CSV real del broker) -->
     <div class="panel full">
-      <div class="phead"><span class="dot" style="background:var(--lime);box-shadow:0 0 8px var(--lime)"></span><h2>Rendimiento · tu CSV de Tradovate</h2><span class="pheadR"><span class="tag" id="rvTag">SIN DATOS</span><button class="editbtn" id="rvImport" title="Importar Performance.csv de Tradovate">Importar CSV</button></span></div>
+      <div class="phead"><span class="dot" style="background:var(--lime);box-shadow:0 0 8px var(--lime)"></span><h2 data-i18n-es="Rendimiento &middot; tu CSV de Tradovate" data-i18n-en="Performance · your Tradovate CSV">Performance · your Tradovate CSV</h2><span class="pheadR"><span class="tag" id="rvTag">NO DATA</span><button class="editbtn" id="rvImport" data-title-es="Importar Performance.csv de Tradovate" data-title-en="Import Performance.csv from Tradovate" title="Import Performance.csv from Tradovate" data-i18n-es="Importar CSV" data-i18n-en="Import CSV">Import CSV</button></span></div>
       <input type="file" id="rvFile" accept=".csv,text/csv" style="display:none">
       <div class="rvgrid">
         <div class="rvkpis">
           <div class="dstat"><div class="n c-lime" id="rvWin">&#8212;</div><div class="l">Win rate</div></div>
           <div class="dstat"><div class="n c-cyan" id="rvPf">&#8212;</div><div class="l">Profit factor</div></div>
-          <div class="dstat"><div class="n" id="rvNet">&#8212;</div><div class="l">Neto</div></div>
-          <div class="dstat"><div class="n c-amber" id="rvAvg">&#8212;</div><div class="l">Trade prom.</div></div>
+          <div class="dstat"><div class="n" id="rvNet">&#8212;</div><div class="l" data-i18n-es="Neto" data-i18n-en="Net">Net</div></div>
+          <div class="dstat"><div class="n c-amber" id="rvAvg">&#8212;</div><div class="l" data-i18n-es="Trade prom." data-i18n-en="Avg trade">Avg trade</div></div>
           <div class="dstat"><div class="n c-cyan" id="rvN">0</div><div class="l">Trades</div></div>
         </div>
         <div class="rvchart">
-          <div class="watchhead">Lo que serías sin tus fugas</div>
+          <div class="watchhead" data-i18n-es="Lo que ser&iacute;as sin tus fugas" data-i18n-en="What you'd be without your leaks">What you'd be without your leaks</div>
           <svg viewBox="0 0 300 88" preserveAspectRatio="none" id="rvSvg" style="width:100%;height:78px;display:block">
             <path id="rvGhostLine" fill="none" stroke="var(--lime)" stroke-width="2" stroke-dasharray="4 3" opacity="0.85"></path>
             <path id="rvRealLine" fill="none" stroke="var(--cyan)" stroke-width="2.5"></path>
           </svg>
-          <div class="rvlegend"><span><b class="c-cyan">&#9644;</b> Real <span id="rvRealNet">&#8212;</span></span><span><b class="c-lime">&#9633;</b> Sin fugas <span id="rvGhostNet">&#8212;</span></span></div>
-          <div class="dnote" id="rvLeak">Importa tu Performance.csv de Tradovate para ver tu rendimiento real y lo que te cuestan las fugas.</div>
+          <div class="rvlegend"><span><b class="c-cyan">&#9644;</b> <span data-i18n-es="Real" data-i18n-en="Real">Real</span> <span id="rvRealNet">&#8212;</span></span><span><b class="c-lime">&#9633;</b> <span data-i18n-es="Sin fugas" data-i18n-en="No leaks">No leaks</span> <span id="rvGhostNet">&#8212;</span></span></div>
+          <div class="dnote" id="rvLeak">Import your Tradovate Performance.csv to see your real performance and what your leaks cost you.</div>
         </div>
       </div>
     </div>
@@ -653,52 +669,53 @@ body::before{
       .roadbody.collapsed{display:none}
     </style>
     <div class="panel full">
-      <div class="phead"><span class="dot" style="background:var(--lime);box-shadow:0 0 8px var(--lime)"></span><h2>Roadmap · 15 cuentas de fondeo</h2><span class="pheadR"><span class="tag" id="roadCount">&#8212; / 15 fondeadas</span><button class="editbtn" id="roadToggle">Ver cuentas &#9662;</button></span></div>
+      <div class="phead"><span class="dot" style="background:var(--lime);box-shadow:0 0 8px var(--lime)"></span><h2 data-i18n-es="Roadmap &middot; 15 cuentas de fondeo" data-i18n-en="Roadmap · 15 funded accounts">Roadmap · 15 funded accounts</h2><span class="pheadR"><span class="tag" id="roadCount">&#8212; / 15 funded</span><button class="editbtn" id="roadToggle">See accounts &#9662;</button></span></div>
       <div id="roadBody" class="roadbody collapsed">
-        <div style="font-size:9px;letter-spacing:.5px;color:var(--txt-faint);text-align:center">Toca cada cuenta para avanzar su etapa. Se guarda en este navegador.</div>
+        <div style="font-size:9px;letter-spacing:.5px;color:var(--txt-faint);text-align:center" data-i18n-es="Toca cada cuenta para avanzar su etapa. Se guarda en este navegador." data-i18n-en="Tap each account to advance its stage. Saved in this browser.">Tap each account to advance its stage. Saved in this browser.</div>
         <div class="planchips">
-          <div class="pchip"><div class="l">FundedNext 50K Flex</div><div class="v" style="font-size:13px">5 días · $200+/día</div><div class="s">máx $1,500/cuenta · 95% split</div></div>
-          <div class="pchip"><div class="l">MFF 25K Rapid</div><div class="v" style="font-size:13px">Buffer $1,100 fijo</div><div class="s">retiro diario hasta $10k · 90% split</div></div>
-          <div class="pchip"><div class="l">Lucid 25K Daily</div><div class="v" style="font-size:13px">Buffer $1,100 fijo</div><div class="s">retiro diario hasta $6k · 90% split</div></div>
+          <div class="pchip"><div class="l">FundedNext 50K Flex</div><div class="v" style="font-size:13px" data-i18n-es="5 d&iacute;as &middot; $200+/d&iacute;a" data-i18n-en="5 days · $200+/day">5 days · $200+/day</div><div class="s" data-i18n-es="m&aacute;x $1,500/cuenta &middot; 95% split" data-i18n-en="max $1,500/account · 95% split">max $1,500/account · 95% split</div></div>
+          <div class="pchip"><div class="l">MFF 25K Rapid</div><div class="v" style="font-size:13px" data-i18n-es="Buffer $1,100 fijo" data-i18n-en="Fixed $1,100 buffer">Fixed $1,100 buffer</div><div class="s" data-i18n-es="retiro diario hasta $10k &middot; 90% split" data-i18n-en="daily withdrawal up to $10k · 90% split">daily withdrawal up to $10k · 90% split</div></div>
+          <div class="pchip"><div class="l">Lucid 25K Daily</div><div class="v" style="font-size:13px" data-i18n-es="Buffer $1,100 fijo" data-i18n-en="Fixed $1,100 buffer">Fixed $1,100 buffer</div><div class="s" data-i18n-es="retiro diario hasta $6k &middot; 90% split" data-i18n-en="daily withdrawal up to $6k · 90% split">daily withdrawal up to $6k · 90% split</div></div>
         </div>
         <div class="roadfirm">
-          <div class="rfhead"><b>FUNDEDNEXT · 50K FLEX</b><span class="rftag">5 cuentas</span><span class="rfcount" id="rfCountFN">&#8212;/5 fondeadas</span></div>
-          <div class="rfrule">Fondeada &#8594; <b>5 días</b> con mínimo <b>$200</b> de ganancia cada uno cuentan &#8594; retiras hasta <b>$1,500</b>/cuenta (95% para ti = <b>$1,425</b>). Meta: fondear las 5 y correr el ciclo de 5 días en cada una.</div>
+          <div class="rfhead"><b>FUNDEDNEXT · 50K FLEX</b><span class="rftag" data-i18n-es="5 cuentas" data-i18n-en="5 accounts">5 accounts</span><span class="rfcount" id="rfCountFN">&#8212;/5 funded</span></div>
+          <div class="rfrule" data-i18n-html-es="Fondeada &#8594; <b>5 d&iacute;as</b> con m&iacute;nimo <b>$200</b> de ganancia cada uno cuentan &#8594; retiras hasta <b>$1,500</b>/cuenta (95% para ti = <b>$1,425</b>). Meta: fondear las 5 y correr el ciclo de 5 d&iacute;as en cada una." data-i18n-html-en="Funded &#8594; <b>5 days</b> with a minimum of <b>$200</b> profit each count &#8594; you withdraw up to <b>$1,500</b>/account (95% to you = <b>$1,425</b>). Goal: fund all 5 and run the 5-day cycle on each.">Funded &#8594; <b>5 days</b> with a minimum of <b>$200</b> profit each count &#8594; you withdraw up to <b>$1,500</b>/account (95% to you = <b>$1,425</b>). Goal: fund all 5 and run the 5-day cycle on each.</div>
           <div class="accrow" id="accFN"></div>
         </div>
         <div class="roadfirm">
-          <div class="rfhead"><b>MYFUNDEDFUTURES · 25K RAPID</b><span class="rftag">5 cuentas</span><span class="rfcount" id="rfCountMFF">&#8212;/5 fondeadas</span></div>
-          <div class="rfrule">Fondeada &#8594; llegar a <b>$1,100</b> de ganancia (el trailing drawdown se fija ahí) &#8594; seguir a <b>$1,500-1,600</b> &#8594; retiro diario de cualquier cantidad manteniendo el buffer de $1,100 (90% para ti). Meta por cuenta: <b>$400-500</b> retirados.</div>
+          <div class="rfhead"><b>MYFUNDEDFUTURES · 25K RAPID</b><span class="rftag" data-i18n-es="5 cuentas" data-i18n-en="5 accounts">5 accounts</span><span class="rfcount" id="rfCountMFF">&#8212;/5 funded</span></div>
+          <div class="rfrule" data-i18n-html-es="Fondeada &#8594; llegar a <b>$1,100</b> de ganancia (el trailing drawdown se fija ah&iacute;) &#8594; seguir a <b>$1,500-1,600</b> &#8594; retiro diario de cualquier cantidad manteniendo el buffer de $1,100 (90% para ti). Meta por cuenta: <b>$400-500</b> retirados." data-i18n-html-en="Funded &#8594; reach <b>$1,100</b> profit (the trailing drawdown locks there) &#8594; keep going to <b>$1,500-1,600</b> &#8594; daily withdrawal of any amount keeping the $1,100 buffer (90% to you). Goal per account: <b>$400-500</b> withdrawn.">Funded &#8594; reach <b>$1,100</b> profit (the trailing drawdown locks there) &#8594; keep going to <b>$1,500-1,600</b> &#8594; daily withdrawal of any amount keeping the $1,100 buffer (90% to you). Goal per account: <b>$400-500</b> withdrawn.</div>
           <div class="accrow" id="accMFF"></div>
         </div>
         <div class="roadfirm">
-          <div class="rfhead"><b>LUCID TRADING · 25K DAILY</b><span class="rftag">5 cuentas</span><span class="rfcount" id="rfCountLU">&#8212;/5 fondeadas</span></div>
-          <div class="rfrule">Mismo modelo que MFF: buffer <b>$1,100</b> fijo, crecer a <b>$1,500-1,600</b>, retiro diario hasta <b>$6,000</b> manteniendo el buffer (90% para ti). Meta por cuenta: <b>$400-500</b> retirados.</div>
+          <div class="rfhead"><b>LUCID TRADING · 25K DAILY</b><span class="rftag" data-i18n-es="5 cuentas" data-i18n-en="5 accounts">5 accounts</span><span class="rfcount" id="rfCountLU">&#8212;/5 funded</span></div>
+          <div class="rfrule" data-i18n-html-es="Mismo modelo que MFF: buffer <b>$1,100</b> fijo, crecer a <b>$1,500-1,600</b>, retiro diario hasta <b>$6,000</b> manteniendo el buffer (90% para ti). Meta por cuenta: <b>$400-500</b> retirados." data-i18n-html-en="Same model as MFF: fixed <b>$1,100</b> buffer, grow to <b>$1,500-1,600</b>, daily withdrawal up to <b>$6,000</b> keeping the buffer (90% to you). Goal per account: <b>$400-500</b> withdrawn.">Same model as MFF: fixed <b>$1,100</b> buffer, grow to <b>$1,500-1,600</b>, daily withdrawal up to <b>$6,000</b> keeping the buffer (90% to you). Goal per account: <b>$400-500</b> withdrawn.</div>
           <div class="accrow" id="accLU"></div>
         </div>
-        <div class="dnote">Si fondeas y corres el ciclo completo en las 15: potencial &#8776; <b>$11,175</b> combinados (FundedNext $7,125 + MFF $2,025 + Lucid $2,025, ya con el split).</div>
+        <div class="dnote" data-i18n-html-es="Si fondeas y corres el ciclo completo en las 15: potencial &#8776; <b>$11,175</b> combinados (FundedNext $7,125 + MFF $2,025 + Lucid $2,025, ya con el split)." data-i18n-html-en="If you fund and run the full cycle on all 15: potential &#8776; <b>$11,175</b> combined (FundedNext $7,125 + MFF $2,025 + Lucid $2,025, already with the split).">If you fund and run the full cycle on all 15: potential &#8776; <b>$11,175</b> combined (FundedNext $7,125 + MFF $2,025 + Lucid $2,025, already with the split).</div>
       </div>
     </div>
     <script>
     (function(){
-      var FN_ST=[
-        {l:"Evaluación",c:"var(--txt-dim)"},
-        {l:"Fondeada",c:"var(--cyan)"},
-        {l:"Día 1-5 · $200+",c:"var(--violet)"},
-        {l:"Retirado $1,425",c:"var(--lime)"}
-      ];
-      var BUF_ST=[
-        {l:"Evaluación",c:"var(--txt-dim)"},
-        {l:"Fondeada",c:"var(--cyan)"},
-        {l:"Buffer $1,100 fijo",c:"var(--violet)"},
-        {l:"Meta $1,500-1,600",c:"var(--amber)"},
-        {l:"Retirando",c:"var(--lime)"}
-      ];
-      var FIRMS=[
-        {key:"fn", stages:FN_ST, n:5, wrap:"accFN", cnt:"rfCountFN", fundedIdx:1},
-        {key:"mff", stages:BUF_ST, n:5, wrap:"accMFF", cnt:"rfCountMFF", fundedIdx:1},
-        {key:"lu", stages:BUF_ST, n:5, wrap:"accLU", cnt:"rfCountLU", fundedIdx:1}
-      ];
+      function T(es,en){ return (window.CC_LANG==='en')?en:es; }
+      function FN_ST(){ return [
+        {l:T('Evaluación','Evaluation'),c:"var(--txt-dim)"},
+        {l:T('Fondeada','Funded'),c:"var(--cyan)"},
+        {l:T('Día 1-5 · $200+','Day 1-5 · $200+'),c:"var(--violet)"},
+        {l:T('Retirado $1,425','Withdrawn $1,425'),c:"var(--lime)"}
+      ]; }
+      function BUF_ST(){ return [
+        {l:T('Evaluación','Evaluation'),c:"var(--txt-dim)"},
+        {l:T('Fondeada','Funded'),c:"var(--cyan)"},
+        {l:T('Buffer $1,100 fijo','Fixed $1,100 buffer'),c:"var(--violet)"},
+        {l:T('Meta $1,500-1,600','Goal $1,500-1,600'),c:"var(--amber)"},
+        {l:T('Retirando','Withdrawing'),c:"var(--lime)"}
+      ]; }
+      function FIRMS(){ return [
+        {key:"fn", stages:FN_ST(), n:5, wrap:"accFN", cnt:"rfCountFN", fundedIdx:1},
+        {key:"mff", stages:BUF_ST(), n:5, wrap:"accMFF", cnt:"rfCountMFF", fundedIdx:1},
+        {key:"lu", stages:BUF_ST(), n:5, wrap:"accLU", cnt:"rfCountLU", fundedIdx:1}
+      ]; }
       var KEY='cc_prop_accounts';
       function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){ return {}; } }
       function save(st){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
@@ -709,7 +726,7 @@ body::before{
 
       function render(){
         var totalFunded=0, totalAcc=0;
-        FIRMS.forEach(function(f){
+        FIRMS().forEach(function(f){
           var wrap=document.getElementById(f.wrap); wrap.innerHTML='';
           var funded=0;
           f.stages; // noop reference
@@ -719,7 +736,7 @@ body::before{
             var d=document.createElement('div');
             d.className='acc';
             d.style.borderColor=st.c;
-            d.innerHTML='<div class="an">CUENTA '+(i+1)+'</div><div class="as" style="color:'+st.c+'">'+st.l+'</div>';
+            d.innerHTML='<div class="an">'+T('CUENTA','ACCOUNT')+' '+(i+1)+'</div><div class="as" style="color:'+st.c+'">'+st.l+'</div>';
             d.onclick=(function(idx,i){ return function(){
               state[f.key][i]=(idx+1)%f.stages.length;
               save(state); render();
@@ -727,23 +744,25 @@ body::before{
             wrap.appendChild(d);
           });
           var cntEl=document.getElementById(f.cnt);
-          if(cntEl) cntEl.textContent=funded+'/'+f.n+' fondeadas';
+          if(cntEl) cntEl.textContent=funded+'/'+f.n+' '+T('fondeadas','funded');
           totalFunded+=funded; totalAcc+=f.n;
         });
         var rc=document.getElementById('roadCount');
-        if(rc) rc.textContent=totalFunded+' / '+totalAcc+' fondeadas';
+        if(rc) rc.textContent=totalFunded+' / '+totalAcc+' '+T('fondeadas','funded');
       }
       render();
+      window.__i18nRefresh.push(render);
 
       var toggleKey='cc_road_open';
       var body=document.getElementById('roadBody'), btn=document.getElementById('roadToggle');
       function applyToggle(open){
         body.classList.toggle('collapsed',!open);
-        if(btn) btn.innerHTML=open?'Ocultar cuentas &#9652;':'Ver cuentas &#9662;';
+        if(btn) btn.innerHTML=open?(T('Ocultar cuentas','Hide accounts')+' &#9652;'):(T('Ver cuentas','See accounts')+' &#9662;');
       }
       var openNow=false;
       try{ openNow=localStorage.getItem(toggleKey)==='1'; }catch(e){}
       applyToggle(openNow);
+      window.__i18nRefresh.push(function(){ applyToggle(openNow); });
       if(btn) btn.onclick=function(){
         openNow=!openNow;
         try{ localStorage.setItem(toggleKey,openNow?'1':'0'); }catch(e){}
@@ -757,109 +776,151 @@ body::before{
   <!-- NORTH STAR -->
   <div class="north">
     <div class="why">
-      <h3>PARA ESTO OPERAS <button class="editbtn" id="editNorth" title="Editar tu norte">&#9998;</button></h3>
-      <p id="nsWhy">"Mi mayor enemigo soy yo mismo. Opero por Liam y por salir de deudas, no por la adrenalina."</p>
+      <h3><span data-i18n-es="PARA ESTO OPERAS" data-i18n-en="THIS IS WHY YOU TRADE">THIS IS WHY YOU TRADE</span> <button class="editbtn" id="editNorth" data-title-es="Editar tu norte" data-title-en="Edit your north star" title="Edit your north star">&#9998;</button></h3>
+      <p id="nsWhy">"My biggest enemy is myself. I trade for Liam and to get out of debt, not for the adrenaline."</p>
     </div>
     <div class="debt">
-      <div class="dh"><span>CAMINO A SALIR DE DEUDAS</span><span id="nsDebtHead"><b>$18,400</b> / $30,000 pagado</span></div>
+      <div class="dh"><span data-i18n-es="CAMINO A SALIR DE DEUDAS" data-i18n-en="PATH OUT OF DEBT">PATH OUT OF DEBT</span><span id="nsDebtHead"><b>$18,400</b> / $30,000 paid</span></div>
       <div class="track"><div class="fill" id="nsFill"></div></div>
-      <div class="sub" id="nsSub">Faltan <b>$11,600</b> por pagar. Cada día de disciplina te acerca.</div>
+      <div class="sub" id="nsSub">$11,600 left to pay. Every day of discipline gets you closer.</div>
     </div>
     <div class="goals">
-      <div class="goal"><div class="n" id="nsDays">0</div><div class="l">Días limpio</div></div>
-      <div class="goal"><div class="n" id="nsWho">Liam</div><div class="l">El porqué</div></div>
+      <div class="goal"><div class="n" id="nsDays">0</div><div class="l" data-i18n-es="D&iacute;as limpio" data-i18n-en="Clean days">Clean days</div></div>
+      <div class="goal"><div class="n" id="nsWho">Liam</div><div class="l" data-i18n-es="El porqu&eacute;" data-i18n-en="The why">The why</div></div>
     </div>
   </div>
 
   <!-- RUTINA HOLÍSTICA · el trader se construye lejos del gráfico -->
   <div class="north" style="margin-top:12px">
     <div class="why" style="flex:1;min-width:220px">
-      <h3 style="color:var(--lime)">EL TRADER SE CONSTRUYE LEJOS DEL GRÁFICO</h3>
-      <p style="font-style:normal;font-size:11px;color:var(--txt-dim);line-height:1.5">Sueño, cuerpo y familia son infraestructura de tu ingreso, no un lujo. Marca lo de hoy.</p>
+      <h3 style="color:var(--lime)" data-i18n-es="EL TRADER SE CONSTRUYE LEJOS DEL GR&Aacute;FICO" data-i18n-en="THE TRADER IS BUILT AWAY FROM THE CHART">THE TRADER IS BUILT AWAY FROM THE CHART</h3>
+      <p style="font-style:normal;font-size:11px;color:var(--txt-dim);line-height:1.5" data-i18n-es="Sue&ntilde;o, cuerpo y familia son infraestructura de tu ingreso, no un lujo. Marca lo de hoy." data-i18n-en="Sleep, body and family are the infrastructure of your income, not a luxury. Check off today's.">Sleep, body and family are the infrastructure of your income, not a luxury. Check off today's.</p>
     </div>
     <ul class="rutina" id="rutina" style="flex:2;min-width:260px">
-      <li data-rt="sueno"><span class="rb"></span>Dormí bien, mente descansada <small>PACIENCIA</small></li>
-      <li data-rt="ejercicio"><span class="rb"></span>Bloque de ejercicio o movimiento <small>VÁLVULA</small></li>
-      <li data-rt="familia"><span class="rb"></span>Bloque con Liam y esposa, sin pantalla <small>SAGRADO</small></li>
-      <li data-rt="cierre"><span class="rb"></span>Cerré la plataforma fuera de sesión <small>ANTI-FUGA</small></li>
+      <li data-rt="sueno"><span class="rb"></span><span data-i18n-es="Dorm&iacute; bien, mente descansada" data-i18n-en="Slept well, mind rested">Slept well, mind rested</span> <small data-i18n-es="PACIENCIA" data-i18n-en="PATIENCE">PATIENCE</small></li>
+      <li data-rt="ejercicio"><span class="rb"></span><span data-i18n-es="Bloque de ejercicio o movimiento" data-i18n-en="Exercise or movement block">Exercise or movement block</span> <small data-i18n-es="V&Aacute;LVULA" data-i18n-en="RELEASE VALVE">RELEASE VALVE</small></li>
+      <li data-rt="familia"><span class="rb"></span><span data-i18n-es="Bloque con Liam y esposa, sin pantalla" data-i18n-en="Time with Liam and wife, no screens">Time with Liam and wife, no screens</span> <small data-i18n-es="SAGRADO" data-i18n-en="SACRED">SACRED</small></li>
+      <li data-rt="cierre"><span class="rb"></span><span data-i18n-es="Cerr&eacute; la plataforma fuera de sesi&oacute;n" data-i18n-en="Closed the platform outside of session">Closed the platform outside of session</span> <small data-i18n-es="ANTI-FUGA" data-i18n-en="ANTI-LEAK">ANTI-LEAK</small></li>
     </ul>
   </div>
 
-  <div class="foot" id="foot">TRADEDADLOG COMMAND CENTER · v0.9 · "EL PLAN SOBRE EL IMPULSO"</div>
+  <div class="foot" id="foot" data-i18n-es='TRADEDADLOG COMMAND CENTER &middot; v0.9 &middot; "EL PLAN SOBRE EL IMPULSO"' data-i18n-en='TRADEDADLOG COMMAND CENTER · v0.9 · "THE PLAN OVER THE IMPULSE"'>TRADEDADLOG COMMAND CENTER · v0.9 · "THE PLAN OVER THE IMPULSE"</div>
 </div>
 
 <!-- MODAL NORTH STAR -->
 <div class="planmodal" id="northModal">
   <div class="card">
-    <h3>TU NORTE</h3>
-    <div class="hint">Lo que te recuerda por qué operas con disciplina. Se guarda en este navegador.</div>
+    <h3 data-i18n-es="TU NORTE" data-i18n-en="YOUR NORTH STAR">YOUR NORTH STAR</h3>
+    <div class="hint" data-i18n-es="Lo que te recuerda por qu&eacute; operas con disciplina. Se guarda en este navegador." data-i18n-en="What reminds you why you trade with discipline. Saved in this browser.">What reminds you why you trade with discipline. Saved in this browser.</div>
     <div class="pf">
-      <div class="field" style="grid-column:1/-1"><label>Tu frase / tu porqué</label><input id="n_why" type="text" placeholder="Opero por..."></div>
-      <div class="field"><label>Nombre del porqué</label><input id="n_who" type="text" placeholder="Liam"></div>
-      <div class="field"><label>Deuda total ($)</label><input id="n_total" type="number" step="100" placeholder="30000"></div>
-      <div class="field"><label>Pagado ($)</label><input id="n_paid" type="number" step="100" placeholder="18400"></div>
+      <div class="field" style="grid-column:1/-1"><label data-i18n-es="Tu frase / tu porqu&eacute;" data-i18n-en="Your line / your why">Your line / your why</label><input id="n_why" type="text" data-ph-es="Opero por..." data-ph-en="I trade for..." placeholder="I trade for..."></div>
+      <div class="field"><label data-i18n-es="Nombre del porqu&eacute;" data-i18n-en="Name of your why">Name of your why</label><input id="n_who" type="text" placeholder="Liam"></div>
+      <div class="field"><label data-i18n-es="Deuda total ($)" data-i18n-en="Total debt ($)">Total debt ($)</label><input id="n_total" type="number" step="100" placeholder="30000"></div>
+      <div class="field"><label data-i18n-es="Pagado ($)" data-i18n-en="Paid ($)">Paid ($)</label><input id="n_paid" type="number" step="100" placeholder="18400"></div>
     </div>
-    <div class="pfoot"><button class="cancel" id="northCancel">Cancelar</button><button class="save" id="northSave">Guardar mi norte</button></div>
+    <div class="pfoot"><button class="cancel" id="northCancel" data-i18n-es="Cancelar" data-i18n-en="Cancel">Cancel</button><button class="save" id="northSave" data-i18n-es="Guardar mi norte" data-i18n-en="Save my north star">Save my north star</button></div>
   </div>
 </div>
 
 <!-- MODAL RITUAL PRE-SESIÓN -->
 <div class="planmodal" id="ritualModal">
   <div class="card">
-    <h3>RITUAL PRE-SESIÓN</h3>
-    <div class="hint">En frío, antes de abrir el gráfico. Aquí decides lo que en caliente no vas a poder. Sin esto, el portero no te deja operar.</div>
+    <h3 data-i18n-es="RITUAL PRE-SESI&Oacute;N" data-i18n-en="PRE-SESSION RITUAL">PRE-SESSION RITUAL</h3>
+    <div class="hint" data-i18n-es="En fr&iacute;o, antes de abrir el gr&aacute;fico. Aqu&iacute; decides lo que en caliente no vas a poder. Sin esto, el portero no te deja operar." data-i18n-en="Cold, before you open the chart. Here you decide what you won't be able to in the heat of the moment. Without this, the gatekeeper won't let you trade.">Cold, before you open the chart. Here you decide what you won't be able to in the heat of the moment. Without this, the gatekeeper won't let you trade.</div>
     <div class="pf">
-      <div class="field" style="grid-column:1/-1"><label>Tu línea de identidad</label><input id="r_identity" type="text" placeholder="Hoy soy el francotirador, no la ametralladora."></div>
+      <div class="field" style="grid-column:1/-1"><label data-i18n-es="Tu l&iacute;nea de identidad" data-i18n-en="Your identity line">Your identity line</label><input id="r_identity" type="text" data-ph-es="Hoy soy el francotirador, no la ametralladora." data-ph-en="Today I'm the sniper, not the machine gun." placeholder="Today I'm the sniper, not the machine gun."></div>
     </div>
     <ul class="check" id="ritualCk" style="margin-top:8px">
-      <li data-rk><span class="box"></span>Size fijo confirmado, no lo subo pase lo que pase <small>R FIJA</small></li>
-      <li data-rk><span class="box"></span>Límite de pérdida diaria puesto en la prop firm <small>LOSS LOCK</small></li>
-      <li data-rk><span class="box"></span>Tengo mi plan del día escrito: sesgo + niveles <small>PLAN</small></li>
-      <li data-rk><span class="box"></span>Máximo 3 trades. El cuarto no existe <small>TOPE</small></li>
+      <li data-rk><span class="box"></span><span data-i18n-es="Size fijo confirmado, no lo subo pase lo que pase" data-i18n-en="Fixed size confirmed, I won't raise it no matter what">Fixed size confirmed, I won't raise it no matter what</span> <small data-i18n-es="R FIJA" data-i18n-en="FIXED R">FIXED R</small></li>
+      <li data-rk><span class="box"></span><span data-i18n-es="L&iacute;mite de p&eacute;rdida diaria puesto en la prop firm" data-i18n-en="Daily loss limit set on the prop firm">Daily loss limit set on the prop firm</span> <small data-i18n-es="LOSS LOCK" data-i18n-en="LOSS LOCK">LOSS LOCK</small></li>
+      <li data-rk><span class="box"></span><span data-i18n-es="Tengo mi plan del d&iacute;a escrito: sesgo + niveles" data-i18n-en="I have my day's plan written: bias + levels">I have my day's plan written: bias + levels</span> <small data-i18n-es="PLAN" data-i18n-en="PLAN">PLAN</small></li>
+      <li data-rk><span class="box"></span><span data-i18n-es="M&aacute;ximo 3 trades. El cuarto no existe" data-i18n-en="Maximum 3 trades. The fourth doesn't exist">Maximum 3 trades. The fourth doesn't exist</span> <small data-i18n-es="TOPE" data-i18n-en="CAP">CAP</small></li>
     </ul>
-    <div id="r_msg" style="font-size:10px;color:var(--txt-dim);margin-top:8px">Marca los cuatro para poder empezar.</div>
-    <div class="pfoot"><button class="cancel" id="ritualLater">Ahora no</button><button class="save" id="ritualDoneBtn">Listo, a ejecutar</button></div>
+    <div id="r_msg" style="font-size:10px;color:var(--txt-dim);margin-top:8px">Check all four to be able to start.</div>
+    <div class="pfoot"><button class="cancel" id="ritualLater" data-i18n-es="Ahora no" data-i18n-en="Not now">Not now</button><button class="save" id="ritualDoneBtn" data-i18n-es="Listo, a ejecutar" data-i18n-en="Ready, let's execute">Ready, let's execute</button></div>
   </div>
 </div>
 
 <!-- MODAL PLAN DEL DÍA -->
 <div class="planmodal" id="planModal">
   <div class="card">
-    <h3>PLAN DEL DÍA</h3>
-    <div class="hint">Lee tus niveles en TradingView y captúralos aquí. Se guarda solo para hoy y se reinicia mañana. Escribir tu plan antes de operar es parte del ritual: si no lo tienes claro, no operas.</div>
+    <h3 data-i18n-es="PLAN DEL D&Iacute;A" data-i18n-en="TODAY'S PLAN">TODAY'S PLAN</h3>
+    <div class="hint" data-i18n-es="Lee tus niveles en TradingView y captúralos aqu&iacute;. Se guarda solo para hoy y se reinicia ma&ntilde;ana. Escribir tu plan antes de operar es parte del ritual: si no lo tienes claro, no operas." data-i18n-en="Read your levels on TradingView and capture them here. Saved only for today and resets tomorrow. Writing your plan before trading is part of the ritual: if it's not clear, you don't trade.">Read your levels on TradingView and capture them here. Saved only for today and resets tomorrow. Writing your plan before trading is part of the ritual: if it's not clear, you don't trade.</div>
     <div class="pf">
-      <div class="field" style="grid-column:1/-1"><label>Pegar del indicador (TradingView · TDL · CC Export)</label>
-        <div class="two"><input id="f_paste" type="text" placeholder="TDL1|date=...|price=...|bias=..."><button class="editbtn" id="f_pasteBtn" style="white-space:nowrap">Cargar</button></div>
+      <div class="field" style="grid-column:1/-1"><label data-i18n-es="Pegar del indicador (TradingView &middot; TDL &middot; CC Export)" data-i18n-en="Paste from the indicator (TradingView · TDL · CC Export)">Paste from the indicator (TradingView · TDL · CC Export)</label>
+        <div class="two"><input id="f_paste" type="text" placeholder="TDL1|date=...|price=...|bias=..."><button class="editbtn" id="f_pasteBtn" style="white-space:nowrap" data-i18n-es="Cargar" data-i18n-en="Load">Load</button></div>
         <div id="f_pasteMsg" style="font-size:10px;color:var(--txt-dim);margin-top:2px"></div></div>
-      <div class="sect">Plan</div>
-      <div class="field"><label>Tipo de día</label>
-        <select id="f_dayType"><option value="Aceptación al alza">Aceptación al alza</option><option value="Aceptación a la baja">Aceptación a la baja</option><option value="Balance">Balance</option><option value="Día de tendencia">Día de tendencia</option></select></div>
-      <div class="field"><label>Precio de referencia</label><input id="f_price" type="number" step="0.25" placeholder="ej. 30275"></div>
-      <div class="field"><label>Sesgo del día (marco mayor)</label>
+      <div class="sect" data-i18n-es="Plan" data-i18n-en="Plan">Plan</div>
+      <div class="field"><label data-i18n-es="Tipo de d&iacute;a" data-i18n-en="Day type">Day type</label>
+        <select id="f_dayType"><option value="Aceptación al alza" data-i18n-es="Aceptaci&oacute;n al alza" data-i18n-en="Acceptance to the upside">Acceptance to the upside</option><option value="Aceptación a la baja" data-i18n-es="Aceptaci&oacute;n a la baja" data-i18n-en="Acceptance to the downside">Acceptance to the downside</option><option value="Balance" data-i18n-es="Balance" data-i18n-en="Balance">Balance</option><option value="Día de tendencia" data-i18n-es="D&iacute;a de tendencia" data-i18n-en="Trend day">Trend day</option></select></div>
+      <div class="field"><label data-i18n-es="Precio de referencia" data-i18n-en="Reference price">Reference price</label><input id="f_price" type="number" step="0.25" data-ph-es="ej. 30275" data-ph-en="e.g. 30275" placeholder="e.g. 30275"></div>
+      <div class="field"><label data-i18n-es="Sesgo del d&iacute;a (marco mayor)" data-i18n-en="Day bias (bigger frame)">Day bias (bigger frame)</label>
         <select id="f_weekly"><option value="LONG">LONG</option><option value="SHORT">SHORT</option><option value="NEUTRAL">NEUTRAL</option></select></div>
-      <div class="field"><label>Sesgo de sesión / Asia</label>
+      <div class="field"><label data-i18n-es="Sesgo de sesi&oacute;n / Asia" data-i18n-en="Session / Asia bias">Session / Asia bias</label>
         <select id="f_bias"><option value="LONG">LONG</option><option value="SHORT">SHORT</option><option value="NEUTRAL">NEUTRAL</option></select></div>
-      <div class="sect">Niveles del perfil</div>
+      <div class="sect" data-i18n-es="Niveles del perfil" data-i18n-en="Profile levels">Profile levels</div>
       <div class="field"><label>VAH</label><input id="f_vah" type="number" step="0.25"></div>
       <div class="field"><label>POC</label><input id="f_poc" type="number" step="0.25"></div>
       <div class="field"><label>VAL</label><input id="f_val" type="number" step="0.25"></div>
       <div class="field"><label>VWAP</label><input id="f_vwap" type="number" step="0.25"></div>
-      <div class="sect">Zona de no-trade (auto del indicador, ajustable)</div>
-      <div class="field" style="grid-column:1/-1"><label>Desde · Hasta (tierra de nadie)</label><div class="two"><input id="f_ntz1" type="number" step="0.25" placeholder="desde"><input id="f_ntz2" type="number" step="0.25" placeholder="hasta"></div></div>
+      <div class="sect" data-i18n-es="Zona de no-trade (auto del indicador, ajustable)" data-i18n-en="No-trade zone (auto from the indicator, adjustable)">No-trade zone (auto from the indicator, adjustable)</div>
+      <div class="field" style="grid-column:1/-1"><label data-i18n-es="Desde &middot; Hasta (tierra de nadie)" data-i18n-en="From · To (no man's land)">From · To (no man's land)</label><div class="two"><input id="f_ntz1" type="number" step="0.25" data-ph-es="desde" data-ph-en="from" placeholder="from"><input id="f_ntz2" type="number" step="0.25" data-ph-es="hasta" data-ph-en="to" placeholder="to"></div></div>
     </div>
-    <div class="pfoot"><button class="cancel" id="planCancel">Cancelar</button><button class="save" id="planSave">Guardar plan de hoy</button></div>
+    <div class="pfoot"><button class="cancel" id="planCancel" data-i18n-es="Cancelar" data-i18n-en="Cancel">Cancel</button><button class="save" id="planSave" data-i18n-es="Guardar plan de hoy" data-i18n-en="Save today's plan">Save today's plan</button></div>
   </div>
 </div>
 
 <script src="cc_data.js" onerror="window.__noData=1"></script>
 <script src="cc_plan.js" onerror="window.__noPlan=1"></script>
 <script>
+/* ================= IDIOMA · aplica traducciones estaticas + toggle EN/ES ================= */
+(function(){
+  var L=window.CC_LANG;
+  function applyStaticI18n(){
+    L=window.CC_LANG;
+    document.documentElement.setAttribute('lang',L);
+    [].forEach.call(document.querySelectorAll('[data-i18n-es]'),function(el){
+      el.textContent = L==='en' ? el.getAttribute('data-i18n-en') : el.getAttribute('data-i18n-es');
+    });
+    [].forEach.call(document.querySelectorAll('[data-i18n-html-es]'),function(el){
+      el.innerHTML = L==='en' ? el.getAttribute('data-i18n-html-en') : el.getAttribute('data-i18n-html-es');
+    });
+    [].forEach.call(document.querySelectorAll('[data-ph-es]'),function(el){
+      el.setAttribute('placeholder', L==='en' ? el.getAttribute('data-ph-en') : el.getAttribute('data-ph-es'));
+    });
+    [].forEach.call(document.querySelectorAll('[data-title-es]'),function(el){
+      el.setAttribute('title', L==='en' ? el.getAttribute('data-title-en') : el.getAttribute('data-title-es'));
+    });
+    [].forEach.call(document.querySelectorAll('.langbar button'),function(b){
+      b.setAttribute('aria-pressed', b.getAttribute('data-lang')===L?'true':'false');
+    });
+  }
+  window.applyStaticI18n=applyStaticI18n;
+  window.setCCLang=function(l){
+    if(l!=='en'&&l!=='es') return;
+    window.CC_LANG=l;
+    try{ localStorage.setItem('cc_lang',l); }catch(e){}
+    applyStaticI18n();
+    window.__i18nRefresh.forEach(function(fn){ try{fn();}catch(e){} });
+  };
+  [].forEach.call(document.querySelectorAll('.langbar button'),function(b){
+    b.addEventListener('click',function(){ window.setCCLang(b.getAttribute('data-lang')); });
+  });
+  applyStaticI18n();
+})();
+
 /* ---- secuencia de arranque + encendido escalonado ---- */
 (function(){
   var wrap=document.querySelector('.wrap'), boot=document.getElementById('boot'), lines=document.getElementById('bootLines');
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
   if(!boot||!wrap||reduce){ if(boot)boot.remove(); wrap&&wrap.classList.remove('boot'); wrap&&wrap.classList.add('lit'); onLit(); return; }
-  var steps=['> TRADEDADLOG OS v0.8','> cargando plan · niveles · sesgo ... [<b>OK</b>]','> motor anti-fugas ............... [<b>ARMADO</b>]','> tilt-lock ..................... [<b>ACTIVO</b>]','> para Liam. el plan sobre el impulso.'];
+  var steps=[
+    '> TRADEDADLOG OS v0.9',
+    '> '+T('cargando plan · niveles · sesgo','loading plan · levels · bias')+' ... [<b>OK</b>]',
+    '> '+T('motor anti-fugas','anti-leak engine')+' ............... [<b>'+T('ARMADO','ARMED')+'</b>]',
+    '> '+T('tilt-lock','tilt-lock')+' ..................... [<b>'+T('ACTIVO','ACTIVE')+'</b>]',
+    '> '+T('para Liam. el plan sobre el impulso.','for Liam. the plan over the impulse.')
+  ];
   var i=0;
   var iv=setInterval(function(){
     if(i<steps.length){ lines.innerHTML+=steps[i]+'\n'; i++; }
@@ -871,16 +932,17 @@ body::before{
 
 setInterval(function(){ var n=new Date(); var p=function(x){return String(x).padStart(2,'0');}; var c=document.getElementById('clk'); if(c) c.textContent=p(n.getHours())+':'+p(n.getMinutes())+':'+p(n.getSeconds()); },1000);
 
-var quotes=[
-  '"El plan sobre el impulso. No opero para sentir, opero para ejecutar."',
-  '"Mi mayor enemigo soy yo mismo. El mercado solo me lo enseña."',
-  '"Cero entradas en el aire. Nivel, sesgo y gatillo, o no es."',
-  '"Cada peso que tiro por indisciplina se lo quito a Liam."',
-  '"El mercado no me debe la de ayer. Empiezo en cero."',
-  '"Si dudo, no es. Si es, no dudo."'
-];
+function quotesList(){ return [
+  T('"El plan sobre el impulso. No opero para sentir, opero para ejecutar."','"The plan over the impulse. I don\'t trade to feel, I trade to execute."'),
+  T('"Mi mayor enemigo soy yo mismo. El mercado solo me lo enseña."','"My biggest enemy is myself. The market just teaches me that."'),
+  T('"Cero entradas en el aire. Nivel, sesgo y gatillo, o no es."','"Zero entries in the air. Level, bias and trigger, or it isn\'t one."'),
+  T('"Cada peso que tiro por indisciplina se lo quito a Liam."','"Every dollar I lose to indiscipline, I take from Liam."'),
+  T('"El mercado no me debe la de ayer. Empiezo en cero."','"The market doesn\'t owe me yesterday\'s. I start at zero."'),
+  T('"Si dudo, no es. Si es, no dudo."','"If I doubt it, it isn\'t. If it is, I don\'t doubt it."')
+]; }
 var qi=0;
-setInterval(function(){ qi=(qi+1)%quotes.length; var el=document.getElementById('quote'); if(!el)return; el.style.animation='none';el.offsetHeight;el.style.animation='fade 1s'; el.textContent=quotes[qi]; },6000);
+setInterval(function(){ var quotes=quotesList(); qi=(qi+1)%quotes.length; var el=document.getElementById('quote'); if(!el)return; el.style.animation='none';el.offsetHeight;el.style.animation='fade 1s'; el.textContent=quotes[qi]; },6000);
+window.__i18nRefresh.push(function(){ var el=document.getElementById('quote'); if(el) el.textContent=quotesList()[qi]; });
 
 var lockSec=299;
 setInterval(function(){ if(!document.getElementById('overlay').classList.contains('show'))return; lockSec=lockSec>0?lockSec-1:299; var p=function(x){return String(x).padStart(2,'0');}; document.getElementById('lockcd').textContent=p(Math.floor(lockSec/60))+':'+p(lockSec%60); },1000);
