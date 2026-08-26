@@ -571,10 +571,18 @@ body::before{
       .scanrow .scorec{font-family:"Orbitron","JetBrains Mono",monospace;font-size:10.5px;font-weight:700;text-align:right}
       .scanrow.empty{opacity:.5}
       .scanpick{padding:9px 12px;border-radius:10px;background:rgba(95,224,138,0.08);border:1px solid rgba(95,224,138,0.35);font-size:11px;color:var(--txt);line-height:1.5}
+      .scanhead{display:grid;grid-template-columns:38px 64px 1fr 42px;gap:7px;padding:0 9px;font-size:7.5px;letter-spacing:.6px;color:var(--txt-faint);text-transform:uppercase}
+      .scanhead .scorec{text-align:right}
     </style>
     <div class="panel">
       <div class="phead"><span class="dot" style="background:var(--violet);box-shadow:0 0 8px var(--violet)"></span><h2 data-i18n-es="Fuerza relativa" data-i18n-en="Relative strength">Relative strength</h2><span class="tag" data-i18n-es="6 S&Iacute;MBOLOS" data-i18n-en="6 SYMBOLS">6 SYMBOLS</span></div>
       <div class="scanpick" id="scanPick">Waiting for data from more than one symbol to compare.</div>
+      <div class="scanhead">
+        <span data-i18n-es="S&iacute;mbolo" data-i18n-en="Symbol">Symbol</span>
+        <span data-i18n-es="Sesgo" data-i18n-en="Bias">Bias</span>
+        <span data-i18n-es="Se&ntilde;al en vivo" data-i18n-en="Live signal">Live signal</span>
+        <span class="scorec" data-i18n-es="Fuerza" data-i18n-en="Strength">Strength</span>
+      </div>
       <div class="scan" id="scan"></div>
       <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center" data-i18n-es="Cada s&iacute;mbolo necesita el indicador + alerta corriendo en su propio gr&aacute;fico en TradingView." data-i18n-en="Each symbol needs the indicator + alert running on its own TradingView chart.">Each symbol needs the indicator + alert running on its own TradingView chart.</div>
     </div>
