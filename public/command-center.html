@@ -560,6 +560,25 @@ body::before{
       </div>
     </div>
 
+    <!-- 3.5 FUERZA RELATIVA · escanea NQ/ES/GC/CL/YM/SI y sugiere el mas claro -->
+    <style>
+      .scan{display:flex;flex-direction:column;gap:6px}
+      .scanrow{display:grid;grid-template-columns:52px 90px 1fr 56px;align-items:center;gap:10px;padding:8px 11px;border-radius:9px;background:var(--panel-2);border:1px solid var(--border)}
+      .scanrow.best{border-color:var(--lime);background:rgba(95,224,138,0.07)}
+      .scanrow .symc{font-family:"Orbitron","JetBrains Mono",monospace;font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--txt)}
+      .scanrow .dirc{font-size:10.5px;font-weight:700;letter-spacing:.5px}
+      .scanrow .sigc{font-size:9.5px;color:var(--txt-dim)}
+      .scanrow .scorec{font-family:"Orbitron","JetBrains Mono",monospace;font-size:12px;font-weight:700;text-align:right}
+      .scanrow.empty{opacity:.5}
+      .scanpick{padding:9px 12px;border-radius:10px;background:rgba(95,224,138,0.08);border:1px solid rgba(95,224,138,0.35);font-size:11px;color:var(--txt);line-height:1.5}
+    </style>
+    <div class="panel full">
+      <div class="phead"><span class="dot" style="background:var(--violet);box-shadow:0 0 8px var(--violet)"></span><h2 data-i18n-es="Fuerza relativa" data-i18n-en="Relative strength">Relative strength</h2><span class="tag" data-i18n-es="NQ &middot; ES &middot; GC &middot; CL &middot; YM &middot; SI" data-i18n-en="NQ · ES · GC · CL · YM · SI">NQ · ES · GC · CL · YM · SI</span></div>
+      <div class="scanpick" id="scanPick">Waiting for data from more than one symbol to compare.</div>
+      <div class="scan" id="scan"></div>
+      <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center" data-i18n-es="Cada s&iacute;mbolo necesita el indicador + alerta corriendo en su propio gr&aacute;fico en TradingView." data-i18n-en="Each symbol needs the indicator + alert running on its own TradingView chart.">Each symbol needs the indicator + alert running on its own TradingView chart.</div>
+    </div>
+
     <div class="panel">
       <div class="phead"><span class="dot" style="background:var(--violet);box-shadow:0 0 8px var(--violet)"></span><h2 data-i18n-es="Mapa de niveles" data-i18n-en="Level map">Level map</h2><span class="tag" data-i18n-es="TODOS &middot; DIST. AL PRECIO" data-i18n-en="ALL · DIST. TO PRICE">ALL · DIST. TO PRICE</span></div>
       <div class="lad" id="lad">
@@ -607,25 +626,6 @@ body::before{
       <div class="feed" id="feed">
         <div class="empty">No moves today.<br>Every trade you mark in the gatekeeper (win / loss) gets logged here.</div>
       </div>
-    </div>
-
-    <!-- 3.5 FUERZA RELATIVA · escanea NQ/ES/GC/CL/YM y sugiere el mas claro -->
-    <style>
-      .scan{display:flex;flex-direction:column;gap:6px}
-      .scanrow{display:grid;grid-template-columns:52px 90px 1fr 56px;align-items:center;gap:10px;padding:8px 11px;border-radius:9px;background:var(--panel-2);border:1px solid var(--border)}
-      .scanrow.best{border-color:var(--lime);background:rgba(95,224,138,0.07)}
-      .scanrow .symc{font-family:"Orbitron","JetBrains Mono",monospace;font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--txt)}
-      .scanrow .dirc{font-size:10.5px;font-weight:700;letter-spacing:.5px}
-      .scanrow .sigc{font-size:9.5px;color:var(--txt-dim)}
-      .scanrow .scorec{font-family:"Orbitron","JetBrains Mono",monospace;font-size:12px;font-weight:700;text-align:right}
-      .scanrow.empty{opacity:.5}
-      .scanpick{padding:9px 12px;border-radius:10px;background:rgba(95,224,138,0.08);border:1px solid rgba(95,224,138,0.35);font-size:11px;color:var(--txt);line-height:1.5}
-    </style>
-    <div class="panel full">
-      <div class="phead"><span class="dot" style="background:var(--violet);box-shadow:0 0 8px var(--violet)"></span><h2 data-i18n-es="Fuerza relativa" data-i18n-en="Relative strength">Relative strength</h2><span class="tag" data-i18n-es="NQ &middot; ES &middot; GC &middot; CL &middot; YM &middot; SI" data-i18n-en="NQ · ES · GC · CL · YM · SI">NQ · ES · GC · CL · YM · SI</span></div>
-      <div class="scanpick" id="scanPick">Waiting for data from more than one symbol to compare.</div>
-      <div class="scan" id="scan"></div>
-      <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center" data-i18n-es="Cada s&iacute;mbolo necesita el indicador + alerta corriendo en su propio gr&aacute;fico en TradingView." data-i18n-en="Each symbol needs the indicator + alert running on its own TradingView chart.">Each symbol needs the indicator + alert running on its own TradingView chart.</div>
     </div>
 
     <!-- 4. NOTICIAS · puede cerrar la ventana de entrada -->
