@@ -662,7 +662,11 @@ body::before{
       .rfrule{font-size:9.5px;color:var(--txt-dim);line-height:1.5}
       .rfrule b{color:var(--txt)}
       .accrow{display:flex;gap:7px;flex-wrap:wrap}
-      .acc{flex:1;min-width:88px;padding:7px 6px;border-radius:9px;border:1px solid var(--border);background:var(--panel-solid);text-align:center;cursor:pointer;transition:.15s;user-select:none}
+      .acc{position:relative;flex:1;min-width:88px;padding:7px 6px;border-radius:9px;border:1px solid var(--border);background:var(--panel-solid);text-align:center;cursor:pointer;transition:.15s;user-select:none}
+      .acc.lost{border-color:var(--red);background:rgba(255,95,116,0.08)}
+      .acc .lostbtn{position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;background:var(--panel-2);border:1px solid var(--border);color:var(--txt-faint);font-size:9px;line-height:14px;cursor:pointer;transition:.15s}
+      .acc .lostbtn:hover{border-color:var(--red);color:var(--red)}
+      .acc.lost .lostbtn{background:var(--red);border-color:var(--red);color:#fff}
       .acc:hover{filter:brightness(1.2)}
       .acc .an{font-family:"Orbitron","JetBrains Mono",monospace;font-size:9px;letter-spacing:1px;color:var(--txt-faint)}
       .acc .as{font-size:9px;font-weight:700;margin-top:3px;line-height:1.25}
@@ -724,24 +728,39 @@ body::before{
       if(!state.fn) state.fn=[1,1,0,0,0];
       if(!state.mff) state.mff=[0,0,0,0,0];
       if(!state.lu) state.lu=[0,0,0,0,0];
+      if(!state.fnLost) state.fnLost=[false,false,false,false,false];
+      if(!state.mffLost) state.mffLost=[false,false,false,false,false];
+      if(!state.luLost) state.luLost=[false,false,false,false,false];
+      var LOSTKEY={fn:'fnLost',mff:'mffLost',lu:'luLost'};
 
       function render(){
         var totalFunded=0, totalAcc=0;
         FIRMS().forEach(function(f){
           var wrap=document.getElementById(f.wrap); wrap.innerHTML='';
           var funded=0;
+          var lk=LOSTKEY[f.key];
+          if(!state[lk]) state[lk]=[];
           f.stages; // noop reference
           state[f.key].forEach(function(idx,i){
-            if(idx>=f.fundedIdx) funded++;
+            var lost=!!state[lk][i];
+            if(idx>=f.fundedIdx && !lost) funded++;
             var st=f.stages[idx];
             var d=document.createElement('div');
-            d.className='acc';
-            d.style.borderColor=st.c;
-            d.innerHTML='<div class="an">'+T('CUENTA','ACCOUNT')+' '+(i+1)+'</div><div class="as" style="color:'+st.c+'">'+st.l+'</div>';
+            d.className='acc'+(lost?' lost':'');
+            d.style.borderColor=lost?'var(--red)':st.c;
+            var label=lost?T('PERDIDA','BLOWN'):st.l;
+            var labelColor=lost?'var(--red)':st.c;
+            d.innerHTML='<div class="an">'+T('CUENTA','ACCOUNT')+' '+(i+1)+'</div><div class="as" style="color:'+labelColor+'">'+label+'</div><div class="lostbtn" title="'+T('Marcar/desmarcar perdida','Mark/unmark blown')+'">&#10005;</div>';
             d.onclick=(function(idx,i){ return function(){
               state[f.key][i]=(idx+1)%f.stages.length;
               save(state); render();
             };})(idx,i);
+            var xbtn=d.querySelector('.lostbtn');
+            xbtn.onclick=(function(i,lk){ return function(e){
+              e.stopPropagation();
+              state[lk][i]=!state[lk][i];
+              save(state); render();
+            };})(i,lk);
             wrap.appendChild(d);
           });
           var cntEl=document.getElementById(f.cnt);
