@@ -1143,21 +1143,25 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   if($('pProto')) $('pProto').addEventListener('click',function(){ openProto(''); });
 
   function afterTrade(){
-    if(s.used>=MAXT){ s.stopped=true; s.reason=MAXT+' trades hechos. Se acabó, sin trade extra.'; }
+    if(s.used>=MAXT){ s.stopped=true; s.reason=T(MAXT+' trades hechos. Se acabó, sin trade extra.',MAXT+' trades done. That\'s it, no extra trade.'); }
     save(s); markDay(true); clearChecks(); renderDay();
   }
+  function resumeAudio(){ try{ if(typeof actx==='function'){var c=actx(); if(c&&c.state==='suspended')c.resume();} }catch(e){} }
+  function playWin(){ resumeAudio(); try{ if(typeof beep==='function'){ var c=typeof actx==='function'?actx():null; var t=c?c.currentTime:0; beep(660,0.12,'sine',0.05,t); beep(880,0.16,'sine',0.05,t+0.13); } }catch(e){} }
+  function playLoss(){ resumeAudio(); try{ if(typeof beep==='function'){ var c=typeof actx==='function'?actx():null; var t=c?c.currentTime:0; beep(300,0.14,'square',0.04,t); beep(220,0.16,'square',0.04,t+0.15); } }catch(e){} }
+
   pWin.addEventListener('click',function(){
     if(!open())return;
     s.used++; s.trades.push({r:'win',t:hhmm()});
     var key=classify('win'); afterTrade(); resetGate(); openProto(key);
-    try{ if(typeof actx==='function'){var c=actx(); if(c&&c.state==='suspended')c.resume();} if(typeof beep==='function') beep(660,0.12,'sine',0.05); }catch(e){}
+    playWin();
   });
 
   pLoss.addEventListener('click',function(){
     if(!open())return;
     s.used++; s.trades.push({r:'loss',t:hhmm()});
     var key=classify('loss'); afterTrade(); resetGate(); openProto(key);
-    if(s.used>=MAXT){ triggerLock(); }
+    if(s.used>=MAXT){ triggerLock(); } else { playLoss(); }
   });
 
   pReset.addEventListener('click',function(){
@@ -1177,7 +1181,8 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var sub=ov.querySelector('.sub');
     if(sub) sub.innerHTML=T('TOPE DE '+MAXT+' TRADES. SE ACABÓ EL DÍA.<br>No hay trade número '+(MAXT+1)+'. Esta cuenta te la protejo de ti mismo.',MAXT+'-TRADE CAP. THE DAY IS OVER.<br>There\'s no trade number '+(MAXT+1)+'. I\'m protecting this account from you.');
     ov.classList.add('show');
-    try{ if(typeof actx==='function'){var c=actx(); if(c&&c.state==='suspended')c.resume();} if(typeof alarmSnd==='function') alarmSnd(); }catch(e){}
+    resumeAudio();
+    try{ if(typeof alarmSnd==='function') alarmSnd(); }catch(e){}
   }
 
   // tocar el veredicto cuando el ritual está pendiente lo abre
