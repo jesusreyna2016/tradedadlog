@@ -697,7 +697,7 @@ body::before{
           <div class="rfrule" data-i18n-html-es="Mismo modelo que MFF: buffer <b>$1,100</b> fijo, crecer a <b>$1,500-1,600</b>, retiro diario hasta <b>$6,000</b> manteniendo el buffer (90% para ti). Meta por cuenta: <b>$400-500</b> retirados." data-i18n-html-en="Same model as MFF: fixed <b>$1,100</b> buffer, grow to <b>$1,500-1,600</b>, daily withdrawal up to <b>$6,000</b> keeping the buffer (90% to you). Goal per account: <b>$400-500</b> withdrawn.">Same model as MFF: fixed <b>$1,100</b> buffer, grow to <b>$1,500-1,600</b>, daily withdrawal up to <b>$6,000</b> keeping the buffer (90% to you). Goal per account: <b>$400-500</b> withdrawn.</div>
           <div class="accrow" id="accLU"></div>
         </div>
-        <div class="dnote" data-i18n-html-es="Si fondeas y corres el ciclo completo en las 15: potencial &#8776; <b>$11,175</b> combinados (FundedNext $7,125 + MFF $2,025 + Lucid $2,025, ya con el split)." data-i18n-html-en="If you fund and run the full cycle on all 15: potential &#8776; <b>$11,175</b> combined (FundedNext $7,125 + MFF $2,025 + Lucid $2,025, already with the split).">If you fund and run the full cycle on all 15: potential &#8776; <b>$11,175</b> combined (FundedNext $7,125 + MFF $2,025 + Lucid $2,025, already with the split).</div>
+        <div class="dnote" id="roadPotential">If you fund and run the full cycle on all 15: potential &#8776; <b>$11,175</b> combined (FundedNext $7,125 + MFF $2,025 + Lucid $2,025, already with the split).</div>
       </div>
     </div>
     <script>
@@ -717,10 +717,11 @@ body::before{
         {l:T('Retirando','Withdrawing'),c:"var(--lime)"}
       ]; }
       function FIRMS(){ return [
-        {key:"fn", stages:FN_ST(), n:5, wrap:"accFN", cnt:"rfCountFN", fundedIdx:1},
-        {key:"mff", stages:BUF_ST(), n:5, wrap:"accMFF", cnt:"rfCountMFF", fundedIdx:1},
-        {key:"lu", stages:BUF_ST(), n:5, wrap:"accLU", cnt:"rfCountLU", fundedIdx:1}
+        {key:"fn", name:"FundedNext", stages:FN_ST(), n:5, wrap:"accFN", cnt:"rfCountFN", fundedIdx:1, perAcct:1425},
+        {key:"mff", name:"MFF", stages:BUF_ST(), n:5, wrap:"accMFF", cnt:"rfCountMFF", fundedIdx:1, perAcct:405},
+        {key:"lu", name:"Lucid", stages:BUF_ST(), n:5, wrap:"accLU", cnt:"rfCountLU", fundedIdx:1, perAcct:405}
       ]; }
+      function money(n){ return '$'+Math.round(n).toLocaleString('en-US'); }
       var KEY='cc_prop_accounts';
       function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){ return {}; } }
       function save(st){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
@@ -735,14 +736,16 @@ body::before{
 
       function render(){
         var totalFunded=0, totalAcc=0;
+        var potFirms=[];
         FIRMS().forEach(function(f){
           var wrap=document.getElementById(f.wrap); wrap.innerHTML='';
-          var funded=0;
+          var funded=0, aliveCount=0, blownCount=0;
           var lk=LOSTKEY[f.key];
           if(!state[lk]) state[lk]=[];
           f.stages; // noop reference
           state[f.key].forEach(function(idx,i){
             var lost=!!state[lk][i];
+            if(lost) blownCount++; else aliveCount++;
             if(idx>=f.fundedIdx && !lost) funded++;
             var st=f.stages[idx];
             var d=document.createElement('div');
@@ -766,9 +769,22 @@ body::before{
           var cntEl=document.getElementById(f.cnt);
           if(cntEl) cntEl.textContent=funded+'/'+f.n+' '+T('fondeadas','funded');
           totalFunded+=funded; totalAcc+=f.n;
+          potFirms.push({name:f.name, potential:aliveCount*f.perAcct, blown:blownCount});
         });
         var rc=document.getElementById('roadCount');
         if(rc) rc.textContent=totalFunded+' / '+totalAcc+' '+T('fondeadas','funded');
+
+        var pot=document.getElementById('roadPotential');
+        if(pot){
+          var totalPot=potFirms.reduce(function(s,p){return s+p.potential;},0);
+          var totalBlown=potFirms.reduce(function(s,p){return s+p.blown;},0);
+          var breakdown=potFirms.map(function(p){return p.name+' '+money(p.potential);}).join(' + ');
+          if(!totalBlown){
+            pot.innerHTML=T('Si fondeas y corres el ciclo completo en las 15: potencial &#8776; <b>'+money(totalPot)+'</b> combinados ('+breakdown+', ya con el split).','If you fund and run the full cycle on all 15: potential &#8776; <b>'+money(totalPot)+'</b> combined ('+breakdown+', already with the split).');
+          } else {
+            pot.innerHTML=T('Potencial real hoy &#8776; <b>'+money(totalPot)+'</b> combinados ('+breakdown+') &middot; <b style="color:var(--red)">'+totalBlown+' cuenta'+(totalBlown===1?'':'s')+' perdida'+(totalBlown===1?'':'s')+'</b> ya descontada'+(totalBlown===1?'':'s')+' del c&aacute;lculo.','Real potential today &#8776; <b>'+money(totalPot)+'</b> combined ('+breakdown+') &middot; <b style="color:var(--red)">'+totalBlown+' blown account'+(totalBlown===1?'':'s')+'</b> already excluded.');
+          }
+        }
       }
       render();
       window.__i18nRefresh.push(render);
