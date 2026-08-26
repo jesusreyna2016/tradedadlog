@@ -23,3 +23,8 @@
   from = "/api/cc-news"
   to = "/.netlify/functions/cc-news"
   status = 200
+
+[[redirects]]
+  from = "/api/cc-scan"
+  to = "/.netlify/functions/cc-scan"
+  status = 200

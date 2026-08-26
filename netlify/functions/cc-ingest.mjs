@@ -31,8 +31,11 @@ export default async (req) => {
   const kv = parseTDL(body);
   if(!kv) return new Response('bad payload (esperaba cadena TDL1|...)', { status: 400 });
 
+  const sym = (kv.sym || 'NQ').toUpperCase();
+
   const plan = {
     ver: kv.ver || null,
+    sym,
     date: kv.date || null,
     dayType: kv.daytype || null,
     biasDir: kv.bias || null,
@@ -60,6 +63,10 @@ export default async (req) => {
   };
 
   const store = getStore('cc');
-  await store.setJSON('latest', plan);
-  return new Response('ok · ' + (plan.date||'') + ' · ' + (plan.biasDir||''), { status: 200 });
+  // guarda por simbolo (para el scanner de fuerza relativa) y, si es NQ (el
+  // simbolo principal del Center), tambien pisa 'latest' para no romper
+  // /api/cc-plan (retrocompatible con alertas viejas sin sym=).
+  await store.setJSON('sym:' + sym, plan);
+  if(sym === 'NQ') await store.setJSON('latest', plan);
+  return new Response('ok · ' + sym + ' · ' + (plan.date||'') + ' · ' + (plan.biasDir||''), { status: 200 });
 };
