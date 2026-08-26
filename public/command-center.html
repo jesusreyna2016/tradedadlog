@@ -622,7 +622,7 @@ body::before{
       .scanpick{padding:9px 12px;border-radius:10px;background:rgba(95,224,138,0.08);border:1px solid rgba(95,224,138,0.35);font-size:11px;color:var(--txt);line-height:1.5}
     </style>
     <div class="panel full">
-      <div class="phead"><span class="dot" style="background:var(--violet);box-shadow:0 0 8px var(--violet)"></span><h2 data-i18n-es="Fuerza relativa" data-i18n-en="Relative strength">Relative strength</h2><span class="tag" data-i18n-es="NQ &middot; ES &middot; GC &middot; CL &middot; YM" data-i18n-en="NQ · ES · GC · CL · YM">NQ · ES · GC · CL · YM</span></div>
+      <div class="phead"><span class="dot" style="background:var(--violet);box-shadow:0 0 8px var(--violet)"></span><h2 data-i18n-es="Fuerza relativa" data-i18n-en="Relative strength">Relative strength</h2><span class="tag" data-i18n-es="NQ &middot; ES &middot; GC &middot; CL &middot; YM &middot; SI" data-i18n-en="NQ · ES · GC · CL · YM · SI">NQ · ES · GC · CL · YM · SI</span></div>
       <div class="scanpick" id="scanPick">Waiting for data from more than one symbol to compare.</div>
       <div class="scan" id="scan"></div>
       <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center" data-i18n-es="Cada s&iacute;mbolo necesita el indicador + alerta corriendo en su propio gr&aacute;fico en TradingView." data-i18n-en="Each symbol needs the indicator + alert running on its own TradingView chart.">Each symbol needs the indicator + alert running on its own TradingView chart.</div>
@@ -1563,7 +1563,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   var scanEl=$('scan'), pickEl=$('scanPick');
   if(!scanEl) return;
   var CC_API=/(^|\.)tradedadlog\.com$/i.test(location.hostname)?'':'https://tradedadlog.com';
-  var ORDER=['NQ','ES','GC','CL','YM'];
+  var ORDER=['NQ','ES','GC','CL','YM','SI'];
   function today(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
   function colDir(x){return x==='SHORT'?'var(--red)':x==='LONG'?'var(--lime)':'var(--amber)';}
   function word(x){return x==='SHORT'?T('BAJISTA','BEARISH'):x==='LONG'?T('ALCISTA','BULLISH'):T('NEUTRAL','NEUTRAL');}

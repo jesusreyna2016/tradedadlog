@@ -4,7 +4,7 @@
 // TDL1, misma clave secreta, pero corriendo en el simbolo correspondiente).
 import { getStore } from '@netlify/blobs';
 
-const SYMBOLS = ['NQ', 'ES', 'GC', 'CL', 'YM'];
+const SYMBOLS = ['NQ', 'ES', 'GC', 'CL', 'YM', 'SI'];
 
 export default async () => {
   const store = getStore('cc');
