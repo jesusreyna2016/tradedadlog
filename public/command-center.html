@@ -508,9 +508,9 @@ body::before{
     </div>
     <!-- RACHA -->
     <div class="hcol">
-      <div class="hlabel">Disciplina</div>
-      <div class="hstreak"><div class="n" id="streakN">0</div><div class="l">Días sin<br>fuga</div></div>
-      <div class="hproc" id="hproc">Paciencia hoy · A+ vistos <b id="procSeen">0</b> · operados <b id="procTook">0</b></div>
+      <div class="hlabel" data-i18n-es="Disciplina" data-i18n-en="Discipline">Discipline</div>
+      <div class="hstreak"><div class="n" id="streakN">0</div><div class="l" data-i18n-html-es="D&iacute;as sin<br>fuga" data-i18n-html-en="Days without<br>a leak">Days without<br>a leak</div></div>
+      <div class="hproc" id="hproc"><span data-i18n-es="Paciencia hoy" data-i18n-en="Patience today">Patience today</span> · <span data-i18n-es="A+ vistos" data-i18n-en="A+ seen">A+ seen</span> <b id="procSeen">0</b> · <span data-i18n-es="operados" data-i18n-en="traded">traded</span> <b id="procTook">0</b></div>
     </div>
   </div>
 
@@ -1040,23 +1040,23 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   window.__setNewsLock=function(info){ if(newsLock===(info||null)) return; newsLock=info||null; renderVerdict(); };
 
   function renderVerdict(){
-    if(newsLock){ setVerdict('closed','VENTANA DE NOTICIA', newsLock+' · manos fuera'); if(ckTag) ckTag.textContent='NEWS'; return; }
-    if(!ritualOK()){ setVerdict('no','RITUAL PENDIENTE','pásalo en frío antes de operar · toca aquí'); if(ckTag) ckTag.textContent='RITUAL'; return; }
+    if(newsLock){ setVerdict('closed',T('VENTANA DE NOTICIA','NEWS WINDOW'), newsLock+T(' · manos fuera',' · hands off')); if(ckTag) ckTag.textContent='NEWS'; return; }
+    if(!ritualOK()){ setVerdict('no',T('RITUAL PENDIENTE','RITUAL PENDING'),T('pásalo en frío antes de operar · toca aquí','do it cold before trading · tap here')); if(ckTag) ckTag.textContent=T('RITUAL','RITUAL'); return; }
     if(!open()){
-      if(s.stopped) setVerdict('closed','DÍA CERRADO', s.reason||'vuelve mañana');
-      else setVerdict('closed','TOPE DE TRADES','ya diste tus '+MAXT+', se acabó');
-      if(ckTag) ckTag.textContent=s.used+' / '+MAXT+' trades';
+      if(s.stopped) setVerdict('closed',T('DÍA CERRADO','DAY CLOSED'), s.reason||T('vuelve mañana','come back tomorrow'));
+      else setVerdict('closed',T('TOPE DE TRADES','TRADE CAP'),T('ya diste tus '+MAXT+', se acabó','you already made your '+MAXT+', that\'s it'));
+      if(ckTag) ckTag.textContent=s.used+' / '+MAXT+' '+T('trades','trades');
       return;
     }
     var c=counted();
     if(ckTag) ckTag.textContent=c+' / '+lis.length;
     if(c===lis.length){
       var g=gateStatus();
-      if(!gateDir){ setVerdict('no','FALTA DIRECCIÓN','declara largo o corto en el gate'); return; }
-      if(!g.allow){ setVerdict('no','CONTRA EL SESGO',gateDir+' contra el sesgo en vivo · esto es tu fuga'); return; }
-      setVerdict('yes','SETUP A+','7/7 · a favor · puedes entrar con tu plan');
+      if(!gateDir){ setVerdict('no',T('FALTA DIRECCIÓN','MISSING DIRECTION'),T('declara largo o corto en el gate','declare long or short in the gate')); return; }
+      if(!g.allow){ setVerdict('no',T('CONTRA EL SESGO','AGAINST THE BIAS'),gateDir+T(' contra el sesgo en vivo · esto es tu fuga',' against the live bias · this is your leak')); return; }
+      setVerdict('yes',T('SETUP A+','A+ SETUP'),T('7/7 · a favor · puedes entrar con tu plan','7/7 · with the bias · you can enter with your plan'));
     }
-    else { setVerdict('no','NO ENTRES TODAVÍA','faltan '+(lis.length-c)+' del checklist'); }
+    else { setVerdict('no',T('NO ENTRES TODAVÍA',"DON'T ENTER YET"),T('faltan '+(lis.length-c)+' del checklist',(lis.length-c)+' left on the checklist')); }
   }
 
   function renderFeed(){
@@ -1064,13 +1064,13 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var feed=document.getElementById('feed'), tag=document.getElementById('feedTag');
     if(!feed) return;
     var tr=s.trades||[];
-    if(tag) tag.textContent=tr.length+' MOVIMIENTO'+(tr.length===1?'':'S');
-    if(!tr.length){ feed.innerHTML='<div class="empty">Sin movimientos hoy.<br>Cada trade que marcas en el portero (ganada / perdida) queda registrado aquí.</div>'; return; }
+    if(tag) tag.textContent=tr.length+' '+T('MOVIMIENTO'+(tr.length===1?'':'S'),'MOVE'+(tr.length===1?'':'S'));
+    if(!tr.length){ feed.innerHTML='<div class="empty">'+T('Sin movimientos hoy.<br>Cada trade que marcas en el portero (ganada / perdida) queda registrado aquí.','No moves today.<br>Every trade you mark in the gatekeeper (win / loss) gets logged here.')+'</div>'; return; }
     feed.innerHTML=tr.slice().reverse().map(function(t){
       var win=t.r==='win';
-      return '<div class="trade '+(win?'win':'loss')+'"><div class="r1"><span class="side '+(win?'l':'s')+'">'+(win?'GANADA':'PERDIDA')+'</span>'+
+      return '<div class="trade '+(win?'win':'loss')+'"><div class="r1"><span class="side '+(win?'l':'s')+'">'+(win?T('GANADA','WIN'):T('PERDIDA','LOSS'))+'</span>'+
         '<span class="sym">NQ</span><span class="pnl '+(win?'up':'down')+'">'+(win?'▲':'▼')+'</span></div>'+
-        '<div class="r2">Registrada a las '+t.t+'.</div></div>';
+        '<div class="r2">'+T('Registrada a las '+t.t+'.','Logged at '+t.t+'.')+'</div></div>';
     }).join('');
   }
   window.__refreshFeed=renderFeed;
@@ -1083,9 +1083,9 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   function $(id){return document.getElementById(id);}
   function renderDay(){
     for(var i=1;i<=MAXT;i++){ var d=document.getElementById('pd'+i); if(d) d.className = s.used>=i?'used':''; }
-    if(s.stopped){ pDay.textContent=s.reason||'Día cerrado'; pDay.className='pv stop'; }
-    else if(s.used>=MAXT){ pDay.textContent='Tope'; pDay.className='pv stop'; }
-    else { var left=MAXT-s.used; pDay.textContent=left+' disponible'+(left===1?'':'s'); pDay.className='pv ok'; }
+    if(s.stopped){ pDay.textContent=s.reason||T('Día cerrado','Day closed'); pDay.className='pv stop'; }
+    else if(s.used>=MAXT){ pDay.textContent=T('Tope','Cap'); pDay.className='pv stop'; }
+    else { var left=MAXT-s.used; pDay.textContent=left+' '+T('disponible'+(left===1?'':'s'),'available'); pDay.className='pv ok'; }
     pWin.disabled=!open(); pLoss.disabled=!open();
     ckList.classList.toggle('dim',!open());
     if(!open()) clearChecks();
@@ -1093,6 +1093,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if(window.__refreshDisc) window.__refreshDisc();
     if(window.__refreshHealth) window.__refreshHealth();
   }
+  window.__i18nRefresh.push(renderDay);
   // el módulo de señal reporta cuándo aparece un A+ (paciencia: vistos vs operados)
   window.__markAplus=function(){ s.seen=(s.seen||0)+1; save(s); renderProc(); if(window.__refreshHealth) window.__refreshHealth(); };
   window.__refreshPortero=function(){ renderDay(); };
@@ -1108,17 +1109,18 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   function bias(){ try{ return window.__liveBias||null; }catch(e){ return null; } }
   function gateStatus(){
     var b=bias();
-    if(!gateDir) return {cls:'',allow:false,msg:'Declara tu dirección. Te aviso si vas contra el sesgo en vivo.'};
-    if(!b||b.dir==='NEUTRAL') return {cls:'warn',allow:true,msg:'Sin sesgo claro en vivo. En neutral es fácil forzar, sé selectivo.'};
-    if(gateDir===b.dir) return {cls:'ok',allow:true,msg:'A favor del sesgo en vivo ('+b.dir+', fuerza '+Math.abs(b.score)+'). Esto es lo tuyo.'};
-    if(gBorde()) return {cls:'warn',allow:true,msg:'Contra el sesgo, pero marcaste borde a favor. Que sea rechazo/rebote real en el nivel, no fadeo de la tendencia.'};
-    return {cls:'bad',allow:false,msg:'CONTRA EL SESGO EN VIVO ('+b.dir+'). Esto es tu fuga: no fadees la tendencia. Solo en un borde a favor.'};
+    if(!gateDir) return {cls:'',allow:false,msg:T('Declara tu dirección. Te aviso si vas contra el sesgo en vivo.',"Declare your direction. I'll flag it if you go against the live bias.")};
+    if(!b||b.dir==='NEUTRAL') return {cls:'warn',allow:true,msg:T('Sin sesgo claro en vivo. En neutral es fácil forzar, sé selectivo.','No clear live bias. In neutral it\'s easy to force it, be selective.')};
+    if(gateDir===b.dir) return {cls:'ok',allow:true,msg:T('A favor del sesgo en vivo ('+b.dir+', fuerza '+Math.abs(b.score)+'). Esto es lo tuyo.','With the live bias ('+b.dir+', strength '+Math.abs(b.score)+'). This is yours.')};
+    if(gBorde()) return {cls:'warn',allow:true,msg:T('Contra el sesgo, pero marcaste borde a favor. Que sea rechazo/rebote real en el nivel, no fadeo de la tendencia.','Against the bias, but you marked an edge with the trend. Make it a real rejection/bounce at the level, not fading the trend.')};
+    return {cls:'bad',allow:false,msg:T('CONTRA EL SESGO EN VIVO ('+b.dir+'). Esto es tu fuga: no fadees la tendencia. Solo en un borde a favor.','AGAINST THE LIVE BIAS ('+b.dir+'). This is your leak: don\'t fade the trend. Only on an edge with it.')};
   }
   window.__refreshGate=function(){
     gDirBtns.forEach(function(bn){ bn.classList.toggle('on', bn.getAttribute('data-dir')===gateDir); });
     var st=gateStatus(); if(gMsgEl){ gMsgEl.className='gmsg '+st.cls; gMsgEl.textContent=st.msg; }
     renderVerdict();
   };
+  window.__i18nRefresh.push(window.__refreshGate);
   gDirBtns.forEach(function(bn){ bn.addEventListener('click',function(){ var d=bn.getAttribute('data-dir'); gateDir=(gateDir===d)?null:d; window.__refreshGate(); }); });
   if(gBordeEl) gBordeEl.addEventListener('change',function(){ window.__refreshGate(); });
   function resetGate(){ gateDir=null; if(gBordeEl) gBordeEl.checked=false; window.__refreshGate(); }
@@ -1159,21 +1161,21 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   });
 
   pReset.addEventListener('click',function(){
-    if(!confirm('¿Empezar un día nuevo? Se reinicia el contador y el checklist.'))return;
+    if(!confirm(T('¿Empezar un día nuevo? Se reinicia el contador y el checklist.','Start a new day? This resets the counter and the checklist.')))return;
     s=fresh(); save(s); clearChecks(); renderDay();
   });
 
   var pBroke=document.getElementById('pBroke');
   if(pBroke) pBroke.addEventListener('click',function(){
-    if(!confirm('¿Rompiste una regla hoy (churn, revancha, tierra de nadie, tamaño)? Esto reinicia tu racha. Sé honesto.'))return;
+    if(!confirm(T('¿Rompiste una regla hoy (churn, revancha, tierra de nadie, tamaño)? Esto reinicia tu racha. Sé honesto.','Did you break a rule today (churn, revenge, no man\'s land, size)? This resets your streak. Be honest.')))return;
     markDay(false); updateStreakUI(); if(window.__refreshDisc) window.__refreshDisc();
-    var m=document.getElementById('pDay'); if(m){ m.textContent='Racha reiniciada'; m.className='pv stop'; }
+    var m=document.getElementById('pDay'); if(m){ m.textContent=T('Racha reiniciada','Streak reset'); m.className='pv stop'; }
   });
 
   function triggerLock(){
     var ov=document.getElementById('overlay'); if(!ov)return;
     var sub=ov.querySelector('.sub');
-    if(sub) sub.innerHTML='TOPE DE '+MAXT+' TRADES. SE ACABÓ EL DÍA.<br>No hay trade número '+(MAXT+1)+'. Esta cuenta te la protejo de ti mismo.';
+    if(sub) sub.innerHTML=T('TOPE DE '+MAXT+' TRADES. SE ACABÓ EL DÍA.<br>No hay trade número '+(MAXT+1)+'. Esta cuenta te la protejo de ti mismo.',MAXT+'-TRADE CAP. THE DAY IS OVER.<br>There\'s no trade number '+(MAXT+1)+'. I\'m protecting this account from you.');
     ov.classList.add('show');
     try{ if(typeof actx==='function'){var c=actx(); if(c&&c.state==='suspended')c.resume();} if(typeof alarmSnd==='function') alarmSnd(); }catch(e){}
   }
@@ -1212,12 +1214,13 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if($('discBar')) $('discBar').style.width=(pct==null?0:pct)+'%';
     var note=$('discNote');
     if(note){
-      if(!operados){ note.innerHTML='Aún sin días registrados. Marca cada día en el portero y aquí verás tu constancia real, no dinero fantasma.'; }
-      else if(pct===100){ note.innerHTML='<b>'+operados+' días</b> operados, <b>0 traiciones</b>. Así se sale de deudas: constancia, no suerte.'; }
-      else { var fallas=operados-limpios; note.innerHTML='<b>'+st+'</b> días fieles seguidos · <b>'+fallas+'</b> traición'+(fallas===1?'':'es')+' en 30 días. Cada casilla verde es un día que le ganaste a tu peor enemigo.'; }
+      if(!operados){ note.innerHTML=T('Aún sin días registrados. Marca cada día en el portero y aquí verás tu constancia real, no dinero fantasma.',"No days logged yet. Mark each day in the gatekeeper and here you'll see your real consistency, not phantom money."); }
+      else if(pct===100){ note.innerHTML=T('<b>'+operados+' días</b> operados, <b>0 traiciones</b>. Así se sale de deudas: constancia, no suerte.','<b>'+operados+' days</b> traded, <b>0 slip-ups</b>. This is how you get out of debt: consistency, not luck.'); }
+      else { var fallas=operados-limpios; note.innerHTML=T('<b>'+st+'</b> días fieles seguidos · <b>'+fallas+'</b> traición'+(fallas===1?'':'es')+' en 30 días. Cada casilla verde es un día que le ganaste a tu peor enemigo.','<b>'+st+'</b> faithful days in a row · <b>'+fallas+'</b> slip-up'+(fallas===1?'':'s')+' in 30 days. Every green square is a day you beat your worst enemy.'); }
     }
   };
   window.__refreshDisc();
+  window.__i18nRefresh.push(window.__refreshDisc);
 })();
 </script>
 
@@ -1244,15 +1247,15 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     add('VWAP',      L.vwap,    24);
     add('EMA20 15m', L.ema15,   20);
     add('EMA20 5m',  L.ema5,    14);
-    add('Apertura',  L.dayOpen, 12);
+    add(T('Apertura','Open'),  L.dayOpen, 12);
     if(L.ema5!=null && L.ema15!=null){
       var ds=Math.abs(L.ema5-L.ema15)<=tol?0:(L.ema5>L.ema15?1:-1);
-      F.push({label:'EMAs apiladas',w:10,d:ds});
+      F.push({label:T('EMAs apiladas','EMAs stacked'),w:10,d:ds});
     }
     if(L.pdh!=null && L.pdl!=null){
       var d; if(P>=L.pdh) d=1; else if(P<=L.pdl) d=-1;
       else { var pos=(P-L.pdl)/((L.pdh-L.pdl)||1); d=(pos-0.5)*1.2; d=Math.max(-1,Math.min(1,d)); }
-      F.push({label:'Rango previo',w:20,d:d});
+      F.push({label:T('Rango previo','Prior range'),w:20,d:d});
     }
     if(!F.length) return null;
     var raw=0,wsum=0,up=0,dn=0;
@@ -1270,15 +1273,18 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   }
   function savePlan(p){ try{ localStorage.setItem(KEY,JSON.stringify(p)); }catch(e){} }
 
+  var lastPlan=null;
   function applyPlan(p){
     if(!p) return;
+    lastPlan=p;
     if($('mock')) $('mock').style.display='none';
     var L=p.levels||{};
     // archiva el plan del día para poder cruzar fugas con el CSV del broker
     try{ if(p.date){ var H=JSON.parse(localStorage.getItem('cc_plan_hist')||'{}')||{}; H[p.date]={ntz:(p.noTradeZone||null),vah:L.vah,poc:L.poc,val:L.val,bias:(p.biasDir||null),weekly:(p.weeklyDir||null)}; localStorage.setItem('cc_plan_hist',JSON.stringify(H)); if(window.__refreshJournal) window.__refreshJournal(); } }catch(e){}
     if(p.date){ var dt=new Date(p.date+'T00:00:00');
-      if($('ccDate')) $('ccDate').textContent=DIAS[dt.getDay()]+' · '+dt.getDate()+' '+MES[dt.getMonth()]+' '+dt.getFullYear()+' · GMT-6';
-      if($('planTag')) $('planTag').textContent='PLAN · '+dt.getDate()+' '+MES[dt.getMonth()]; }
+      var DIASL=T(DIAS,['SUN','MON','TUE','WED','THU','FRI','SAT']), MESL=T(MES,['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']);
+      if($('ccDate')) $('ccDate').textContent=DIASL[dt.getDay()]+' · '+dt.getDate()+' '+MESL[dt.getMonth()]+' '+dt.getFullYear()+' · GMT-6';
+      if($('planTag')) $('planTag').textContent=T('PLAN','PLAN')+' · '+dt.getDate()+' '+MESL[dt.getMonth()]; }
     // niveles (incluye PRICE)
     if($('levels')){
       var rows=[['PRICE',p.price,'cyan'],['VAH',L.vah,'red'],['POC',L.poc,'amber'],['VAL',L.val,'lime']].filter(function(r){return r[1]!=null;});
@@ -1291,33 +1297,33 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     }
     // chips del plan
     if($('planchips')){
-      var z=p.noTradeZone, dir=p.biasDir, sub=dir==='LONG'?'sesgo alcista':dir==='SHORT'?'sesgo bajista':'sin sesgo claro';
-      var va=(L.val!=null&&L.vah!=null)?('<div class="pchip line"><div class="l">Área de valor</div><div class="v">'+fmt(L.val)+' &#8211; '+fmt(L.vah)+'</div><div class="s">zona de confluencia</div></div>'):'';
+      var z=p.noTradeZone, dir=p.biasDir, sub=dir==='LONG'?T('sesgo alcista','bullish bias'):dir==='SHORT'?T('sesgo bajista','bearish bias'):T('sin sesgo claro','no clear bias');
+      var va=(L.val!=null&&L.vah!=null)?('<div class="pchip line"><div class="l">'+T('Área de valor','Value area')+'</div><div class="v">'+fmt(L.val)+' &#8211; '+fmt(L.vah)+'</div><div class="s">'+T('zona de confluencia','confluence zone')+'</div></div>'):'';
       $('planchips').innerHTML=
-        '<div class="pchip"><div class="l">Tipo de día</div><div class="v" style="font-size:14px">'+(p.dayType||'—')+'</div><div class="s">'+sub+'</div></div>'+
-        (z&&z[0]!=null&&z[1]!=null?'<div class="pchip danger"><div class="l">Zona de no-trade</div><div class="v">'+fmt(z[0])+' &#8211; '+fmt(z[1])+'</div><div class="s">tierra de nadie</div></div>':'')+
+        '<div class="pchip"><div class="l">'+T('Tipo de día','Day type')+'</div><div class="v" style="font-size:14px">'+(p.dayType||'—')+'</div><div class="s">'+sub+'</div></div>'+
+        (z&&z[0]!=null&&z[1]!=null?'<div class="pchip danger"><div class="l">'+T('Zona de no-trade','No-trade zone')+'</div><div class="v">'+fmt(z[0])+' &#8211; '+fmt(z[1])+'</div><div class="s">'+T('tierra de nadie',"no man's land")+'</div></div>':'')+
         va;
     }
     // disparadores
     if($('triggers')){
       $('triggers').innerHTML=
-        '<div class="trig long"><b>LARGO</b> &nbsp;a favor, en nivel + gatillo: rebote en VAL ('+fmt(L.val)+'), reclaim de VWAP ('+fmt(L.vwap)+') o retest de OR/PDH, con FVG o cambio de estructura. Nunca en el aire.</div>'+
-        '<div class="trig short"><b>CORTO</b> &nbsp;a favor, en nivel + gatillo: rechazo en VAH ('+fmt(L.vah)+'), pérdida de VWAP/VAL ('+fmt(L.val)+') o fallo de OR, con FVG o cambio de estructura. Objetivo POC '+fmt(L.poc)+'.</div>';
+        '<div class="trig long"><b>'+T('LARGO','LONG')+'</b> &nbsp;'+T('a favor, en nivel + gatillo: rebote en VAL ('+fmt(L.val)+'), reclaim de VWAP ('+fmt(L.vwap)+') o retest de OR/PDH, con FVG o cambio de estructura. Nunca en el aire.','with the trend, on a level + trigger: bounce at VAL ('+fmt(L.val)+'), VWAP reclaim ('+fmt(L.vwap)+') or OR/PDH retest, with FVG or structure shift. Never in the air.')+'</div>'+
+        '<div class="trig short"><b>'+T('CORTO','SHORT')+'</b> &nbsp;'+T('a favor, en nivel + gatillo: rechazo en VAH ('+fmt(L.vah)+'), pérdida de VWAP/VAL ('+fmt(L.val)+') o fallo de OR, con FVG o cambio de estructura. Objetivo POC '+fmt(L.poc)+'.','with the trend, on a level + trigger: rejection at VAH ('+fmt(L.vah)+'), loss of VWAP/VAL ('+fmt(L.val)+') or OR failure, with FVG or structure shift. Target POC '+fmt(L.poc)+'.')+'</div>';
     }
     // sesgo (motor de confluencia en vivo)
     var CB=computeBias(p);
     try{ window.__liveBias = CB ? {dir:CB.dir,score:CB.score} : null; if(window.__refreshGate) window.__refreshGate(); }catch(e){}
     var colDir=function(x){return x==='SHORT'?'var(--red)':x==='LONG'?'var(--lime)':'var(--amber)';};
-    var word=function(x){return x==='SHORT'?'BAJISTA':x==='LONG'?'ALCISTA':'NEUTRAL';};
+    var word=function(x){return x==='SHORT'?T('BAJISTA','BEARISH'):x==='LONG'?T('ALCISTA','BULLISH'):T('NEUTRAL','NEUTRAL');};
     var wk=p.weeklyDir||p.biasDir, liveDir=CB?CB.dir:p.biasDir;
     if($('biasBoxes')){
       var box=function(lbl,ck,disp,sb){return '<div style="flex:1;padding:9px 11px;border-radius:10px;background:var(--panel-2);border:1px solid var(--border)">'+
         '<div class="l" style="font-size:8px;letter-spacing:1.5px;color:var(--txt-faint);text-transform:uppercase">'+lbl+'</div>'+
         '<div style="font-size:18px;font-weight:800;color:'+colDir(ck)+';margin-top:2px">'+(disp||'—')+'</div>'+
         '<div style="font-size:9px;color:var(--txt-dim);margin-top:2px">'+sb+'</div></div>';};
-      var overVal=(p.price!=null&&L.vah!=null)?(p.price>=L.vah?'Sobre valor':'Bajo valor'):'marco mayor';
-      var liveSub=CB?('confluencia '+(CB.score>0?'+':'')+CB.score):'sin datos';
-      $('biasBoxes').innerHTML=box('Sesgo del día',wk,wk||'—',overVal)+box('Sesgo en vivo',liveDir,CB?word(CB.dir):(p.biasDir||'—'),liveSub);
+      var overVal=(p.price!=null&&L.vah!=null)?(p.price>=L.vah?T('Sobre valor','Above value'):T('Bajo valor','Below value')):T('marco mayor','bigger frame');
+      var liveSub=CB?(T('confluencia','confluence')+' '+(CB.score>0?'+':'')+CB.score):T('sin datos','no data');
+      $('biasBoxes').innerHTML=box(T('Sesgo del día','Day bias'),wk,wk||'—',overVal)+box(T('Sesgo en vivo','Live bias'),liveDir,CB?word(CB.dir):(p.biasDir||'—'),liveSub);
     }
     if($('biasBig')){ $('biasBig').textContent=CB?word(CB.dir):(p.biasDir?word(p.biasDir):'—'); $('biasBig').style.color=colDir(liveDir); }
     // anillo de confianza = fuerza real de la confluencia (0-100)
@@ -1330,24 +1336,24 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       if(CB){
         var toks=CB.factors.map(function(x){ var a=x.d>0.15?'▲':x.d<-0.15?'▼':'·', c=x.d>0.15?'var(--lime)':x.d<-0.15?'var(--red)':'var(--txt-faint)';
           return '<span style="color:'+c+'">'+x.label+' '+a+'</span>'; }).join(' · ');
-        var head='<b style="color:'+colDir(CB.dir)+'">'+word(CB.dir)+'</b> · '+CB.agreeUp+'▲ / '+CB.agreeDn+'▼ · fuerza '+CB.mag;
-        var align=''; if(liveDir&&wk&&liveDir!=='NEUTRAL'&&wk!=='NEUTRAL'){ align=liveDir===wk?'<br>Alineado con el día ('+wk+'). Contexto a favor, sé selectivo en tu setup.':'<br><b style="color:var(--amber)">Mixto:</b> en vivo '+word(liveDir)+' vs día '+wk+'. Solo lo muy claro.'; }
-        $('biasMeta').innerHTML=head+'<br>'+toks+align+(inZone?'<br><b style="color:var(--red)">Ojo:</b> precio en el aire (tierra de nadie), sin nivel.':'');
+        var head='<b style="color:'+colDir(CB.dir)+'">'+word(CB.dir)+'</b> · '+CB.agreeUp+'▲ / '+CB.agreeDn+'▼ · '+T('fuerza','strength')+' '+CB.mag;
+        var align=''; if(liveDir&&wk&&liveDir!=='NEUTRAL'&&wk!=='NEUTRAL'){ align=liveDir===wk?T('<br>Alineado con el día ('+wk+'). Contexto a favor, sé selectivo en tu setup.','<br>Aligned with the day ('+wk+'). Context is with you, be selective on your setup.'):'<br><b style="color:var(--amber)">'+T('Mixto:','Mixed:')+'</b> '+T('en vivo '+word(liveDir)+' vs día '+wk+'. Solo lo muy claro.','live '+word(liveDir)+' vs day '+wk+'. Only the very clear ones.'); }
+        $('biasMeta').innerHTML=head+'<br>'+toks+align+(inZone?'<br><b style="color:var(--red)">'+T('Ojo:','Watch out:')+'</b> '+T('precio en el aire (tierra de nadie), sin nivel.',"price in the air (no man's land), no level."):'');
       } else {
-        $('biasMeta').innerHTML='Sin datos recientes para calcular el sesgo.<br>Espera al feed del indicador o pega tu plan.';
+        $('biasMeta').innerHTML=T('Sin datos recientes para calcular el sesgo.<br>Espera al feed del indicador o pega tu plan.','No recent data to calculate the bias.<br>Wait for the indicator feed or paste your plan.');
       }
     }
     // mapa de niveles (stack completo, dist. al precio)
     if($('lad')){
-      var defs=[['PWH',L.pwh,''],['PDH',L.pdh,''],['VAH',L.vah,'res'],['OR High',L.orH,''],['VWAP',L.vwap,'flip'],['Apertura',L.dayOpen,''],['POC',L.poc,'flip'],['VAL',L.val,'sup'],['OR Low',L.orL,''],['True Day',L.tdo,''],['PDL',L.pdl,''],['PWL',L.pwl,'']];
+      var defs=[['PWH',L.pwh,''],['PDH',L.pdh,''],['VAH',L.vah,'res'],['OR High',L.orH,''],['VWAP',L.vwap,'flip'],[T('Apertura','Open'),L.dayOpen,''],['POC',L.poc,'flip'],['VAL',L.val,'sup'],['OR Low',L.orL,''],[T('True Day','True Day'),L.tdo,''],['PDL',L.pdl,''],['PWL',L.pwl,'']];
       var items=[];
       defs.forEach(function(d){ if(d[1]!=null) items.push({price:d[1],label:d[0],cls:d[2]}); });
-      if(p.price!=null) items.push({price:p.price,label:'Precio ahora',cls:'now',now:true});
+      if(p.price!=null) items.push({price:p.price,label:T('Precio ahora','Price now'),cls:'now',now:true});
       if(items.length){
         items.sort(function(a,b){return b.price-a.price;});
         $('lad').innerHTML=items.map(function(r){
           var bdg;
-          if(r.now){ bdg='AQUÍ'; }
+          if(r.now){ bdg=T('AQUÍ','HERE'); }
           else if(p.price!=null){ var dd=Math.round(r.price-p.price); bdg=(dd>=0?'+':'')+dd; }
           else bdg='';
           return '<div class="lrow '+r.cls+'"><span class="dot2"></span><span class="pr">'+fmt(r.price)+'</span><span class="lbl">'+r.label+'</span>'+(bdg?'<span class="bdg">'+bdg+'</span>':'')+'</div>';
@@ -1360,38 +1366,38 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       var push=function(cls,html){ lines.push('<div class="wl '+cls+'">'+html+'</div>'); };
       var near=function(a,b){ return Math.abs(a-b) <= P*0.0006; };
       if(p.biasDir&&p.weeklyDir){
-        if(p.biasDir===p.weeklyDir&&p.biasDir!=='NEUTRAL'){ var da=p.biasDir==='LONG'; push(da?'up':'down','Sesgo <b>alineado '+(da?'alcista':'bajista')+'</b> (sesión y día). El contexto acompaña, sé agresivo solo en tu setup.'); }
-        else if(p.biasDir==='NEUTRAL'){ push('warn','Sesión <b>neutral</b>: sin dirección clara. Día de observar, no de forzar.'); }
-        else { push('warn','Sesgo <b>mixto</b>: sesión '+p.biasDir+' vs día '+p.weeklyDir+'. Sé selectivo, solo lo muy claro.'); }
+        if(p.biasDir===p.weeklyDir&&p.biasDir!=='NEUTRAL'){ var da=p.biasDir==='LONG'; push(da?'up':'down',T('Sesgo <b>alineado '+(da?'alcista':'bajista')+'</b> (sesión y día). El contexto acompaña, sé agresivo solo en tu setup.','Bias <b>aligned '+(da?'bullish':'bearish')+'</b> (session and day). Context is with you, be aggressive only on your setup.')); }
+        else if(p.biasDir==='NEUTRAL'){ push('warn',T('Sesión <b>neutral</b>: sin dirección clara. Día de observar, no de forzar.','Session <b>neutral</b>: no clear direction. A day to observe, not to force.')); }
+        else { push('warn',T('Sesgo <b>mixto</b>: sesión '+p.biasDir+' vs día '+p.weeklyDir+'. Sé selectivo, solo lo muy claro.','Bias <b>mixed</b>: session '+p.biasDir+' vs day '+p.weeklyDir+'. Be selective, only the very clear ones.')); }
       }
       if(L.vwap!=null){ var dv=P-L.vwap;
-        if(near(P,L.vwap)) push('info','En <b>VWAP</b> ('+fmt(L.vwap)+'): zona de decisión, el que lo gane manda.');
-        else if(dv>0) push('up','Sobre <b>VWAP</b>: control comprador intradía. Pullbacks al VWAP = zona de interés.');
-        else push('down','Bajo <b>VWAP</b>: control vendedor intradía. Rebotes al VWAP suelen rechazar.');
+        if(near(P,L.vwap)) push('info',T('En <b>VWAP</b> ('+fmt(L.vwap)+'): zona de decisión, el que lo gane manda.','At <b>VWAP</b> ('+fmt(L.vwap)+'): decision zone, whoever wins it is in control.'));
+        else if(dv>0) push('up',T('Sobre <b>VWAP</b>: control comprador intradía. Pullbacks al VWAP = zona de interés.','Above <b>VWAP</b>: intraday buyer control. Pullbacks to VWAP = zone of interest.'));
+        else push('down',T('Bajo <b>VWAP</b>: control vendedor intradía. Rebotes al VWAP suelen rechazar.','Below <b>VWAP</b>: intraday seller control. Bounces to VWAP tend to get rejected.'));
       }
-      if(L.dayOpen!=null && !near(P,L.dayOpen)) push(P>L.dayOpen?'up':'down','Precio '+(P>L.dayOpen?'sobre':'bajo')+' la <b>apertura del día</b> ('+fmt(L.dayOpen)+'): sesgo intradía '+(P>L.dayOpen?'alcista':'bajista')+'.');
-      var stk=[]; [['PWH',L.pwh],['PDH',L.pdh],['VAH',L.vah],['OR High',L.orH],['VWAP',L.vwap],['Apertura',L.dayOpen],['POC',L.poc],['VAL',L.val],['OR Low',L.orL],['True Day',L.tdo],['PDL',L.pdl],['PWL',L.pwl]].forEach(function(d){ if(d[1]!=null) stk.push({l:d[0],v:d[1]}); });
+      if(L.dayOpen!=null && !near(P,L.dayOpen)) push(P>L.dayOpen?'up':'down',T('Precio '+(P>L.dayOpen?'sobre':'bajo')+' la <b>apertura del día</b> ('+fmt(L.dayOpen)+'): sesgo intradía '+(P>L.dayOpen?'alcista':'bajista')+'.','Price '+(P>L.dayOpen?'above':'below')+' the <b>day open</b> ('+fmt(L.dayOpen)+'): intraday bias '+(P>L.dayOpen?'bullish':'bearish')+'.'));
+      var stk=[]; [['PWH',L.pwh],['PDH',L.pdh],['VAH',L.vah],['OR High',L.orH],['VWAP',L.vwap],[T('Apertura','Open'),L.dayOpen],['POC',L.poc],['VAL',L.val],['OR Low',L.orL],[T('True Day','True Day'),L.tdo],['PDL',L.pdl],['PWL',L.pwl]].forEach(function(d){ if(d[1]!=null) stk.push({l:d[0],v:d[1]}); });
       var up=stk.filter(function(x){return x.v>P;}).sort(function(a,b){return a.v-b.v;})[0];
       var dn=stk.filter(function(x){return x.v<P;}).sort(function(a,b){return b.v-a.v;})[0];
-      if(up) push('info','Arriba: <b>'+up.l+' '+fmt(up.v)+'</b> (+'+Math.round(up.v-P)+'). Imán / posible reacción.');
-      if(dn) push('info','Abajo: <b>'+dn.l+' '+fmt(dn.v)+'</b> ('+Math.round(dn.v-P)+'). Soporte / posible reacción.');
+      if(up) push('info',T('Arriba: <b>'+up.l+' '+fmt(up.v)+'</b> (+'+Math.round(up.v-P)+'). Imán / posible reacción.','Above: <b>'+up.l+' '+fmt(up.v)+'</b> (+'+Math.round(up.v-P)+'). Magnet / possible reaction.'));
+      if(dn) push('info',T('Abajo: <b>'+dn.l+' '+fmt(dn.v)+'</b> ('+Math.round(dn.v-P)+'). Soporte / posible reacción.','Below: <b>'+dn.l+' '+fmt(dn.v)+'</b> ('+Math.round(dn.v-P)+'). Support / possible reaction.'));
       if(p.regime&&p.regime!=='none'){
         var rg=p.regime.toLowerCase();
-        if(rg.indexOf('rango')>=0) push('warn','Régimen en <b>rango</b>: favorece fades en los extremos, castiga perseguir rupturas.');
-        else if(rg.indexOf('tend')>=0) push('info','Régimen en <b>tendencia</b>: favorece continuaciones y pullbacks, no fades.');
-        else push('warn','Régimen en <b>transición</b>: cuidado con falsas rupturas, espera confirmación.');
+        if(rg.indexOf('rango')>=0) push('warn',T('Régimen en <b>rango</b>: favorece fades en los extremos, castiga perseguir rupturas.','Regime in <b>range</b>: favors fades at the extremes, punishes chasing breakouts.'));
+        else if(rg.indexOf('tend')>=0) push('info',T('Régimen en <b>tendencia</b>: favorece continuaciones y pullbacks, no fades.','Regime in <b>trend</b>: favors continuations and pullbacks, not fades.'));
+        else push('warn',T('Régimen en <b>transición</b>: cuidado con falsas rupturas, espera confirmación.','Regime in <b>transition</b>: watch for false breakouts, wait for confirmation.'));
       }
-      $('ccWatch').innerHTML = lines.length ? lines.slice(0,6).join('') : '<div class="wl">Sin contexto suficiente todavía.</div>';
+      $('ccWatch').innerHTML = lines.length ? lines.slice(0,6).join('') : '<div class="wl">'+T('Sin contexto suficiente todavía.','Not enough context yet.')+'</div>';
     }
     // ---- SEÑAL EN VIVO ----
     if($('ccSignal')){
       var edge=(p.edge&&p.edge!=='none')?p.edge:null;
-      var sig=p.signal||null, cls='wait', big='ESPERA', sub2='sin borde todavía';
-      if(sig==='REVERSAL_IFVG'){ cls='rev'; big='REVERSAL + IFVG'; sub2='setup premium a favor del sesgo'; }
-      else if(sig==='REVERSAL'){ cls='rev'; big='REVERSAL'; sub2='barrida y vuelta a favor'; }
-      else if(sig==='A_FAVOR_BORDE'){ cls='go'; big='A+ · A FAVOR EN NIVEL'; sub2=(edge?('en '+edge+' · '):'')+'nivel + sesgo, busca tu gatillo'; }
-      else if(sig==='NOTRADE'){ cls='stop'; big='EN EL AIRE'; sub2='sin nivel cerca, manos fuera'; }
-      else if(sig==='ESPERA'){ cls='wait'; big='ESPERA'; sub2=edge?('cerca de '+edge+', aún no'):'sin borde todavía'; }
+      var sig=p.signal||null, cls='wait', big=T('ESPERA','WAIT'), sub2=T('sin borde todavía','no edge yet');
+      if(sig==='REVERSAL_IFVG'){ cls='rev'; big='REVERSAL + IFVG'; sub2=T('setup premium a favor del sesgo','premium setup with the bias'); }
+      else if(sig==='REVERSAL'){ cls='rev'; big='REVERSAL'; sub2=T('barrida y vuelta a favor','sweep and reclaim with the bias'); }
+      else if(sig==='A_FAVOR_BORDE'){ cls='go'; big=T('A+ · A FAVOR EN NIVEL','A+ · WITH THE BIAS ON A LEVEL'); sub2=(edge?(T('en ','at ')+edge+' · '):'')+T('nivel + sesgo, busca tu gatillo','level + bias, look for your trigger'); }
+      else if(sig==='NOTRADE'){ cls='stop'; big=T('EN EL AIRE','IN THE AIR'); sub2=T('sin nivel cerca, manos fuera','no level nearby, hands off'); }
+      else if(sig==='ESPERA'){ cls='wait'; big=T('ESPERA','WAIT'); sub2=edge?(T('cerca de ','near ')+edge+T(', aún no',', not yet')):T('sin borde todavía','no edge yet'); }
       $('ccSignal').className='ccsignal '+cls;
       $('ccSignal').innerHTML='<b>'+big+'</b><span>'+sub2+'</span>';
     }
@@ -1399,12 +1405,20 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if($('ccCtx')){
       var chips=[];
       var add=function(l,v){ if(v&&v!=='none'&&v!=='off') chips.push('<span class="cx">'+l+' <b>'+v+'</b></span>'); };
-      add('Estruct', (p.struct||'').replace(' up',' ▲').replace(' dn',' ▼'));
-      add('Régimen', p.regime); add('Vol', p.vol);
-      add('HTF1', p.htf1); add('HTF2', p.htf2); add('RS', p.rs);
+      var VMAP={'alcista':T('Alcista','Bullish'),'bajista':T('Bajista','Bearish'),'neutral':T('Neutral','Neutral'),
+        'expansión':T('Expansión','Expansion'),'expansion':T('Expansión','Expansion'),'contracción':T('Contracción','Contraction'),'contraccion':T('Contracción','Contraction'),
+        'transición':T('Transición','Transition'),'transicion':T('Transición','Transition'),'tendencia':T('Tendencia','Trend'),'rango':T('Rango','Range'),
+        'lidera':T('lidera','leads'),'rezaga':T('rezaga','lags')};
+      var trV=function(v){ if(!v) return v; var vs=String(v); var low=vs.toLowerCase();
+        for(var k in VMAP){ if(low.indexOf(k)>=0) return vs.replace(new RegExp(k,'i'),VMAP[k]); }
+        return vs; };
+      add(T('Estruct','Struct'), (p.struct||'').replace(' up',' ▲').replace(' dn',' ▼'));
+      add(T('Régimen','Regime'), trV(p.regime)); add('Vol', trV(p.vol));
+      add('HTF1', trV(p.htf1)); add('HTF2', trV(p.htf2)); add('RS', trV(p.rs));
       $('ccCtx').innerHTML=chips.join('');
     }
   }
+  window.__i18nRefresh.push(function(){ if(lastPlan) applyPlan(lastPlan); });
 
   /* ---- formulario ---- */
   var modal=$('planModal');
@@ -1426,7 +1440,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   if($('f_pasteBtn')) $('f_pasteBtn').addEventListener('click',function(){
     var kv=parsePasteString($('f_paste')?$('f_paste').value:'');
     var msg=$('f_pasteMsg');
-    if(!kv){ if(msg){ msg.textContent='No reconozco el texto. Pega la cadena que empieza con TDL1|'; msg.style.color='var(--red)'; } return; }
+    if(!kv){ if(msg){ msg.textContent=T('No reconozco el texto. Pega la cadena que empieza con TDL1|','I don\'t recognize the text. Paste the string that starts with TDL1|'); msg.style.color='var(--red)'; } return; }
     var okNum=function(v){ return v!=null&&v!==''&&v!=='NaN'&&isFinite(parseFloat(v)); };
     var set=function(id,v){ if($(id)&&okNum(v)) $(id).value=v; };
     set('f_price',kv.price); set('f_vwap',kv.vwap); set('f_vah',kv.vah); set('f_poc',kv.poc); set('f_val',kv.val);
@@ -1434,10 +1448,10 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if(kv.bias&&$('f_bias')) $('f_bias').value=kv.bias;
     if(kv.weekly&&$('f_weekly')) $('f_weekly').value=kv.weekly;
     if(kv.daytype&&$('f_dayType')) $('f_dayType').value=kv.daytype;
-    var va = okNum(kv.vah) ? ' · VAH/POC/VAL' : ' · falta VAH/POC/VAL (activa el perfil en el indicador)';
-    var nt = okNum(kv.ntz1) ? ' · zona no-trade' : '';
+    var va = okNum(kv.vah) ? ' · VAH/POC/VAL' : T(' · falta VAH/POC/VAL (activa el perfil en el indicador)',' · missing VAH/POC/VAL (turn on the profile in the indicator)');
+    var nt = okNum(kv.ntz1) ? T(' · zona no-trade',' · no-trade zone') : '';
     var dt = kv.daytype ? ' · '+kv.daytype : '';
-    if(msg){ msg.innerHTML='Cargado: '+(kv.bias||'—')+dt+va+nt+'. Revisa y guarda.'; msg.style.color='var(--lime)'; }
+    if(msg){ msg.innerHTML=T('Cargado: ','Loaded: ')+(kv.bias||'—')+dt+va+nt+T('. Revisa y guarda.','. Check it and save.'); msg.style.color='var(--lime)'; }
   });
 
   function openModal(){ fillForm(loadPlan()); if($('f_paste')) $('f_paste').value=''; if($('f_pasteMsg')) $('f_pasteMsg').textContent=''; modal.classList.add('show'); }
@@ -1458,7 +1472,8 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   /* ---- al cargar ---- */
   var plan=loadPlan();
   if(plan){ applyPlan(plan); }
-  else { if($('planTag')) $('planTag').textContent='SIN PLAN HOY'; var eb=$('editPlan'); if(eb) eb.classList.add('pulse'); }
+  else { if($('planTag')) $('planTag').textContent=T('SIN PLAN HOY','NO PLAN YET'); var eb=$('editPlan'); if(eb) eb.classList.add('pulse'); }
+  window.__i18nRefresh.push(function(){ if(!lastPlan && $('planTag')) $('planTag').textContent=T('SIN PLAN HOY','NO PLAN YET'); });
 
   /* ---- auto-sync desde el indicador (online: /api/cc-plan cada 45s) ---- */
   function applyRemote(p){
@@ -1557,7 +1572,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var pf = gL>0 ? (gW/gL) : (gW>0?Infinity:0);
     var avg = net/N;
     var ghostNet=cg, realNet=cr, leakImpact=realNet-ghostNet;
-    if($('rvTag')) $('rvTag').textContent=N+' TRADES · '+planned+' CON PLAN';
+    if($('rvTag')) $('rvTag').textContent=N+' TRADES · '+planned+' '+T('CON PLAN','PLANNED');
     if($('rvWin')) $('rvWin').textContent=winRate+'%';
     if($('rvPf')) $('rvPf').textContent=(pf===Infinity?'∞':pf.toFixed(2));
     if($('rvNet')){ $('rvNet').textContent=money(net); $('rvNet').className='n '+(net>=0?'c-lime':'c-red'); }
@@ -1571,26 +1586,27 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if($('rvGhostNet')) $('rvGhostNet').textContent=money(ghostNet);
     if($('rvLeak')){
       var diff=ghostNet-realNet;   // lo que la disciplina te habría sumado
-      if(planned===0){ $('rvLeak').innerHTML='Rendimiento real cargado. Para marcar fugas y ghost equity necesito el plan de esos días (se guardan hacia adelante).'; }
-      else if(leaks===0){ $('rvLeak').innerHTML='<b>0 fugas</b> en los '+planned+' días con plan. Así se ve la disciplina.'; }
-      else if(diff>0.5){ $('rvLeak').innerHTML='Tus <b>'+leaks+'</b> fuga'+(leaks===1?'':'s')+' te costaron <b class="c-red">'+money(-diff)+'</b>. Disciplinado tendrías más. Eso era de Liam.'; }
-      else if(diff<-0.5){ $('rvLeak').innerHTML='Tus <b>'+leaks+'</b> fuga'+(leaks===1?'':'s')+' salieron ganadoras esta vez (<b class="c-amber">'+money(-diff)+'</b>), pero eso es suerte, no edge. No las normalices.'; }
-      else { $('rvLeak').innerHTML='<b>'+leaks+'</b> fuga'+(leaks===1?'':'s')+' con impacto neutro. Igual, no son tu plan.'; }
+      if(planned===0){ $('rvLeak').innerHTML=T('Rendimiento real cargado. Para marcar fugas y ghost equity necesito el plan de esos días (se guardan hacia adelante).','Real performance loaded. To flag leaks and ghost equity I need the plan for those days (saved going forward).'); }
+      else if(leaks===0){ $('rvLeak').innerHTML=T('<b>0 fugas</b> en los '+planned+' días con plan. Así se ve la disciplina.','<b>0 leaks</b> in the '+planned+' days with a plan. This is what discipline looks like.'); }
+      else if(diff>0.5){ $('rvLeak').innerHTML=T('Tus <b>'+leaks+'</b> fuga'+(leaks===1?'':'s')+' te costaron <b class="c-red">'+money(-diff)+'</b>. Disciplinado tendrías más. Eso era de Liam.','Your <b>'+leaks+'</b> leak'+(leaks===1?'':'s')+' cost you <b class="c-red">'+money(-diff)+'</b>. Disciplined, you\'d have more. That was Liam\'s.'); }
+      else if(diff<-0.5){ $('rvLeak').innerHTML=T('Tus <b>'+leaks+'</b> fuga'+(leaks===1?'':'s')+' salieron ganadoras esta vez (<b class="c-amber">'+money(-diff)+'</b>), pero eso es suerte, no edge. No las normalices.','Your <b>'+leaks+'</b> leak'+(leaks===1?'':'s')+' won this time (<b class="c-amber">'+money(-diff)+'</b>), but that\'s luck, not edge. Don\'t normalize it.'); }
+      else { $('rvLeak').innerHTML=T('<b>'+leaks+'</b> fuga'+(leaks===1?'':'s')+' con impacto neutro. Igual, no son tu plan.','<b>'+leaks+'</b> leak'+(leaks===1?'':'s')+' with neutral impact. Still, not your plan.'); }
     }
     // bitácora de HOY (si hay trades de hoy en el CSV)
     var tk=today(), todays=trades.filter(function(t){return t.date===tk;});
     var feed=$('feed'), ftag=$('feedTag');
     if(todays.length){
       window.__journalFeed=true;
-      if(ftag) ftag.textContent=todays.length+' MOVIMIENTO'+(todays.length===1?'':'S');
+      if(ftag) ftag.textContent=todays.length+' '+T('MOVIMIENTO'+(todays.length===1?'':'S'),'MOVE'+(todays.length===1?'':'S'));
       if(feed) feed.innerHTML=todays.slice().reverse().map(function(t){
         var win=t.pnl>=0, lk=leakOf(t), flags=[];
-        if(lk) flags.push('<span class="flag bad">FUGA: '+lk.toUpperCase()+'</span>');
-        else if(lk===false) flags.push('<span class="flag good">CON PLAN</span>');
+        var lkLabel = lk==='tierra de nadie' ? T('TIERRA DE NADIE',"NO MAN'S LAND") : lk==='contra sesgo' ? T('CONTRA SESGO','AGAINST BIAS') : (lk?String(lk).toUpperCase():'');
+        if(lk) flags.push('<span class="flag bad">'+T('FUGA: ','LEAK: ')+lkLabel+'</span>');
+        else if(lk===false) flags.push('<span class="flag good">'+T('CON PLAN','PLANNED')+'</span>');
         var hh=new Date(t.ts); flags.push('<span class="flag t">'+('0'+hh.getHours()).slice(-2)+':'+('0'+hh.getMinutes()).slice(-2)+'</span>');
         return '<div class="trade '+(win?'win':'loss')+'"><div class="r1"><span class="side '+(t.side==='LONG'?'l':'s')+'">'+t.side+'</span>'+
           '<span class="sym">'+t.sym+'</span><span class="pnl '+(win?'up':'down')+'">'+money(t.pnl)+'</span></div>'+
-          '<div class="r2">Entrada '+fmt(t.entry)+' → '+fmt(t.exit)+' · '+t.qty+' contrato'+(t.qty===1?'':'s')+'.</div><div class="flags">'+flags.join('')+'</div></div>';
+          '<div class="r2">'+T('Entrada '+fmt(t.entry)+' → '+fmt(t.exit)+' · '+t.qty+' contrato'+(t.qty===1?'':'s')+'.','Entry '+fmt(t.entry)+' → '+fmt(t.exit)+' · '+t.qty+' contract'+(t.qty===1?'':'s')+'.')+'</div><div class="flags">'+flags.join('')+'</div></div>';
       }).join('');
     } else {
       window.__journalFeed=false;   // sin trades hoy: deja que el portero maneje la bitácora
@@ -1598,6 +1614,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     }
   }
   window.__refreshJournal=render;
+  window.__i18nRefresh.push(render);
 
   if($('rvImport')&&$('rvFile')){
     $('rvImport').addEventListener('click',function(){ $('rvFile').click(); });
@@ -1609,8 +1626,8 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
           var arr=parseCSV(rd.result);
           if(arr.length){ localStorage.setItem('cc_journal',JSON.stringify(arr)); render();
             if($('rvTag')) $('rvTag').style.color='var(--lime)'; }
-          else alert('No encontré trades en ese CSV. ¿Es el export "Performance" de Tradovate?');
-        }catch(err){ alert('No pude leer el CSV: '+(err&&err.message||err)); }
+          else alert(T('No encontré trades en ese CSV. ¿Es el export "Performance" de Tradovate?','I couldn\'t find trades in that CSV. Is it the "Performance" export from Tradovate?'));
+        }catch(err){ alert(T('No pude leer el CSV: ',"I couldn't read the CSV: ")+(err&&err.message||err)); }
         e.target.value='';
       };
       rd.readAsText(f);
@@ -1636,13 +1653,14 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var list=events.filter(function(e){return e.ts>=now-3*3600e3;}).slice(0,8);
     var box=$('news');
     if(box){
-      if(!list.length){ box.innerHTML='<div style="grid-column:1/-1;font-size:10.5px;color:var(--txt-faint);text-align:center;padding:10px">Sin noticias de alto impacto próximas.</div>'; }
+      if(!list.length){ box.innerHTML='<div style="grid-column:1/-1;font-size:10.5px;color:var(--txt-faint);text-align:center;padding:10px">'+T('Sin noticias de alto impacto próximas.','No high-impact news coming up.')+'</div>'; }
       else box.innerHTML=list.map(function(e){
         var mins=Math.round((e.ts-now)/60000);
         var soon = mins>=0 && mins<=60;
         var hot = e.impact==='high' && e.currency==='USD';
         var cls = mins<0 ? '' : (soon ? 'soon' : (hot?'hot':''));
-        var cd = (mins>=0 && mins<=180) ? '<span class="countdown">'+(mins<60?('EN '+mins+'M'):('EN '+Math.floor(mins/60)+'H '+p2(mins%60)+'M'))+'</span>' : (mins<0?'<span class="countdown" style="color:var(--txt-faint);border-color:var(--border)">YA</span>':'');
+        var enLbl=T('EN','IN'), yaLbl=T('YA','NOW');
+        var cd = (mins>=0 && mins<=180) ? '<span class="countdown">'+(mins<60?(enLbl+' '+mins+'M'):(enLbl+' '+Math.floor(mins/60)+'H '+p2(mins%60)+'M'))+'</span>' : (mins<0?'<span class="countdown" style="color:var(--txt-faint);border-color:var(--border)">'+yaLbl+'</span>':'');
         var impc = e.impact==='high'?'h3':'h2';
         var fc=[]; if(e.previous!=null) fc.push('prev <b>'+e.previous+'</b>'); if(e.forecast!=null) fc.push('fcst '+e.forecast);
         return '<div class="nrow '+cls+'"><span class="time">'+hm(e.ts)+'</span><span class="cur">'+e.currency+'</span>'+
@@ -1661,16 +1679,16 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var banner=$('newsBanner');
     if(lock){
       var mm=Math.round((lock.ts-now)/60000);
-      var txt = mm>=0 ? ('en '+mm+' min') : ('hace '+(-mm)+' min');
+      var txt = mm>=0 ? (T('en ','in ')+mm+T(' min',' min')) : (T('hace ','')+(-mm)+T(' min',' min ago'));
       if(banner){ banner.style.display='flex'; banner.className='newsbanner';
-        banner.innerHTML='<span class="tg">VENTANA DE NOTICIA</span><span><b>'+lock.title+'</b> ('+lock.currency+') '+txt+'. Manos fuera, no seas el héroe.</span>'; }
+        banner.innerHTML='<span class="tg">'+T('VENTANA DE NOTICIA','NEWS WINDOW')+'</span><span><b>'+lock.title+'</b> ('+lock.currency+') '+txt+T('. Manos fuera, no seas el héroe.','. Hands off, don\'t be a hero.')+'</span>'; }
       if(window.__setNewsLock) window.__setNewsLock(lock.title+' '+txt);
     } else {
       if(window.__setNewsLock) window.__setNewsLock(null);
       if(banner){
         if(soonEv){ var sm=Math.round((soonEv.ts-now)/60000);
           banner.style.display='flex'; banner.className='newsbanner soon';
-          banner.innerHTML='<span class="tg">OJO</span><span><b>'+soonEv.title+'</b> ('+soonEv.currency+') en '+sm+' min. Baja el ritmo, se acerca.</span>'; }
+          banner.innerHTML='<span class="tg">'+T('OJO','HEADS UP')+'</span><span><b>'+soonEv.title+'</b> ('+soonEv.currency+') '+T('en ','in ')+sm+T(' min. Baja el ritmo, se acerca.',' min. Slow down, it\'s coming.')+'</span>'; }
         else banner.style.display='none';
       }
     }
@@ -1685,6 +1703,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   load();
   setInterval(load, 10*60000);   // datos frescos cada 10 min
   setInterval(render, 30000);    // countdown/candado cada 30 s
+  window.__i18nRefresh.push(render);
 })();
 </script>
 
@@ -1710,17 +1729,17 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   function handleSig(){
     var st=sigState(); if(st===prevSig) return; prevSig=st; if(!armed) return;
     var big=((sigEl.querySelector('b')||{}).textContent)||'';
-    if(st==='go'){ chime(); toast('go','<b>'+big+'</b> · esto es lo tuyo, busca tu gatillo'); notify('Setup A+ a favor', big); if(window.__markAplus) window.__markAplus(); }
-    else if(st==='rev'){ chime(); toast('rev','<b>'+big+'</b> · a favor del sesgo'); notify('Reversal a favor', big); if(window.__markAplus) window.__markAplus(); }
-    else if(st==='stop'){ warnTone(); toast('stop','<b>EN EL AIRE</b> · sin nivel cerca, manos fuera'); notify('Precio en el aire','Manos fuera'); }
+    if(st==='go'){ chime(); toast('go','<b>'+big+'</b> · '+T('esto es lo tuyo, busca tu gatillo','this is yours, look for your trigger')); notify(T('Setup A+ a favor','A+ setup with the bias'), big); if(window.__markAplus) window.__markAplus(); }
+    else if(st==='rev'){ chime(); toast('rev','<b>'+big+'</b> · '+T('a favor del sesgo','with the bias')); notify(T('Reversal a favor','Reversal with the bias'), big); if(window.__markAplus) window.__markAplus(); }
+    else if(st==='stop'){ warnTone(); toast('stop','<b>'+big+'</b> · '+T('sin nivel cerca, manos fuera','no level nearby, hands off')); notify(T('Precio en el aire','Price in the air'),T('Manos fuera','Hands off')); }
   }
 
   function newsState(){ if(!banEl||banEl.style.display==='none') return 'off'; return banEl.classList.contains('soon')?'soon':'danger'; }
   function handleNews(){
     var st=newsState(); if(st===prevNews) return; prevNews=st; if(!armed) return;
     var txt=(banEl&&banEl.textContent)||'';
-    if(st==='danger'){ snd(function(){ if(typeof alarmSnd==='function') alarmSnd(); }); toast('stop','<b>VENTANA DE NOTICIA</b> · '+txt.replace('VENTANA DE NOTICIA','').trim(), 9000); notify('Ventana de noticia','Manos fuera'); }
-    else if(st==='soon'){ warnTone(); toast('news', txt.replace('OJO','').trim()); }
+    if(st==='danger'){ snd(function(){ if(typeof alarmSnd==='function') alarmSnd(); }); toast('stop','<b>'+T('VENTANA DE NOTICIA','NEWS WINDOW')+'</b> · '+txt.replace('VENTANA DE NOTICIA','').replace('NEWS WINDOW','').trim(), 9000); notify(T('Ventana de noticia','News window'),T('Manos fuera','Hands off')); }
+    else if(st==='soon'){ warnTone(); toast('news', txt.replace('OJO','').replace('HEADS UP','').trim()); }
   }
 
   new MutationObserver(handleSig).observe(sigEl,{attributes:true,attributeFilter:['class'],childList:true,subtree:true});
@@ -1734,14 +1753,14 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
 <script>
 (function(){
   var $=function(id){return document.getElementById(id);};
-  var SESS=[
+  function SESS(){ return [
     {id:'sessAsia', name:'ASIA',    open:'17:00', lo:17,  hi:2},
-    {id:'sessLon',  name:'LONDRES', open:'02:00', lo:2,   hi:5},
+    {id:'sessLon',  name:T('LONDRES','LONDON'), open:'02:00', lo:2,   hi:5},
     {id:'sessNY',   name:'NY',      open:'08:30', lo:8.5, hi:15}
-  ];
+  ]; }
   function updateSessions(){
     var d=new Date(), h=d.getHours()+d.getMinutes()/60;
-    SESS.forEach(function(s){
+    SESS().forEach(function(s){
       var live = s.lo<=s.hi ? (h>=s.lo && h<s.hi) : (h>=s.lo || h<s.hi);
       var el=$(s.id); if(!el) return;
       el.className='sess'+(live?' live':'');
@@ -1749,6 +1768,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     });
   }
   updateSessions(); setInterval(updateSessions, 60000);
+  window.__i18nRefresh.push(updateSessions);
 
   var NKEY="cc_northstar";
   function loadN(){ try{ return JSON.parse(localStorage.getItem(NKEY)||"null"); }catch(e){ return null; } }
@@ -1761,15 +1781,16 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var total=Number(n.total), paid=Number(n.paid);
     if(isFinite(total) && total>0 && isFinite(paid)){
       var pct=Math.max(0,Math.min(100, paid/total*100));
-      if($('nsDebtHead')) $('nsDebtHead').innerHTML='<b>'+money(paid)+'</b> / '+money(total)+' pagado';
+      if($('nsDebtHead')) $('nsDebtHead').innerHTML='<b>'+money(paid)+'</b> / '+money(total)+' '+T('pagado','paid');
       if($('nsFill')) $('nsFill').style.width=pct.toFixed(0)+'%';
-      if($('nsSub')) $('nsSub').innerHTML='Faltan <b>'+money(total-paid)+'</b> por pagar &middot; <b>'+pct.toFixed(0)+'%</b> hecho. Cada día de disciplina te acerca.';
+      if($('nsSub')) $('nsSub').innerHTML=T('Faltan <b>'+money(total-paid)+'</b> por pagar &middot; <b>'+pct.toFixed(0)+'%</b> hecho. Cada día de disciplina te acerca.','<b>'+money(total-paid)+'</b> left to pay &middot; <b>'+pct.toFixed(0)+'%</b> done. Every day of discipline gets you closer.');
     }
   }
+  window.__i18nRefresh.push(function(){ applyN(loadN()); });
   var nMod=$('northModal');
   function openN(){
     var n=loadN()||{};
-    if($('n_why')) $('n_why').value = n.why||'Mi mayor enemigo soy yo mismo. Opero por Liam y por salir de deudas, no por la adrenalina.';
+    if($('n_why')) $('n_why').value = n.why||T('Mi mayor enemigo soy yo mismo. Opero por Liam y por salir de deudas, no por la adrenalina.','My biggest enemy is myself. I trade for Liam and to get out of debt, not for the adrenaline.');
     if($('n_who')) $('n_who').value = n.who||'Liam';
     if($('n_total')) $('n_total').value = (n.total!=null?n.total:30000);
     if($('n_paid')) $('n_paid').value = (n.paid!=null?n.paid:18400);
@@ -1797,7 +1818,8 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   var rli=rMod?[].slice.call(rMod.querySelectorAll('[data-rk]')):[];
   function ritualDoneToday(){ try{ return localStorage.getItem('cc_ritual_dia')===today(); }catch(e){ return false; } }
   function rCount(){ return rli.filter(function(li){return li.classList.contains('done');}).length; }
-  function rMsg(){ var m=$('r_msg'); if(!m)return; var c=rCount(); m.innerHTML = c<rli.length ? ('Faltan <b>'+(rli.length-c)+'</b> para poder empezar.') : '<b style="color:var(--lime)">Listo.</b> Pásalo y a ejecutar el plan.'; }
+  function rMsg(){ var m=$('r_msg'); if(!m)return; var c=rCount(); m.innerHTML = c<rli.length ? T('Faltan <b>'+(rli.length-c)+'</b> para poder empezar.','<b>'+(rli.length-c)+'</b> left to be able to start.') : '<b style="color:var(--lime)">'+T('Listo.','Ready.')+'</b> '+T('Pásalo y a ejecutar el plan.',"Run it and go execute the plan."); }
+  window.__i18nRefresh.push(rMsg);
   rli.forEach(function(li){ li.addEventListener('click',function(){ li.classList.toggle('done'); rMsg(); }); });
   function openRitual(){
     if($('r_identity')){ var ln=''; try{ ln=localStorage.getItem('cc_ritual_line')||''; }catch(e){} $('r_identity').value=ln||''; }
@@ -1832,25 +1854,26 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if(!sysEl) return;
     var st=ps(), sc=sigCls(), rg=regimeTxt(), rok=st.ritual;
     var closed=st.stopped, tope=st.used>=st.max;
-    var chop = sc==='stop' ? {c:'bad',b:'EN EL AIRE'} : (rg.indexOf('rango')>=0||rg.indexOf('transici')>=0 ? {c:'warn',b:'OJO RANGO'} : {c:'ok',b:'FILTRO ON'});
+    var chop = sc==='stop' ? {c:'bad',b:T('EN EL AIRE','IN THE AIR')} : (rg.indexOf('rango')>=0||rg.indexOf('transici')>=0||rg.indexOf('range')>=0||rg.indexOf('transition')>=0 ? {c:'warn',b:T('OJO RANGO','WATCH RANGE')} : {c:'ok',b:T('FILTRO ON','FILTER ON')});
     var rows=[
-      {c: closed?'ok':'ok', b: closed?'ACTIVA · cerrado':'ARMADA', leak:'Seguir tras el target', sub:'El portero cierra el día al tope · tilt-lock'},
-      {c:'ok', b: st.used+'/'+st.max+(tope?' · TOPE':''), leak:'Sobreoperar', sub:'Tope de '+st.max+' trades, el siguiente no existe'},
-      {c: rok?'ok':'warn', b: rok?'EN PROP FIRM':'CONFÍRMALO', leak:'Revenge trading', sub:'Límite de pérdida diaria en la prop firm + journal'},
-      {c:'ok', b:'REGLA DURA', leak:'Copy trading', sub:'Cero copytrade, cero excepciones'},
-      {c: rok?'ok':'warn', b: rok?'R FIJA':'CONFÍRMALO', leak:'Subir size en caliente', sub:'Size fijo pre-definido, cambiarlo es señal de tilt'},
-      {c: closed?'ok':'ok', b: closed?'ACTIVA':'ARMADA', leak:'No bloquear al ganar', sub:'Bloqueo del día al alcanzar el tope u objetivo'},
-      {c: chop.c, b: chop.b, leak:'Operar el chop', sub:'El checklist exige nivel + confluencia + sesgo'},
-      {c:'ok', b:'PLAN FIJO', leak:'Cortar ganadores', sub:'Objetivo fijado antes de entrar, no se toca en vivo'}
+      {c: closed?'ok':'ok', b: closed?T('ACTIVA · cerrado','ACTIVE · closed'):T('ARMADA','ARMED'), leak:T('Seguir tras el target','Chasing after the target'), sub:T('El portero cierra el día al tope · tilt-lock','The gatekeeper closes the day at the cap · tilt-lock')},
+      {c:'ok', b: st.used+'/'+st.max+(tope?(' · '+T('TOPE','CAP')):''), leak:T('Sobreoperar','Overtrading'), sub:T('Tope de '+st.max+' trades, el siguiente no existe','Cap of '+st.max+' trades, the next one doesn\'t exist')},
+      {c: rok?'ok':'warn', b: rok?T('EN PROP FIRM','ON THE PROP FIRM'):T('CONFÍRMALO','CONFIRM IT'), leak:T('Revenge trading','Revenge trading'), sub:T('Límite de pérdida diaria en la prop firm + journal','Daily loss limit on the prop firm + journal')},
+      {c:'ok', b:T('REGLA DURA','HARD RULE'), leak:T('Copy trading','Copy trading'), sub:T('Cero copytrade, cero excepciones','Zero copytrade, zero exceptions')},
+      {c: rok?'ok':'warn', b: rok?T('R FIJA','FIXED R'):T('CONFÍRMALO','CONFIRM IT'), leak:T('Subir size en caliente','Raising size in the heat of the moment'), sub:T('Size fijo pre-definido, cambiarlo es señal de tilt','Fixed size pre-defined, changing it is a tilt signal')},
+      {c: closed?'ok':'ok', b: closed?T('ACTIVA','ACTIVE'):T('ARMADA','ARMED'), leak:T('No bloquear al ganar','Not locking in when winning'), sub:T('Bloqueo del día al alcanzar el tope u objetivo','Day lock once you hit the cap or target')},
+      {c: chop.c, b: chop.b, leak:T('Operar el chop','Trading the chop'), sub:T('El checklist exige nivel + confluencia + sesgo','The checklist requires level + confluence + bias')},
+      {c:'ok', b:T('PLAN FIJO','FIXED PLAN'), leak:T('Cortar ganadores','Cutting winners short'), sub:T('Objetivo fijado antes de entrar, no se toca en vivo','Target set before entry, not touched live')}
     ];
     sysEl.innerHTML=rows.map(function(r){
       return '<div class="sysrow '+r.c+'"><span class="st"></span><span class="leak">'+r.leak+'<small>'+r.sub+'</small></span><span class="badge">'+r.b+'</span></div>';
     }).join('');
     var tag=$('sysTag'); if(tag){ var bad=rows.filter(function(r){return r.c==='bad';}).length, warn=rows.filter(function(r){return r.c==='warn';}).length;
-      tag.textContent = bad? (bad+' EN RIESGO') : warn? (warn+' POR CONFIRMAR') : 'TODO ARMADO'; }
+      tag.textContent = bad? (bad+' '+T('EN RIESGO','AT RISK')) : warn? (warn+' '+T('POR CONFIRMAR','TO CONFIRM')) : T('TODO ARMADO','ALL ARMED'); }
   };
   window.__refreshHealth();
   setInterval(window.__refreshHealth, 2500);
+  window.__i18nRefresh.push(window.__refreshHealth);
 
   /* ---------- RUTINA HOLÍSTICA ---------- */
   var rtUl=$('rutina');
