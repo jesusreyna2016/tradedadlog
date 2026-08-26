@@ -573,9 +573,14 @@ body::before{
       .scanpick{padding:9px 12px;border-radius:10px;background:rgba(95,224,138,0.08);border:1px solid rgba(95,224,138,0.35);font-size:11px;color:var(--txt);line-height:1.5}
       .scanhead{display:grid;grid-template-columns:38px 64px 1fr 42px;gap:7px;padding:0 9px;font-size:7.5px;letter-spacing:.6px;color:var(--txt-faint);text-transform:uppercase}
       .scanhead .scorec{text-align:right}
+      .scanconf{display:none;padding:7px 12px;border-radius:10px;font-size:10.5px;font-weight:700;letter-spacing:.2px;text-align:center}
+      .scanconf.show{display:block}
+      .scanconf.up{background:rgba(95,224,138,0.1);border:1px solid rgba(95,224,138,0.4);color:var(--lime)}
+      .scanconf.dn{background:rgba(255,90,90,0.1);border:1px solid rgba(255,90,90,0.4);color:var(--red)}
     </style>
     <div class="panel">
       <div class="phead"><span class="dot" style="background:var(--violet);box-shadow:0 0 8px var(--violet)"></span><h2 data-i18n-es="Fuerza relativa" data-i18n-en="Relative strength">Relative strength</h2><span class="tag" data-i18n-es="6 S&Iacute;MBOLOS" data-i18n-en="6 SYMBOLS">6 SYMBOLS</span></div>
+      <div class="scanconf" id="scanConf"></div>
       <div class="scanpick" id="scanPick">Waiting for data from more than one symbol to compare.</div>
       <div class="scanhead">
         <span data-i18n-es="S&iacute;mbolo" data-i18n-en="Symbol">Symbol</span>
@@ -1568,7 +1573,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
 <script>
 (function(){
   var $=function(id){return document.getElementById(id);};
-  var scanEl=$('scan'), pickEl=$('scanPick');
+  var scanEl=$('scan'), pickEl=$('scanPick'), confEl=$('scanConf');
   if(!scanEl) return;
   var CC_API=/(^|\.)tradedadlog\.com$/i.test(location.hostname)?'':'https://tradedadlog.com';
   var ORDER=['NQ','ES','GC','CL','YM','SI'];
@@ -1599,6 +1604,22 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       if(a.act!==b.act) return a.act?-1:1;
       return b.mag-a.mag;
     });
+    if(confEl){
+      var nq=withData.filter(function(r){return r.sym==='NQ';})[0];
+      var others=withData.filter(function(r){return r.sym!=='NQ';});
+      if(!nq || nq.dir==='NEUTRAL' || others.length<2){
+        confEl.className='scanconf';
+        confEl.innerHTML='';
+      } else {
+        var agree=others.filter(function(o){return o.dir===nq.dir;}).length;
+        var total=others.length;
+        confEl.className='scanconf show '+(nq.dir==='LONG'?'up':'dn');
+        confEl.innerHTML=T(
+          '&#9889; Confluencia: <b>'+agree+'/'+total+'</b> otros s&iacute;mbolos tambi&eacute;n '+word(nq.dir)+' como NQ.',
+          '&#9889; Confluence: <b>'+agree+'/'+total+'</b> other symbols also '+word(nq.dir)+' like NQ.'
+        );
+      }
+    }
     scanEl.innerHTML=rows.map(function(r){
       if(!r.has) return '<div class="scanrow empty"><span class="symc">'+r.sym+'</span><span class="dirc" style="color:var(--txt-faint)">'+T('sin datos','no data')+'</span><span class="sigc">'+T('falta indicador + alerta en este gráfico','needs indicator + alert on this chart')+'</span><span class="scorec">&#8212;</span></div>';
       return '<div class="scanrow'+(ranked.length&&ranked[0]===r?' best':'')+'"><span class="symc">'+r.sym+'</span><span class="dirc" style="color:'+colDir(r.dir)+'">'+word(r.dir)+'</span><span class="sigc">'+sigWord(r.sig)+(r.act?' &middot; '+T('activo','live'):'')+'</span><span class="scorec" style="color:'+colDir(r.dir)+'">'+(r.score>0?'+':'')+r.score+'</span></div>';
