@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Welcome Aboard the Cybertruck</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0a0a0b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%230a0a0b'/%3E%3Cpath d='M12 62 L34 40 L66 40 L88 58 L88 66 L12 66 Z' fill='none' stroke='%23d7dbe0' stroke-width='4'/%3E%3Ccircle cx='32' cy='70' r='7' fill='%23d7dbe0'/%3E%3Ccircle cx='70' cy='70' r='7' fill='%23d7dbe0'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#0a0a0b;
+    --bg-2:#111214;
+    --panel:#151618;
+    --border:rgba(215,219,224,0.14);
+    --border-hot:rgba(215,219,224,0.32);
+    --txt:#eef0f2;
+    --txt-dim:#9aa0a8;
+    --txt-faint:#6b7079;
+    --steel:#d7dbe0;
+    --accent:#7fd8ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--txt)}
+  body{
+    font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    padding:max(20px,env(safe-area-inset-top)) 18px calc(40px + env(safe-area-inset-bottom));
+    display:flex;justify-content:center;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(127,216,255,0.06), transparent 70%),
+      var(--bg);
+    min-height:100dvh;
+  }
+  .wrap{width:100%;max-width:620px}
+
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;margin-bottom:22px;
+  }
+  .mark{
+    display:flex;align-items:center;gap:10px;
+    font-family:'Chakra Petch',sans-serif;font-weight:700;
+    letter-spacing:.12em;text-transform:uppercase;font-size:.72rem;
+    color:var(--txt-dim);
+  }
+  .mark svg{width:30px;height:20px;flex:none}
+
+  .langtoggle{
+    display:inline-flex;border:1px solid var(--border);border-radius:999px;
+    overflow:hidden;background:var(--bg-2);
+  }
+  .langtoggle button{
+    appearance:none;border:0;background:transparent;cursor:pointer;
+    font-family:'Chakra Petch',sans-serif;font-weight:600;
+    font-size:.72rem;letter-spacing:.1em;padding:7px 14px;color:var(--txt-faint);
+    transition:.15s;
+  }
+  .langtoggle button.active{background:var(--steel);color:#0a0a0b}
+
+  .card{
+    border:1px solid var(--border);border-radius:18px;
+    background:linear-gradient(180deg, var(--panel), var(--bg-2));
+    padding:30px 26px;
+  }
+
+  h1{
+    font-family:'Chakra Petch',sans-serif;
+    font-weight:700;font-size:1.5rem;line-height:1.25;
+    letter-spacing:.01em;margin-bottom:6px;
+    display:flex;align-items:center;gap:.4em;flex-wrap:wrap;
+  }
+  .lede{color:var(--txt);font-size:1.02rem;margin-bottom:22px}
+
+  .qa{margin-top:20px;padding-top:20px;border-top:1px solid var(--border)}
+  .qa:first-of-type{margin-top:24px}
+  .qa h2{
+    font-family:'Chakra Petch',sans-serif;font-weight:600;
+    font-size:.95rem;color:var(--accent);letter-spacing:.02em;margin-bottom:6px;
+  }
+  .qa p{color:var(--txt-dim);font-size:.98rem}
+
+  .kick{
+    margin-top:26px;padding:16px 18px;border-radius:14px;
+    background:rgba(127,216,255,0.06);border:1px solid var(--border);
+    font-size:1rem;color:var(--txt);
+  }
+  .fsd{
+    display:inline-block;font-family:'Chakra Petch',sans-serif;
+    font-weight:600;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--txt-faint);border:1px solid var(--border);border-radius:6px;
+    padding:2px 7px;
+  }
+  footer{
+    margin-top:24px;text-align:center;color:var(--txt-faint);
+    font-size:.74rem;letter-spacing:.08em;font-family:'Chakra Petch',sans-serif;
+    text-transform:uppercase;
+  }
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="mark">
+      <svg viewBox="0 0 100 66" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M6 58 L34 34 L64 34 L94 52 L94 60 L6 60 Z" fill="none" stroke="#d7dbe0" stroke-width="5"/>
+        <circle cx="30" cy="62" r="4" fill="#d7dbe0"/><circle cx="72" cy="62" r="4" fill="#d7dbe0"/>
+      </svg>
+      <span data-t="mark">Autonomous ride program</span>
+    </span>
+    <div class="langtoggle" role="group" aria-label="Language">
+      <button type="button" data-lang="en">EN</button>
+      <button type="button" data-lang="es">ES</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <!-- ENGLISH -->
+    <div data-locale="en">
+      <h1>Welcome aboard the Cybertruck! <span>&#9889;</span></h1>
+      <p class="lede">Yes, you&rsquo;re riding in a Cybertruck, a piece of the future!</p>
+
+      <div class="qa">
+        <h2>Why am I driving Lyft in a Cybertruck?</h2>
+        <p>I&rsquo;m participating in a real-world testing program evaluating autonomous vehicle performance and gathering passenger feedback to help prepare for the upcoming Tesla Robotaxi network.</p>
+      </div>
+
+      <div class="qa">
+        <h2>Is the truck driving itself?</h2>
+        <p>It sure is! For most of our trip, the vehicle will be operating in <span class="fsd">Full Self-Driving</span> mode while I closely supervise to ensure a safe, seamless ride.</p>
+      </div>
+
+      <div class="qa">
+        <h2>You&rsquo;re part of a unique experience!</h2>
+        <p>Not many people have been inside a Cybertruck, let alone one operating on FSD!</p>
+      </div>
+
+      <div class="kick">Sit back, relax, and enjoy the futuristic ride! &#128640;</div>
+    </div>
+
+    <!-- ESPANOL -->
+    <div data-locale="es" hidden>
+      <h1>&iexcl;Bienvenido a bordo del Cybertruck! <span>&#9889;</span></h1>
+      <p class="lede">S&iacute;, &iexcl;est&aacute;s viajando en un Cybertruck y en un trozo del futuro!</p>
+
+      <div class="qa">
+        <h2>&iquest;Por qu&eacute; estoy haciendo Lyft en este veh&iacute;culo?</h2>
+        <p>Formo parte de un programa de pruebas en el mundo real en colaboraci&oacute;n con la evaluaci&oacute;n de tecnolog&iacute;as aut&oacute;nomas. Estamos recopilando datos sobre la experiencia del pasajero y el rendimiento diario para preparar el camino hacia el servicio de Robotaxi de Tesla.</p>
+      </div>
+
+      <div class="qa">
+        <h2>&iquest;El veh&iacute;culo se maneja solo?</h2>
+        <p>&iexcl;As&iacute; es! Durante la mayor parte del trayecto el veh&iacute;culo opera en modo <span class="fsd">Full Self-Driving</span>. Yo estoy aqu&iacute; supervisando en todo momento para garantizar un viaje seguro y fluido.</p>
+      </div>
+
+      <div class="qa">
+        <h2>&iexcl;Est&aacute;s viviendo una experiencia &uacute;nica!</h2>
+        <p>Muy pocas personas han viajado en un Cybertruck, y menos a&uacute;n mientras el sistema aut&oacute;nomo maneja.</p>
+      </div>
+
+      <div class="kick">&iexcl;Ponte c&oacute;modo y disfruta el viaje futurista! &#128640;</div>
+    </div>
+  </div>
+
+  <footer>TradeDadLog</footer>
+</div>
+
+<script>
+  (function(){
+    var KEY='cybertruck_lang';
+    var stored;
+    try{ stored=localStorage.getItem(KEY); }catch(e){}
+    var lang = stored==='es' ? 'es' : 'en';
+
+    var locales=document.querySelectorAll('[data-locale]');
+    var btns=document.querySelectorAll('.langtoggle button');
+
+    function apply(l){
+      lang=l;
+      document.documentElement.lang=l;
+      locales.forEach(function(n){ n.hidden = n.getAttribute('data-locale')!==l; });
+      btns.forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-lang')===l); });
+      try{ localStorage.setItem(KEY,l); }catch(e){}
+    }
+
+    btns.forEach(function(b){
+      b.addEventListener('click', function(){ apply(b.getAttribute('data-lang')); });
+    });
+
+    apply(lang);
+  })();
+</script>
+</body>
+</html>
