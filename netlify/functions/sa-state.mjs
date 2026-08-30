@@ -1,11 +1,32 @@
-// Estado completo del Session Analyst para el agente en la nube (y el Command
-// Center). Una sola llamada devuelve metodo + historial + ultimos planes.
+// Estado completo del Session Analyst para el Command Center.
+// Fuente primaria: el bus GitHub (state/sa-state.json), que es lo que la rutina
+// cloud mantiene mergeado (instructions + narrative + models + zones + scorecard
+// + reviews + dayThesis + plans). Fallback: ensamblado desde Blobs sa:* (por si
+// el bus aun no tiene estado o no responde).
 import { getStore } from '@netlify/blobs';
+import { busGet } from './_sa-bus.mjs';
 
 const tailByKey = (keys, prefix, n) =>
   keys.filter(k => k.startsWith(prefix)).sort().slice(-n);
 
 export default async () => {
+  try {
+    const f = await busGet('state/sa-state.json');
+    if (f && f.content) {
+      const parsed = JSON.parse(f.content);
+      parsed.generatedAt = new Date().toISOString();
+      parsed._source = 'bus';
+      return new Response(JSON.stringify(parsed), {
+        headers: {
+          'content-type': 'application/json',
+          'access-control-allow-origin': '*',
+          'cache-control': 'no-store',
+          'x-sa-source': 'bus'
+        }
+      });
+    }
+  } catch (e) { /* cae al ensamblado desde Blobs */ }
+
   const store = getStore('cc');
   const out = {
     instructions: null,
@@ -47,11 +68,13 @@ export default async () => {
     out.plans[k.slice('sa:plan:'.length)] = await obj(k);
   }
 
+  out._source = 'blob';
   return new Response(JSON.stringify(out), {
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
-      'cache-control': 'no-store'
+      'cache-control': 'no-store',
+      'x-sa-source': 'blob'
     }
   });
 };

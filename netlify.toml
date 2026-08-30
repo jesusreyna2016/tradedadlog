@@ -59,3 +59,9 @@
   from = "/api/sa-state"
   to = "/.netlify/functions/sa-state"
   status = 200
+
+# Snapshot del bus GitHub (cron cada 5 min; tambien invocable a mano para probar)
+[[redirects]]
+  from = "/api/sa-bus-snapshot"
+  to = "/.netlify/functions/sa-bus-snapshot"
+  status = 200
