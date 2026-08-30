@@ -28,3 +28,24 @@
   from = "/api/cc-scan"
   to = "/.netlify/functions/cc-scan"
   status = 200
+
+# Session Analyst · ingesta de indicadores, feed unificado y plan de sesion
+[[redirects]]
+  from = "/api/ind-ingest"
+  to = "/.netlify/functions/ind-ingest"
+  status = 200
+
+[[redirects]]
+  from = "/api/session-feed"
+  to = "/.netlify/functions/session-feed"
+  status = 200
+
+[[redirects]]
+  from = "/api/session-plan-ingest"
+  to = "/.netlify/functions/session-plan-ingest"
+  status = 200
+
+[[redirects]]
+  from = "/api/session-plan"
+  to = "/.netlify/functions/session-plan"
+  status = 200
