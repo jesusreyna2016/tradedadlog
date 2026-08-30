@@ -5,11 +5,12 @@
 //   drbias   -> Daily Range & Bias Pro  (ind:drbias:<SYM>)
 //   srzones  -> Support & Resistance MTF (ind:srzones:<SYM>)
 //   htfzones -> HTF Context & Zones     (ind:htfzones:<SYM>)
+//   command  -> NQ Command All-in-One   (ind:command:<SYM>) · sesgo fusionado + veredicto Portero
 // El calendario economico se pide aparte a /api/cc-news.
 import { getStore } from '@netlify/blobs';
 
 const SYMBOLS = ['NQ', 'ES', 'GC'];
-const SOURCES = ['3reads', 'drbias', 'srzones', 'htfzones'];
+const SOURCES = ['3reads', 'drbias', 'srzones', 'htfzones', 'command'];
 
 export default async () => {
   const store = getStore('cc');

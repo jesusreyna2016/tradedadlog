@@ -1,12 +1,14 @@
 // Recibe los webhooks de los indicadores STATE EXPORT del Session Analyst:
 //   R3R1| (3reads) · DRB1| (dr bias) · SRZ1| (sr zones) · HCZ1| (htf context zones)
+//   CMDC1| (command center all-in-one · feed de sintesis: sesgo fusionado + veredicto)
 // Valida el secreto, parsea la cadena k=v y guarda el ultimo estado por
 // fuente+simbolo en Netlify Blobs (store 'cc', key 'ind:<src>:<SYM>').
 // El backbone orb_sesgo (TDL1) sigue entrando por cc-ingest como 'sym:<SYM>'.
 import { getStore } from '@netlify/blobs';
 
 const PREFIX_SRC = {
-  R3R1: '3reads', DRB1: 'drbias', SRZ1: 'srzones', HCZ1: 'htfzones', TDL1: 'orb'
+  R3R1: '3reads', DRB1: 'drbias', SRZ1: 'srzones', HCZ1: 'htfzones', TDL1: 'orb',
+  CMDC1: 'command'
 };
 
 function parsePipe(text){
