@@ -49,3 +49,13 @@
   from = "/api/session-plan"
   to = "/.netlify/functions/session-plan"
   status = 200
+
+[[redirects]]
+  from = "/api/sa-state-ingest"
+  to = "/.netlify/functions/sa-state-ingest"
+  status = 200
+
+[[redirects]]
+  from = "/api/sa-state"
+  to = "/.netlify/functions/sa-state"
+  status = 200
