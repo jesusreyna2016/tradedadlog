@@ -298,8 +298,8 @@
     var conv=(d.conviction||"").toLowerCase();
     var aligned=d.biasAligned;
     var sig,code;
-    if(/no-?trade|tierra de nadie|chop|sin borde/.test(ctx)){ sig="WAIT"; code="CHOP"; }
-    else if(/muy estirad|no perseguir|sobre-?extend|overext/.test(ctx)){ sig="AVOID"; code="STRETCHED"; }
+    if(/muy estirad|no perseguir|sobre-?extend|overext/.test(ctx)){ sig="AVOID"; code="STRETCHED"; }
+    else if(/\bchop\b|tierra de nadie|sin borde/.test(ctx)){ sig="WAIT"; code="CHOP"; }
     else if(aligned===false || /en contra|conflicto/.test(ctx)){ sig="WAIT"; code="CONFLICT"; }
     else if(conv==="baja"){ sig="WAIT"; code="LOWCONV"; }
     else if((conv==="media"||conv==="alta") && aligned && best && (best.confluence||0)>=3){ sig="GO"; code="EDGE"; }
