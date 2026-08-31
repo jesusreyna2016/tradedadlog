@@ -2032,6 +2032,8 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   function ageTxt(iso){ try{ var m=Math.round((Date.now()-new Date(iso))/60000);
     return m<1?'ahora':m<60?(m+'m'):(Math.round(m/60)+'h'); }catch(e){ return ''; } }
   function render(plan){
+    // los alertLevels curados alimentan el nudge aunque no haya `focus`
+    try{ window.__saAlertLevels=Array.isArray(plan&&plan.alertLevels)?plan.alertLevels:null; }catch(e){}
     var f=plan&&plan.focus;
     if(!f||!f.sym){ bar.style.display='none'; return; }
     var v=String(f.verdict||'WAIT').toUpperCase();
@@ -2048,7 +2050,6 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       (bits.length?'<div class="fb-sub">'+bits.join(' &nbsp;·&nbsp; ')+'</div>':'')+
       (f.note?'<div class="fb-note">'+esc(f.note)+'</div>':'');
     bar.style.display='';
-    try{ window.__saAlertLevels=Array.isArray(plan.alertLevels)?plan.alertLevels:null; }catch(e){}
   }
   function load(){
     fetch(SA_URL+'?t='+Date.now(),{cache:'no-store'})
