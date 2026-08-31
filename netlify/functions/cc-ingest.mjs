@@ -51,6 +51,7 @@ export default async (req) => {
     noTradeZone: (num(kv.ntz1)!=null && num(kv.ntz2)!=null) ? [num(kv.ntz1), num(kv.ntz2)] : null,
     // contexto extra + senal en vivo
     signal: kv.signal || null,      // REVERSAL_IFVG | REVERSAL | A_FAVOR_BORDE | NOTRADE | ESPERA
+    sigTf: kv.sigtf || kv.ifvgtf || kv.tf || null, // temporalidad del gatillo/iFVG (ej "5m")
     edge: kv.edge || null,          // VAH | VAL | POC | none
     struct: kv.struct || null,      // "BOS up" / "CHoCH dn" / none
     regime: kv.regime || null,      // Rango | Tendencia | Transición

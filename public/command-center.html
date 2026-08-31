@@ -1638,6 +1638,16 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     return T('espera','wait');
   }
   function actionable(sig){ return sig==='A_FAVOR_BORDE'||sig==='REVERSAL'||sig==='REVERSAL_IFVG'; }
+  function levelName(p){ var e=(p&&p.edge||'').toUpperCase(); return (e&&e!=='NONE')?e:null; }
+  function levelVal(p){ var e=(p&&p.edge||'').toUpperCase(),L=(p&&p.levels)||{}; return e==='VAH'?L.vah:e==='VAL'?L.val:e==='POC'?L.poc:null; }
+  function fmtNum(x){ return (x==null)?null:Number(x).toLocaleString('en-US',{maximumFractionDigits:2}); }
+  function sigTf(p){ var t=p&&(p.sigTf||p.ifvgTf||p.tf); return t?String(t):null; }
+  function meaning(sig){
+    if(sig==='REVERSAL_IFVG') return T('Setup premium: espera el tap al iFVG y el rechazo del nivel antes de entrar.','Premium setup: wait for the tap into the iFVG and the level rejection before entering.');
+    if(sig==='REVERSAL') return T('Barrida y vuelta a favor: espera confirmaci&oacute;n de estructura.','Sweep and reclaim with the bias: wait for structure confirmation.');
+    if(sig==='A_FAVOR_BORDE') return T('A favor del sesgo en el borde: busca tu gatillo.','With the bias at the edge: look for your trigger.');
+    return '';
+  }
 
   function render(data){
     var syms=(data&&data.symbols)||{};
@@ -1647,7 +1657,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       var CB=window.__computeBias?window.__computeBias(p):null;
       var dir=CB?CB.dir:(p.biasDir||'NEUTRAL');
       var score=CB?CB.score:0;
-      return {sym:sym, has:true, dir:dir, score:score, mag:Math.abs(score), sig:p.signal||'ESPERA', act:actionable(p.signal)};
+      return {sym:sym, has:true, dir:dir, score:score, mag:Math.abs(score), sig:p.signal||'ESPERA', act:actionable(p.signal), raw:p};
     });
     var withData=rows.filter(function(r){return r.has;});
     var ranked=withData.slice().sort(function(a,b){
@@ -1672,7 +1682,9 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     }
     scanEl.innerHTML=rows.map(function(r){
       if(!r.has) return '<div class="scanrow empty"><span class="symc">'+r.sym+'</span><span class="dirc" style="color:var(--txt-faint)">'+T('sin datos','no data')+'</span><span class="sigc">'+T('falta indicador + alerta en este gráfico','needs indicator + alert on this chart')+'</span><span class="scorec">&#8212;</span></div>';
-      return '<div class="scanrow'+(ranked.length&&ranked[0]===r?' best':'')+'"><span class="symc">'+r.sym+'</span><span class="dirc" style="color:'+colDir(r.dir)+'">'+word(r.dir)+'</span><span class="sigc">'+sigWord(r.sig)+(r.act?' &middot; '+T('activo','live'):'')+'</span><span class="scorec" style="color:'+colDir(r.dir)+'">'+(r.score>0?'+':'')+r.score+'</span></div>';
+      var rtf=sigTf(r.raw), rl=levelName(r.raw);
+      var sigTxt=sigWord(r.sig)+(rtf?(' '+rtf):'')+(r.act&&rl?(' &middot; '+rl):'')+(r.act?' &middot; '+T('activo','live'):'');
+      return '<div class="scanrow'+(ranked.length&&ranked[0]===r?' best':'')+'"><span class="symc">'+r.sym+'</span><span class="dirc" style="color:'+colDir(r.dir)+'">'+word(r.dir)+'</span><span class="sigc">'+sigTxt+'</span><span class="scorec" style="color:'+colDir(r.dir)+'">'+(r.score>0?'+':'')+r.score+'</span></div>';
     }).join('');
     if(pickEl){
       if(withData.length<2){
@@ -1680,7 +1692,18 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       } else {
         var best=ranked[0];
         if(best.act){
-          pickEl.innerHTML=T('Más claro ahora: <b style="color:'+colDir(best.dir)+'">'+best.sym+'</b> ('+word(best.dir)+', '+sigWord(best.sig)+', fuerza '+best.mag+'). No es luz verde automática, sigue tu checklist ahí.','Clearest right now: <b style="color:'+colDir(best.dir)+'">'+best.sym+'</b> ('+word(best.dir)+', '+sigWord(best.sig)+', strength '+best.mag+'). Not an automatic green light, still run your checklist there.');
+          var bp=best.raw||{};
+          var bln=levelName(bp), blv=fmtNum(levelVal(bp)), btf=sigTf(bp), bpx=fmtNum(bp.price);
+          var bst=(bp.struct && /BOS|CHoCH/i.test(bp.struct))?bp.struct:'';
+          var seg=[T('Más claro ahora: ','Clearest right now: ')+'<b style="color:'+colDir(best.dir)+'">'+best.sym+'</b> &middot; '+word(best.dir)+', '+sigWord(best.sig)+(btf?(' '+btf):'')];
+          if(bln) seg.push(T('en ','at ')+bln+(blv?(' '+blv):''));
+          if(bst) seg.push(bst);
+          seg.push(T('fuerza','strength')+' '+best.mag);
+          var msg=seg.join(', ')+'.';
+          if(bpx) msg+=' '+T('Precio','Price')+' '+bpx+'.';
+          var mn=meaning(best.sig); if(mn) msg+=' '+mn;
+          msg+=' '+T('No es luz verde automática, sigue tu checklist.','Not an automatic green light, still run your checklist.');
+          pickEl.innerHTML=msg;
         } else {
           pickEl.textContent=T('Ninguno tiene una señal clara ahora mismo. Paciencia.','None of them has a clear signal right now. Be patient.');
         }
