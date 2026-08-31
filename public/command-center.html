@@ -1351,6 +1351,16 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   var $=function(id){return document.getElementById(id);};
   var DIAS=['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'], MES=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
   function fmt(n){ return (n==null||n==='')?'—':Number(n).toLocaleString('en-US',{maximumFractionDigits:(Math.abs(n%1)>1e-9?2:0)}); }
+  // el indicador manda dayType en español ("Aceptación al alza"...): traducir para la vista EN
+  function dayTypeT(dt){
+    if(!dt) return '—';
+    var s=String(dt).toLowerCase();
+    if(s.indexOf('alza')>=0||s.indexOf('upside')>=0)   return T('Aceptación al alza','Acceptance to the upside');
+    if(s.indexOf('baja')>=0||s.indexOf('downside')>=0) return T('Aceptación a la baja','Acceptance to the downside');
+    if(s.indexOf('tendencia')>=0||s.indexOf('trend')>=0) return T('Día de tendencia','Trend day');
+    if(s.indexOf('balance')>=0) return T('Balance','Balance');
+    return dt;
+  }
   function num(v){ if(v===''||v==null)return null; var x=parseFloat(v); return isFinite(x)?x:null; }
 
   // ---- MOTOR DE SESGO EN VIVO (confluencia con pesos, datos más recientes) ----
@@ -1456,7 +1466,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       var z=p.noTradeZone, dir=p.biasDir, sub=dir==='LONG'?T('sesgo alcista','bullish bias'):dir==='SHORT'?T('sesgo bajista','bearish bias'):T('sin sesgo claro','no clear bias');
       var va=(L.val!=null&&L.vah!=null)?('<div class="pchip line"><div class="l">'+T('Área de valor','Value area')+'</div><div class="v">'+fmt(L.val)+' &#8211; '+fmt(L.vah)+'</div><div class="s">'+T('zona de confluencia','confluence zone')+'</div></div>'):'';
       $('planchips').innerHTML=
-        '<div class="pchip"><div class="l">'+T('Tipo de día','Day type')+'</div><div class="v" style="font-size:14px">'+(p.dayType||'—')+'</div><div class="s">'+sub+'</div></div>'+
+        '<div class="pchip"><div class="l">'+T('Tipo de día','Day type')+'</div><div class="v" style="font-size:14px">'+dayTypeT(p.dayType)+'</div><div class="s">'+sub+'</div></div>'+
         (z&&z[0]!=null&&z[1]!=null?'<div class="pchip danger"><div class="l">'+T('Zona de no-trade','No-trade zone')+'</div><div class="v">'+fmt(z[0])+' &#8211; '+fmt(z[1])+'</div><div class="s">'+T('tierra de nadie',"no man's land")+'</div></div>':'')+
         va;
     }
