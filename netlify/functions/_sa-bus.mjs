@@ -7,6 +7,7 @@
 //     method/instructions.md      · metodo del agente (lo mantiene el equipo)
 //     state/sa-state.json         · estado/aprendizaje acumulado (lo escribe la rutina)
 //     live/market.json            · feed de mercado + noticias (lo escribe Netlify, este helper)
+//     snapshots/<fecha>/<HH>.json · copia horaria de market.json para replay (Netlify, 1/hora)
 //     plans/latest.json           · ultimo plan (lo escribe la rutina)
 //     plans/<fecha>-<sesion>.json · historico de planes
 //     reviews/<fecha>.md          · calificacion del dia (pre-asia)

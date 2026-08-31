@@ -29,7 +29,24 @@ export async function runSnapshot() {
 
   try {
     const r = await busPut('live/market.json', body, `sa-bus: market snapshot ${now}`, { token });
-    return { ok: true, ...r, builtAt: now };
+
+    // Archivo horario para replay/bootstrap de calibracion. 1 escritura/hora (solo en la
+    // ventana :00-:05 del cron de 5 min); busPut ademas omite si el contenido no cambio.
+    // Da un historico ~el que el agente veria en cada corrida (16:30 / 01:55 / 08:25 CT).
+    let archive = null;
+    const d = new Date(now);
+    if (d.getUTCMinutes() < 5) {
+      const day = now.slice(0, 10);                          // YYYY-MM-DD
+      const hh = String(d.getUTCHours()).padStart(2, '0');   // HH UTC
+      try {
+        archive = await busPut(
+          `snapshots/${day}/${hh}.json`, body,
+          `sa-bus: snapshot archive ${day} ${hh}:00Z`, { token }
+        );
+      } catch (e) { archive = { error: String(e && e.message || e) }; }
+    }
+
+    return { ok: true, ...r, archive, builtAt: now };
   } catch (e) {
     return { ok: false, error: String(e && e.message || e), builtAt: now };
   }
