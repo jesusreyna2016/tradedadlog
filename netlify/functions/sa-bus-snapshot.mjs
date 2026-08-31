@@ -24,6 +24,16 @@ const readJson = async (handler) => {
   }
 };
 
+// Deterministic JSON: sorts object keys recursively. session-feed builds its
+// symbols map via Promise.all(map(...)), so key insertion order jitters between
+// calls even when the content is identical; a plain JSON.stringify would then
+// never match. Arrays keep their order (news events are chronological).
+function stableStringify(v) {
+  if (v === null || typeof v !== 'object') return JSON.stringify(v);
+  if (Array.isArray(v)) return '[' + v.map(stableStringify).join(',') + ']';
+  return '{' + Object.keys(v).sort().map(k => JSON.stringify(k) + ':' + stableStringify(v[k])).join(',') + '}';
+}
+
 // A stable fingerprint of the payload that ignores the always-changing timestamps
 // (builtAt, feed.generatedAt, news.fetchedAt). Per-source records only change when
 // a new indicator webhook lands (their receivedAt), and news.events only when the
@@ -31,7 +41,7 @@ const readJson = async (handler) => {
 function stableKey(feed, news) {
   const f = (feed && feed.symbols) ? { symbols: feed.symbols } : (feed || null);
   const n = (news && news.events) ? { source: news.source, events: news.events } : (news || null);
-  try { return JSON.stringify({ f, n }); } catch (e) { return null; }
+  try { return stableStringify({ f, n }); } catch (e) { return null; }
 }
 
 export async function runSnapshot() {
