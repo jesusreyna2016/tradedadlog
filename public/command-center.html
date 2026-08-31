@@ -561,6 +561,26 @@ body::before{
       <div class="levels" id="levels">
         <div class="lvl"><span class="k">PRICE</span><div class="bar"><i class="c-cyan" style="left:90%;color:var(--cyan)"></i></div><span class="v c-cyan">&#8212;</span></div>
       </div>
+      <style>
+        .nudge{margin-top:9px;padding:8px 10px;border-radius:10px;background:var(--panel-2);border:1px solid var(--border);transition:box-shadow .2s,border-color .2s}
+        .nudge.hit{border-color:var(--amber);box-shadow:0 0 22px -4px var(--amber)}
+        .nudge-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+        .nudge-tog{display:flex;align-items:center;gap:5px;font-size:10px;letter-spacing:.4px;color:var(--txt-dim);text-transform:uppercase;cursor:pointer}
+        .nudge-tog input{accent-color:var(--amber)}
+        .nudge-r{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--txt-faint);margin-left:auto}
+        .nudge-r input{width:46px;background:var(--panel-solid);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-size:11px;padding:2px 4px;font-family:inherit}
+        .nudge-near{margin-top:6px;font-size:10.5px;color:var(--txt-dim);line-height:1.6;min-height:15px}
+        .nudge-near b{color:var(--txt)}
+        .nudge-near s{color:var(--txt-faint)}
+      </style>
+      <div class="nudge" id="nudgeBox">
+        <div class="nudge-top">
+          <label class="nudge-tog"><input type="checkbox" id="nudgeOn" checked><span data-i18n-es="Aviso de nivel" data-i18n-en="Level alert">Level alert</span></label>
+          <span class="nudge-r"><span data-i18n-es="radio" data-i18n-en="radius">radius</span> <input type="number" id="nudgeR" min="4" max="200" step="2" value="20"><span>t</span></span>
+          <button class="editbtn" id="nudgeCopy" data-i18n-es="Alerta TV" data-i18n-en="TV alert">TV alert</button>
+        </div>
+        <div class="nudge-near" id="nudgeNear"></div>
+      </div>
     </div>
 
     <!-- 3.5 FUERZA RELATIVA · escanea NQ/ES/GC/CL/YM/SI y sugiere el mas claro -->
@@ -1426,6 +1446,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     // sesgo (motor de confluencia en vivo)
     var CB=computeBias(p);
     try{ window.__liveBias = CB ? {dir:CB.dir,score:CB.score} : null; if(window.__refreshGate) window.__refreshGate(); }catch(e){}
+    try{ if(window.__nudgeTick) window.__nudgeTick(p); }catch(e){}
     var colDir=function(x){return x==='SHORT'?'var(--red)':x==='LONG'?'var(--lime)':'var(--amber)';};
     var word=function(x){return x==='SHORT'?T('BAJISTA','BEARISH'):x==='LONG'?T('ALCISTA','BULLISH'):T('NEUTRAL','NEUTRAL');};
     var wk=p.weeklyDir||p.biasDir, liveDir=CB?CB.dir:p.biasDir;
@@ -1976,6 +1997,91 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   if(banEl) new MutationObserver(handleNews).observe(banEl,{attributes:true,attributeFilter:['class','style'],childList:true,subtree:true});
   // baseline silencioso
   prevSig=sigState(); prevNews=newsState();
+})();
+</script>
+
+<!-- ===================== NUDGE · te avisa cuando el precio se acerca a un nivel edge ===================== -->
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var box=$('nudgeBox'); if(!box) return;
+  var onEl=$('nudgeOn'), rEl=$('nudgeR'), copyEl=$('nudgeCopy'), nearEl=$('nudgeNear');
+  var LS_ON='cc_nudge_on', LS_R='cc_nudge_ticks';
+  function fmt(n){ return n==null?'—':Number(n).toLocaleString('en-US',{maximumFractionDigits:(Math.abs(n%1)>1e-9?2:0)}); }
+  function symTick(s){ s=(s||'NQ').toUpperCase(); return s==='GC'?0.10:s==='CL'?0.01:s==='SI'?0.005:(s==='YM'||s==='DOW')?1:0.25; }
+  var radius=20, on=true, armed=false;
+  try{ var v=parseInt(localStorage.getItem(LS_R),10); if(v>0) radius=v; }catch(e){}
+  try{ on=localStorage.getItem(LS_ON)!=='0'; }catch(e){}
+  if(rEl) rEl.value=radius; if(onEl) onEl.checked=on;
+  setTimeout(function(){ armed=true; },4000);   // no suena al cargar
+
+  var st={};            // nombre nivel -> 'in' | 'out' (histeresis para no repicar)
+  var lastFire=0, lastPlan=null;
+
+  function edges(p){
+    var L=p.levels||{};
+    return [['VAH',L.vah],['POC',L.poc],['VAL',L.val],['PDH',L.pdh],['PDL',L.pdl],
+            ['PWH',L.pwh],['PWL',L.pwl],['DO',L.dayOpen],['TDO',L.tdo],['VWAP',L.vwap],
+            ['OR High',L.orH],['OR Low',L.orL]].filter(function(d){ return d[1]!=null; });
+  }
+  function ping(){
+    try{ if(typeof actx==='function'){ var c=actx(); if(c&&c.state==='suspended') c.resume(); } }catch(e){}
+    try{ if(typeof beep==='function'){ var c2=typeof actx==='function'?actx():null, t=c2?c2.currentTime:0;
+      beep(740,0.10,'sine',0.05,t); beep(990,0.12,'sine',0.05,t+0.11); } }catch(e){}
+  }
+  function toast(html){
+    var t=$('ccToast'); if(!t) return;
+    t.className='toast show news'; t.innerHTML=html;
+    clearTimeout(t.__hN); t.__hN=setTimeout(function(){ t.className='toast'; }, 6000);
+  }
+  function notify(title,body){ try{ if(window.Notification && Notification.permission==='granted') new Notification(title,{body:body,silent:true}); }catch(e){} }
+
+  function renderNear(p){
+    if(!nearEl) return;
+    if(!p || p.price==null){ nearEl.textContent=''; return; }
+    var tick=symTick(p.sym), P=p.price;
+    var arr=edges(p).map(function(d){ return {n:d[0], v:d[1], dd:Math.abs(P-d[1])}; }).sort(function(a,b){ return a.dd-b.dd; });
+    if(!arr.length){ nearEl.textContent=''; return; }
+    var top=arr.slice(0,3).map(function(x){ var tk=Math.round(x.dd/tick), sd=P>=x.v?'▼':'▲';
+      var hot=tk<=radius?' style="color:var(--amber)"':'';
+      return '<span'+hot+'>'+sd+' <b>'+x.n+'</b> '+fmt(x.v)+' · '+tk+'t</span>'; }).join(' &nbsp; ');
+    nearEl.innerHTML=(on?'':'<s>'+T('aviso apagado','alert off')+'</s> · ')+top;
+  }
+
+  window.__nudgeTick=function(p){
+    lastPlan=p;
+    renderNear(p);
+    if(!on || !armed || !p || p.price==null) return;
+    var tick=symTick(p.sym), band=radius*tick, rearm=band*1.6, P=p.price;
+    edges(p).forEach(function(d){
+      var name=d[0], val=d[1], dist=Math.abs(P-val), was=st[name]||'out';
+      if(was==='out' && dist<=band){
+        st[name]='in';
+        var now=Date.now();
+        if(now-lastFire>2500){ lastFire=now; ping(); box.classList.add('hit'); setTimeout(function(){ box.classList.remove('hit'); },1200); }
+        var tk=Math.round(dist/tick), up=P>=val;
+        toast(T('Cerca de <b>'+name+'</b> '+fmt(val)+' · a '+tk+' t '+(up?'por encima':'por debajo'),
+                'Near <b>'+name+'</b> '+fmt(val)+' · '+tk+' t '+(up?'above':'below')));
+        notify(T('Cerca de nivel','Near a level'), name+' '+fmt(val));
+      } else if(was==='in' && dist>rearm){
+        st[name]='out';
+      }
+    });
+  };
+
+  if(onEl) onEl.addEventListener('change',function(){ on=onEl.checked; try{ localStorage.setItem(LS_ON,on?'1':'0'); }catch(e){} if(lastPlan) renderNear(lastPlan); });
+  if(rEl) rEl.addEventListener('change',function(){ var v=parseInt(rEl.value,10); if(!(v>0)) v=20; v=Math.max(4,Math.min(200,v)); radius=v; rEl.value=v; try{ localStorage.setItem(LS_R,String(v)); }catch(e){} st={}; if(lastPlan) renderNear(lastPlan); });
+  if(copyEl) copyEl.addEventListener('click',function(){
+    var p=lastPlan; if(!p) return;
+    var head=(p.sym||'NQ')+' · '+T('niveles edge','edge levels')+' · '+(p.date||'');
+    var txt=head+'\n'+edges(p).map(function(d){ return d[0]+'\t'+fmt(d[1]); }).join('\n');
+    try{ navigator.clipboard.writeText(txt).then(function(){
+      var o=copyEl.textContent; copyEl.textContent=T('copiado','copied');
+      setTimeout(function(){ copyEl.textContent=T('Alerta TV','TV alert'); },1500);
+    }); }catch(e){}
+  });
+
+  if(window.__i18nRefresh) window.__i18nRefresh.push(function(){ if(lastPlan) renderNear(lastPlan); });
 })();
 </script>
 
