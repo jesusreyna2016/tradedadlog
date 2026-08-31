@@ -1350,6 +1350,25 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   }
   function savePlan(p){ try{ localStorage.setItem(KEY,JSON.stringify(p)); }catch(e){} }
 
+  // ---- tierra de nadie por PROXIMIDAD (a peticion de Jesus, 31 ago) ----
+  // "en un nivel" = el precio esta a <= NML_TICKS ticks del nivel edge mas cercano.
+  // Si esta mas lejos que eso de TODOS los niveles edge -> tierra de nadie.
+  // Niveles edge: VAH/POC/VAL, PDH/PDL, PWH/PWL, apertura del dia (DO), true day open (TDO).
+  var NML_TICKS = 100;                         // radio de "en un nivel", en ticks. Baja a 60-80 si queda muy laxo.
+  function symTick(s){ s=(s||'NQ').toUpperCase();
+    return s==='GC'?0.10 : s==='CL'?0.01 : s==='SI'?0.005 : (s==='YM'||s==='DOW')?1 : 0.25; } // NQ/ES = 0.25
+  function noMansLand(p){
+    if(!p || p.price==null) return {far:false, n:0};
+    var L=p.levels||{}, P=p.price;
+    var defs=[['VAH',L.vah],['POC',L.poc],['VAL',L.val],['PDH',L.pdh],['PDL',L.pdl],
+              ['PWH',L.pwh],['PWL',L.pwl],[T('Apertura','Open'),L.dayOpen],['TDO',L.tdo]];
+    var lv=defs.filter(function(d){ return d[1]!=null; });
+    var tick=symTick(p.sym), band=NML_TICKS*tick, nrst=null;
+    lv.forEach(function(d){ var dd=Math.abs(P-d[1]); if(nrst==null||dd<nrst.dist) nrst={name:d[0],dist:dd}; });
+    var far = lv.length>=3 && nrst!=null && nrst.dist>band;   // necesita >=3 niveles para fiarse
+    return {far:far, nrst:nrst, tick:tick, n:lv.length};
+  }
+
   var lastPlan=null;
   function applyPlan(p){
     if(!p) return;
@@ -1409,13 +1428,21 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       ring.style.background='conic-gradient('+cR+' 0 '+mg+'%,rgba(255,255,255,0.06) '+mg+'% 100%)';
       var ri=ring.querySelector('i'); if(ri) ri.textContent=mg; }
     if($('biasMeta')){
-      var inZone=p.price!=null&&p.noTradeZone&&p.noTradeZone[0]!=null&&p.price>=p.noTradeZone[0]&&p.price<=p.noTradeZone[1];
+      var inBand=p.price!=null&&p.noTradeZone&&p.noTradeZone[0]!=null&&p.price>=p.noTradeZone[0]&&p.price<=p.noTradeZone[1];
+      var NML=noMansLand(p);
+      var inZone=inBand||NML.far||p.inNtz===true;
+      var zTxt='';
+      if(inZone){
+        if(NML.far&&NML.nrst){ var _tk=Math.round(NML.nrst.dist/NML.tick);
+          zTxt='<br><b style="color:var(--red)">'+T('Ojo:','Watch out:')+'</b> '+T('precio en el aire (tierra de nadie): a '+_tk+' t del nivel más cercano ('+NML.nrst.name+'), a más de '+NML_TICKS+' t de todo nivel edge.','price in the air (no man\'s land): '+_tk+' t from the nearest level ('+NML.nrst.name+'), more than '+NML_TICKS+' t from any edge level.'); }
+        else { zTxt='<br><b style="color:var(--red)">'+T('Ojo:','Watch out:')+'</b> '+T('precio dentro de la zona de no-trade del plan.','price inside the plan no-trade zone.'); }
+      }
       if(CB){
         var toks=CB.factors.map(function(x){ var a=x.d>0.15?'▲':x.d<-0.15?'▼':'·', c=x.d>0.15?'var(--lime)':x.d<-0.15?'var(--red)':'var(--txt-faint)';
           return '<span style="color:'+c+'">'+x.label+' '+a+'</span>'; }).join(' · ');
         var head='<b style="color:'+colDir(CB.dir)+'">'+word(CB.dir)+'</b> · '+CB.agreeUp+'▲ / '+CB.agreeDn+'▼ · '+T('fuerza','strength')+' '+CB.mag;
         var align=''; if(liveDir&&wk&&liveDir!=='NEUTRAL'&&wk!=='NEUTRAL'){ align=liveDir===wk?T('<br>Alineado con el día ('+wk+'). Contexto a favor, sé selectivo en tu setup.','<br>Aligned with the day ('+wk+'). Context is with you, be selective on your setup.'):'<br><b style="color:var(--amber)">'+T('Mixto:','Mixed:')+'</b> '+T('en vivo '+word(liveDir)+' vs día '+wk+'. Solo lo muy claro.','live '+word(liveDir)+' vs day '+wk+'. Only the very clear ones.'); }
-        $('biasMeta').innerHTML=head+'<br>'+toks+align+(inZone?'<br><b style="color:var(--red)">'+T('Ojo:','Watch out:')+'</b> '+T('precio en el aire (tierra de nadie), sin nivel.',"price in the air (no man's land), no level."):'');
+        $('biasMeta').innerHTML=head+'<br>'+toks+align+zTxt;
       } else {
         $('biasMeta').innerHTML=T('Sin datos recientes para calcular el sesgo.<br>Espera al feed del indicador o pega tu plan.','No recent data to calculate the bias.<br>Wait for the indicator feed or paste your plan.');
       }
@@ -1456,6 +1483,9 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       var stk=[]; [['PWH',L.pwh],['PDH',L.pdh],['VAH',L.vah],['OR High',L.orH],['VWAP',L.vwap],[T('Apertura','Open'),L.dayOpen],['POC',L.poc],['VAL',L.val],['OR Low',L.orL],[T('True Day','True Day'),L.tdo],['PDL',L.pdl],['PWL',L.pwl]].forEach(function(d){ if(d[1]!=null) stk.push({l:d[0],v:d[1]}); });
       var up=stk.filter(function(x){return x.v>P;}).sort(function(a,b){return a.v-b.v;})[0];
       var dn=stk.filter(function(x){return x.v<P;}).sort(function(a,b){return b.v-a.v;})[0];
+      var _NML=noMansLand(p);
+      if(_NML.far&&_NML.nrst){ var _t=Math.round(_NML.nrst.dist/_NML.tick);
+        push('warn',T('<b>Tierra de nadie</b>: a '+_t+' t del nivel más cercano ('+_NML.nrst.name+'), a más de '+NML_TICKS+' t de todo nivel edge. Manos fuera hasta llegar a un nivel.','<b>No man\'s land</b>: '+_t+' t from the nearest level ('+_NML.nrst.name+'), more than '+NML_TICKS+' t from any edge level. Hands off until price reaches a level.')); }
       if(up) push('info',T('Arriba: <b>'+up.l+' '+fmt(up.v)+'</b> (+'+Math.round(up.v-P)+'). Imán / posible reacción.','Above: <b>'+up.l+' '+fmt(up.v)+'</b> (+'+Math.round(up.v-P)+'). Magnet / possible reaction.'));
       if(dn) push('info',T('Abajo: <b>'+dn.l+' '+fmt(dn.v)+'</b> ('+Math.round(dn.v-P)+'). Soporte / posible reacción.','Below: <b>'+dn.l+' '+fmt(dn.v)+'</b> ('+Math.round(dn.v-P)+'). Support / possible reaction.'));
       if(p.regime&&p.regime!=='none'){
