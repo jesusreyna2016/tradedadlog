@@ -685,12 +685,9 @@ body::before{
 
     <!-- 4. NOTICIAS · puede cerrar la ventana de entrada -->
     <div class="panel full">
-      <div class="phead"><span class="dot" style="background:var(--red);box-shadow:0 0 8px var(--red)"></span><h2 data-i18n-es="Noticias de alto impacto" data-i18n-en="High-impact news">High-impact news</h2><span class="tag" data-i18n-es="FOREXFACTORY &middot; HOY" data-i18n-en="FOREXFACTORY · TODAY">FOREXFACTORY · TODAY</span></div>
-      <div class="news">
-        <div class="nrow hot"><span class="time">07:30</span><span class="cur">USD</span><span class="imp h3"><i></i><i></i><i></i></span><span class="ev">Core CPI m/m</span><span class="fc">prev <b>0.3%</b> · fcst 0.2%</span></div>
-        <div class="nrow soon"><span class="time">08:30</span><span class="cur">USD</span><span class="imp h3"><i></i><i></i><i></i></span><span class="ev">Unemployment Claims</span><span class="fc">prev <b>221K</b> · fcst 225K</span></div>
-        <div class="nrow"><span class="time">10:00</span><span class="cur">USD</span><span class="imp h2"><i></i><i></i><i></i></span><span class="ev">Fed Williams speaks</span><span class="fc">speech</span></div>
-        <div class="nrow"><span class="time">02:00</span><span class="cur">EUR</span><span class="imp h2"><i></i><i></i><i></i></span><span class="ev">German Final CPI</span><span class="fc">prev <b>2.2%</b></span></div>
+      <div class="phead"><span class="dot" style="background:var(--red);box-shadow:0 0 8px var(--red)"></span><h2 data-i18n-es="Noticias de alto impacto" data-i18n-en="High-impact news">High-impact news</h2><span class="tag" data-i18n-es="FOREXFACTORY &middot; PR&Oacute;XIMAS" data-i18n-en="FOREXFACTORY · NEXT">FOREXFACTORY · NEXT</span></div>
+      <div class="news" id="newsList">
+        <div class="nrow"><span class="ev" data-i18n-es="Cargando calendario&hellip;" data-i18n-en="Loading calendar&hellip;">Loading calendar…</span></div>
       </div>
       <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center" data-i18n-es="Tres barras rojas es alto impacto. No te hagas el h&eacute;roe 15 min antes ni despu&eacute;s." data-i18n-en="Three red bars is high impact. Don't be a hero 15 min before or after.">Three red bars is high impact. Don't be a hero 15 min before or after.</div>
     </div>
@@ -1560,7 +1557,13 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       if(sig==='REVERSAL_IFVG'){ cls='rev'; big='REVERSAL + IFVG'; sub2=T('setup premium a favor del sesgo','premium setup with the bias'); }
       else if(sig==='REVERSAL'){ cls='rev'; big='REVERSAL'; sub2=T('barrida y vuelta a favor','sweep and reclaim with the bias'); }
       else if(sig==='A_FAVOR_BORDE'){ cls='go'; big=T('A+ · A FAVOR EN NIVEL','A+ · WITH THE BIAS ON A LEVEL'); sub2=(edge?(T('en ','at ')+edge+' · '):'')+T('nivel + sesgo, busca tu gatillo','level + bias, look for your trigger'); }
-      else if(sig==='NOTRADE'){ cls='stop'; big=T('EN EL AIRE','IN THE AIR'); sub2=T('sin nivel cerca, manos fuera','no level nearby, hands off'); }
+      else if(sig==='NOTRADE'){
+        var _nml=(typeof noMansLand==='function')?noMansLand(p):{far:true};
+        if(_nml && _nml.far){ cls='stop'; big=T('EN EL AIRE','IN THE AIR'); sub2=T('sin nivel cerca, manos fuera','no level nearby, hands off'); }
+        else { cls='wait'; big=T('SIN PERMISO AÚN','NO GREENLIGHT YET');
+          sub2=(_nml&&_nml.nrst)? T('a '+Math.round(_nml.nrst.dist/_nml.tick)+' t de '+_nml.nrst.name+', espera confirmación','~'+Math.round(_nml.nrst.dist/_nml.tick)+' t from '+_nml.nrst.name+', wait for confirmation')
+                                : T('el indicador aún no da permiso','indicator hasn\'t greenlit yet'); }
+      }
       else if(sig==='ESPERA'){ cls='wait'; big=T('ESPERA','WAIT'); sub2=edge?(T('cerca de ','near ')+edge+T(', aún no',', not yet')):T('sin borde todavía','no edge yet'); }
       $('ccSignal').className='ccsignal '+cls;
       $('ccSignal').innerHTML='<b>'+big+'</b><span>'+sub2+'</span>';
@@ -1570,15 +1573,18 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       var chips=[];
       var add=function(l,v){ if(v&&v!=='none'&&v!=='off') chips.push('<span class="cx">'+l+' <b>'+v+'</b></span>'); };
       var VMAP={'alcista':T('Alcista','Bullish'),'bajista':T('Bajista','Bearish'),'neutral':T('Neutral','Neutral'),
-        'expansión':T('Expansión','Expansion'),'expansion':T('Expansión','Expansion'),'contracción':T('Contracción','Contraction'),'contraccion':T('Contracción','Contraction'),
-        'transición':T('Transición','Transition'),'transicion':T('Transición','Transition'),'tendencia':T('Tendencia','Trend'),'rango':T('Rango','Range'),
-        'lidera':T('lidera','leads'),'rezaga':T('rezaga','lags')};
-      var trV=function(v){ if(!v) return v; var vs=String(v); var low=vs.toLowerCase();
-        for(var k in VMAP){ if(low.indexOf(k)>=0) return vs.replace(new RegExp(k,'i'),VMAP[k]); }
+        'bullish':T('Alcista','Bullish'),'bearish':T('Bajista','Bearish'),
+        'alineado':T('alineado','aligned'),'alineada':T('alineada','aligned'),'aligned':T('alineado','aligned'),'mixto':T('mixto','mixed'),
+        'expansión':T('Expansión','Expansion'),'expansion':T('Expansión','Expansion'),'contracción':T('Contracción','Contraction'),'contraccion':T('Contracción','Contraction'),'contraction':T('Contracción','Contraction'),
+        'transición':T('Transición','Transition'),'transicion':T('Transición','Transition'),'transition':T('Transición','Transition'),
+        'tendencia':T('Tendencia','Trend'),'trend':T('Tendencia','Trend'),'rango':T('Rango','Range'),'range':T('Rango','Range'),
+        'lidera':T('lidera','leads'),'leads':T('lidera','leads'),'rezaga':T('rezaga','lags'),'lags':T('rezaga','lags')};
+      var trV=function(v){ if(!v) return v; var vs=String(v);
+        for(var k in VMAP){ vs=vs.replace(new RegExp(k,'ig'),VMAP[k]); }
         return vs; };
-      add(T('Estruct','Struct'), (p.struct||'').replace(' up',' ▲').replace(' dn',' ▼'));
+      add(T('Estructura','Structure'), (p.struct||'').replace(/ up/i,' ▲').replace(/ dn/i,' ▼'));
       add(T('Régimen','Regime'), trV(p.regime)); add('Vol', trV(p.vol));
-      add('HTF1', trV(p.htf1)); add('HTF2', trV(p.htf2)); add('RS', trV(p.rs));
+      add(T('1H','1H'), trV(p.htf1)); add(T('4H','4H'), trV(p.htf2)); add(T('NQ vs ES','NQ vs ES'), trV(p.rs));
       $('ccCtx').innerHTML=chips.join('');
     }
   }
@@ -1744,6 +1750,10 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
           var mn=meaning(best.sig); if(mn) msg+=' '+mn;
           msg+=' '+T('No es luz verde automática, sigue tu checklist.','Not an automatic green light, still run your checklist.');
           pickEl.innerHTML=msg;
+        } else if(best.mag>=55){
+          pickEl.innerHTML=T('Ninguno tiene gatillo accionable. El que más se inclina: ','No actionable trigger. Strongest lean: ')+
+            '<b style="color:'+colDir(best.dir)+'">'+best.sym+'</b> '+word(best.dir)+' ('+T('fuerza','strength')+' '+best.mag+'), '+
+            T('pero espera un nivel + tu gatillo.','but wait for a level + your trigger.');
         } else {
           pickEl.textContent=T('Ninguno tiene una señal clara ahora mismo. Paciencia.','None of them has a clear signal right now. Be patient.');
         }
@@ -1918,12 +1928,18 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   function p2(x){return ('0'+x).slice(-2);}
   function hm(ts){var d=new Date(ts);return p2(d.getHours())+':'+p2(d.getMinutes());}
 
+  function dow(ts){
+    var d=new Date(ts), n=new Date();
+    if(d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate()) return '';
+    return T(['dom','lun','mar','mié','jue','vie','sáb'],['Sun','Mon','Tue','Wed','Thu','Fri','Sat'])[d.getDay()]+' ';
+  }
   function render(){
     var now=Date.now();
-    var list=events.filter(function(e){return e.ts>=now-3*3600e3;}).slice(0,8);
-    var box=$('news');
+    // proximas ~36h (cubre Asia de esta noche + Londres y NY de manana), max 8
+    var list=events.filter(function(e){return e.ts>=now-3*3600e3 && e.ts<=now+36*3600e3;}).slice(0,8);
+    var box=$('newsList');
     if(box){
-      if(!list.length){ box.innerHTML='<div style="grid-column:1/-1;font-size:10.5px;color:var(--txt-faint);text-align:center;padding:10px">'+T('Sin noticias de alto impacto próximas.','No high-impact news coming up.')+'</div>'; }
+      if(!list.length){ box.innerHTML='<div style="grid-column:1/-1;font-size:10.5px;color:var(--txt-faint);text-align:center;padding:10px">'+T('Sin noticias de alto impacto en las próximas 36 h.','No high-impact news in the next 36 h.')+'</div>'; }
       else box.innerHTML=list.map(function(e){
         var mins=Math.round((e.ts-now)/60000);
         var soon = mins>=0 && mins<=60;
@@ -1933,7 +1949,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
         var cd = (mins>=0 && mins<=180) ? '<span class="countdown">'+(mins<60?(enLbl+' '+mins+'M'):(enLbl+' '+Math.floor(mins/60)+'H '+p2(mins%60)+'M'))+'</span>' : (mins<0?'<span class="countdown" style="color:var(--txt-faint);border-color:var(--border)">'+yaLbl+'</span>':'');
         var impc = e.impact==='high'?'h3':'h2';
         var fc=[]; if(e.previous!=null) fc.push('prev <b>'+e.previous+'</b>'); if(e.forecast!=null) fc.push('fcst '+e.forecast);
-        return '<div class="nrow '+cls+'"><span class="time">'+hm(e.ts)+'</span><span class="cur">'+e.currency+'</span>'+
+        return '<div class="nrow '+cls+'"><span class="time">'+dow(e.ts)+hm(e.ts)+'</span><span class="cur">'+e.currency+'</span>'+
           '<span class="imp '+impc+'"><i></i><i></i><i></i></span><span class="ev">'+e.title+'</span>'+
           '<span class="fc">'+fc.join(' · ')+'</span>'+cd+'</div>';
       }).join('');
