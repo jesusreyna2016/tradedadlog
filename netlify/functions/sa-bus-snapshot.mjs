@@ -1,14 +1,19 @@
-// Snapshot del estado de mercado al bus GitHub para que las rutinas cloud del
-// Session Analyst (sin egress a tradedadlog.com) lo lean del checkout del repo.
+// Snapshot the market state to the GitHub bus so the Session Analyst cloud
+// routines (no egress to tradedadlog.com) can read it from the repo checkout.
 //
-// Escribe live/market.json con la salida de session-feed + cc-news. busPut omite
-// el commit si el contenido no cambio, asi que con el mercado cerrado no hay ruido.
+// Writes live/market.json = session-feed + cc-news, wrapped with a builtAt.
 //
-// Esta es la funcion HTTP (invocable a mano para probar: GET /api/sa-bus-snapshot).
-// El cron cada 5 min vive en sa-bus-cron.mjs y llama a runSnapshot() de aqui.
+// De-dupe: builtAt (and feed.generatedAt / news.fetchedAt) change on every call,
+// which used to defeat busPut's skip-if-unchanged and produce a commit every 5
+// min around the clock. We now compare only the MEANINGFUL payload (per-source
+// records + news events) against what's already in the bus and skip the write
+// entirely when nothing changed (market closed, weekends, overnight lulls).
+//
+// HTTP entrypoint (test by hand: GET /api/sa-bus-snapshot). The 5-min cron lives
+// in sa-bus-cron.mjs and calls runSnapshot() here.
 import feedHandler from './session-feed.mjs';
 import newsHandler from './cc-news.mjs';
-import { busPut } from './_sa-bus.mjs';
+import { busGet, busPut } from './_sa-bus.mjs';
 
 const readJson = async (handler) => {
   try {
@@ -19,20 +24,56 @@ const readJson = async (handler) => {
   }
 };
 
+// A stable fingerprint of the payload that ignores the always-changing timestamps
+// (builtAt, feed.generatedAt, news.fetchedAt). Per-source records only change when
+// a new indicator webhook lands (their receivedAt), and news.events only when the
+// calendar scrape changes, so this flips exactly when there is real new data.
+function stableKey(feed, news) {
+  const f = (feed && feed.symbols) ? { symbols: feed.symbols } : (feed || null);
+  const n = (news && news.events) ? { source: news.source, events: news.events } : (news || null);
+  try { return JSON.stringify({ f, n }); } catch (e) { return null; }
+}
+
 export async function runSnapshot() {
   const token = process.env.SA_BUS_TOKEN;
   const now = new Date().toISOString();
   if (!token) return { ok: false, reason: 'SA_BUS_TOKEN no configurado', builtAt: now };
 
   const [feed, news] = await Promise.all([readJson(feedHandler), readJson(newsHandler)]);
-  const body = JSON.stringify({ builtAt: now, feed, news }, null, 2) + '\n';
+
+  // Si el feed no trae symbols (handler cayo), NO escribas: dejarias el bus con un
+  // blob de error en vez del ultimo market.json bueno.
+  if (!feed || !feed.symbols) {
+    return { ok: false, error: 'feed sin symbols: ' + (feed && feed.error || 'desconocido'), builtAt: now };
+  }
+
+  const key = stableKey(feed, news);
 
   try {
-    const r = await busPut('live/market.json', body, `sa-bus: market snapshot ${now}`, { token });
+    // What's in the bus now? Compare the meaningful payload only.
+    // cur: {content,sha} si existe · null si 404 · undefined si el GET fallo
+    let cur, prevKey = null, prevBuiltAt = null;
+    try {
+      cur = await busGet('live/market.json', { token });
+      if (cur && cur.content) {
+        const pj = JSON.parse(cur.content);
+        prevKey = stableKey(pj.feed, pj.news);
+        prevBuiltAt = pj.builtAt || null;
+      }
+    } catch (e) { cur = undefined; /* el GET fallo: que busPut lo reintente */ }
 
-    // Archivo horario para replay/bootstrap de calibracion. 1 escritura/hora (solo en la
-    // ventana :00-:05 del cron de 5 min); busPut ademas omite si el contenido no cambio.
-    // Da un historico ~el que el agente veria en cada corrida (16:30 / 01:55 / 08:25 CT).
+    if (key != null && prevKey != null && key === prevKey) {
+      // nada nuevo: no tocamos el bus (evita el commit cada 5 min con el mercado cerrado)
+      return { ok: true, unchanged: true, builtAt: prevBuiltAt || now };
+    }
+
+    const body = JSON.stringify({ builtAt: now, feed, news }, null, 2) + '\n';
+    // pasamos `cur` para que busPut no repita el GET
+    const r = await busPut('live/market.json', body, `sa-bus: market snapshot ${now}`, { token, known: cur });
+
+    // Hourly archive for replay / calibration bootstrap. Only in the :00-:05 window
+    // of the 5-min cron, and only when the payload actually changed (this branch),
+    // so closed periods don't pile up identical hourly files.
     let archive = null;
     const d = new Date(now);
     if (d.getUTCMinutes() < 5) {

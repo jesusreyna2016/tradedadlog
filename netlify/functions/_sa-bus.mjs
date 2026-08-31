@@ -53,11 +53,13 @@ export async function busGet(path, { token } = {}) {
 
 // Escribe (crea o actualiza) un archivo en el bus. Si el contenido es identico
 // al que ya hay, no hace commit y devuelve { skipped: true }.
-export async function busPut(path, contentString, message, { token } = {}) {
+// `known` (opcional) = { content, sha } ya leido por quien llama, para evitar un
+// busGet extra. Pasar `known: null` fuerza a NO leer (se asume que no existe).
+export async function busPut(path, contentString, message, { token, known } = {}) {
   if (!token) throw new Error('busPut: falta SA_BUS_TOKEN');
   let sha = null;
   try {
-    const cur = await busGet(path, { token });
+    const cur = (known !== undefined) ? known : await busGet(path, { token });
     if (cur) {
       if (cur.content === contentString) return { skipped: true, path };
       sha = cur.sha;
