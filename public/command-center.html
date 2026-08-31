@@ -1324,6 +1324,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     add('EMA20 15m', L.ema15,   20);
     add('EMA20 5m',  L.ema5,    14);
     add(T('Apertura','Open'),  L.dayOpen, 12);
+    add(T('True Day Open','True Day Open'), L.tdo, 8);
     if(L.ema5!=null && L.ema15!=null){
       var ds=Math.abs(L.ema5-L.ema15)<=tol?0:(L.ema5>L.ema15?1:-1);
       F.push({label:T('EMAs apiladas','EMAs stacked'),w:10,d:ds});
@@ -1332,6 +1333,11 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       var d; if(P>=L.pdh) d=1; else if(P<=L.pdl) d=-1;
       else { var pos=(P-L.pdl)/((L.pdh-L.pdl)||1); d=(pos-0.5)*1.2; d=Math.max(-1,Math.min(1,d)); }
       F.push({label:T('Rango previo','Prior range'),w:20,d:d});
+    }
+    if(L.pwh!=null && L.pwl!=null){
+      var dw; if(P>=L.pwh) dw=1; else if(P<=L.pwl) dw=-1;
+      else { var posw=(P-L.pwl)/((L.pwh-L.pwl)||1); dw=(posw-0.5)*1.2; dw=Math.max(-1,Math.min(1,dw)); }
+      F.push({label:T('Rango semanal','Weekly range'),w:14,d:dw});
     }
     if(!F.length) return null;
     var raw=0,wsum=0,up=0,dn=0;
@@ -1368,6 +1374,16 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var far = lv.length>=3 && nrst!=null && nrst.dist>band;   // necesita >=3 niveles para fiarse
     return {far:far, nrst:nrst, tick:tick, n:lv.length};
   }
+  // expuesto para el journal (otra IIFE): mismo criterio de tierra de nadie por proximidad
+  window.__NML_TICKS = NML_TICKS;
+  window.__symTick = symTick;
+  window.__farFromEdges = function(px, lvObj, sym){
+    if(px==null || !lvObj) return false;
+    var e=[lvObj.vah,lvObj.poc,lvObj.val,lvObj.pdh,lvObj.pdl,lvObj.pwh,lvObj.pwl,lvObj.dayOpen,lvObj.tdo].filter(function(x){return x!=null;});
+    if(e.length<3) return false;
+    var band=NML_TICKS*symTick(sym), nr=Math.min.apply(null,e.map(function(v){return Math.abs(px-v);}));
+    return nr>band;
+  };
 
   var lastPlan=null;
   function applyPlan(p){
@@ -1376,14 +1392,15 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if($('mock')) $('mock').style.display='none';
     var L=p.levels||{};
     // archiva el plan del día para poder cruzar fugas con el CSV del broker
-    try{ if(p.date){ var H=JSON.parse(localStorage.getItem('cc_plan_hist')||'{}')||{}; H[p.date]={ntz:(p.noTradeZone||null),vah:L.vah,poc:L.poc,val:L.val,bias:(p.biasDir||null),weekly:(p.weeklyDir||null)}; localStorage.setItem('cc_plan_hist',JSON.stringify(H)); if(window.__refreshJournal) window.__refreshJournal(); } }catch(e){}
+    try{ if(p.date){ var H=JSON.parse(localStorage.getItem('cc_plan_hist')||'{}')||{}; H[p.date]={ntz:(p.noTradeZone||null),vah:L.vah,poc:L.poc,val:L.val,pdh:L.pdh,pdl:L.pdl,pwh:L.pwh,pwl:L.pwl,dayOpen:L.dayOpen,tdo:L.tdo,sym:(p.sym||'NQ'),bias:(p.biasDir||null),weekly:(p.weeklyDir||null)}; localStorage.setItem('cc_plan_hist',JSON.stringify(H)); if(window.__refreshJournal) window.__refreshJournal(); } }catch(e){}
     if(p.date){ var dt=new Date(p.date+'T00:00:00');
       var DIASL=T(DIAS,['SUN','MON','TUE','WED','THU','FRI','SAT']), MESL=T(MES,['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']);
       if($('ccDate')) $('ccDate').textContent=DIASL[dt.getDay()]+' · '+dt.getDate()+' '+MESL[dt.getMonth()]+' '+dt.getFullYear()+' · GMT-6';
       if($('planTag')) $('planTag').textContent=T('PLAN','PLAN')+' · '+dt.getDate()+' '+MESL[dt.getMonth()]; }
-    // niveles (incluye PRICE)
+    // niveles (incluye PRICE + edge completo: VA, apertura DO/TDO, semanales PWH/PWL)
     if($('levels')){
-      var rows=[['PRICE',p.price,'cyan'],['VAH',L.vah,'red'],['POC',L.poc,'amber'],['VAL',L.val,'lime']].filter(function(r){return r[1]!=null;});
+      var rows=[['PRICE',p.price,'cyan'],['VAH',L.vah,'red'],['POC',L.poc,'amber'],['VAL',L.val,'lime'],
+                ['DO',L.dayOpen,'violet'],['TDO',L.tdo,'violet'],['PWH',L.pwh,'red'],['PWL',L.pwl,'lime']].filter(function(r){return r[1]!=null;});
       if(rows.length){
         var vals=rows.map(function(r){return r[1];}), lo=Math.min.apply(null,vals), hi=Math.max.apply(null,vals), span=(hi-lo)||1;
         $('levels').innerHTML=rows.map(function(r){ var pos=6+(r[1]-lo)/span*88;
@@ -1733,6 +1750,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   function leakOf(t){
     var H=loadPlanHist(), pl=H[t.date]; if(!pl) return null;
     if(pl.ntz && pl.ntz[0]!=null && pl.ntz[1]!=null && t.entry!=null && t.entry>=pl.ntz[0] && t.entry<=pl.ntz[1]) return 'tierra de nadie';
+    try{ if(window.__farFromEdges && window.__farFromEdges(t.entry, pl, pl.sym||t.sym)) return 'tierra de nadie'; }catch(e){}
     if(pl.bias && pl.weekly && pl.bias===pl.weekly && pl.bias!=='NEUTRAL'){
       if((pl.bias==='LONG'&&t.side==='SHORT')||(pl.bias==='SHORT'&&t.side==='LONG')) return 'contra sesgo';
     }
