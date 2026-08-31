@@ -99,6 +99,25 @@
   .num{text-align:right}
   .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 
+  .verdict{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;margin-bottom:2px}
+  .verdict .vtag{font-size:15px;font-weight:800;letter-spacing:1.2px;padding:4px 12px;border-radius:8px}
+  .verdict.GO{background:rgba(55,214,122,.10);border:1px solid rgba(55,214,122,.35)}
+  .verdict.GO .vtag{background:var(--long);color:#04240f}
+  .verdict.WAIT{background:rgba(245,196,81,.10);border:1px solid rgba(245,196,81,.35)}
+  .verdict.WAIT .vtag{background:var(--gold);color:#2a2205}
+  .verdict.AVOID{background:rgba(255,92,108,.10);border:1px solid rgba(255,92,108,.35)}
+  .verdict.AVOID .vtag{background:var(--short);color:#2a0509}
+  .verdict .vreason{font-weight:600;font-size:13.5px;color:var(--txt)}
+  .glance{display:flex;flex-wrap:wrap;gap:8px}
+  .glance .g{flex:1;min-width:120px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:7px 10px}
+  .glance .gl{font-size:9.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--dim2)}
+  .glance .gv{font-family:var(--mono);font-size:13px;margin-top:2px}
+  details.more{border:1px solid var(--line);border-radius:9px;background:var(--panel2)}
+  details.more>summary{cursor:pointer;padding:8px 12px;font-size:12px;color:var(--dim);list-style:none}
+  details.more>summary::-webkit-details-marker{display:none}
+  details.more>summary::before{content:"\25B8  ";color:var(--accent)}
+  details.more[open]>summary::before{content:"\25BE  "}
+  details.more .inner{padding:0 12px 12px;display:flex;flex-direction:column;gap:12px}
   .thesis{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:16px}
   .thesis .ti{margin:10px 0}
   .thesis .ti b{color:var(--accent)}
@@ -154,6 +173,11 @@
       zRange:"Range", zDir:"Dir", zType:"Type", zConf:"Conf", zDist:"Dist",
       keyLvls:"Key levels", lvl:"Level", price:"Price", dist:"Dist",
       thesis:"Day thesis", reviewOf:"Review of", updated:"Updated",
+      verdictGO:"GO", verdictWAIT:"WAIT", verdictAVOID:"AVOID",
+      vBestZone:"Best zone", vInval:"Invalidates", vRange:"Est. range", vDetail:"Show detail",
+      vr:{STRETCHED:"overextended, don't chase", CHOP:"in no-trade zone, no clean edge",
+        CONFLICT:"bias in conflict, stand down", LOWCONV:"low conviction, no clean setup",
+        EDGE:"edge at a mapped level, aligned with bias", NOSETUP:"no clear setup yet"},
       pts:"pts", tk:"tk", refresh:"Refresh", convMap:{alta:"high",media:"medium",baja:"low"}
     },
     es:{
@@ -172,6 +196,11 @@
       zRange:"Rango", zDir:"Dir", zType:"Tipo", zConf:"Conf", zDist:"Dist",
       keyLvls:"Niveles clave", lvl:"Nivel", price:"Precio", dist:"Dist",
       thesis:"Tesis del día", reviewOf:"Revisión de", updated:"Actualizado",
+      verdictGO:"GO", verdictWAIT:"WAIT", verdictAVOID:"AVOID",
+      vBestZone:"Mejor zona", vInval:"Invalida", vRange:"Rango est.", vDetail:"Ver detalle",
+      vr:{STRETCHED:"estirado, no perseguir", CHOP:"en zona de no-trade, sin borde claro",
+        CONFLICT:"sesgo en conflicto, fuera", LOWCONV:"convicción baja, sin setup limpio",
+        EDGE:"borde en nivel mapeado, a favor del sesgo", NOSETUP:"sin setup claro todavía"},
       pts:"pts", tk:"tk", refresh:"Refrescar", convMap:{alta:"alta",media:"media",baja:"baja"}
     }
   };
@@ -248,6 +277,46 @@
     document.getElementById("foot").innerHTML=footHTML(plan);
   }
 
+  function bestZone(d){
+    var best=null;
+    (d.zones||[]).forEach(function(z){
+      var zc=z.confluence||0, bc=best?(best.confluence||0):-1;
+      var zd=Math.abs(z.distPts==null?1e9:z.distPts), bd=best?Math.abs(best.distPts==null?1e9:best.distPts):1e18;
+      if(!best || zc>bc || (zc===bc && zd<bd)) best=z;
+    });
+    return best;
+  }
+  // v1: prefiere el veredicto explícito del agente si existe; si no, deriva con
+  // guardarraíles de disciplina (no codifica el edge completo, solo evita trampas).
+  function deriveVerdict(sy,d,plan,t){
+    var best=bestZone(d);
+    var inval=(d.invalidation && d.invalidation.level!=null)?d.invalidation.level:null;
+    if(d.verdict && d.verdict.signal){
+      return {signal:String(d.verdict.signal).toUpperCase(), reason:d.verdict.reason||"", best:best, inval:inval, agent:true};
+    }
+    var ctx=((d.context||"")+" "+(Array.isArray(plan.summary)?plan.summary.join(" "):"")).toLowerCase();
+    var conv=(d.conviction||"").toLowerCase();
+    var aligned=d.biasAligned;
+    var sig,code;
+    if(/estirad|no perseguir|sobre-?extend|overext/.test(ctx)){ sig="AVOID"; code="STRETCHED"; }
+    else if(/no-?trade|tierra de nadie|chop|sin borde/.test(ctx)){ sig="WAIT"; code="CHOP"; }
+    else if(aligned===false || /en contra|conflicto/.test(ctx)){ sig="WAIT"; code="CONFLICT"; }
+    else if(conv==="baja"){ sig="WAIT"; code="LOWCONV"; }
+    else if((conv==="media"||conv==="alta") && aligned && best && (best.confluence||0)>=3){ sig="GO"; code="EDGE"; }
+    else { sig="WAIT"; code="NOSETUP"; }
+    return {signal:sig, reason:t.vr[code], best:best, inval:inval, agent:false};
+  }
+  function glanceRow(v,d,t){
+    var h='<div class="glance">';
+    if(v.best){
+      var r=(v.best.range&&v.best.range.length===2)?(n(v.best.range[0])+'–'+n(v.best.range[1])):'—';
+      h+='<div class="g"><div class="gl">'+t.vBestZone+'</div><div class="gv"><span class="z-dir '+biasClass(v.best.dir)+'">'+esc(v.best.dir||'')+'</span> '+r+(v.best.type?' · '+esc(v.best.type):'')+'</div></div>';
+    }
+    if(v.inval!=null){ h+='<div class="g"><div class="gl">'+t.vInval+'</div><div class="gv" style="color:var(--short)">'+n(v.inval)+'</div></div>'; }
+    if(d.expectedMove){ h+='<div class="g"><div class="gl">'+t.vRange+'</div><div class="gv">'+n(d.expectedMove.base)+' '+t.pts+' / '+n(d.expectedMove.baseTk)+' '+t.tk+'</div></div>'; }
+    return h+'</div>';
+  }
+
   function card(sy,d,t,plan){
     var bc=biasClass(d.biasSession||d.biasDay);
     var convRaw=(d.conviction||"").toLowerCase();
@@ -260,6 +329,11 @@
        '<span class="spacer"></span>'+
        '<span class="aligned">'+t.biasDay+' '+esc(d.biasDay||"")+' · '+t.biasSes+' '+esc(d.biasSession||"")+' · '+alignedTxt+'</span>';
     h+='</div><div class="cbody">';
+
+    var v=deriveVerdict(sy,d,plan,t);
+    h+='<div class="verdict '+esc(v.signal)+'"><span class="vtag">'+esc(t['verdict'+v.signal]||v.signal)+'</span><span class="vreason">'+esc(v.reason||'')+'</span></div>';
+    h+=glanceRow(v,d,t);
+    h+='<details class="more"><summary>'+esc(t.vDetail)+'</summary><div class="inner">';
 
     if(d.context){ h+='<div class="context">'+esc(d.context)+'</div>'; }
 
@@ -322,7 +396,7 @@
       h+='</tbody></table></div></div>';
     }
 
-    h+='</div></div>';
+    h+='</div></details></div></div>';
     return h;
   }
 
