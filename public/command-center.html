@@ -518,6 +518,25 @@ body::before{
     </div>
   </div>
 
+  <!-- FOCUS · lo único que importa ahora (del Session Analyst) -->
+  <style>
+    .focusbar{margin:12px 0 0;padding:11px 14px;border-radius:12px;background:var(--panel-2);
+      border:1px solid var(--border);border-left:4px solid var(--txt-faint)}
+    .focusbar.go{border-left-color:var(--lime);box-shadow:0 0 26px -10px var(--lime)}
+    .focusbar.avoid{border-left-color:var(--red)}
+    .focusbar.wait{border-left-color:var(--amber)}
+    .fb-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+    .fb-tag{font-family:"Orbitron","JetBrains Mono",monospace;font-size:9px;font-weight:800;
+      letter-spacing:1.2px;padding:2px 7px;border-radius:6px;background:rgba(255,255,255,.06);color:var(--txt-dim)}
+    .focusbar.go .fb-tag{color:var(--lime)} .focusbar.avoid .fb-tag{color:var(--red)} .focusbar.wait .fb-tag{color:var(--amber)}
+    .fb-main{font-size:13px;font-weight:700;color:var(--txt);flex:1;min-width:180px}
+    .fb-age{font-size:9px;color:var(--txt-faint);letter-spacing:.5px}
+    .fb-sub{margin-top:5px;font-size:10.5px;color:var(--txt-dim);line-height:1.5}
+    .fb-sub b{color:var(--txt-dim);font-weight:700}
+    .fb-note{margin-top:4px;font-size:10.5px;color:var(--amber);line-height:1.5}
+  </style>
+  <div class="focusbar" id="focusBar" style="display:none"></div>
+
   <!-- DASH · orden por importancia: 1) contexto del día 2) gate de entrada 3) sesgo/niveles
        4) noticias 5) reglas/disciplina 6) rendimiento 7) roadmap (colapsado, es progreso a largo plazo) -->
   <div class="dash">
@@ -2000,6 +2019,49 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
 })();
 </script>
 
+<!-- ===================== FOCUS · lo único que importa ahora (del Session Analyst bus) ===================== -->
+<script>
+(function(){
+  // El agente Session Analyst publica su plan en un repo publico de GitHub (no puede
+  // salir a tradedadlog.com). Lo leemos directo del raw. Campo `focus` = la unica mejor
+  // oportunidad de los 3 instrumentos, ya destilada.
+  var SA_URL='https://raw.githubusercontent.com/jesusreyna2016/session-analyst-bus/main/plans/latest.json';
+  var bar=document.getElementById('focusBar');
+  if(!bar) return;
+  function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return c==='<'?'&lt;':c==='>'?'&gt;':'&amp;';}); }
+  function ageTxt(iso){ try{ var m=Math.round((Date.now()-new Date(iso))/60000);
+    return m<1?'ahora':m<60?(m+'m'):(Math.round(m/60)+'h'); }catch(e){ return ''; } }
+  function render(plan){
+    var f=plan&&plan.focus;
+    if(!f||!f.sym){ bar.style.display='none'; return; }
+    var v=String(f.verdict||'WAIT').toUpperCase();
+    bar.className='focusbar '+(v==='GO'?'go':v==='AVOID'?'avoid':'wait');
+    var main=[esc(f.sym),esc(f.setup||''),(f.window?'· '+esc(f.window):'')].filter(Boolean).join(' ');
+    var bits=[];
+    if(f.trigger) bits.push('<b>'+T('Gatillo','Trigger')+':</b> '+esc(f.trigger));
+    if(f.invalid) bits.push('<b>'+T('Invalida','Invalid')+':</b> '+esc(f.invalid));
+    var age=ageTxt(plan.generatedAt);
+    bar.innerHTML=
+      '<div class="fb-top"><span class="fb-tag">SA · '+esc(v)+'</span>'+
+        '<span class="fb-main">'+(main||T('sin foco hoy','no focus today'))+'</span>'+
+        (age?'<span class="fb-age">'+esc(age)+'</span>':'')+'</div>'+
+      (bits.length?'<div class="fb-sub">'+bits.join(' &nbsp;·&nbsp; ')+'</div>':'')+
+      (f.note?'<div class="fb-note">'+esc(f.note)+'</div>':'');
+    bar.style.display='';
+    try{ window.__saAlertLevels=Array.isArray(plan.alertLevels)?plan.alertLevels:null; }catch(e){}
+  }
+  function load(){
+    fetch(SA_URL+'?t='+Date.now(),{cache:'no-store'})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(p){ if(p) render(p); })
+      .catch(function(){});
+  }
+  load();
+  setInterval(load, 5*60000);
+  if(window.__i18nRefresh) window.__i18nRefresh.push(load);
+})();
+</script>
+
 <!-- ===================== NUDGE · te avisa cuando el precio se acerca a un nivel edge ===================== -->
 <script>
 (function(){
@@ -2020,9 +2082,21 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
 
   function edges(p){
     var L=p.levels||{};
-    return [['VAH',L.vah],['POC',L.poc],['VAL',L.val],['PDH',L.pdh],['PDL',L.pdl],
-            ['PWH',L.pwh],['PWL',L.pwl],['DO',L.dayOpen],['TDO',L.tdo],['VWAP',L.vwap],
-            ['OR High',L.orH],['OR Low',L.orL]].filter(function(d){ return d[1]!=null; });
+    var e=[['VAH',L.vah],['POC',L.poc],['VAL',L.val],['PDH',L.pdh],['PDL',L.pdl],
+           ['PWH',L.pwh],['PWL',L.pwl],['DO',L.dayOpen],['TDO',L.tdo],['VWAP',L.vwap],
+           ['OR High',L.orH],['OR Low',L.orL]].filter(function(d){ return d[1]!=null; });
+    // niveles curados del Session Analyst (alertLevels) para este simbolo, al frente
+    try{
+      var sym=(p.sym||'NQ').toUpperCase();
+      var pre=(window.__saAlertLevels||[]).filter(function(a){
+        return a && (a.sym||'NQ').toUpperCase()===sym && a.price!=null;
+      }).map(function(a){
+        var nm=a.kind==='zoneA'?'A+':a.kind==='invalidation'?T('Invalida','Invalid'):a.kind==='gapEdge'?'Gap':'SA';
+        return [nm+(a.dir?' '+a.dir:''), a.price];
+      });
+      if(pre.length) e=pre.concat(e);
+    }catch(err){}
+    return e;
   }
   function ping(){
     try{ if(typeof actx==='function'){ var c=actx(); if(c&&c.state==='suspended') c.resume(); } }catch(e){}
