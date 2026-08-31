@@ -2045,6 +2045,10 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   var bar=document.getElementById('focusBar');
   if(!bar) return;
   function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return c==='<'?'&lt;':c==='>'?'&gt;':'&amp;';}); }
+  // plan bilingue {es,en}: saca el string del idioma activo; tolera strings sueltos (planes viejos)
+  function L(x){ if(x==null) return ''; if(typeof x!=='object') return String(x);
+    var lg=(window.CC_LANG==='es')?'es':'en'; var v=(x[lg]!=null)?x[lg]:(x.en!=null?x.en:(x.es!=null?x.es:''));
+    return (typeof v==='object')?'':String(v); }
   function ageTxt(iso){ try{ var m=Math.round((Date.now()-new Date(iso))/60000);
     return m<1?'ahora':m<60?(m+'m'):(Math.round(m/60)+'h'); }catch(e){ return ''; } }
   function render(plan){
@@ -2054,17 +2058,17 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if(!f||!f.sym){ bar.style.display='none'; return; }
     var v=String(f.verdict||'WAIT').toUpperCase();
     bar.className='focusbar '+(v==='GO'?'go':v==='AVOID'?'avoid':'wait');
-    var main=[esc(f.sym),esc(f.setup||''),(f.window?'· '+esc(f.window):'')].filter(Boolean).join(' ');
+    var main=[esc(f.sym),esc(L(f.setup)),(f.window?'· '+esc(f.window):'')].filter(Boolean).join(' ');
     var bits=[];
-    if(f.trigger) bits.push('<b>'+T('Gatillo','Trigger')+':</b> '+esc(f.trigger));
-    if(f.invalid) bits.push('<b>'+T('Invalida','Invalid')+':</b> '+esc(f.invalid));
+    if(L(f.trigger)) bits.push('<b>'+T('Gatillo','Trigger')+':</b> '+esc(L(f.trigger)));
+    if(L(f.invalid)) bits.push('<b>'+T('Invalida','Invalid')+':</b> '+esc(L(f.invalid)));
     var age=ageTxt(plan.generatedAt);
     bar.innerHTML=
       '<div class="fb-top"><span class="fb-tag">SA · '+esc(v)+'</span>'+
         '<span class="fb-main">'+(main||T('sin foco hoy','no focus today'))+'</span>'+
         (age?'<span class="fb-age">'+esc(age)+'</span>':'')+'</div>'+
       (bits.length?'<div class="fb-sub">'+bits.join(' &nbsp;·&nbsp; ')+'</div>':'')+
-      (f.note?'<div class="fb-note">'+esc(f.note)+'</div>':'');
+      (L(f.note)?'<div class="fb-note">'+esc(L(f.note))+'</div>':'');
     bar.style.display='';
   }
   function load(){
