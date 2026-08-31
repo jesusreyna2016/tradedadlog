@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Session Plan · TradeDadLog</title>
+<meta name="theme-color" content="#0a0e14" />
+<style>
+  :root{
+    --bg:#0a0e14; --panel:#111722; --panel2:#0e141d; --line:#1e2836;
+    --txt:#e6edf3; --dim:#8b97a7; --dim2:#5d6b7d;
+    --short:#ff5c6c; --long:#37d67a; --neutral:#7c8aa0;
+    --accent:#5db3ff; --gold:#f5c451; --warn:#ffab52;
+    --chipbg:#18212e;
+    --mono:'SFMono-Regular',ui-monospace,'Cascadia Code','Consolas',monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.45}
+  a{color:var(--accent)}
+  .wrap{max-width:820px;margin:0 auto;padding:0 14px 60px}
+
+  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,var(--bg) 70%,rgba(10,14,20,.0));
+    padding:12px 0 8px;border-bottom:1px solid var(--line);margin-bottom:14px}
+  .hrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .brand{font-weight:700;letter-spacing:.3px;font-size:15px}
+  .brand small{color:var(--dim);font-weight:500}
+  .spacer{flex:1}
+  .btn{background:var(--chipbg);border:1px solid var(--line);color:var(--txt);
+    border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;font-family:var(--sans)}
+  .btn:active{transform:translateY(1px)}
+  .btn.mini{padding:4px 8px;font-size:12px}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;color:var(--dim);font-size:12.5px}
+  .pill{background:var(--chipbg);border:1px solid var(--line);border-radius:999px;padding:2px 9px;color:var(--txt)}
+  .pill.warn{color:var(--warn);border-color:#3a2c17}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
+  .dot.ok{background:var(--long)} .dot.old{background:var(--warn)} .dot.err{background:var(--short)}
+
+  .clean{background:linear-gradient(90deg,rgba(245,196,81,.12),rgba(245,196,81,0));
+    border:1px solid #3a3320;border-left:3px solid var(--gold);border-radius:10px;
+    padding:10px 12px;margin-bottom:14px;font-size:14px}
+  .clean b{color:var(--gold)}
+
+  .summary{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:16px}
+  .summary h2,.thesis h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin:0 0 8px}
+  .summary ul{margin:0;padding-left:18px}
+  .summary li{margin:5px 0;color:var(--txt)}
+
+  .cards{display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .chead{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .sym{font-size:20px;font-weight:800;letter-spacing:.5px}
+  .bias{font-weight:800;font-size:13px;padding:3px 10px;border-radius:8px;letter-spacing:.6px}
+  .bias.SHORT{background:rgba(255,92,108,.14);color:var(--short);border:1px solid rgba(255,92,108,.3)}
+  .bias.LONG{background:rgba(55,214,122,.14);color:var(--long);border:1px solid rgba(55,214,122,.3)}
+  .bias.NEUTRAL,.bias.NEUTRO{background:rgba(124,138,160,.14);color:var(--neutral);border:1px solid rgba(124,138,160,.3)}
+  .conv{font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+  .conv.alta,.conv\.high{color:var(--long)}
+  .aligned{font-size:11px;color:var(--dim2)}
+  .cbody{padding:12px 14px;display:flex;flex-direction:column;gap:12px}
+
+  .context{font-size:13.5px;color:#cdd7e2}
+  .sec-label{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);margin-bottom:5px}
+
+  .em{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .em-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .em-base{font-size:22px;font-weight:800;font-family:var(--mono)}
+  .em-unit{color:var(--dim);font-size:12px}
+  .em-range{color:var(--dim);font-size:12.5px;font-family:var(--mono)}
+  .em-flag{margin-left:auto;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;
+    background:rgba(255,171,82,.14);color:var(--warn);border:1px solid rgba(255,171,82,.3)}
+  .bar{height:6px;background:var(--line);border-radius:4px;margin-top:9px;overflow:hidden}
+  .bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--gold))}
+  .em-budget{display:flex;justify-content:space-between;font-size:11.5px;color:var(--dim);margin-top:6px;font-family:var(--mono)}
+
+  .scen{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--panel2)}
+  .scen .tag{font-size:11px;font-weight:800;letter-spacing:.5px;color:var(--accent)}
+  .scen.b .tag{color:var(--neutral)}
+  .scen p{margin:6px 0 0;font-size:13.5px}
+  .kv{font-size:12px;color:var(--dim);font-family:var(--mono);margin-top:6px;display:flex;gap:14px;flex-wrap:wrap}
+  .kv b{color:var(--txt);font-weight:600}
+
+  .inval{border:1px solid rgba(255,92,108,.25);background:rgba(255,92,108,.06);border-radius:10px;padding:10px 12px}
+  .inval .sec-label{color:var(--short)}
+  .inval p{margin:0;font-size:13.5px}
+  .inval .lvl{font-family:var(--mono);color:var(--short);font-weight:700}
+
+  .ntz{font-family:var(--mono);font-size:12.5px;color:var(--warn)}
+
+  table{width:100%;border-collapse:collapse;font-size:12.5px;font-family:var(--mono)}
+  th{text-align:left;color:var(--dim2);font-weight:600;font-size:10.5px;text-transform:uppercase;
+    letter-spacing:.5px;padding:4px 6px;border-bottom:1px solid var(--line)}
+  td{padding:5px 6px;border-bottom:1px solid #151d28}
+  tr:last-child td{border-bottom:none}
+  .z-dir.SHORT{color:var(--short)} .z-dir.LONG{color:var(--long)}
+  .conf{display:inline-block;min-width:16px;text-align:center;background:var(--chipbg);
+    border-radius:5px;padding:1px 5px;color:var(--gold)}
+  .num{text-align:right}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  .thesis{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:16px}
+  .thesis .ti{margin:10px 0}
+  .thesis .ti b{color:var(--accent)}
+  .thesis .ti p{margin:3px 0 0;font-size:13.5px;color:#cdd7e2}
+
+  .foot{margin-top:22px;color:var(--dim2);font-size:11.5px;text-align:center;line-height:1.7}
+  .state{color:var(--dim);font-size:12px}
+  .loading,.error{padding:40px 10px;text-align:center;color:var(--dim)}
+  .error{color:var(--short)}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="hrow">
+      <span class="brand">Session Analyst <small>· TradeDadLog</small></span>
+      <span class="spacer"></span>
+      <button class="btn mini" id="langBtn">ES</button>
+      <button class="btn mini" id="refreshBtn">&#8635;</button>
+    </div>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <div id="content">
+    <div class="loading" id="loading">Loading plan&hellip;</div>
+  </div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var PLAN_URL = "https://raw.githubusercontent.com/jesusreyna2016/session-analyst-bus/main/plans/latest.json";
+  var REVIEW_BASE = "https://github.com/jesusreyna2016/session-analyst-bus/blob/main/reviews/";
+  var SYMS = ["NQ","ES","GC"];
+
+  var T = {
+    en:{
+      loading:"Loading plan…", err:"Could not load the plan. ",
+      empty:"No plan yet. The next routine run will write one.",
+      session:"Session", generated:"Generated", cleanest:"Cleanest",
+      cleanestTxt:"is the cleanest read right now.",
+      lagged:"lagged data", live:"live",
+      summary:"Session summary", biasDay:"Day", biasSes:"Session",
+      aligned:"aligned", notAligned:"conflict", conv:"conviction",
+      context:"Context", expMove:"Expected move (this session)",
+      dayBudget:"day budget", used:"used", left:"left",
+      scenA:"Scenario A", scenB:"Scenario B", trigger:"Trigger",
+      target:"Target", entry:"Entry", inval:"Invalidation", at:"at",
+      noTrade:"No-trade zone", zones:"High-probability zones",
+      zRange:"Range", zDir:"Dir", zType:"Type", zConf:"Conf", zDist:"Dist",
+      keyLvls:"Key levels", lvl:"Level", price:"Price", dist:"Dist",
+      thesis:"Day thesis", reviewOf:"Review of", updated:"Updated",
+      pts:"pts", tk:"tk", refresh:"Refresh", convMap:{alta:"high",media:"medium",baja:"low"}
+    },
+    es:{
+      loading:"Cargando plan…", err:"No se pudo cargar el plan. ",
+      empty:"Aún no hay plan. La próxima corrida de la rutina escribirá uno.",
+      session:"Sesión", generated:"Generado", cleanest:"Más limpio",
+      cleanestTxt:"es la lectura más limpia ahora mismo.",
+      lagged:"datos rezagados", live:"en vivo",
+      summary:"Resumen de sesión", biasDay:"Día", biasSes:"Sesión",
+      aligned:"alineado", notAligned:"en conflicto", conv:"convicción",
+      context:"Contexto", expMove:"Movimiento esperado (esta sesión)",
+      dayBudget:"presupuesto día", used:"usado", left:"resta",
+      scenA:"Escenario A", scenB:"Escenario B", trigger:"Gatillo",
+      target:"Objetivo", entry:"Entrada", inval:"Invalidación", at:"en",
+      noTrade:"Zona de no-trade", zones:"Zonas de alta probabilidad",
+      zRange:"Rango", zDir:"Dir", zType:"Tipo", zConf:"Conf", zDist:"Dist",
+      keyLvls:"Niveles clave", lvl:"Nivel", price:"Precio", dist:"Dist",
+      thesis:"Tesis del día", reviewOf:"Revisión de", updated:"Actualizado",
+      pts:"pts", tk:"tk", refresh:"Refrescar", convMap:{alta:"alta",media:"media",baja:"baja"}
+    }
+  };
+
+  var lang = (function(){ try{return localStorage.getItem("sa_lang")||"en";}catch(e){return "en";} })();
+  var lastPlan = null;
+
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function n(x,d){ if(x==null||isNaN(x))return "—"; var v=Number(x);
+    return d!=null? v.toFixed(d): (Math.abs(v)>=1000? v.toLocaleString("en-US"): String(v)); }
+  function biasClass(b){ b=(b||"").toUpperCase(); return (b==="SHORT"||b==="LONG")?b:"NEUTRAL"; }
+
+  function fmtWhen(iso, t){
+    if(!iso) return "";
+    var dt=new Date(iso); if(isNaN(dt)) return esc(iso);
+    var opt={month:"short",day:"2-digit",hour:"2-digit",minute:"2-digit"};
+    return dt.toLocaleString(lang==="es"?"es-MX":"en-US",opt);
+  }
+  function ageHours(iso){ if(!iso)return 999; var dt=new Date(iso); if(isNaN(dt))return 999;
+    return (Date.now()-dt.getTime())/3600000; }
+
+  function render(plan){
+    var t=T[lang];
+    var meta=document.getElementById("meta");
+    var content=document.getElementById("content");
+
+    if(!plan || Object.keys(plan).length===0 || !plan.instruments){
+      meta.innerHTML="";
+      content.innerHTML='<div class="error">'+esc(t.empty)+'</div>';
+      document.getElementById("foot").innerHTML=footHTML(plan);
+      return;
+    }
+
+    // meta bar
+    var lagged = (plan.dataStatus==="lagged") || /rezag|lag/i.test(plan.summary&&plan.summary.join?plan.summary.join(" "):"");
+    var age = ageHours(plan.generatedAt);
+    var freshDot = age>8 ? "old" : "ok";
+    meta.innerHTML =
+      '<span class="pill">'+esc((plan.session||"").toUpperCase())+' · '+esc(plan.runType||"")+'</span>'+
+      '<span class="pill">'+esc(plan.date||"")+'</span>'+
+      '<span class="state"><span class="dot '+freshDot+'"></span>'+t.generated+' '+fmtWhen(plan.generatedAt,t)+'</span>'+
+      (lagged?'<span class="pill warn">'+t.lagged+'</span>':'');
+
+    var html="";
+    // cleanest banner
+    if(plan.cleanest){
+      html+='<div class="clean"><b>'+t.cleanest+': '+esc(plan.cleanest)+'</b> &middot; '+
+        esc(plan.cleanest)+' '+t.cleanestTxt+'</div>';
+    }
+    // summary
+    if(plan.summary && plan.summary.length){
+      html+='<div class="summary"><h2>'+t.summary+'</h2><ul>';
+      plan.summary.forEach(function(s){ html+='<li>'+esc(s)+'</li>'; });
+      html+='</ul></div>';
+    }
+    // instrument cards
+    html+='<div class="cards">';
+    SYMS.forEach(function(sy){
+      var d=plan.instruments[sy]; if(!d) return;
+      html+=card(sy,d,t,plan);
+    });
+    html+='</div>';
+    // day thesis
+    if(plan.dayThesis){
+      html+='<div class="thesis"><h2>'+t.thesis+'</h2>';
+      SYMS.forEach(function(sy){
+        if(plan.dayThesis[sy]) html+='<div class="ti"><b>'+sy+'</b><p>'+esc(plan.dayThesis[sy])+'</p></div>';
+      });
+      html+='</div>';
+    }
+
+    content.innerHTML=html;
+    document.getElementById("foot").innerHTML=footHTML(plan);
+  }
+
+  function card(sy,d,t,plan){
+    var bc=biasClass(d.biasSession||d.biasDay);
+    var convRaw=(d.conviction||"").toLowerCase();
+    var conv=(t.convMap[convRaw]||d.conviction||"");
+    var alignedTxt = d.biasAligned ? t.aligned : t.notAligned;
+    var h='<div class="card">';
+    h+='<div class="chead"><span class="sym">'+sy+'</span>'+
+       '<span class="bias '+bc+'">'+esc((d.biasSession||d.biasDay||"").toUpperCase())+'</span>'+
+       (conv?'<span class="conv">'+t.conv+': '+esc(conv)+'</span>':'')+
+       '<span class="spacer"></span>'+
+       '<span class="aligned">'+t.biasDay+' '+esc(d.biasDay||"")+' · '+t.biasSes+' '+esc(d.biasSession||"")+' · '+alignedTxt+'</span>';
+    h+='</div><div class="cbody">';
+
+    if(d.context){ h+='<div class="context">'+esc(d.context)+'</div>'; }
+
+    // expected move
+    var em=d.expectedMove;
+    if(em){
+      var usedPct=em.dayUsedPct!=null?em.dayUsedPct:(em.dayBudget?Math.round(100*(em.dayUsed||0)/em.dayBudget):0);
+      h+='<div><div class="sec-label">'+t.expMove+'</div><div class="em">'+
+         '<div class="em-top"><span class="em-base">'+n(em.base)+'</span>'+
+         '<span class="em-unit">'+t.pts+' / '+n(em.baseTk)+' '+t.tk+'</span>'+
+         '<span class="em-range">('+n(em.low)+'–'+n(em.high)+' '+t.pts+')</span>'+
+         (em.flag?'<span class="em-flag">'+esc(em.flag)+'</span>':'')+'</div>'+
+         '<div class="bar"><span style="width:'+Math.max(2,Math.min(100,usedPct))+'%"></span></div>'+
+         '<div class="em-budget"><span>'+t.dayBudget+': '+n(em.dayBudget)+' '+t.pts+'</span>'+
+         '<span>'+t.used+': '+n(usedPct)+'%</span>'+
+         '<span>'+t.left+': '+n(em.dayRemaining)+' '+t.pts+'</span></div>'+
+         '</div></div>';
+    }
+
+    // scenarios
+    if(d.scenarioA){ h+=scen("A",t.scenA,d.scenarioA,t,false); }
+    if(d.scenarioB){ h+=scen("B",t.scenB,d.scenarioB,t,true); }
+
+    // invalidation
+    if(d.invalidation){
+      h+='<div class="inval"><div class="sec-label">'+t.inval+'</div><p>'+esc(d.invalidation.text||"")+
+         (d.invalidation.level!=null?' <span class="lvl">'+t.at+' '+n(d.invalidation.level)+'</span>':'')+'</p></div>';
+    }
+
+    // no-trade zone
+    if(d.noTradeZone && d.noTradeZone.length===2){
+      h+='<div><span class="sec-label" style="display:inline">'+t.noTrade+': </span>'+
+         '<span class="ntz">'+n(d.noTradeZone[0])+' – '+n(d.noTradeZone[1])+'</span></div>';
+    }
+
+    // zones
+    if(d.zones && d.zones.length){
+      h+='<div><div class="sec-label">'+t.zones+'</div><div class="scroll"><table>'+
+         '<thead><tr><th>'+t.zRange+'</th><th>'+t.zDir+'</th><th>'+t.zType+'</th>'+
+         '<th>'+t.zConf+'</th><th class="num">'+t.zDist+'</th></tr></thead><tbody>';
+      d.zones.forEach(function(z){
+        var r=(z.range&&z.range.length===2)?(n(z.range[0])+"–"+n(z.range[1])):"—";
+        h+='<tr><td>'+r+'</td>'+
+           '<td class="z-dir '+biasClass(z.dir)+'">'+esc(z.dir||"")+'</td>'+
+           '<td>'+esc(z.type||"")+'</td>'+
+           '<td><span class="conf">'+n(z.confluence)+'</span></td>'+
+           '<td class="num">'+n(z.distPts)+' '+t.pts+' / '+n(z.distTicks)+t.tk+'</td></tr>';
+      });
+      h+='</tbody></table></div></div>';
+    }
+
+    // key levels
+    if(d.keyLevels && d.keyLevels.length){
+      h+='<div><div class="sec-label">'+t.keyLvls+'</div><div class="scroll"><table>'+
+         '<thead><tr><th>'+t.lvl+'</th><th class="num">'+t.price+'</th><th class="num">'+t.dist+'</th></tr></thead><tbody>';
+      d.keyLevels.forEach(function(k){
+        h+='<tr><td>'+esc(k.name||"")+'</td><td class="num">'+n(k.price)+'</td>'+
+           '<td class="num">'+n(k.distPts)+' '+t.pts+' / '+n(k.distTicks)+t.tk+'</td></tr>';
+      });
+      h+='</tbody></table></div></div>';
+    }
+
+    h+='</div></div>';
+    return h;
+  }
+
+  function scen(letter,label,s,t,isB){
+    var h='<div class="scen'+(isB?' b':'')+'"><span class="tag">'+label+'</span>';
+    if(s.text) h+='<p>'+esc(s.text)+'</p>';
+    var kv=[];
+    if(s.trigger) kv.push('<span>'+t.trigger+': <b>'+esc(s.trigger)+'</b></span>');
+    if(s.target!=null) kv.push('<span>'+t.target+': <b>'+n(s.target)+'</b></span>');
+    if(s.entryZone && s.entryZone.length===2) kv.push('<span>'+t.entry+': <b>'+n(s.entryZone[0])+'–'+n(s.entryZone[1])+'</b></span>');
+    if(kv.length) h+='<div class="kv">'+kv.join("")+'</div>';
+    h+='</div>';
+    return h;
+  }
+
+  function footHTML(plan){
+    var t=T[lang];
+    var h='';
+    if(plan && plan.reviewYesterday){
+      h+=t.reviewOf+' <a href="'+REVIEW_BASE+esc(plan.reviewYesterday)+'.md" target="_blank" rel="noopener">'+esc(plan.reviewYesterday)+'</a> &middot; ';
+    }
+    h+='<a href="https://github.com/jesusreyna2016/session-analyst-bus/blob/main/plans/latest.json" target="_blank" rel="noopener">raw JSON</a>';
+    h+='<br>'+t.updated+' '+new Date().toLocaleTimeString(lang==="es"?"es-MX":"en-US");
+    return h;
+  }
+
+  function load(){
+    var t=T[lang];
+    if(!lastPlan){ document.getElementById("content").innerHTML='<div class="loading">'+t.loading+'</div>'; }
+    fetch(PLAN_URL+"?t="+Date.now(),{cache:"no-store"})
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(p){ lastPlan=p; render(p); })
+      .catch(function(e){
+        if(lastPlan){ render(lastPlan); return; }
+        document.getElementById("content").innerHTML='<div class="error">'+esc(t.err)+esc(e.message)+'</div>';
+      });
+  }
+
+  function setLang(l){
+    lang=l; try{localStorage.setItem("sa_lang",l);}catch(e){}
+    document.documentElement.lang=l;
+    document.getElementById("langBtn").textContent = (l==="en"?"ES":"EN");
+    if(lastPlan) render(lastPlan);
+  }
+
+  document.getElementById("langBtn").addEventListener("click",function(){ setLang(lang==="en"?"es":"en"); });
+  document.getElementById("refreshBtn").addEventListener("click",function(){ lastPlan=null; load(); });
+
+  setLang(lang);
+  load();
+  setInterval(load, 5*60*1000);
+})();
+</script>
+</body>
+</html>
