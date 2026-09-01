@@ -1,0 +1,77 @@
+{
+  "updated": "2026-08-31",
+  "cycle": 1,
+  "account": { "handle": "TradeDadLog", "followers": 771, "posts": 636 },
+  "followerHistory": [
+    { "date": "2026-08-26", "followers": 759 },
+    { "date": "2026-08-31", "followers": 771 }
+  ],
+  "recentPosts": [
+    { "date": "2026-08-28", "id": "2093381057781322204", "excerpt": "My 100k @Topstep Eval so far: Green day. Red day...", "views": 6800, "likes": 54, "replies": 7, "format": "pattern" },
+    { "date": "2026-08-30", "id": "2094205399725670891", "excerpt": "Market opens and I gift myself another red day. Hit DLL...", "views": 2800, "likes": null, "replies": null, "format": "confession" },
+    { "date": "2026-08-27", "id": "2093032579708408118", "excerpt": "I've said 'this time is different' so many times it stopped meaning anything...", "views": 1500, "likes": 28, "replies": 14, "format": "confession" },
+    { "date": "2026-08-31", "id": "2094462688575283458", "excerpt": "Passing an eval isn't the hard part for me. The hard part is not sabotaging it...", "views": 777, "likes": null, "replies": null, "format": "truth-bomb" },
+    { "date": "2026-08-31", "id": "2094580592495002023", "excerpt": "Knowing the rule was never the problem... the ten seconds after you already knew better.", "views": 382, "likes": 6, "replies": 1, "format": "aphorism", "note": "too young to judge" }
+  ],
+  "formatPerformance": [
+    { "format": "pattern", "medianViews": 6800, "count": 1 },
+    { "format": "confession", "medianViews": 2150, "count": 2 },
+    { "format": "truth-bomb", "medianViews": 777, "count": 1 },
+    { "format": "aphorism", "medianViews": 382, "count": 1, "note": "sample too young" }
+  ],
+  "drafts": [
+    {
+      "rank": 1,
+      "format": "aphorism",
+      "text": "The plan always gets written by the calm version of me.\nNothing on the line. All patience. Thinks clearly.\nThat guy is never in the room when price rips against my stop.\nThe one who shows up then just wants to be right.\nTrading is learning to obey the calm one after he's already left.",
+      "source": "RealizedTrader mechanism + Glenn 10-sec seed",
+      "why": "Universal split every trader feels, citable last line, no question = repost bait. First person makes it ours."
+    },
+    {
+      "rank": 2,
+      "format": "truth-bomb",
+      "text": "Easiest thing in the world is to feel bad about a red day and scroll past it.\nHardest thing is to line your losses up next to each other and actually look.\nThey're never random. Same setup. Same time of day. Same feeling in your chest right before you click.\nThe shame isn't protecting you. It's protecting the pattern.",
+      "source": "@leahlager comment (used)",
+      "why": "Turns a common comment into a sharp reframe, universal so no fabricated numbers needed."
+    },
+    {
+      "rank": 3,
+      "format": "question",
+      "text": "Honest question for the prop firm crowd.\nWhat's the real gap between passing an eval and staying passed?\nFor me it was never the strategy. It was the ten seconds after a clean trend when I decide I suddenly know better.",
+      "source": "Jesus's own recurring theme",
+      "why": "Direct question = reply engine, ties to his real posted theme, invites the exact audience he wants."
+    }
+  ],
+  "plan": "Lead with Draft 1 (aphorism) for reach. Post Draft 3 a day later for conversation. Hold Draft 2 as the mid-week reframe. Space them out, never stack two in one window.",
+  "read": {
+    "working": "Concrete + numbers + a twist still wins reach (the Green/Red eval post hit 6.8K). Aphorisms pull fewer views but the highest-quality replies.",
+    "stop": "Stacking two low-variety truth-bombs hours apart. Both underperformed (777 and 382). Space formats out.",
+    "watch": "The '10-second window' idea. Two different people named it in comments today. It's a full post: what drives that window (need to be right vs escape vs ego)."
+  },
+  "prediction": {
+    "week": "2026-08-31",
+    "claim": "Draft 1 (aphorism) clears the recent median of ~1.5K views within 48h of posting.",
+    "status": "pending"
+  },
+  "engageList": [
+    { "handle": "@RealizedTrader", "postExcerpt": "The plan was written by a version of you who was calm and had nothing at stake...", "whyReply": "Your best commenter and a peer running the same aphorism lane. A sharp reply here builds the relationship and borrows his audience." },
+    { "handle": "@SmarterForexAU", "postExcerpt": "commented on your aphorism about the 10-second window (right / escape / status)", "whyReply": "Thoughtful reply on your post. Answer his question back to deepen the thread and signal you actually read." }
+  ],
+  "backlog": {
+    "open": [
+      "Not every gap is 'the market testing you' - sometimes it's just news (toddc, 27 ago)",
+      "Anatomy of the 10-second window: right vs escape vs status (Glenn Christensen, 31 ago)",
+      "'It takes years to stop you, from you' + market hypnosis (DE-RAH, 31 ago)",
+      "The two selves / calm planner, longer confession version still open (RealizedTrader scan, 31 ago)"
+    ],
+    "used": [
+      "Aphorism riff 'Knowing the rule was never the problem' (RealizedTrader) - posted 31 ago",
+      "Analyse your losers for a pattern (leahlager) - draft 2, cycle #1"
+    ]
+  },
+  "scorecard": [
+    { "week": "2026-08-31", "draft": "D1 calm-planner", "format": "aphorism", "adopted": "pending", "url": null, "result": null },
+    { "week": "2026-08-31", "draft": "D2 analyse-your-losers", "format": "truth-bomb", "adopted": "pending", "url": null, "result": null },
+    { "week": "2026-08-31", "draft": "D3 gap passing/staying", "format": "question", "adopted": "pending", "url": null, "result": null }
+  ]
+}

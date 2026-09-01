@@ -37,11 +37,12 @@ Read, in full, before doing anything else:
 - `x-growth-reports/_state.md` — accumulated learnings, the draft scorecard, running hypotheses.
 - The most recent `x-growth-reports/<date>-report.md` (last week's 3 drafts), if any.
 
-### 2. Adoption check (did last week's drafts get used, and did they work?)
+### 2. Adoption check + score last week's prediction
 For each of last week's 3 drafts, mark **ADOPTED** (with the real post URL + its metrics) or
 **NOT ADOPTED**. If adopted, judge honestly: did it perform above or below this account's
 median? Feed the verdict into `_state.md` — this is how the agent gets sharper over time.
-First run ever: skip and say so.
+Also read last week's `prediction` in the data file and grade it **hit** or **miss** against
+the real numbers. A prediction you never check is worthless. First run ever: skip and say so.
 
 ### 3. Self-performance check (what's landing on YOUR account)
 - INTERACTIVE: open Jesus's last 5-7 posts by their status URL (`x.com/TradeDadLog/status/<id>`),
@@ -68,17 +69,29 @@ performing** right now (high views, high replies, lots of reposts) and reverse-e
   tell it was lifted, it failed. The bar is: same *insight class*, completely different, more
   personal, more true execution.
 
-### 5. Draft exactly 3 posts
+### 5. Draft posts (generate 5, ship the best 3)
+- Write **5** candidates, then self-critique hard against the voice profile and the anti-AI pass,
+  and keep only the **3** strongest. A demanding agent kills its own weak drafts before Jesus sees them.
 - Prefer drafting from an OPEN idea in the backlog when one fits; otherwise a universal trading
   mistake per the voice profile. Never fabricate personal anecdotes or dollar figures — if
   there's no real anchor Jesus gave, stay universal.
-- Each of the 3 must use a **different structural format** from the other two (rotate: aphorism,
+- Each of the final 3 must use a **different structural format** from the other two (rotate: aphorism,
   real-time confession, "Don't be like me!", self-quote thread, community question, truth-bomb,
   victory+personal). Never ship two of the same template in one batch — this was explicitly
   rejected before.
+- Bias the mix toward whatever format is over-performing in `formatPerformance` right now, but
+  always keep at least one aphorism (best reach shape) in rotation.
 - For each draft include: the post text, which format it is, which idea/source it came from,
   and one line on why it should land (which lever it pulls).
 - Mark any backlog idea you used as `[USED YYYY-MM-DD]`.
+
+### 5b. Build the engage list + the weekly prediction
+- **Engage list:** from the peer scan and your own post comments, pick 2-3 specific posts Jesus
+  should reply to this week (replying to sharp accounts is one of the fastest organic-growth
+  levers). For each: the handle, the post excerpt, and one line on why replying there pays off.
+- **Weekly prediction:** state ONE falsifiable claim about this week (e.g. "the aphorism draft
+  clears the ~1.5K median within 48h", or "question-format posts will out-reply confessions").
+  Next cycle grades it. This forces the agent to have a real thesis, not vibes.
 
 ### 6. The anti-AI-tells pass (do NOT skip — this is the whole point)
 Before a draft is allowed into the report, run it through this filter. If it fails, rewrite it.
@@ -93,8 +106,13 @@ Before a draft is allowed into the report, run it through this filter. If it fai
 - Read it out loud in your head. If no human friend talks like that, rewrite.
 
 ### 7. Write outputs
-- `x-growth-reports/<YYYY-MM-DD>-report.md`: the adoption check, the ranked self-performance
-  read, the niche findings (with the "how we beat it" line each), and the 3 drafts.
+- `x-growth-reports/<YYYY-MM-DD>-report.md`: the adoption check, the prediction grade, the ranked
+  self-performance read, the niche findings (with the "how we beat it" line each), and the 3 drafts.
+- **`public/x-growth-data.json`** — the structured data that powers the dashboard at
+  tradedadlog.com/x-growth.html. Update EVERY cycle. Keep the existing schema exactly (keys:
+  updated, cycle, account, followerHistory[append a point], recentPosts, formatPerformance,
+  drafts, plan, read{working,stop,watch}, prediction{week,claim,status}, engageList, backlog{open,used},
+  scorecard[append this week's 3 + fill in last week's adopted/result]). This is what Jesus actually looks at.
 - Update `x-growth-reports/_content-ideas-backlog.md` (new ideas added, used ones marked).
 - Update `x-growth-reports/_state.md` (scorecard + any new learning about what works).
 - INTERACTIVE mode also refreshes `x-growth-reports/live/x-snapshot.md` with the raw metrics +
