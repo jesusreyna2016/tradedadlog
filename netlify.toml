@@ -89,3 +89,9 @@
   from = "/api/scalp-bus-snapshot"
   to = "/.netlify/functions/scalp-bus-snapshot"
   status = 200
+
+# Scalp CC · feed del dashboard (public/scalp.html)
+[[redirects]]
+  from = "/api/scalp-state"
+  to = "/.netlify/functions/scalp-state"
+  status = 200

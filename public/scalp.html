@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scalp CC Agent</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧪</text></svg>">
+<style>
+  :root{
+    --bg:#0d1117; --panel:#12181f; --panel2:#0f151c; --border:#2a2e39;
+    --ink:#e6edf3; --dim:#8b949e; --up:#00E676; --dn:#FF5252; --warn:#f59e0b; --acc:#22d3ee;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  a{color:var(--acc);text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:18px 16px 60px}
+  header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  header h1{font-size:18px;margin:0;font-weight:650;letter-spacing:.2px}
+  .fresh{color:var(--dim);font-size:12px}
+  .spacer{flex:1}
+  .btn{border:1px solid var(--border);background:var(--panel);color:var(--ink);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer}
+  .btn:hover{border-color:var(--acc)}
+  .grid{display:grid;gap:12px}
+  .tiles{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px}
+  .card h2{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--dim);font-weight:650}
+  .tile .k{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
+  .tile .v{font-size:22px;font-weight:700;margin-top:4px}
+  .tile .s{font-size:11px;color:var(--dim);margin-top:2px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:right;padding:6px 8px;border-bottom:1px solid var(--border)}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--dim);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+  tbody tr:hover{background:var(--panel2)}
+  .pos{color:var(--up)} .neg{color:var(--dn)} .amb{color:var(--warn)} .mut{color:var(--dim)}
+  .alertbar{background:rgba(255,82,82,.1);border:1px solid rgba(255,82,82,.4);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+  .alertbar h2{color:var(--dn)}
+  .alertbar ul{margin:6px 0 0;padding-left:18px}
+  .ladder{display:flex;gap:6px;flex-wrap:wrap}
+  .rung{flex:1;min-width:120px;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;background:var(--panel2);color:var(--dim)}
+  .rung.on{border-color:var(--acc);color:var(--ink);background:rgba(34,211,238,.08)}
+  .rung b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--acc)}
+  .feed{max-height:340px;overflow:auto}
+  .feed .row{display:flex;gap:8px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+  .feed .row .id{color:var(--dim);font-variant-numeric:tabular-nums}
+  .pill{border:1px solid var(--border);border-radius:999px;padding:1px 7px;font-size:11px}
+  .two{grid-template-columns:1fr 1fr}
+  @media(max-width:820px){.two{grid-template-columns:1fr}}
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:1px 5px;font-size:12px}
+  .empty{color:var(--dim);font-size:13px;padding:6px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🧪 <span data-t="title">Scalp CC Agent</span></h1>
+    <span class="fresh" id="fresh"></span>
+    <span class="spacer"></span>
+    <button class="btn" id="lang">ES</button>
+    <a class="btn" href="/command-center.html" data-t="cc">Command Center</a>
+  </header>
+  <div id="app"><p class="empty" data-t="loading">Loading…</p></div>
+  <p class="fresh" style="margin-top:24px">
+    <a href="https://github.com/jesusreyna2016/scalp-cc-bus" target="_blank" rel="noopener">scalp-cc-bus</a> ·
+    <a href="https://claude.ai/code/routines/trig_01Hx7byYhQwqvkbDwJnX7x9m" target="_blank" rel="noopener" data-t="routine">routine</a>
+  </p>
+</div>
+<script>
+const T = {
+  en:{title:"Scalp CC Agent",cc:"Command Center",routine:"routine",loading:"Loading…",
+    updated:"updated",alerts:"Alerts",noalerts:"No material alerts.",gate:"Execution gate",
+    ladder:"Execution ladder",totals:"Totals",pairs:"resolved pairs",pending:"pending",orphans:"orphans",
+    globER:"global E[R]",wr:"WR at TP1",bySeg:"By timeframe / kind / side",bySym:"By instrument",
+    slc:"Stop-loss post-mortem",decay:"Weekly WR TP1",wf:"Walk-forward (out of sample)",
+    model:"P(TP1) model — top features",exps:"Experiments",preds:"Prediction scoreboard",
+    sig:"Recent signals",out:"Recent outcomes",n:"n",pf:"PF",sl:"SL",rev:"rev%",mfe:"MFE p50",
+    none:"nothing yet",accum:"data still accumulating",notReady:"not enough sample",
+    ver:"verdict",week:"week"},
+  es:{title:"Agente Scalp CC",cc:"Command Center",routine:"rutina",loading:"Cargando…",
+    updated:"actualizado",alerts:"Alertas",noalerts:"Sin alertas materiales.",gate:"Gate de ejecucion",
+    ladder:"Escalera de ejecucion",totals:"Totales",pairs:"pares resueltos",pending:"pendientes",orphans:"huerfanos",
+    globER:"E[R] global",wr:"WR a TP1",bySeg:"Por timeframe / tipo / lado",bySym:"Por instrumento",
+    slc:"Autopsia de stop-loss",decay:"WR TP1 semanal",wf:"Walk-forward (fuera de muestra)",
+    model:"Modelo P(TP1) — features top",exps:"Experimentos",preds:"Scoreboard de predicciones",
+    sig:"Señales recientes",out:"Resultados recientes",n:"n",pf:"PF",sl:"SL",rev:"rev%",mfe:"MFE p50",
+    none:"nada todavia",accum:"data aun acumulandose",notReady:"muestra insuficiente",
+    ver:"veredicto",week:"semana"}
+};
+let lang = localStorage.getItem("scalp_lang") || "en";
+const RUNGS = [["0","advisor"],["1","shadow"],["2","semi-auto"],["3","auto demo"],["4","live micro"],["5","scale"]];
+
+const num = (x,d=2)=> (x===null||x===undefined||x==="")? "·" : (typeof x==="number"? x.toFixed(d): x);
+const cls = x => x>0?"pos":x<0?"neg":"mut";
+const esc = s => String(s??"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+function segTable(obj, tk){
+  if(!obj || !Object.keys(obj).length) return `<p class="empty">${tk.none}</p>`;
+  let h = `<table><thead><tr><th>seg</th><th>${tk.n}</th><th>WR</th><th>E[R]</th><th>${tk.pf}</th><th>${tk.sl}</th><th>${tk.mfe}</th><th>${tk.rev}</th></tr></thead><tbody>`;
+  for(const [k,m] of Object.entries(obj)){
+    h += `<tr><td>${esc(k)}</td><td>${m.n}</td><td>${num(m.wrTP1,0)}</td>`+
+         `<td class="${cls(m.expR)}">${num(m.expR)}</td><td>${num(m.pf,1)}</td>`+
+         `<td>${m.nSL??"·"}</td><td>${num(m.mfe_p50,0)}</td><td>${num(m.revAfterSL_rate,0)}</td></tr>`;
+  }
+  return h+"</tbody></table>";
+}
+
+function render(data){
+  const tk = T[lang];
+  document.querySelectorAll("[data-t]").forEach(e=>{ if(tk[e.dataset.t]) e.textContent = tk[e.dataset.t]; });
+  document.getElementById("lang").textContent = lang==="en" ? "ES" : "EN";
+  document.documentElement.lang = lang;
+
+  const rep = data.report || {}, st = data.state || {};
+  const t = rep.totals || st.totals || {};
+  document.getElementById("fresh").textContent =
+    `${tk.updated}: ${new Date(data.generatedAt).toLocaleString()} · report ${rep.generatedAt? new Date(rep.generatedAt).toLocaleString():"·"}`;
+
+  const alerts = rep.alerts || st.alerts || [];
+  const ci = rep.expR_ci_overall;
+  const gate = rep.gate || st.gate || {};
+  const rung = gate.readyForLive ? 2 : (t.pairs_resolved>=5 ? 1 : 0);
+
+  let H = "";
+
+  if(alerts.length)
+    H += `<div class="alertbar"><h2>⚠ ${tk.alerts}</h2><ul>${alerts.map(a=>`<li>${esc(a)}</li>`).join("")}</ul></div>`;
+
+  H += `<div class="grid tiles" style="margin-bottom:12px">
+    <div class="card tile"><div class="k">${tk.pairs}</div><div class="v">${t.pairs_resolved??0}</div><div class="s">${t.pending??0} ${tk.pending} · ${t.orphan_outcomes??0} ${tk.orphans}</div></div>
+    <div class="card tile"><div class="k">${tk.globER}</div><div class="v ${ci?cls(ci.expR):""}">${ci?num(ci.expR):"·"}</div><div class="s">${ci?`CI90 [${num(ci.ci90[0])}, ${num(ci.ci90[1])}]`:tk.accum}</div></div>
+    <div class="card tile"><div class="k">${tk.wr}</div><div class="v">${num((rep.overall||{}).wrTP1,0)}%</div><div class="s">n ${(rep.overall||{}).n??0}</div></div>
+    <div class="card tile"><div class="k">${tk.gate}</div><div class="v">${gate.readyForLive?"✓":"·"}</div><div class="s">${esc(gate.segment||tk.notReady)}</div></div>
+  </div>`;
+
+  H += `<div class="card" style="margin-bottom:12px"><h2>${tk.ladder}</h2><div class="ladder">`+
+    RUNGS.map(([n,name],i)=>`<div class="rung ${i===rung?"on":""}"><b>${n}</b>${name}</div>`).join("")+`</div></div>`;
+
+  H += `<div class="grid two">
+    <div class="card"><h2>${tk.bySeg}</h2>${segTable(rep.by_tf_kind_side, tk)}</div>
+    <div class="card"><h2>${tk.bySym}</h2>${segTable(rep.by_symbol, tk)}</div>
+  </div>`;
+
+  const slc = (rep.sl_post_mortem||{}).causes || st.sl_causes || {};
+  const maxc = Math.max(1, ...Object.values(slc));
+  H += `<div class="grid two" style="margin-top:12px">
+    <div class="card"><h2>${tk.slc}</h2>${Object.keys(slc).length? Object.entries(slc).map(([k,v])=>
+      `<div style="display:flex;align-items:center;gap:8px;margin:4px 0"><span style="flex:0 0 150px">${esc(k)}</span>
+       <span style="flex:1;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--dn) ${100*v/maxc}%,var(--panel2) 0)"></span>
+       <b>${v}</b></div>`).join("") : `<p class="empty">${tk.none}</p>`}</div>
+    <div class="card"><h2>${tk.decay}</h2>${decayTable(rep.decay_weekly||st.decay_weekly, tk)}</div>
+  </div>`;
+
+  H += `<div class="grid two" style="margin-top:12px">
+    <div class="card"><h2>${tk.wf}</h2>${wfPanel(rep.walk_forward||st.walk_forward, tk)}</div>
+    <div class="card"><h2>${tk.model}</h2>${modelPanel(rep.model, tk)}</div>
+  </div>`;
+
+  H += `<div class="grid two" style="margin-top:12px">
+    <div class="card"><h2>${tk.exps}</h2>${expsPanel(rep.experiments, tk)}</div>
+    <div class="card"><h2>${tk.preds}</h2>${predsPanel(rep.prediction_scoreboard||st.prediction_scoreboard, tk)}</div>
+  </div>`;
+
+  H += `<div class="grid two" style="margin-top:12px">
+    <div class="card"><h2>${tk.sig}</h2><div class="feed">${feed(data.recentSignals, "signal", tk)}</div></div>
+    <div class="card"><h2>${tk.out}</h2><div class="feed">${feed(data.recentOutcomes, "outcome", tk)}</div></div>
+  </div>`;
+
+  document.getElementById("app").innerHTML = H;
+}
+
+function decayTable(dw, tk){
+  if(!dw || !Object.keys(dw).length) return `<p class="empty">${tk.none}</p>`;
+  let h = `<table><thead><tr><th>${tk.week}</th><th>${tk.n}</th><th>WR</th><th>E[R]</th></tr></thead><tbody>`;
+  for(const [k,m] of Object.entries(dw))
+    h += `<tr><td>${esc(k)}</td><td>${m.n}</td><td>${num(m.wrTP1,0)}</td><td class="${cls(m.expR)}">${num(m.expR)}</td></tr>`;
+  return h+"</tbody></table>";
+}
+function wfPanel(wf, tk){
+  if(!wf || !wf.ready) return `<p class="empty">${tk.notReady} (${wf?`n ${wf.n||wf.weeks||"·"} / need ${wf.need||"·"}`:"·"})</p>`;
+  return `<table><tbody>
+    <tr><td>train / test</td><td>${wf.trainN} / ${wf.testN}</td></tr>
+    <tr><td>model OOS Brier</td><td>${num(wf.model_oos_brier,4)}</td></tr>
+    <tr><td>best scheme (in-sample)</td><td>${esc(wf.best_scheme_in_sample?.scheme||"·")}</td></tr>
+    <tr><td>best scheme OOS E[R]</td><td class="${cls(wf.best_scheme_oos_expR)}">${num(wf.best_scheme_oos_expR)}</td></tr>
+  </tbody></table>`;
+}
+function modelPanel(m, tk){
+  if(!m || !m.fitted) return `<p class="empty">${tk.notReady} (n ${m?.n??0} / ${m?.need??120})</p>`;
+  let h = `<p class="mut" style="font-size:12px;margin:0 0 6px">Brier ${num(m.brier,4)} · n ${m.n}</p><table><tbody>`;
+  for(const c of (m.coefficients||[]).slice(0,8))
+    h += `<tr><td>${esc(c.feature)}</td><td class="${cls(c.weight)}">${num(c.weight)}</td></tr>`;
+  return h+"</tbody></table>";
+}
+function expsPanel(ex, tk){
+  const list = (ex||[]).filter(e=>e.status!=="template");
+  if(!list.length) return `<p class="empty">${tk.none}</p>`;
+  return list.map(e=>`<div style="padding:6px 0;border-bottom:1px solid var(--border)">
+    <div><code>${esc(e.param)}</code> ${esc(e.from)} → ${esc(e.to)}
+    <span class="pill ${e.verdict==="confirmed"?"pos":e.verdict==="rejected"?"neg":"mut"}">${esc(e.verdict||e.status||"·")}</span></div>
+    <div class="mut" style="font-size:12px">${esc(e.hypothesis||"")}</div>
+    <div class="mut" style="font-size:11px">before n ${e.beforeN??"·"} · after n ${e.afterN??"·"}</div>
+  </div>`).join("");
+}
+function predsPanel(ps, tk){
+  if(!ps || !ps.n) return `<p class="empty">${tk.none}</p>`;
+  return `<table><tbody>
+    <tr><td>total / scored</td><td>${ps.n} / ${ps.scored??0}</td></tr>
+    <tr><td>MAE ΔE[R]</td><td>${num(ps.mae_deltaER)}</td></tr>
+    <tr><td>direction hit rate</td><td>${num(ps.hit_direction_rate,0)}%</td></tr>
+  </tbody></table>`;
+}
+function feed(rows, kind, tk){
+  if(!rows || !rows.length) return `<p class="empty">${tk.none}</p>`;
+  return rows.map(r=>{
+    const x = r.raw || r;
+    if(kind==="signal"){
+      const side = x.side==="LONG"?"pos":"neg";
+      return `<div class="row"><span class="id">${esc(r.receivedAt?.slice(11,16)||"")}</span>
+        <span class="${side}">${esc(x.side||"")}</span>
+        <span>${esc(x.sym)} ${esc(x.tf)}m ${esc(x.kind)}</span>
+        <span class="mut">tier ${esc(x.tier)} · RR ${esc(x.rr1)} · bias ${esc(x.biasScore)}</span></div>`;
+    }
+    const res = x.result, rc = res==="SL"?"neg":res==="TIMEOUT"?"amb":"pos";
+    return `<div class="row"><span class="id">${esc(r.receivedAt?.slice(11,16)||"")}</span>
+      <span class="${rc}">${esc(res)}</span>
+      <span>${esc(x.sym)} ${esc(x.tf)}m ${esc(x.kind)} ${esc(x.side)}</span>
+      <span class="mut">R ${esc(x.rMultiple)} · mfe ${esc(x.mfeTk)} · mae ${esc(x.maeTk)}</span></div>`;
+  }).join("");
+}
+
+async function load(){
+  try{
+    const r = await fetch("/api/scalp-state", {cache:"no-store"});
+    render(await r.json());
+  }catch(e){
+    document.getElementById("app").innerHTML = `<p class="empty">error: ${esc(e.message)}</p>`;
+  }
+}
+document.getElementById("lang").onclick = ()=>{ lang = lang==="en"?"es":"en"; localStorage.setItem("scalp_lang",lang); load(); };
+load();
+setInterval(load, 90000);
+</script>
+</body>
+</html>
