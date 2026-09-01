@@ -6,28 +6,37 @@ import { getStore } from '@netlify/blobs';
 const FF_URL = 'https://nfs.faireconomy.media/ff_calendar_thisweek.json';
 const TTL_MS = 30 * 60 * 1000;   // refresca como mucho cada 30 min
 
+// Eventos que mueven el crudo (CL) aunque ForexFactory los marque impacto bajo:
+// inventario semanal de la EIA, OPEP, gas natural, informe de energia. Van con
+// tag "oil" para que el Session Analyst los use como ventana de no-trade de CL
+// (no disparan el candado del Center, que es NQ-centrico).
+const OIL_RX = /(crude oil inventories|\beia\b|\bopec\b|opec-jmmc|gasoline inventories|natural gas storage|petroleum status|short-term energy outlook|\bapi\b weekly)/i;
+
 function normalize(raw){
   if(!Array.isArray(raw)) return [];
   const out = [];
   for(const e of raw){
     const impact = String(e.impact || '').toLowerCase();   // high | medium | low | holiday
     const cur = String(e.country || e.currency || '').toUpperCase();
-    // nos quedamos con lo que mueve al NQ: alto impacto (cualquiera) + medio USD
-    const keep = impact === 'high' || (impact === 'medium' && cur === 'USD');
+    const title = e.title || '';
+    const isOil = OIL_RX.test(title);
+    // nos quedamos con lo que mueve al NQ (alto impacto + medio USD) MAS lo que mueve al CL
+    const keep = impact === 'high' || (impact === 'medium' && cur === 'USD') || isOil;
     if(!keep) continue;
     const ts = e.date ? new Date(e.date).getTime() : null;
     if(!ts || !isFinite(ts)) continue;
     out.push({
-      title: e.title || '',
+      title,
       currency: cur,
       impact: impact === 'high' ? 'high' : 'medium',
       ts,
+      tags: isOil ? ['oil'] : [],
       forecast: (e.forecast === '' ? null : e.forecast) ?? null,
       previous: (e.previous === '' ? null : e.previous) ?? null
     });
   }
   out.sort((a,b)=> a.ts - b.ts);
-  return out.slice(0, 60);
+  return out.slice(0, 80);
 }
 
 async function fetchFF(){
