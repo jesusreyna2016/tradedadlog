@@ -2101,13 +2101,13 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   if(!bar) return;
   var strip=document.getElementById('saStrip');
   var execData=null;   // rollup de ejecucion (del journal, de-identificado)
-  // tira "El agente hoy": los 3 verdicts NQ/ES/GC + la lectura de noticias del agente, en la
+  // tira "El agente hoy": los verdicts NQ/ES/GC/YM/CL + la lectura de noticias del agente, en la
   // pantalla de operar (antes solo vivian en session-plan.html). El foco es UN instrumento; esto
-  // te da los tres y ancla el CC al cerebro del agente.
+  // te da todos y ancla el CC al cerebro del agente. YM/CL solo salen si el agente los incluyo.
   function renderStrip(plan){
     if(!strip) return;
     if(!plan || !plan.instruments){ strip.style.display='none'; return; }
-    var rows=['NQ','ES','GC'].map(function(sym){
+    var rows=['NQ','ES','GC','YM','CL'].map(function(sym){
       var d=plan.instruments[sym]; if(!d) return '';
       var v=String((d.verdict&&d.verdict.signal)||'').toUpperCase();
       var vc=v==='GO'?'go':(v==='AVOID'?'avoid':'wait');
