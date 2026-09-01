@@ -195,6 +195,7 @@
       thesis:"Day thesis", reviewOf:"Review of", updated:"Updated",
       verdictGO:"GO", verdictWAIT:"WAIT", verdictAVOID:"AVOID",
       vBestZone:"Best zone", vInval:"Invalidates", vRange:"Est. range", vDetail:"Show detail",
+      dataOk:"Data OK", dataWarn:"Data stale", dataMissing:"missing",
       vr:{STRETCHED:"overextended, don't chase", CHOP:"in no-trade zone, no clean edge",
         CONFLICT:"bias in conflict, stand down", LOWCONV:"low conviction, no clean setup",
         EDGE:"edge at a mapped level, aligned with bias", NOSETUP:"no clear setup yet"},
@@ -222,6 +223,7 @@
       thesis:"Tesis del día", reviewOf:"Revisión de", updated:"Actualizado",
       verdictGO:"GO", verdictWAIT:"WAIT", verdictAVOID:"AVOID",
       vBestZone:"Mejor zona", vInval:"Invalida", vRange:"Rango est.", vDetail:"Ver detalle",
+      dataOk:"Datos OK", dataWarn:"Datos viejos", dataMissing:"faltan",
       vr:{STRETCHED:"estirado, no perseguir", CHOP:"en zona de no-trade, sin borde claro",
         CONFLICT:"sesgo en conflicto, fuera", LOWCONV:"convicción baja, sin setup limpio",
         EDGE:"borde en nivel mapeado, a favor del sesgo", NOSETUP:"sin setup claro todavía"},
@@ -290,7 +292,8 @@
       '<span class="pill">'+esc((plan.session||"").toUpperCase())+' · '+esc(plan.runType||"")+'</span>'+
       '<span class="pill">'+esc(plan.date||"")+'</span>'+
       '<span class="state"><span class="dot '+freshDot+'"></span>'+t.generated+' '+fmtWhen(plan.generatedAt,t)+'</span>'+
-      (lagged?'<span class="pill warn">'+t.lagged+'</span>':'');
+      (lagged?'<span class="pill warn">'+t.lagged+'</span>':'')+
+      dhPill(plan.dataHealth,t);
 
     var html="";
     // focus (la unica mejor oportunidad, destilada)
@@ -347,6 +350,14 @@
     document.getElementById("foot").innerHTML=footHTML(plan);
   }
 
+  function dhPill(dh,t){
+    if(!dh) return "";
+    var ok = dh.snapshot==="OK" && (!dh.stale||!dh.stale.length) && (!dh.missing||!dh.missing.length);
+    var cls = ok?"ok":"old";
+    var txt = ok ? (t.dataOk+(dh.builtAtAgeMin!=null?" · "+dh.builtAtAgeMin+"m":""))
+      : (t.dataWarn+((dh.stale&&dh.stale.length)?" "+dh.stale.join(","):"")+((dh.missing&&dh.missing.length)?" · "+t.dataMissing+" "+dh.missing.join(","):""));
+    return '<span class="pill" title="'+esc(vreason(dh.notes))+'"><span class="dot '+cls+'"></span>'+esc(txt)+'</span>';
+  }
   function bestZone(d){
     var best=null;
     (d.zones||[]).forEach(function(z){
