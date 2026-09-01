@@ -1,5 +1,5 @@
 // Feed unificado para el agente Session Analyst. Devuelve, por simbolo
-// (NQ / ES / GC), el ultimo estado de cada fuente:
+// (NQ / ES / GC / YM / CL), el ultimo estado de cada fuente:
 //   orb      -> backbone orb_sesgo (sym:<SYM>, lo guarda cc-ingest)
 //   3reads   -> Rutina 3 Reads          (ind:3reads:<SYM>)
 //   drbias   -> Daily Range & Bias Pro  (ind:drbias:<SYM>)
@@ -9,7 +9,7 @@
 // El calendario economico se pide aparte a /api/cc-news.
 import { getStore } from '@netlify/blobs';
 
-const SYMBOLS = ['NQ', 'ES', 'GC'];
+const SYMBOLS = ['NQ', 'ES', 'GC', 'YM', 'CL'];
 const SOURCES = ['3reads', 'drbias', 'srzones', 'htfzones', 'command'];
 
 export default async () => {
