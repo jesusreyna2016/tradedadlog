@@ -77,3 +77,15 @@
   from = "/api/x-growth-mark-posted"
   to = "/.netlify/functions/x-growth-mark-posted"
   status = 200
+
+# Scalp CC · agente de aprendizaje: ingesta de señales/resultados del parche SCC1|
+[[redirects]]
+  from = "/api/scalp-ingest"
+  to = "/.netlify/functions/scalp-ingest"
+  status = 200
+
+# Scalp CC · snapshot del bus scalp-cc-bus (cron cada 10 min; invocable a mano para probar)
+[[redirects]]
+  from = "/api/scalp-bus-snapshot"
+  to = "/.netlify/functions/scalp-bus-snapshot"
+  status = 200
