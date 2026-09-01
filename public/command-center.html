@@ -94,7 +94,11 @@ body::before{
 /* ---------- TICKER ---------- */
 .ticker{display:flex;align-items:center;gap:14px;padding:9px 18px;border:1px solid var(--border);border-radius:12px;background:var(--panel);overflow:hidden}
 .ticker .lb{font-size:8.5px;letter-spacing:2px;color:var(--violet);flex-shrink:0}
-.ticker .q{font-size:12.5px;font-style:italic;color:var(--txt);white-space:nowrap;animation:fade 1s}
+.ticker .q{font-size:12.5px;font-style:italic;color:var(--txt);white-space:nowrap;animation:fade 1s;min-width:0;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:600px){
+  .ticker{flex-direction:column;align-items:flex-start;gap:4px}
+  .ticker .q{white-space:normal;overflow:visible;font-size:12px;line-height:1.45}
+}
 @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
 /* banner ventana de noticia */
 .newsbanner{display:flex;align-items:center;gap:12px;padding:11px 18px;border-radius:12px;border:1px solid rgba(255,95,116,0.45);background:rgba(255,95,116,0.09);color:#fff;font-size:12px;letter-spacing:.3px;animation:fade .3s}
