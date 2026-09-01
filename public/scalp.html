@@ -73,6 +73,8 @@ const T = {
     globER:"global E[R]",wr:"WR at TP1",bySeg:"By timeframe / kind / side",bySym:"By instrument",
     slc:"Stop-loss post-mortem",decay:"Weekly WR TP1",wf:"Walk-forward (out of sample)",
     model:"P(TP1) model — top features",exps:"Experiments",preds:"Prediction scoreboard",
+    mgd:"Managed model (scale-in + partials) vs naive",naiveER:"naive E[R]",mgdER:"managed E[R]",
+    fill:"deep fill %",m1r:"reached +1R",
     sig:"Recent signals",out:"Recent outcomes",n:"n",pf:"PF",sl:"SL",rev:"rev%",mfe:"MFE p50",
     none:"nothing yet",accum:"data still accumulating",notReady:"not enough sample",
     ver:"verdict",week:"week"},
@@ -82,6 +84,8 @@ const T = {
     globER:"E[R] global",wr:"WR a TP1",bySeg:"Por timeframe / tipo / lado",bySym:"Por instrumento",
     slc:"Autopsia de stop-loss",decay:"WR TP1 semanal",wf:"Walk-forward (fuera de muestra)",
     model:"Modelo P(TP1) — features top",exps:"Experimentos",preds:"Scoreboard de predicciones",
+    mgd:"Modelo gestionado (escalera + parciales) vs ingenuo",naiveER:"E[R] ingenuo",mgdER:"E[R] gestionado",
+    fill:"% fill profundo",m1r:"llegó a +1R",
     sig:"Señales recientes",out:"Resultados recientes",n:"n",pf:"PF",sl:"SL",rev:"rev%",mfe:"MFE p50",
     none:"nada todavia",accum:"data aun acumulandose",notReady:"muestra insuficiente",
     ver:"veredicto",week:"semana"}
@@ -155,6 +159,8 @@ function render(data){
     <div class="card"><h2>${tk.model}</h2>${modelPanel(rep.model, tk)}</div>
   </div>`;
 
+  H += `<div class="card" style="margin-top:12px"><h2>${tk.mgd}</h2>${mgdPanel(rep.managed_vs_naive||st.managed_vs_naive, tk)}</div>`;
+
   H += `<div class="grid two" style="margin-top:12px">
     <div class="card"><h2>${tk.exps}</h2>${expsPanel(rep.experiments, tk)}</div>
     <div class="card"><h2>${tk.preds}</h2>${predsPanel(rep.prediction_scoreboard||st.prediction_scoreboard, tk)}</div>
@@ -200,6 +206,17 @@ function expsPanel(ex, tk){
     <div class="mut" style="font-size:12px">${esc(e.hypothesis||"")}</div>
     <div class="mut" style="font-size:11px">before n ${e.beforeN??"·"} · after n ${e.afterN??"·"}</div>
   </div>`).join("");
+}
+function mgdPanel(mv, tk){
+  if(!mv || mv.n===0 || !mv.overall) return `<p class="empty">${mv?.note||tk.none}</p>`;
+  const o = mv.overall;
+  let h = `<table><thead><tr><th>seg</th><th>${tk.n}</th><th>${tk.naiveER}</th><th>${tk.mgdER}</th><th>Δ</th><th>${tk.fill}</th><th>${tk.m1r}</th><th>+2R</th><th>+3R</th></tr></thead><tbody>`;
+  const row = (k,m)=>`<tr><td>${esc(k)}</td><td>${m.n}</td><td class="${cls(m.naive_expR)}">${num(m.naive_expR)}</td>`+
+    `<td class="${cls(m.managed_expR)}">${num(m.managed_expR)}</td><td class="${cls(m.delta)}">${num(m.delta)}</td>`+
+    `<td>${num(m.fill_t3plus_pct,0)}%</td><td>${num(m.m1_rate,0)}%</td><td>${num(m.m2_rate,0)}%</td><td>${num(m.m3_rate,0)}%</td></tr>`;
+  h += row("overall", o);
+  for(const [k,m] of Object.entries(mv.by_tf_kind_side||{})) h += row(k,m);
+  return h+"</tbody></table>";
 }
 function predsPanel(ps, tk){
   if(!ps || !ps.n) return `<p class="empty">${tk.none}</p>`;
