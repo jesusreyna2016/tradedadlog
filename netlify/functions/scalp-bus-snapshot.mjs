@@ -1,12 +1,13 @@
-// Espeja los logs de eventos de Scalp CC (Netlify Blobs store 'scalp', key
-// log:<YYYY-MM-DD>) al repo git jesusreyna2016/scalp-cc-bus, separados por tipo:
+// Enumera los eventos de Scalp CC guardados por scalp-ingest.mjs (Netlify Blobs
+// store 'scalp', claves ev/<YYYY-MM-DD>/<sigId>__<evt>) y los espeja al repo git
+// jesusreyna2016/scalp-cc-bus, separados por tipo:
 //   evt=signal   -> signals/<fecha>.jsonl
 //   evt=outcome  -> outcomes/<fecha>.jsonl
-// Idempotente: reconstruye el archivo completo del dia desde el blob y hace
-// busPut (que omite el commit si el contenido no cambio). Procesa hoy y ayer
-// (para recoger outcomes tardios cerca de medianoche UTC).
+// Idempotente: reconstruye el archivo completo del dia y hace busPut (que omite
+// el commit si el contenido no cambio). Procesa hoy y ayer (para recoger
+// outcomes tardios cerca de medianoche UTC).
 //
-// Invocable por HTTP para pruebas; el schedule vive en scalp-bus-cron.mjs.
+// Invocable por HTTP para pruebas (GET); el schedule vive en scalp-bus-cron.mjs.
 import { getStore } from '@netlify/blobs';
 import { busPut } from './_scalp-bus.mjs';
 
@@ -17,18 +18,6 @@ function daysToProcess() {
   return [y, today];
 }
 
-function dedupeBySigIdEvt(records) {
-  // ultimo gana: para outcomes reemitidos o signals repetidos por el mismo bar
-  const m = new Map();
-  for (const r of records) {
-    const id = r?.sigId || r?.raw?.sigId;
-    const evt = r?.evt || r?.raw?.evt || 'signal';
-    if (!id) continue;
-    m.set(`${id}::${evt}`, r);
-  }
-  return [...m.values()];
-}
-
 export async function runSnapshot() {
   const token = process.env.SCALP_BUS_TOKEN;
   if (!token) return { ok: false, error: 'falta SCALP_BUS_TOKEN' };
@@ -37,18 +26,31 @@ export async function runSnapshot() {
   const out = [];
 
   for (const day of daysToProcess()) {
-    const blob = (await store.get(`log:${day}`)) || '';
-    if (!blob.trim()) continue;
+    const listed = await store.list({ prefix: `ev/${day}/` });
+    const keys = (listed && listed.blobs ? listed.blobs : []).map((b) => b.key);
+    if (!keys.length) continue;
 
-    const recs = blob
-      .split('\n')
-      .map((l) => l.trim())
-      .filter(Boolean)
-      .map((l) => { try { return JSON.parse(l); } catch { return null; } })
-      .filter(Boolean);
+    const recs = [];
+    for (const k of keys) {
+      const r = await store.get(k, { type: 'json' });
+      if (r) recs.push(r);
+    }
 
-    const signals = dedupeBySigIdEvt(recs.filter((r) => (r.evt || r.raw?.evt) === 'signal'));
-    const outcomes = dedupeBySigIdEvt(recs.filter((r) => (r.evt || r.raw?.evt) === 'outcome'));
+    const byType = (evt) => {
+      const m = new Map();
+      for (const r of recs) {
+        if ((r.evt || r.raw?.evt) !== evt) continue;
+        const id = r.sigId || r.raw?.sigId;
+        if (!id) continue;
+        m.set(id, r);
+      }
+      return [...m.values()].sort((a, b) =>
+        String(a.receivedAt || '').localeCompare(String(b.receivedAt || ''))
+      );
+    };
+
+    const signals = byType('signal');
+    const outcomes = byType('outcome');
 
     if (signals.length) {
       const body = signals.map((r) => JSON.stringify(r)).join('\n') + '\n';

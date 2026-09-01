@@ -1,10 +1,11 @@
 // Recibe los webhooks del parche STATE EXPORT de "TDL · Scalp CC" (prefijo SCC1|).
 // Dos tipos de evento: evt=signal (al disparo) y evt=outcome (al resolverse).
-// Guarda:
-//   - ultimo evento por señal:      scalp store, key  evt:<sym>:<tf>:<sigId>:<evt>
-//   - log diario append (JSONL):    scalp store, key  log:<YYYY-MM-DD>
-//   - puntero al ultimo recibido:    scalp store, key  last
-// El cron scalp-bus-cron.mjs (F3) espeja el log diario al repo git scalp-cc-bus.
+// Guarda cada evento con clave UNICA e inmutable (sin read-modify-write, sin
+// carrera entre los 9 graficos que postean en el cierre de vela):
+//   scalp store, key  ev/<YYYY-MM-DD>/<sigId>__<evt>
+//   scalp store, key  last                          (puntero de depuracion)
+// El cron scalp-bus-cron.mjs enumera esas claves y espeja a signals/ y outcomes/
+// del repo git scalp-cc-bus.
 import { getStore } from '@netlify/blobs';
 
 function parsePipe(text) {
@@ -18,6 +19,8 @@ function parsePipe(text) {
   }
   return { prefix: parts[0].trim(), kv };
 }
+
+const safeKey = (s) => String(s).replace(/[^A-Za-z0-9._-]/g, '_');
 
 export default async (req) => {
   if (req.method !== 'POST') return new Response('POST only', { status: 405 });
@@ -49,13 +52,8 @@ export default async (req) => {
   };
 
   const store = getStore('scalp');
-  await store.setJSON(`evt:${sym}:${tf}:${sigId}:${evt}`, record);
+  await store.setJSON(`ev/${day}/${safeKey(sigId)}__${evt}`, record);
   await store.setJSON('last', record);
-
-  // append al log diario (JSONL). Carga baja: ~1 evento por cierre de vela por grafico.
-  const logKey = `log:${day}`;
-  const prev = (await store.get(logKey)) || '';
-  await store.set(logKey, prev + JSON.stringify(record) + '\n');
 
   return new Response(`ok · ${evt} · ${sym} ${tf} · ${sigId}`, { status: 200 });
 };
