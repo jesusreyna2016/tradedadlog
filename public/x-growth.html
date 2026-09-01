@@ -21,8 +21,13 @@
   header.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:20px}
   .brand h1{font-size:19px;margin:0;letter-spacing:.2px}
   .brand .sub{color:var(--muted);font-size:13px;margin-top:3px}
+  .rightcol{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
   .updated{font-size:12px;color:var(--dim);font-family:var(--mono);text-align:right}
   .updated b{color:var(--muted);font-weight:600}
+  .langtoggle{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .langtoggle button{background:transparent;color:var(--muted);border:none;padding:4px 11px;font-size:12px;
+    font-weight:700;cursor:pointer;font-family:var(--mono);letter-spacing:.5px}
+  .langtoggle button.on{background:var(--accent);color:#06121f}
 
   .grid{display:grid;gap:14px}
   .stats{grid-template-columns:repeat(4,1fr)}
@@ -50,7 +55,7 @@
   .chip.aphorism{background:rgba(157,123,255,.16);color:var(--violet)}
   .chip.confession{background:rgba(242,99,126,.15);color:var(--red)}
   .chip.question{background:rgba(77,163,255,.15);color:var(--accent)}
-  .chip\.truth-bomb,.chip.truthbomb{background:rgba(240,183,74,.15);color:var(--amber)}
+  .chip.truthbomb{background:rgba(240,183,74,.15);color:var(--amber)}
   .chip.pattern{background:rgba(63,208,139,.15);color:var(--green)}
   .draft .why{font-size:12.5px;color:var(--muted);margin-left:auto}
   .draft pre{font-family:var(--sans);font-size:14.5px;white-space:pre-wrap;margin:0;color:#eef2f8;
@@ -77,7 +82,7 @@
     letter-spacing:.5px;padding:7px 8px;border-bottom:1px solid var(--line)}
   td{padding:8px;border-bottom:1px solid #1a2028;font-variant-numeric:tabular-nums}
   tr:last-child td{border-bottom:none}
-  .post-ex{color:var(--txt);max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .post-ex{color:var(--txt);max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
   .best td{background:rgba(63,208,139,.06)} .worst td{color:var(--muted)}
   .mini{font-size:11px;color:var(--dim)}
 
@@ -115,22 +120,56 @@
 </div>
 
 <script>
+const T = {
+  en:{ sub:"organic growth engine", updated:"updated", cycle:"cycle #",
+    followers:"Followers", trend:"Trend", posts:"Posts", thisweek:"This week", draftsready:"drafts ready",
+    since:"since", notenough:"not enough data",
+    s_plan:"This week's plan", s_drafts:"Drafts, ready to post", s_read:"The read", s_perf:"Performance",
+    s_pred:"Weekly prediction", s_engage:"Who to engage this week", s_backlog:"Ideas backlog", s_score:"Draft scorecard",
+    working:"Working", stop:"Stop doing", watch:"Idea to watch",
+    h_post:"Post", h_format:"Format", h_views:"Views", h_likes:"Likes", h_replies:"Replies",
+    medianby:"Median views by format", copy:"Copy", copied:"Copied",
+    status:"status", open:"Open", used:"Used",
+    h_week:"Week", h_draft:"Draft", h_adopted:"Adopted", h_result:"Result",
+    pending:"pending", hit:"hit", miss:"miss", footer:"runs interactively, writes here every cycle" },
+  es:{ sub:"motor de crecimiento orgánico", updated:"actualizado", cycle:"ciclo #",
+    followers:"Seguidores", trend:"Tendencia", posts:"Posts", thisweek:"Esta semana", draftsready:"borradores listos",
+    since:"desde", notenough:"datos insuficientes",
+    s_plan:"Plan de la semana", s_drafts:"Borradores, listos para publicar", s_read:"La lectura", s_perf:"Rendimiento",
+    s_pred:"Predicción de la semana", s_engage:"A quién responder esta semana", s_backlog:"Banco de ideas", s_score:"Scorecard de borradores",
+    working:"Funciona", stop:"Deja de hacer", watch:"Idea a vigilar",
+    h_post:"Post", h_format:"Formato", h_views:"Vistas", h_likes:"Likes", h_replies:"Respuestas",
+    medianby:"Vistas medianas por formato", copy:"Copiar", copied:"Copiado",
+    status:"estado", open:"Abiertas", used:"Usadas",
+    h_week:"Semana", h_draft:"Borrador", h_adopted:"Adoptado", h_result:"Resultado",
+    pending:"pendiente", hit:"acierto", miss:"fallo", footer:"corre en modo interactivo, escribe aquí cada ciclo" }
+};
+
+let LANG = "en", DATA = null;
+try{ const s = localStorage.getItem("xg_lang"); if(s==="es"||s==="en") LANG=s; }catch(e){}
+
 const fmt = n => n==null ? "—" : (n>=1000 ? (n/1000).toFixed(n>=10000?0:1)+"K" : ""+n);
 const esc = s => (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const clsFmt = f => (f||"").replace(/[^a-z]/g,"");
+const t = k => (T[LANG][k]!=null?T[LANG][k]:T.en[k]);
+// pick localized field: L(obj,"why") -> obj.why_es in ES if present, else obj.why
+const L = (o,base) => { if(!o) return ""; const v = (LANG==="es" && o[base+"_es"]!=null) ? o[base+"_es"] : o[base]; return v; };
+const Larr = (o,base) => (LANG==="es" && Array.isArray(o[base+"_es"])) ? o[base+"_es"] : (o[base]||[]);
 
 fetch("/x-growth-data.json?v="+Date.now())
   .then(r=>{ if(!r.ok) throw new Error("data "+r.status); return r.json(); })
-  .then(render)
+  .then(d=>{ DATA=d; render(); })
   .catch(e=>{ document.getElementById("loading").textContent = "Could not load x-growth-data.json ("+e.message+")"; });
 
-function render(d){
+function setLang(l){ LANG=l; try{ localStorage.setItem("xg_lang", l); }catch(e){} document.documentElement.lang=l; render(); }
+
+function render(){
+  const d = DATA; if(!d) return;
   const fh = d.followerHistory||[];
   const first = fh.length?fh[0].followers:null, last = d.account.followers;
   const delta = (first!=null)? last-first : null;
 
   const posts = (d.recentPosts||[]).filter(p=>p.views!=null);
-  const maxV = Math.max(1,...posts.map(p=>p.views));
   const bestId = posts.length? posts.reduce((a,b)=>a.views>b.views?a:b).id : null;
 
   const fp = d.formatPerformance||[];
@@ -138,18 +177,19 @@ function render(d){
   const fpColor = {aphorism:"var(--violet)",confession:"var(--red)",question:"var(--accent)","truth-bomb":"var(--amber)",pattern:"var(--green)"};
 
   const spark = sparkline(fh.map(p=>p.followers));
+  const statuses = {pending:t("pending"),hit:t("hit"),miss:t("miss")};
 
   const draftCard = dr => `
     <div class="draft ${dr.rank===1?'r1':''}">
       <div class="head">
         <span class="rankbadge">${dr.rank}</span>
         <span class="chip ${clsFmt(dr.format)}">${esc(dr.format)}</span>
-        <span class="why">${esc(dr.why)}</span>
+        <span class="why">${esc(L(dr,"why"))}</span>
       </div>
       <pre id="dr${dr.rank}">${esc(dr.text)}</pre>
       <div class="foot">
         <span class="src">${esc(dr.source)}</span>
-        <button class="copy" data-t="dr${dr.rank}">Copy</button>
+        <button class="copy" data-t="dr${dr.rank}">${t("copy")}</button>
       </div>
     </div>`;
 
@@ -157,54 +197,60 @@ function render(d){
   <header class="top">
     <div class="brand">
       <h1>X Growth Agent</h1>
-      <div class="sub">@${esc(d.account.handle)} · organic growth engine</div>
+      <div class="sub">@${esc(d.account.handle)} · ${esc(t("sub"))}</div>
     </div>
-    <div class="updated">updated <b>${esc(d.updated)}</b><br>cycle #${esc(d.cycle)}</div>
+    <div class="rightcol">
+      <div class="langtoggle">
+        <button data-l="en" class="${LANG==='en'?'on':''}">EN</button>
+        <button data-l="es" class="${LANG==='es'?'on':''}">ES</button>
+      </div>
+      <div class="updated">${esc(t("updated"))} <b>${esc(d.updated)}</b> · ${esc(t("cycle"))}${esc(d.cycle)}</div>
+    </div>
   </header>
 
   <div class="grid stats">
     <div class="card stat">
-      <div class="k">Followers</div>
+      <div class="k">${esc(t("followers"))}</div>
       <div class="v">${fmt(last)}</div>
-      <div class="d ${delta>=0?'up':'down'}">${delta==null?"":(delta>=0?"▲ +"+delta:"▼ "+delta)+" since "+esc(fh[0].date)}</div>
+      <div class="d ${delta>=0?'up':'down'}">${delta==null?"":(delta>=0?"▲ +"+delta:"▼ "+delta)+" "+t("since")+" "+esc(fh[0].date)}</div>
     </div>
     <div class="card stat">
-      <div class="k">Trend</div>
+      <div class="k">${esc(t("trend"))}</div>
       <div style="margin-top:10px">${spark}</div>
     </div>
     <div class="card stat">
-      <div class="k">Posts</div>
+      <div class="k">${esc(t("posts"))}</div>
       <div class="v">${fmt(d.account.posts)}</div>
     </div>
     <div class="card stat">
-      <div class="k">This week</div>
+      <div class="k">${esc(t("thisweek"))}</div>
       <div class="v">${(d.drafts||[]).length}</div>
-      <div class="d" style="color:var(--muted)">drafts ready</div>
+      <div class="d" style="color:var(--muted)">${esc(t("draftsready"))}</div>
     </div>
   </div>
 
-  <div class="section-title">This week's plan <span class="line"></span></div>
-  <div class="plan">${esc(d.plan)}</div>
+  <div class="section-title">${esc(t("s_plan"))} <span class="line"></span></div>
+  <div class="plan">${esc(L(d,"plan"))}</div>
 
-  <div class="section-title">Drafts, ready to post <span class="line"></span></div>
-  <div class="grid drafts">${(d.drafts||[]).sort((a,b)=>a.rank-b.rank).map(draftCard).join("")}</div>
+  <div class="section-title">${esc(t("s_drafts"))} <span class="line"></span></div>
+  <div class="grid drafts">${(d.drafts||[]).slice().sort((a,b)=>a.rank-b.rank).map(draftCard).join("")}</div>
 
-  <div class="section-title">The read <span class="line"></span></div>
+  <div class="section-title">${esc(t("s_read"))} <span class="line"></span></div>
   <div class="grid read">
-    <div class="card working"><h4>Working</h4><p>${esc(d.read?.working)}</p></div>
-    <div class="card stop"><h4>Stop doing</h4><p>${esc(d.read?.stop)}</p></div>
-    <div class="card watch"><h4>Idea to watch</h4><p>${esc(d.read?.watch)}</p></div>
+    <div class="card working"><h4>${esc(t("working"))}</h4><p>${esc(L(d.read,"working"))}</p></div>
+    <div class="card stop"><h4>${esc(t("stop"))}</h4><p>${esc(L(d.read,"stop"))}</p></div>
+    <div class="card watch"><h4>${esc(t("watch"))}</h4><p>${esc(L(d.read,"watch"))}</p></div>
   </div>
 
-  <div class="section-title">Performance <span class="line"></span></div>
+  <div class="section-title">${esc(t("s_perf"))} <span class="line"></span></div>
   <div class="grid two">
     <div class="card">
       <table>
-        <thead><tr><th>Post</th><th>Format</th><th>Views</th><th>Likes</th><th>Replies</th></tr></thead>
+        <thead><tr><th>${esc(t("h_post"))}</th><th>${esc(t("h_format"))}</th><th>${esc(t("h_views"))}</th><th>${esc(t("h_likes"))}</th><th>${esc(t("h_replies"))}</th></tr></thead>
         <tbody>
         ${(d.recentPosts||[]).map(p=>`
           <tr class="${p.id===bestId?'best':''} ${p.views!=null&&p.views<600?'worst':''}">
-            <td><a class="post-ex" href="https://x.com/${esc(d.account.handle)}/status/${esc(p.id)}" target="_blank" title="${esc(p.excerpt)}">${esc(p.excerpt)}</a><div class="mini">${esc(p.date)}${p.note?" · "+esc(p.note):""}</div></td>
+            <td><a class="post-ex" href="https://x.com/${esc(d.account.handle)}/status/${esc(p.id)}" target="_blank" title="${esc(p.excerpt)}">${esc(p.excerpt)}</a><div class="mini">${esc(p.date)}${(L(p,"note"))?" · "+esc(L(p,"note")):""}</div></td>
             <td><span class="chip ${clsFmt(p.format)}" style="font-size:10px">${esc(p.format)}</span></td>
             <td>${fmt(p.views)}</td><td>${fmt(p.likes)}</td><td>${fmt(p.replies)}</td>
           </tr>`).join("")}
@@ -212,7 +258,7 @@ function render(d){
       </table>
     </div>
     <div class="card">
-      <div class="mini" style="margin-bottom:10px">Median views by format</div>
+      <div class="mini" style="margin-bottom:10px">${esc(t("medianby"))}</div>
       <div class="bars">
       ${fp.map(f=>`
         <div class="bar">
@@ -224,47 +270,48 @@ function render(d){
     </div>
   </div>
 
-  <div class="section-title">Weekly prediction <span class="line"></span></div>
+  <div class="section-title">${esc(t("s_pred"))} <span class="line"></span></div>
   <div class="card predict">
     <span class="dot" style="background:${d.prediction?.status==='hit'?'var(--green)':d.prediction?.status==='miss'?'var(--red)':'var(--amber)'}"></span>
-    <div><div class="claim">${esc(d.prediction?.claim)}</div>
-    <div class="meta">${esc(d.prediction?.week)} · status: ${esc(d.prediction?.status||'pending')}</div></div>
+    <div><div class="claim">${esc(L(d.prediction,"claim"))}</div>
+    <div class="meta">${esc(d.prediction?.week)} · ${esc(t("status"))}: ${esc(statuses[d.prediction?.status]||statuses.pending)}</div></div>
   </div>
 
-  <div class="section-title">Who to engage this week <span class="line"></span></div>
+  <div class="section-title">${esc(t("s_engage"))} <span class="line"></span></div>
   <div class="card engage"><ul>
-  ${(d.engageList||[]).map(e=>`<li><div class="h">${esc(e.handle)}</div><div class="ex">${esc(e.postExcerpt)}</div><div class="wy">${esc(e.whyReply)}</div></li>`).join("")}
+  ${(d.engageList||[]).map(e=>`<li><div class="h">${esc(e.handle)}</div><div class="ex">${esc(e.postExcerpt)}</div><div class="wy">${esc(L(e,"whyReply"))}</div></li>`).join("")}
   </ul></div>
 
-  <div class="section-title">Ideas backlog <span class="line"></span></div>
+  <div class="section-title">${esc(t("s_backlog"))} <span class="line"></span></div>
   <div class="grid bl-cols">
-    <div class="card bl open"><h4>Open</h4><ul>${(d.backlog?.open||[]).map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div>
-    <div class="card bl used"><h4>Used</h4><ul>${(d.backlog?.used||[]).map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div>
+    <div class="card bl open"><h4>${esc(t("open"))}</h4><ul>${Larr(d.backlog,"open").map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div>
+    <div class="card bl used"><h4>${esc(t("used"))}</h4><ul>${Larr(d.backlog,"used").map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div>
   </div>
 
-  <div class="section-title">Draft scorecard <span class="line"></span></div>
+  <div class="section-title">${esc(t("s_score"))} <span class="line"></span></div>
   <div class="card">
     <table>
-      <thead><tr><th>Week</th><th>Draft</th><th>Format</th><th>Adopted</th><th>Result</th></tr></thead>
+      <thead><tr><th>${esc(t("h_week"))}</th><th>${esc(t("h_draft"))}</th><th>${esc(t("h_format"))}</th><th>${esc(t("h_adopted"))}</th><th>${esc(t("h_result"))}</th></tr></thead>
       <tbody>
-      ${(d.scorecard||[]).map(s=>`<tr><td>${esc(s.week)}</td><td>${esc(s.draft)}</td><td>${esc(s.format)}</td><td>${esc(s.adopted)}</td><td>${s.url?`<a href="${esc(s.url)}" target="_blank">${esc(s.result||'view')}</a>`:esc(s.result||'—')}</td></tr>`).join("")}
+      ${(d.scorecard||[]).map(s=>`<tr><td>${esc(s.week)}</td><td>${esc(s.draft)}</td><td>${esc(s.format)}</td><td>${esc(statuses[s.adopted]||s.adopted)}</td><td>${s.url?`<a href="${esc(s.url)}" target="_blank">${esc(s.result||'view')}</a>`:esc(s.result||'—')}</td></tr>`).join("")}
       </tbody>
     </table>
   </div>
 
-  <footer>X Growth Agent · runs interactively, writes here every cycle · @${esc(d.account.handle)}</footer>
+  <footer>X Growth Agent · ${esc(t("footer"))} · @${esc(d.account.handle)}</footer>
   `;
   document.getElementById("app").innerHTML = html;
 
+  document.querySelectorAll(".langtoggle button").forEach(b=>b.addEventListener("click",()=>setLang(b.dataset.l)));
   document.querySelectorAll(".copy").forEach(b=>b.addEventListener("click",()=>{
-    const t = document.getElementById(b.dataset.t).textContent;
-    navigator.clipboard.writeText(t).then(()=>{ b.textContent="Copied"; b.classList.add("ok");
-      setTimeout(()=>{b.textContent="Copy";b.classList.remove("ok");},1400); });
+    const txt = document.getElementById(b.dataset.t).textContent;
+    navigator.clipboard.writeText(txt).then(()=>{ b.textContent=t("copied"); b.classList.add("ok");
+      setTimeout(()=>{b.textContent=t("copy");b.classList.remove("ok");},1400); });
   }));
 }
 
 function sparkline(vals){
-  if(!vals||vals.length<2) return '<div class="mini">not enough data</div>';
+  if(!vals||vals.length<2) return '<div class="mini">'+t("notenough")+'</div>';
   const w=140,h=44,pad=4;
   const mn=Math.min(...vals),mx=Math.max(...vals),rng=(mx-mn)||1;
   const pts=vals.map((v,i)=>[pad+i*(w-2*pad)/(vals.length-1), h-pad-(v-mn)/rng*(h-2*pad)]);

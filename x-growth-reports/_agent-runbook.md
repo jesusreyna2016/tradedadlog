@@ -113,6 +113,11 @@ Before a draft is allowed into the report, run it through this filter. If it fai
   updated, cycle, account, followerHistory[append a point], recentPosts, formatPerformance,
   drafts, plan, read{working,stop,watch}, prediction{week,claim,status}, engageList, backlog{open,used},
   scorecard[append this week's 3 + fill in last week's adopted/result]). This is what Jesus actually looks at.
+  The dashboard is bilingual (EN default, ES toggle): for every PROSE field, also write a `_es`
+  Spanish variant next to it (`plan`+`plan_es`, `read.working`+`working_es`, each `draft.why`+`why_es`,
+  `prediction.claim`+`claim_es`, `engageList[].whyReply`+`whyReply_es`, `backlog.open`+`open_es`,
+  `backlog.used`+`used_es`, any post `note`+`note_es`). NEVER translate the draft `text` itself or the
+  post `excerpt` — the actual posts stay in English. Match Jesus's no-em-dash rule in both languages.
 - Update `x-growth-reports/_content-ideas-backlog.md` (new ideas added, used ones marked).
 - Update `x-growth-reports/_state.md` (scorecard + any new learning about what works).
 - INTERACTIVE mode also refreshes `x-growth-reports/live/x-snapshot.md` with the raw metrics +
