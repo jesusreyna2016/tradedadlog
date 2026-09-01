@@ -121,7 +121,20 @@ export async function runSnapshot() {
     }
   }
 
-  return { ok: true, wrote: out };
+  // espeja report.json / state.json del repo a Blobs para que el dashboard los
+  // sirva sin el retraso de cache de raw.githubusercontent
+  const mirrored = [];
+  for (const name of ['report', 'state']) {
+    try {
+      const cur = await busGet(`${name}.json`, { token });
+      if (cur?.content) {
+        await store.set(`mirror:${name}`, cur.content, { metadata: { at: new Date().toISOString() } });
+        mirrored.push(name);
+      }
+    } catch { /* aun no existe */ }
+  }
+
+  return { ok: true, wrote: out, mirrored };
 }
 
 // invocable por HTTP para pruebas: GET /api/scalp-bus-snapshot
