@@ -553,8 +553,23 @@ body::before{
     .fb-guard{margin-top:7px;padding:7px 10px;border-radius:8px;background:rgba(255,92,108,.12);
       border-left:3px solid var(--red);color:var(--red);font-size:11px;font-weight:700;line-height:1.45}
     .fb-guard::before{content:"\26D4  "}
+    /* tira "El agente hoy": los 3 verdicts NQ/ES/GC + noticias, del bus */
+    .sastrip{margin:8px 0 0;padding:10px 12px;border-radius:12px;background:var(--panel-2);border:1px solid var(--border)}
+    .sav-head{font-family:"Orbitron","JetBrains Mono",monospace;font-size:9px;font-weight:800;letter-spacing:1.2px;
+      color:var(--txt-faint);text-transform:uppercase;margin-bottom:7px}
+    .sav{display:flex;align-items:baseline;gap:9px;padding:4px 0;border-top:1px solid var(--border);flex-wrap:wrap}
+    .sav:first-of-type{border-top:0}
+    .sav-sym{font-family:"JetBrains Mono",monospace;font-weight:800;font-size:12px;color:var(--txt);min-width:30px}
+    .sav-v{font-family:"JetBrains Mono",monospace;font-size:9px;font-weight:800;letter-spacing:1px;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,.06)}
+    .sav.go .sav-v{color:var(--lime)} .sav.avoid .sav-v{color:var(--red)} .sav.wait .sav-v{color:var(--amber)}
+    .sav-bias{font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt-faint)}
+    .sav-z{font-size:10.5px;color:var(--txt-dim);flex:1;min-width:120px}
+    .sanews{margin-top:8px;padding:6px 9px;border-radius:7px;font-size:10.5px;font-weight:700;line-height:1.45}
+    .sanews.med{background:rgba(245,197,66,.12);color:var(--amber)} .sanews.high{background:rgba(255,92,108,.12);color:var(--red)}
+    .sanews::before{content:"\26A0  "}
   </style>
   <div class="focusbar" id="focusBar" style="display:none"></div>
+  <div class="sastrip" id="saStrip" style="display:none"></div>
 
   <!-- DASH · orden por importancia: 1) contexto del día 2) gate de entrada 3) sesgo/niveles
        4) noticias 5) reglas/disciplina 6) rendimiento 7) roadmap (colapsado, es progreso a largo plazo) -->
@@ -2074,7 +2089,37 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   var JOURNAL_URL='https://raw.githubusercontent.com/jesusreyna2016/session-analyst-bus/main/live/journal.json';
   var bar=document.getElementById('focusBar');
   if(!bar) return;
+  var strip=document.getElementById('saStrip');
   var execData=null;   // rollup de ejecucion (del journal, de-identificado)
+  // tira "El agente hoy": los 3 verdicts NQ/ES/GC + la lectura de noticias del agente, en la
+  // pantalla de operar (antes solo vivian en session-plan.html). El foco es UN instrumento; esto
+  // te da los tres y ancla el CC al cerebro del agente.
+  function renderStrip(plan){
+    if(!strip) return;
+    if(!plan || !plan.instruments){ strip.style.display='none'; return; }
+    var rows=['NQ','ES','GC'].map(function(sym){
+      var d=plan.instruments[sym]; if(!d) return '';
+      var v=String((d.verdict&&d.verdict.signal)||'').toUpperCase();
+      var vc=v==='GO'?'go':(v==='AVOID'?'avoid':'wait');
+      var b=String(d.biasSession||'').toUpperCase();
+      var bias=b==='LONG'?T('largo','long'):(b==='SHORT'?T('corto','short'):T('neutral','neutral'));
+      var z=(d.zones&&d.zones[0])||null;
+      var zTxt=z?(esc(z.type||'')+' · '+T('conf','conf')+' '+(z.confluence!=null?z.confluence:'?')+
+        (z.risk&&z.risk.rr!=null?' · R:R '+z.risk.rr:'')):T('sin zona','no zone');
+      return '<div class="sav '+vc+'"><span class="sav-sym">'+sym+'</span>'+
+        '<span class="sav-v">'+(v||'—')+'</span><span class="sav-bias">'+bias+'</span>'+
+        '<span class="sav-z">'+zTxt+'</span></div>';
+    }).filter(Boolean);
+    if(!rows.length){ strip.style.display='none'; return; }
+    var nr=plan.newsRisk, lvl=nr&&String(nr.level||'').toUpperCase(), newsHtml='';
+    if(nr && (lvl==='MEDIA'||lvl==='ALTA')){
+      var ev=Array.isArray(nr.events)?nr.events.map(function(e){return L(e);}).filter(Boolean).join(' · '):L(nr.events);
+      newsHtml='<div class="sanews '+(lvl==='ALTA'?'high':'med')+'">'+T('Noticias','News')+' '+esc(lvl)+
+        (ev?' · '+esc(ev):'')+(L(nr.note)?' · '+esc(L(nr.note)):'')+'</div>';
+    }
+    strip.innerHTML='<div class="sav-head">'+T('El agente hoy','The agent today')+'</div>'+rows.join('')+newsHtml;
+    strip.style.display='';
+  }
   // readout de ejecucion: tu patron real (disciplina, contra-sesgo, fuera de zona) en la pantalla de operar
   function execHtml(){
     var r=execData&&execData.rollup; if(!r) return '';
@@ -2152,7 +2197,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       .catch(function(){});
     fetch(SA_URL+'?t='+Date.now(),{cache:'no-store'})
       .then(function(r){ return r.ok?r.json():null; })
-      .then(function(p){ lastPlan=p||{}; render(p||{}); })
+      .then(function(p){ lastPlan=p||{}; render(p||{}); renderStrip(p||{}); })
       .catch(function(){});
   }
   load();
