@@ -44,6 +44,9 @@
 
   .plan{background:linear-gradient(180deg,#141a26,#12161f);border:1px solid var(--line);
     border-left:3px solid var(--accent);border-radius:12px;padding:13px 15px;font-size:14px;color:var(--txt)}
+  .escalate{margin-top:12px;background:rgba(240,183,74,.06);border:1px solid var(--line);
+    border-left:3px solid var(--amber);border-radius:12px;padding:11px 15px;font-size:13px;color:var(--txt)}
+  .escalate b{color:var(--amber);text-transform:uppercase;font-size:11px;letter-spacing:.6px;margin-right:6px}
 
   .drafts{grid-template-columns:1fr}
   .draft{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px;position:relative}
@@ -57,15 +60,21 @@
   .chip.question{background:rgba(77,163,255,.15);color:var(--accent)}
   .chip.truthbomb{background:rgba(240,183,74,.15);color:var(--amber)}
   .chip.pattern{background:rgba(63,208,139,.15);color:var(--green)}
-  .draft .why{font-size:12.5px;color:var(--muted);margin-left:auto}
+  .aibadge{font-size:10px;font-weight:700;color:var(--green);background:rgba(63,208,139,.13);
+    padding:3px 8px;border-radius:999px;letter-spacing:.4px}
+  .draft .why{font-size:12.5px;color:var(--muted);margin-left:auto;max-width:46%;text-align:right}
   .draft pre{font-family:var(--sans);font-size:14.5px;white-space:pre-wrap;margin:0;color:#eef2f8;
     background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:13px 14px}
-  .draft .foot{display:flex;justify-content:space-between;align-items:center;margin-top:9px;gap:10px}
+  .draft .foot{display:flex;justify-content:space-between;align-items:center;margin-top:9px;gap:10px;flex-wrap:wrap}
   .src{font-size:11.5px;color:var(--dim);font-family:var(--mono)}
-  .copy{border:1px solid var(--line);background:var(--panel2);color:var(--txt);font-size:12.5px;
-    padding:6px 13px;border-radius:8px;cursor:pointer;font-weight:600;transition:.15s}
-  .copy:hover{border-color:var(--accent);color:var(--accent)}
-  .copy.ok{border-color:var(--green);color:var(--green)}
+  .foot .actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+  .slot{font-size:11.5px;color:var(--muted);font-family:var(--mono)}
+  .btn{border:1px solid var(--line);background:var(--panel2);color:var(--txt);font-size:12.5px;
+    padding:6px 13px;border-radius:8px;cursor:pointer;font-weight:600;transition:.15s;display:inline-block}
+  .btn:hover{border-color:var(--accent);color:var(--accent)}
+  .btn.ok{border-color:var(--green);color:var(--green)}
+  .btn.post{background:var(--accent);color:#06121f;border-color:var(--accent)}
+  .btn.post:hover{filter:brightness(1.08);color:#06121f}
 
   .read{grid-template-columns:repeat(3,1fr)}
   @media(max-width:720px){.read{grid-template-columns:1fr}}
@@ -88,16 +97,23 @@
 
   .bars{display:flex;flex-direction:column;gap:10px}
   .bar{display:grid;grid-template-columns:92px 1fr auto;align-items:center;gap:10px;font-size:12.5px}
+  .bar.wide{grid-template-columns:1fr auto}
   .bar .lbl{color:var(--muted);text-transform:capitalize}
+  .bar .hooklbl{color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .bar .track{height:9px;background:#1a2028;border-radius:6px;overflow:hidden}
-  .bar .fill{height:100%;border-radius:6px}
   .bar .val{font-family:var(--mono);color:var(--txt);font-size:12px}
+  .bar .fill{height:100%;border-radius:6px}
 
   .predict{display:flex;gap:13px;align-items:flex-start}
   .predict .dot{width:9px;height:9px;border-radius:50%;margin-top:6px;flex:none;background:var(--amber)}
   .predict .claim{font-size:14px} .predict .meta{font-size:11.5px;color:var(--dim);font-family:var(--mono);margin-top:3px}
+  .windows .slotrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+  .slotpill{font-size:12px;font-family:var(--mono);color:var(--txt);background:var(--panel2);
+    border:1px solid var(--line);border-radius:999px;padding:4px 11px}
 
   .engage li,.bl li{list-style:none} ul{margin:0;padding:0}
+  .goal{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+  .goal b{color:var(--accent)}
   .engage li{padding:10px 0;border-bottom:1px solid #1a2028}
   .engage li:last-child{border:none}
   .engage .h{font-weight:600;font-size:13.5px;color:var(--accent)}
@@ -125,23 +141,25 @@ const T = {
     followers:"Followers", trend:"Trend", posts:"Posts", thisweek:"This week", draftsready:"drafts ready",
     since:"since", notenough:"not enough data",
     s_plan:"This week's plan", s_drafts:"Drafts, ready to post", s_read:"The read", s_perf:"Performance",
-    s_pred:"Weekly prediction", s_engage:"Who to engage this week", s_backlog:"Ideas backlog", s_score:"Draft scorecard",
-    working:"Working", stop:"Stop doing", watch:"Idea to watch",
+    s_hooks:"Hooks that work", s_windows:"Best posting windows", s_pred:"Weekly prediction",
+    s_engage:"Who to engage this week", s_backlog:"Ideas backlog", s_score:"Draft scorecard",
+    esc_label:"If it lands", working:"Working", stop:"Stop doing", watch:"Idea to watch",
     h_post:"Post", h_format:"Format", h_views:"Views", h_likes:"Likes", h_replies:"Replies",
-    medianby:"Median views by format", copy:"Copy", copied:"Copied",
-    status:"status", open:"Open", used:"Used",
-    h_week:"Week", h_draft:"Draft", h_adopted:"Adopted", h_result:"Result",
+    medianby:"Median views by format", copy:"Copy", copied:"Copied", btn_post:"Post to X",
+    status:"status", accuracy:"forecast accuracy", replygoal:"reply target this week",
+    open:"Open", used:"Used", h_week:"Week", h_draft:"Draft", h_adopted:"Adopted", h_result:"Result",
     pending:"pending", hit:"hit", miss:"miss", footer:"runs interactively, writes here every cycle" },
   es:{ sub:"motor de crecimiento orgánico", updated:"actualizado", cycle:"ciclo #",
     followers:"Seguidores", trend:"Tendencia", posts:"Posts", thisweek:"Esta semana", draftsready:"borradores listos",
     since:"desde", notenough:"datos insuficientes",
     s_plan:"Plan de la semana", s_drafts:"Borradores, listos para publicar", s_read:"La lectura", s_perf:"Rendimiento",
-    s_pred:"Predicción de la semana", s_engage:"A quién responder esta semana", s_backlog:"Banco de ideas", s_score:"Scorecard de borradores",
-    working:"Funciona", stop:"Deja de hacer", watch:"Idea a vigilar",
+    s_hooks:"Ganchos que funcionan", s_windows:"Mejores horas para postear", s_pred:"Predicción de la semana",
+    s_engage:"A quién responder esta semana", s_backlog:"Banco de ideas", s_score:"Scorecard de borradores",
+    esc_label:"Si pega", working:"Funciona", stop:"Deja de hacer", watch:"Idea a vigilar",
     h_post:"Post", h_format:"Formato", h_views:"Vistas", h_likes:"Likes", h_replies:"Respuestas",
-    medianby:"Vistas medianas por formato", copy:"Copiar", copied:"Copiado",
-    status:"estado", open:"Abiertas", used:"Usadas",
-    h_week:"Semana", h_draft:"Borrador", h_adopted:"Adoptado", h_result:"Resultado",
+    medianby:"Vistas medianas por formato", copy:"Copiar", copied:"Copiado", btn_post:"Postear en X",
+    status:"estado", accuracy:"precisión de pronóstico", replygoal:"meta de respuestas esta semana",
+    open:"Abiertas", used:"Usadas", h_week:"Semana", h_draft:"Borrador", h_adopted:"Adoptado", h_result:"Resultado",
     pending:"pendiente", hit:"acierto", miss:"fallo", footer:"corre en modo interactivo, escribe aquí cada ciclo" }
 };
 
@@ -152,8 +170,7 @@ const fmt = n => n==null ? "—" : (n>=1000 ? (n/1000).toFixed(n>=10000?0:1)+"K"
 const esc = s => (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const clsFmt = f => (f||"").replace(/[^a-z]/g,"");
 const t = k => (T[LANG][k]!=null?T[LANG][k]:T.en[k]);
-// pick localized field: L(obj,"why") -> obj.why_es in ES if present, else obj.why
-const L = (o,base) => { if(!o) return ""; const v = (LANG==="es" && o[base+"_es"]!=null) ? o[base+"_es"] : o[base]; return v; };
+const L = (o,base) => { if(!o) return ""; return (LANG==="es" && o[base+"_es"]!=null) ? o[base+"_es"] : o[base]; };
 const Larr = (o,base) => (LANG==="es" && Array.isArray(o[base+"_es"])) ? o[base+"_es"] : (o[base]||[]);
 
 fetch("/x-growth-data.json?v="+Date.now())
@@ -176,22 +193,33 @@ function render(){
   const maxFp = Math.max(1,...fp.map(f=>f.medianViews));
   const fpColor = {aphorism:"var(--violet)",confession:"var(--red)",question:"var(--accent)","truth-bomb":"var(--amber)",pattern:"var(--green)"};
 
+  const hb = d.hookBank||[];
+  const maxHb = Math.max(1,...hb.map(h=>h.views));
   const spark = sparkline(fh.map(p=>p.followers));
   const statuses = {pending:t("pending"),hit:t("hit"),miss:t("miss")};
+  const acc = d.predictionAccuracy;
 
-  const draftCard = dr => `
+  const draftCard = dr => {
+    const intent = "https://x.com/intent/tweet?text="+encodeURIComponent(dr.text);
+    return `
     <div class="draft ${dr.rank===1?'r1':''}">
       <div class="head">
         <span class="rankbadge">${dr.rank}</span>
         <span class="chip ${clsFmt(dr.format)}">${esc(dr.format)}</span>
+        ${dr.antiAI?`<span class="aibadge">anti-AI ✓</span>`:''}
         <span class="why">${esc(L(dr,"why"))}</span>
       </div>
       <pre id="dr${dr.rank}">${esc(dr.text)}</pre>
       <div class="foot">
         <span class="src">${esc(dr.source)}</span>
-        <button class="copy" data-t="dr${dr.rank}">${t("copy")}</button>
+        <span class="actions">
+          ${dr.slot?`<span class="slot">🗓 ${esc(dr.slot)}</span>`:''}
+          <button class="btn copy" data-t="dr${dr.rank}">${t("copy")}</button>
+          <a class="btn post" href="${intent}" target="_blank" rel="noopener">${t("btn_post")}</a>
+        </span>
       </div>
     </div>`;
+  };
 
   const html = `
   <header class="top">
@@ -231,6 +259,7 @@ function render(){
 
   <div class="section-title">${esc(t("s_plan"))} <span class="line"></span></div>
   <div class="plan">${esc(L(d,"plan"))}</div>
+  ${L(d,"escalate")?`<div class="escalate"><b>${esc(t("esc_label"))}</b>${esc(L(d,"escalate"))}</div>`:''}
 
   <div class="section-title">${esc(t("s_drafts"))} <span class="line"></span></div>
   <div class="grid drafts">${(d.drafts||[]).slice().sort((a,b)=>a.rank-b.rank).map(draftCard).join("")}</div>
@@ -270,17 +299,41 @@ function render(){
     </div>
   </div>
 
-  <div class="section-title">${esc(t("s_pred"))} <span class="line"></span></div>
-  <div class="card predict">
-    <span class="dot" style="background:${d.prediction?.status==='hit'?'var(--green)':d.prediction?.status==='miss'?'var(--red)':'var(--amber)'}"></span>
-    <div><div class="claim">${esc(L(d.prediction,"claim"))}</div>
-    <div class="meta">${esc(d.prediction?.week)} · ${esc(t("status"))}: ${esc(statuses[d.prediction?.status]||statuses.pending)}</div></div>
+  <div class="section-title">${esc(t("s_hooks"))} <span class="line"></span></div>
+  <div class="card">
+    <div class="bars">
+    ${hb.map(h=>`
+      <div class="bar wide" title="${esc(h.hook)}">
+        <span class="hooklbl">${esc(h.hook)} <span class="mini">${esc(h.format)}</span></span>
+        <span class="val">${fmt(h.views)}</span>
+      </div>
+      <div class="bar" style="grid-template-columns:1fr">
+        <span class="track"><span class="fill" style="width:${Math.max(4,h.views/maxHb*100)}%;background:${fpColor[h.format]||'var(--accent)'}"></span></span>
+      </div>`).join("")}
+    </div>
+    ${L(d,"hookNote")?`<div class="mini" style="margin-top:10px">${esc(L(d,"hookNote"))}</div>`:''}
+  </div>
+
+  <div class="section-title">${esc(t("s_windows"))} · ${esc(t("s_pred"))} <span class="line"></span></div>
+  <div class="grid two">
+    <div class="card windows">
+      <div class="slotrow">${(d.bestWindows?.slots||[]).map(s=>`<span class="slotpill">${esc(s)}</span>`).join("")}</div>
+      <div class="mini">${esc(L(d.bestWindows,"note"))}</div>
+    </div>
+    <div class="card predict">
+      <span class="dot" style="background:${d.prediction?.status==='hit'?'var(--green)':d.prediction?.status==='miss'?'var(--red)':'var(--amber)'}"></span>
+      <div><div class="claim">${esc(L(d.prediction,"claim"))}</div>
+      <div class="meta">${esc(d.prediction?.week)} · ${esc(t("status"))}: ${esc(statuses[d.prediction?.status]||statuses.pending)}${acc&&acc.total?` · ${esc(t("accuracy"))}: ${acc.hits}/${acc.total}`:''}</div></div>
+    </div>
   </div>
 
   <div class="section-title">${esc(t("s_engage"))} <span class="line"></span></div>
-  <div class="card engage"><ul>
-  ${(d.engageList||[]).map(e=>`<li><div class="h">${esc(e.handle)}</div><div class="ex">${esc(e.postExcerpt)}</div><div class="wy">${esc(L(e,"whyReply"))}</div></li>`).join("")}
-  </ul></div>
+  <div class="card engage">
+    ${d.replyGoal?`<div class="goal">${esc(t("replygoal"))}: <b>${esc(d.replyGoal)}</b></div>`:''}
+    <ul>
+    ${(d.engageList||[]).map(e=>`<li><div class="h">${esc(e.handle)}</div><div class="ex">${esc(e.postExcerpt)}</div><div class="wy">${esc(L(e,"whyReply"))}</div></li>`).join("")}
+    </ul>
+  </div>
 
   <div class="section-title">${esc(t("s_backlog"))} <span class="line"></span></div>
   <div class="grid bl-cols">

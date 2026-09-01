@@ -23,6 +23,8 @@
     {
       "rank": 1,
       "format": "aphorism",
+      "antiAI": true,
+      "slot": "Mon · 11:50 AM CT",
       "text": "The plan always gets written by the calm version of me.\nNothing on the line. All patience. Thinks clearly.\nThat guy is never in the room when price rips against my stop.\nThe one who shows up then just wants to be right.\nTrading is learning to obey the calm one after he's already left.",
       "source": "RealizedTrader mechanism + Glenn 10-sec seed",
       "why": "Universal split every trader feels, citable last line, no question = repost bait. First person makes it ours.",
@@ -31,6 +33,8 @@
     {
       "rank": 2,
       "format": "truth-bomb",
+      "antiAI": true,
+      "slot": "Thu · 11:50 AM CT",
       "text": "Easiest thing in the world is to feel bad about a red day and scroll past it.\nHardest thing is to line your losses up next to each other and actually look.\nThey're never random. Same setup. Same time of day. Same feeling in your chest right before you click.\nThe shame isn't protecting you. It's protecting the pattern.",
       "source": "@leahlager comment (used)",
       "why": "Turns a common comment into a sharp reframe, universal so no fabricated numbers needed.",
@@ -39,6 +43,8 @@
     {
       "rank": 3,
       "format": "question",
+      "antiAI": true,
+      "slot": "Tue · 7:00 PM CT",
       "text": "Honest question for the prop firm crowd.\nWhat's the real gap between passing an eval and staying passed?\nFor me it was never the strategy. It was the ten seconds after a clean trend when I decide I suddenly know better.",
       "source": "Jesus's own recurring theme",
       "why": "Direct question = reply engine, ties to his real posted theme, invites the exact audience he wants.",
@@ -47,6 +53,8 @@
   ],
   "plan": "Lead with Draft 1 (aphorism) for reach. Post Draft 3 a day later for conversation. Hold Draft 2 as the mid-week reframe. Space them out, never stack two in one window.",
   "plan_es": "Empieza con el Draft 1 (aforismo) para alcance. Publica el Draft 3 un día después para conversación. Guarda el Draft 2 como reframe de media semana. Espácialos, nunca apiles dos en la misma ventana.",
+  "escalate": "If Draft 1 clears ~3K within a few hours, that same evening reply to it with the 10-second-window breakdown (right vs escape vs status). The algorithm rewards you continuing a post that's already moving.",
+  "escalate_es": "Si el Draft 1 pasa ~3K en unas horas, esa misma noche respóndelo con el desglose de los 10 segundos (tener razón vs escapar vs estatus). El algoritmo premia que sigas un post que ya se está moviendo.",
   "read": {
     "working": "Concrete + numbers + a twist still wins reach (the Green/Red eval post hit 6.8K). Aphorisms pull fewer views but the highest-quality replies.",
     "working_es": "Concreto + números + un giro sigue ganando alcance (el post del eval Green/Red llegó a 6.8K). Los aforismos jalan menos vistas pero los comentarios de más calidad.",
@@ -55,16 +63,32 @@
     "watch": "The '10-second window' idea. Two different people named it in comments today. It's a full post: what drives that window (need to be right vs escape vs ego).",
     "watch_es": "La idea de 'los diez segundos'. Dos personas distintas la nombraron en comentarios hoy. Da para un post entero: qué te empuja en esa ventana (querer tener razón vs escapar vs ego)."
   },
+  "hookBank": [
+    { "hook": "Right now I feel like shit.", "views": 83900, "format": "confession" },
+    { "hook": "Don't be like me!", "views": 44000, "format": "confession" },
+    { "hook": "It's crazy how the mind works in trading...", "views": 40700, "format": "aphorism" },
+    { "hook": "My 100k Eval so far: Green day. Red day...", "views": 6800, "format": "pattern" },
+    { "hook": "Passing an eval isn't the hard part for me.", "views": 777, "format": "truth-bomb" }
+  ],
+  "hookNote": "Hooks that hit are short, simple, present-tense, and clear on line one. Save irony for later lines.",
+  "hookNote_es": "Los ganchos que pegan son cortos, simples, en presente y claros en la primera línea. Guarda la ironía para las líneas siguientes.",
+  "bestWindows": {
+    "slots": ["Late morning CT (~11:50 AM)", "Evening CT (~7:00 PM)"],
+    "note": "Low confidence yet, only a handful of posts. The one clear signal: your single best recent post (6.8K) went out late morning CT.",
+    "note_es": "Baja confianza aún, solo un puñado de posts. La señal clara: tu mejor post reciente (6.8K) salió a media mañana CT."
+  },
   "prediction": {
     "week": "2026-08-31",
     "claim": "Draft 1 (aphorism) clears the recent median of ~1.5K views within 48h of posting.",
     "claim_es": "El Draft 1 (aforismo) supera la mediana reciente de ~1.5K vistas dentro de 48h de publicado.",
     "status": "pending"
   },
+  "predictionAccuracy": { "hits": 0, "total": 0 },
   "engageList": [
     { "handle": "@RealizedTrader", "postExcerpt": "The plan was written by a version of you who was calm and had nothing at stake...", "whyReply": "Your best commenter and a peer running the same aphorism lane. A sharp reply here builds the relationship and borrows his audience.", "whyReply_es": "Tu mejor comentarista y un peer en el mismo carril de aforismos. Una respuesta filosa aquí construye la relación y te presta su audiencia." },
     { "handle": "@SmarterForexAU", "postExcerpt": "commented on your aphorism about the 10-second window (right / escape / status)", "whyReply": "Thoughtful reply on your post. Answer his question back to deepen the thread and signal you actually read.", "whyReply_es": "Comentario reflexivo en tu post. Respóndele su pregunta para profundizar el hilo y mostrar que de verdad lees." }
   ],
+  "replyGoal": 5,
   "backlog": {
     "open": [
       "Not every gap is 'the market testing you' - sometimes it's just news (toddc, 27 ago)",
