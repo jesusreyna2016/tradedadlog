@@ -2,7 +2,12 @@
 
 Freshest read of @TradeDadLog performance. CLOUD-mode runs read THIS instead of x.com (which is blocked in the cloud). Refresh every interactive cycle.
 
-Followers: 771 · Posts: 639 · captured 2026-09-01 ~01:35 CT
+Followers: 773 · Posts: 649 · captured 2026-09-01 ~03:20 CT (refreshed)
+
+## Sep 1 real-day posts (3 variants of the same bad session, posted within ~2h)
+- status 2094700731781513692 (3:15 AM) "Day's over. I'm going to sleep..." confession, hunting shorts / flipped long / it dumped / "punished either way if you force it" — 1.3K views, 26 likes, 9 replies. BEST of the 3. Top comments: @Emmonspired "the psychological problem with trying to predict rather than react" (122 likes); @NordicTrades "you got tired, grinded down, then switched direction, wouldn't happen if fresh at the start" (71 likes); @SebbyDinero1017 "come back after 6pm eastern" (14).
+- status 2094694217331183676 (2:49 AM) "5 x 25k MFF Rapid accounts Gone! ...less than $100 away" confession w/ 2 images — 539 views, 8 likes, 4 replies. Drier take, underperformed. Comment @sowhateh (FxGal) "25k accounts I wouldn't go over 2 micros... were you oversizing trying to pass fast?" (23) — real pushback tied to a known leak.
+- status 2094674193736503610 (Lucid Daily, passed 4 of 5) — matured to 1.2K.
 
 ## Last 5 posts
 1. Sep 1 (1m, too young to judge) · status 2094674193736503610 · real anchor post (real numbers, not a drafted format): "Bought 5 $25k Lucid Daily accounts Monday. Passed 4 of 5 today. Would've been 5 for 5 but my @tradecopia subscription expired..." confession format, real trailing-drawdown story (5 accounts bought, 4 passed, lost 3 of the 4 passed to trailing DD/chop/one NQ wick-to-entry, 4th taken to $4.5k and locked deliberately). Not one of the agent's drafts — Jesus wrote/posted this one himself from a real day. Track its performance next cycle.

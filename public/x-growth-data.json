@@ -1,25 +1,27 @@
 {
   "updated": "2026-09-01",
   "cycle": 2,
-  "account": { "handle": "TradeDadLog", "followers": 771, "posts": 639 },
+  "account": { "handle": "TradeDadLog", "followers": 773, "posts": 649 },
   "followerHistory": [
     { "date": "2026-08-26", "followers": 759 },
     { "date": "2026-08-31", "followers": 771 },
-    { "date": "2026-09-01", "followers": 771 }
+    { "date": "2026-09-01", "followers": 773 }
   ],
   "recentPosts": [
-    { "date": "2026-09-01", "id": "2094674193736503610", "excerpt": "Bought 5 $25k Lucid Daily accounts Monday. Passed 4 of 5 today...", "views": 5, "likes": null, "replies": null, "format": "confession", "dataSource": "analytics", "note": "real anchor post, not a drafted one — too young to judge yet", "note_es": "post real ancla, no fue un borrador del agente — muy temprano para juzgar" },
+    { "date": "2026-09-01", "id": "2094700731781513692", "excerpt": "Day's over. I'm going to sleep. The damage is already done. Spent the session hunting shorts, flipped long and it dumped...", "views": 1300, "likes": 26, "replies": 9, "format": "confession", "dataSource": "loggedout", "note": "real anchor post; best of 3 same-day variants of the same bad day — the reflective one won", "note_es": "post real ancla; el mejor de 3 variantes del mismo mal día — ganó el reflexivo" },
+    { "date": "2026-09-01", "id": "2094694217331183676", "excerpt": "5 x 25k MFF Rapid accounts Gone! I was less than $100 away from passing...", "views": 539, "likes": 8, "replies": 4, "format": "confession", "dataSource": "loggedout", "note": "same-event variant, drier take — underperformed the reflective version", "note_es": "variante del mismo evento, versión más seca — rindió menos que la reflexiva" },
+    { "date": "2026-09-01", "id": "2094674193736503610", "excerpt": "Bought 5 $25k Lucid Daily accounts Monday. Passed 4 of 5 today...", "views": 1200, "likes": null, "replies": null, "format": "confession", "dataSource": "loggedout", "note": "real anchor post, matured to 1.2K", "note_es": "post real ancla, maduró a 1.2K" },
     { "date": "2026-08-26", "id": "2092643864272146901", "excerpt": "Lately this market feels like it's designed to punish anyone who tries to trade it... Anyone else getting chopped up by this?", "views": 12000, "likes": 237, "replies": 61, "format": "complaint-question", "dataSource": "analytics", "note": "strongest recent-week post, corrected from an earlier undercount", "note_es": "post más fuerte de la semana reciente, corregido de un conteo previo equivocado" },
     { "date": "2026-08-26", "id": "2092543134362223103", "excerpt": "Just got a 99% off coupon on @MyFundedFutures 25k Rapid... Still proven I don't need help destroying them.", "views": 12000, "likes": 67, "replies": 23, "format": "truth-bomb", "dataSource": "analytics", "note": "corrected from an earlier undercount (was recorded as 6.8K)", "note_es": "corregido de un conteo previo equivocado (estaba registrado como 6.8K)" },
     { "date": "2026-08-28", "id": "2093381057781322204", "excerpt": "My 100k @Topstep Eval so far: Green day. Red day...", "views": 6800, "likes": 55, "replies": 7, "format": "pattern", "dataSource": "analytics" },
     { "date": "2026-08-30", "id": "2094205399725670891", "excerpt": "Market opens and I gift myself another red day. Hit DLL...", "views": 2800, "likes": 18, "replies": 6, "format": "confession", "dataSource": "analytics" },
-    { "date": "2026-08-31", "id": "2094462688575283458", "excerpt": "Passing an eval isn't the hard part for me. The hard part is not sabotaging it...", "views": 788, "likes": 22, "replies": 3, "format": "truth-bomb", "dataSource": "analytics" },
-    { "date": "2026-08-31", "id": "2094580592495002023", "excerpt": "Knowing the rule was never the problem... the ten seconds after you already knew better.", "views": 412, "likes": 7, "replies": 2, "format": "aphorism", "dataSource": "analytics" }
+    { "date": "2026-08-31", "id": "2094462688575283458", "excerpt": "Passing an eval isn't the hard part for me. The hard part is not sabotaging it...", "views": 845, "likes": 22, "replies": 3, "format": "truth-bomb", "dataSource": "loggedout" },
+    { "date": "2026-08-31", "id": "2094580592495002023", "excerpt": "Knowing the rule was never the problem... the ten seconds after you already knew better.", "views": 565, "likes": 7, "replies": 2, "format": "aphorism", "dataSource": "loggedout" }
   ],
   "formatPerformance": [
     { "format": "complaint-question", "medianViews": 12000, "count": 1 },
     { "format": "pattern", "medianViews": 6800, "count": 1 },
-    { "format": "confession", "medianViews": 2800, "count": 1, "note": "excludes the too-young Lucid Daily post", "note_es": "excluye el post de Lucid Daily, muy joven aún" },
+    { "format": "confession", "medianViews": 1250, "count": 4, "note": "incl. the 3 Sep 1 real-day posts", "note_es": "incl. los 3 posts reales del 1 sep" },
     { "format": "truth-bomb", "medianViews": 6394, "count": 2 },
     { "format": "aphorism", "medianViews": 412, "count": 1 }
   ],
@@ -64,10 +66,10 @@
   "escalate": "If Draft 2 clears ~3K within a few hours, that same day reply to it going one level deeper on the need-to-be-right vs escape vs control breakdown, and credit @SmarterForexAU's comment directly. Keep riding a post that's already moving instead of starting a new one.",
   "escalate_es": "Si el Draft 2 pasa ~3K en unas horas, ese mismo día respóndelo profundizando un nivel más en la necesidad de tener razón vs escapar vs control, y dale crédito directo al comentario de @SmarterForexAU. Sigue montando un post que ya se está moviendo en vez de empezar uno nuevo.",
   "read": {
-    "working": "Unchanged from last cycle, no fresh snapshot yet (this cycle fired 1 day after the last one): concrete + numbers + a twist still wins reach (the Green/Red eval post hit 6.8K). Aphorisms pull fewer views but the highest-quality replies.",
-    "working_es": "Sin cambios respecto al ciclo anterior, sin snapshot nuevo aún (este ciclo corrió 1 día después del anterior): concreto + números + un giro sigue ganando alcance (el post del eval Green/Red llegó a 6.8K). Los aforismos jalan menos vistas pero los comentarios de más calidad.",
-    "stop": "Stacking two low-variety, similar-energy formats hours apart. Both underperformed last cycle (777 and 382). Space formats out.",
-    "stop_es": "Apilar dos formatos de poca variedad y energía similar con horas de diferencia. Los dos rindieron poco el ciclo anterior (777 y 382). Espacia los formatos.",
+    "working": "Fresh Sep 1 read: your reflective real-day confession ('Day's over... hunting shorts') hit 1.3K and pulled comments with more likes than the post itself (Dan Emmons 122, Nordic 71). Real, specific, present-tense trading pain with an honest unresolved lesson is still your strongest lane.",
+    "working_es": "Lectura fresca 1 sep: tu confesión reflexiva del día real ('Day's over... hunting shorts') llegó a 1.3K y jaló comentarios con más likes que el propio post (Dan Emmons 122, Nordic 71). El dolor de trading real, específico y en presente con una lección honesta sin resolver sigue siendo tu carril más fuerte.",
+    "stop": "You posted 3 variants of the same bad day within ~2 hours (Lucid Daily, MFF Rapid Gone, Day's over). The dry one underperformed (539) while the reflective one won (1.3K). One strong reflective post beats three near-duplicates of the same event. Space them out and pick the best angle.",
+    "stop_es": "Publicaste 3 variantes del mismo mal día en ~2 horas (Lucid Daily, MFF Rapid Gone, Day's over). La versión seca rindió menos (539) y la reflexiva ganó (1.3K). Un post reflexivo fuerte le gana a tres casi-duplicados del mismo evento. Espácialos y elige el mejor ángulo.",
     "watch": "The wider niche is talking about 'need to be right vs. being profitable' right now, the same insight class as Glenn's 10-second-window comment. Also watching whether cycle #1's 3 drafts actually get posted before next cycle, still ungraded.",
     "watch_es": "El nicho en general está hablando de 'necesidad de tener razón vs. ser rentable' ahora mismo, la misma clase de insight que el comentario de Glenn sobre los 10 segundos. También vigilando si los 3 drafts del ciclo #1 se publican antes del próximo ciclo, aún sin calificar."
   },
@@ -101,11 +103,17 @@
   "backlog": {
     "open": [
       "The two selves / calm planner, longer confession version still deliberately held open (RealizedTrader scan, 31 ago)",
-      "Discipline-erosion sequence: name the exact order compromises stack, needs a real Jesus-specific sequence (niche scan, 01 sep)"
+      "Discipline-erosion sequence: name the exact order compromises stack, needs a real Jesus-specific sequence (niche scan, 01 sep)",
+      "Predict vs react: the real trap is trying to predict the next move instead of reacting to what price is actually doing (Dan Emmons, 122 likes on the Day's-over post, 01 sep)",
+      "You don't flip direction when you're fresh, you flip when you're ground down and tired late in the session (Nordic, 71 likes, 01 sep)",
+      "The oversizing-to-pass-fast trap on small evals: risking too much to pass quickly is why one bad candle wipes the account (FxGal, 01 sep) — ties to Jesus's real revenge-sizing leak"
     ],
     "open_es": [
       "Los dos yo / el planificador tranquilo, versión confesión larga aún guardada a propósito (scan RealizedTrader, 31 ago)",
-      "Secuencia de erosión de disciplina: nombrar el orden exacto en que se acumulan las concesiones, necesita una secuencia real de Jesus (scan del nicho, 01 sep)"
+      "Secuencia de erosión de disciplina: nombrar el orden exacto en que se acumulan las concesiones, necesita una secuencia real de Jesus (scan del nicho, 01 sep)",
+      "Predecir vs reaccionar: la trampa real es tratar de predecir el próximo movimiento en vez de reaccionar a lo que el precio de verdad está haciendo (Dan Emmons, 122 likes en el post Day's-over, 01 sep)",
+      "No cambias de dirección cuando estás fresco, cambias cuando estás desgastado y cansado tarde en la sesión (Nordic, 71 likes, 01 sep)",
+      "La trampa de sobredimensionar para pasar rápido en evals chicas: arriesgar de más para pasar rápido es por lo que una sola vela mala borra la cuenta (FxGal, 01 sep) — se conecta con tu fuga real de revenge-sizing"
     ],
     "used": [
       "Aphorism riff 'Knowing the rule was never the problem' (RealizedTrader) - posted 31 ago",
