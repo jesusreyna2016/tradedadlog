@@ -164,6 +164,11 @@
   tr.zplay b{color:#cdd7e2}
   .alevels{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:16px}
   .alevels h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin:0 0 8px}
+  .alevels .ahead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 8px}
+  .alevels .ahead h2{margin:0}
+  .tvbtn{background:var(--chipbg);border:1px solid var(--line);color:var(--txt);font-family:var(--mono);
+    font-size:11px;font-weight:700;letter-spacing:.5px;padding:4px 9px;border-radius:7px;cursor:pointer;white-space:nowrap}
+  .tvbtn:hover{border-color:var(--accent);color:var(--accent)} .tvbtn:active{transform:translateY(1px)}
 </style>
 </head>
 <body>
@@ -220,7 +225,9 @@
       gap:"Gap", smt:"SMT (NQ/ES)", predictions:"Falsifiable predictions", play:"Entry plan",
       window:"Window", structStop:"Struct stop", scale:"Scale", ifWrong:"If wrong",
       alertLevels:"Alert levels", maxCon:"Max contracts", rr:"R:R",
-      news:"News risk", calendar:"Calendar", newsLvl:{NINGUNA:"none",MEDIA:"medium",ALTA:"high"}
+      news:"News risk", calendar:"Calendar", newsLvl:{NINGUNA:"none",MEDIA:"medium",ALTA:"high"},
+      copyTv:"Copy TV alerts", copied:"copied",
+      tvHead:"Session Analyst alerts", tvHint:"TV: new alert > Crossing > paste the price; use the label as the name."
     },
     es:{
       loading:"Cargando plan…", err:"No se pudo cargar el plan. ",
@@ -249,7 +256,9 @@
       gap:"Gap", smt:"SMT (NQ/ES)", predictions:"Predicciones falsables", play:"Plan de entrada",
       window:"Ventana", structStop:"Stop estructura", scale:"Parciales", ifWrong:"Si falla",
       alertLevels:"Niveles de aviso", maxCon:"Máx contratos", rr:"R:R",
-      news:"Riesgo de noticias", calendar:"Calendario", newsLvl:{NINGUNA:"ninguna",MEDIA:"media",ALTA:"alta"}
+      news:"Riesgo de noticias", calendar:"Calendario", newsLvl:{NINGUNA:"ninguna",MEDIA:"media",ALTA:"alta"},
+      copyTv:"Copiar alertas TV", copied:"copiado",
+      tvHead:"Avisos Session Analyst", tvHint:"TV: nuevo aviso > Cruzando > pega el precio; usa la etiqueta como nombre."
     }
   };
 
@@ -365,7 +374,10 @@
     html+='</div>';
     // alert levels (lista plana de niveles de aviso)
     if(Array.isArray(plan.alertLevels) && plan.alertLevels.length){
-      html+='<div class="alevels"><h2>'+t.alertLevels+'</h2><div class="scroll"><table>'+
+      window.__saLevels=plan.alertLevels; window.__saDate=plan.date||"";
+      html+='<div class="alevels"><div class="ahead"><h2>'+t.alertLevels+'</h2>'+
+        '<button class="tvbtn" onclick="copyTvAlerts(this)">⧉ '+t.copyTv+'</button></div>'+
+        '<div class="scroll"><table>'+
         '<thead><tr><th></th><th class="num">'+t.price+'</th><th></th></tr></thead><tbody>';
       plan.alertLevels.forEach(function(a){
         var kc = a.kind==='zoneA'?'z-dir '+biasClass(a.dir):(a.kind==='invalidation'?'':'');
@@ -396,6 +408,28 @@
       : (t.dataWarn+((dh.stale&&dh.stale.length)?" "+dh.stale.join(","):"")+((dh.missing&&dh.missing.length)?" · "+t.dataMissing+" "+dh.missing.join(","):""));
     return '<span class="pill" title="'+esc(vreason(dh.notes))+'"><span class="dot '+cls+'"></span>'+esc(txt)+'</span>';
   }
+  // #3 · genera el texto de avisos TV desde los alertLevels curados del agente y lo copia
+  window.copyTvAlerts=function(btn){
+    var t=T[lang];
+    var levels=window.__saLevels||[]; if(!levels.length) return;
+    var kindLbl={zoneA:"A+", invalidation:(lang==="es"?"INVALIDA":"INVALID"), gapEdge:"GAP"};
+    var lines=levels.map(function(a){
+      var k=kindLbl[a.kind]||String(a.kind||"").toUpperCase();
+      var dir=a.dir?(" "+a.dir):""; var lab=L(a.label);
+      // precio crudo, sin separador de miles (TradingView lo necesita asi para pegar)
+      var px=(a.price==null||isNaN(a.price))?"":String(Number(a.price));
+      return (a.sym||"")+"  "+px+"  "+k+dir+(lab?"  "+lab:"");
+    });
+    var txt=t.tvHead+" · "+(window.__saDate||"")+"\n"+lines.join("\n")+"\n"+t.tvHint;
+    var done=function(){ btn.textContent=t.copied;
+      setTimeout(function(){ btn.innerHTML="⧉ "+t.copyTv; },1400); };
+    var fallback=function(){ try{ var ta=document.createElement("textarea"); ta.value=txt;
+      ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select();
+      document.execCommand("copy"); document.body.removeChild(ta); }catch(e){} };
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(done,function(){ fallback(); done(); });
+    } else { fallback(); done(); } }catch(e){ fallback(); done(); }
+  };
   function bestZone(d){
     var best=null;
     (d.zones||[]).forEach(function(z){
