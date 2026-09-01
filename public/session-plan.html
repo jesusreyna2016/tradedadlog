@@ -139,6 +139,19 @@
   .fx-main{font-size:14px;font-weight:700;color:var(--txt)}
   .fx-sub{margin-top:6px;font-size:12px;color:#cdd7e2;line-height:1.5}
   .fx-note{margin-top:4px;font-size:12px;color:var(--warn);line-height:1.5}
+  /* news band */
+  .newsband{border:1px solid var(--line);border-left:4px solid var(--neutral);border-radius:12px;
+    padding:10px 14px;margin-bottom:14px;background:var(--panel)}
+  .newsband.med{border-left-color:var(--warn)} .newsband.high{border-left-color:var(--short)}
+  .nb-top{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .nb-tag{font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:1px;padding:2px 7px;
+    border-radius:6px;background:rgba(255,255,255,.06);color:var(--dim)}
+  .newsband.med .nb-tag{color:var(--warn)} .newsband.high .nb-tag{color:var(--short)}
+  .nb-events{font-size:12.5px;font-weight:700;color:var(--txt)}
+  .nb-note{margin-top:4px;font-size:12px;color:#cdd7e2;line-height:1.5}
+  .nb-tags{margin-top:5px;display:flex;gap:6px;flex-wrap:wrap}
+  .nb-tags span{font-size:10px;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:6px;
+    background:rgba(255,255,255,.06);color:var(--dim)}
   /* mini rows + strip + preds + zplay + alevels */
   .mini{font-size:12.5px;color:#cdd7e2;line-height:1.5;margin:2px 0}
   .mini .ml{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);margin-right:6px}
@@ -206,7 +219,8 @@
       focus:"Focus", counterCase:"Counter-case", align:"Thesis continuity", prevDay:"Prior day",
       gap:"Gap", smt:"SMT (NQ/ES)", predictions:"Falsifiable predictions", play:"Entry plan",
       window:"Window", structStop:"Struct stop", scale:"Scale", ifWrong:"If wrong",
-      alertLevels:"Alert levels", maxCon:"Max contracts", rr:"R:R"
+      alertLevels:"Alert levels", maxCon:"Max contracts", rr:"R:R",
+      news:"News risk", calendar:"Calendar", newsLvl:{NINGUNA:"none",MEDIA:"medium",ALTA:"high"}
     },
     es:{
       loading:"Cargando plan…", err:"No se pudo cargar el plan. ",
@@ -234,7 +248,8 @@
       focus:"Foco", counterCase:"Contra-caso", align:"Continuidad de tesis", prevDay:"Día anterior",
       gap:"Gap", smt:"SMT (NQ/ES)", predictions:"Predicciones falsables", play:"Plan de entrada",
       window:"Ventana", structStop:"Stop estructura", scale:"Parciales", ifWrong:"Si falla",
-      alertLevels:"Niveles de aviso", maxCon:"Máx contratos", rr:"R:R"
+      alertLevels:"Niveles de aviso", maxCon:"Máx contratos", rr:"R:R",
+      news:"Riesgo de noticias", calendar:"Calendario", newsLvl:{NINGUNA:"ninguna",MEDIA:"media",ALTA:"alta"}
     }
   };
 
@@ -324,6 +339,22 @@
       html+='<div class="summary"><h2>'+t.summary+'</h2><ul>';
       sumArr.forEach(function(s){ html+='<li>'+esc(L(s))+'</li>'; });
       html+='</ul></div>';
+    }
+    // news risk + calendar (solo cuando hay algo que decir)
+    var nr=plan.newsRisk, cc=plan.calendarContext;
+    var nrLvl=nr&&nr.level?String(nr.level).toUpperCase():"NINGUNA";
+    var ccTags=(cc&&Array.isArray(cc.tags))?cc.tags.filter(Boolean):[];
+    if((nr && nrLvl!=="NINGUNA") || ccTags.length){
+      var nbCls = nrLvl==="ALTA"?"high":(nrLvl==="MEDIA"?"med":"");
+      var evTxt = nr ? (Array.isArray(nr.events)?nr.events.map(function(e){return L(e);}).filter(Boolean).join(" · "):L(nr.events)) : "";
+      html+='<div class="newsband '+nbCls+'"><div class="nb-top">'+
+        '<span class="nb-tag">'+t.news.toUpperCase()+(nr?' · '+esc((t.newsLvl&&t.newsLvl[nrLvl])||nrLvl):'')+'</span>'+
+        (nr&&nr.session?'<span class="nb-events">'+esc(String(nr.session).toUpperCase())+'</span>':'')+
+        (evTxt?'<span class="nb-events">'+esc(evTxt)+'</span>':'')+'</div>'+
+        (nr&&L(nr.note)?'<div class="nb-note">'+esc(L(nr.note))+'</div>':'')+
+        (cc&&L(cc.note)?'<div class="nb-note">'+esc(L(cc.note))+'</div>':'')+
+        (ccTags.length?'<div class="nb-tags">'+ccTags.map(function(x){return '<span>'+esc(x)+'</span>';}).join('')+'</div>':'')+
+        '</div>';
     }
     // instrument cards
     html+='<div class="cards">';

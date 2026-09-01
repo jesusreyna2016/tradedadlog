@@ -541,6 +541,10 @@ body::before{
     .fb-sub{margin-top:5px;font-size:10.5px;color:var(--txt-dim);line-height:1.5}
     .fb-sub b{color:var(--txt-dim);font-weight:700}
     .fb-note{margin-top:4px;font-size:10.5px;color:var(--amber);line-height:1.5}
+    .focusbar.alarm{border-left-color:var(--red);box-shadow:0 0 26px -10px var(--red)}
+    .fb-alarm{font-size:11.5px;font-weight:800;color:var(--red);line-height:1.4;letter-spacing:.2px}
+    .fb-alarm::before{content:"\26A0  "}
+    .fb-alarm + .fb-top{margin-top:6px}
   </style>
   <div class="focusbar" id="focusBar" style="display:none"></div>
 
@@ -2072,15 +2076,24 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     // los alertLevels curados alimentan el nudge aunque no haya `focus`
     try{ window.__saAlertLevels=Array.isArray(plan&&plan.alertLevels)?plan.alertLevels:null; }catch(e){}
     var f=plan&&plan.focus;
-    if(!f||!f.sym){ bar.style.display='none'; return; }
+    // la alarma del agente (tesis rota, datos viejos, FOMC/NFP, etc.) sube a la pantalla de operar
+    var alarm=(plan&&plan.alarm!=null)?L(plan.alarm):'';
+    if((!f||!f.sym) && !alarm){ bar.style.display='none'; return; }
+    var alarmHtml=alarm?'<div class="fb-alarm">'+esc(alarm)+'</div>':'';
+    if(!f||!f.sym){ // solo alarma, sin foco hoy
+      bar.className='focusbar alarm';
+      bar.innerHTML=alarmHtml;
+      bar.style.display=''; return;
+    }
     var v=String(f.verdict||'WAIT').toUpperCase();
-    bar.className='focusbar '+(v==='GO'?'go':v==='AVOID'?'avoid':'wait');
+    bar.className='focusbar '+(alarm?'alarm ':'')+(v==='GO'?'go':v==='AVOID'?'avoid':'wait');
     var main=[esc(f.sym),esc(L(f.setup)),(f.window?'· '+esc(f.window):'')].filter(Boolean).join(' ');
     var bits=[];
     if(L(f.trigger)) bits.push('<b>'+T('Gatillo','Trigger')+':</b> '+esc(L(f.trigger)));
     if(L(f.invalid)) bits.push('<b>'+T('Invalida','Invalid')+':</b> '+esc(L(f.invalid)));
     var age=ageTxt(plan.generatedAt);
     bar.innerHTML=
+      alarmHtml+
       '<div class="fb-top"><span class="fb-tag">SA · '+esc(v)+'</span>'+
         '<span class="fb-main">'+(main||T('sin foco hoy','no focus today'))+'</span>'+
         (age?'<span class="fb-age">'+esc(age)+'</span>':'')+'</div>'+
