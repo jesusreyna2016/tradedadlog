@@ -62,3 +62,12 @@ export async function runSnapshot() {
 
   return { ok: true, wrote: out };
 }
+
+// invocable por HTTP para pruebas: GET /api/scalp-bus-snapshot
+export default async () => {
+  const r = await runSnapshot();
+  return new Response(JSON.stringify(r), {
+    status: r.ok === false ? 500 : 200,
+    headers: { 'content-type': 'application/json' },
+  });
+};
