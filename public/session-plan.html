@@ -129,6 +129,9 @@
   .error{color:var(--short)}
   .hidden{display:none}
   /* focus box */
+  .alarm{background:rgba(255,92,108,.14);border:1px solid var(--short);border-left:4px solid var(--short);
+    border-radius:12px;padding:11px 14px;margin-bottom:14px;color:var(--short);font-weight:700;font-size:14px;line-height:1.4}
+  .alarm::before{content:"\26A0  "}
   .focusbox{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--neutral);border-radius:12px;padding:12px 14px;margin-bottom:14px}
   .focusbox.GO{border-left-color:var(--long)} .focusbox.AVOID{border-left-color:var(--short)} .focusbox.WAIT{border-left-color:var(--warn)}
   .fx-top{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
@@ -296,6 +299,10 @@
       dhPill(plan.dataHealth,t);
 
     var html="";
+    // alarma (solo en casos serios: tesis rota, datos viejos, scorecard malo, FOMC/NFP, DST, domingo)
+    if(plan.alarm!=null && L(plan.alarm)){
+      html+='<div class="alarm">'+esc(L(plan.alarm))+'</div>';
+    }
     // focus (la unica mejor oportunidad, destilada)
     var f=plan.focus;
     if(f && f.sym){
