@@ -1,11 +1,10 @@
-// Recibe los webhooks del parche STATE EXPORT de "TDL · Scalp CC" (prefijo SCC1|).
-// Dos tipos de evento: evt=signal (al disparo) y evt=outcome (al resolverse).
-// Guarda cada evento con clave UNICA e inmutable (sin read-modify-write, sin
-// carrera entre los 9 graficos que postean en el cierre de vela):
+// Recibe los webhooks del parche STATE EXPORT de "TDL · Scalp CC".
+// El body puede traer VARIAS lineas SCC1| (una por evento) porque TradingView
+// entrega un solo webhook por vela: el parche acumula 1 signal + N outcomes en
+// un mensaje con lineas separadas por \n. Aqui se parte y se guarda cada evento
+// con clave UNICA e inmutable (sin read-modify-write, sin carrera):
 //   scalp store, key  ev/<YYYY-MM-DD>/<sigId>__<evt>
 //   scalp store, key  last                          (puntero de depuracion)
-// El cron scalp-bus-cron.mjs enumera esas claves y espeja a signals/ y outcomes/
-// del repo git scalp-cc-bus.
 import { getStore } from '@netlify/blobs';
 
 function parsePipe(text) {
@@ -30,30 +29,38 @@ export default async (req) => {
   if (!secret || key !== secret) return new Response('unauthorized', { status: 401 });
 
   const body = await req.text();
-  const parsed = parsePipe(body);
-  if (!parsed || parsed.prefix !== 'SCC1') {
-    return new Response('bad payload (esperaba SCC1|k=v|...)', { status: 400 });
-  }
-
-  const { kv } = parsed;
-  const evt = (kv.evt || 'signal').toLowerCase();
-  const sym = (kv.sym || 'NQ').toUpperCase();
-  const tf = kv.tf || '?';
-  const sigId = kv.sigId || `${sym}-${tf}-${Date.now()}`;
-  const now = new Date();
-  const day = now.toISOString().slice(0, 10);
-
-  const record = {
-    evt, sym, tf, sigId,
-    ver: kv.ver || null,
-    ts: kv.ts || null,
-    raw: kv,
-    receivedAt: now.toISOString(),
-  };
+  const lines = String(body)
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.startsWith('SCC1|'));
+  if (!lines.length) return new Response('bad payload (esperaba 1+ lineas SCC1|k=v|...)', { status: 400 });
 
   const store = getStore('scalp');
-  await store.setJSON(`ev/${day}/${safeKey(sigId)}__${evt}`, record);
-  await store.setJSON('last', record);
+  const now = new Date();
+  const day = now.toISOString().slice(0, 10);
+  const stored = [];
 
-  return new Response(`ok · ${evt} · ${sym} ${tf} · ${sigId}`, { status: 200 });
+  for (const line of lines) {
+    const parsed = parsePipe(line);
+    if (!parsed || parsed.prefix !== 'SCC1') continue;
+    const kv = parsed.kv;
+    const evt = (kv.evt || 'signal').toLowerCase();
+    const sym = (kv.sym || 'NQ').toUpperCase();
+    const tf = kv.tf || '?';
+    const sigId = kv.sigId || `${sym}-${tf}-${Date.now()}-${stored.length}`;
+
+    const record = {
+      evt, sym, tf, sigId,
+      ver: kv.ver || null,
+      ts: kv.ts || null,
+      raw: kv,
+      receivedAt: now.toISOString(),
+    };
+    await store.setJSON(`ev/${day}/${safeKey(sigId)}__${evt}`, record);
+    await store.setJSON('last', record);
+    stored.push(`${evt}:${sym}${tf}:${sigId}`);
+  }
+
+  if (!stored.length) return new Response('no valid SCC1 lines', { status: 400 });
+  return new Response(`ok · ${stored.length} · ${stored.join(' , ')}`, { status: 200 });
 };
