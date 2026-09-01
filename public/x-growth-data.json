@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-01",
-  "cycle": 2,
+  "cycle": 3,
   "account": { "handle": "TradeDadLog", "followers": 773, "posts": 649 },
   "followerHistory": [
     { "date": "2026-08-26", "followers": 759 },
@@ -32,46 +32,46 @@
   "drafts": [
     {
       "rank": 1,
-      "format": "confession",
-      "antiAI": true,
-      "slot": "Thu · 7:00 PM CT",
-      "text": "It's not that I forget the rule.\nRight now, in the middle of a live trade, the rule just stops existing.\nThat's the part nobody tells you starting out. Years in this and the market can still talk you out of your own name.\nGetting out of your own way isn't a lesson you learn once. It's a fight you have again every single day you sit down in front of the charts.",
-      "source": "DE-RAH (@Tee_pee_TP) comment",
-      "why": "Turns a real audience comment about live-market hypnosis into the account's proven deep-engagement format. Stakes are identity/time, not money.",
-      "why_es": "Convierte un comentario real de la audiencia sobre la hipnosis del mercado en vivo en el formato de más engagement de la cuenta. La apuesta es identidad/tiempo, no dinero."
-    },
-    {
-      "rank": 2,
       "format": "aphorism",
       "antiAI": true,
       "slot": "Tue · 11:50 AM CT",
-      "text": "In the ten seconds before you break your own rule, something is racing the clock.\nNot logic. Need.\nThe need to be right. The need to escape the pain of being wrong. The need to still feel in control.\nWhichever one wins gets there before the rule even has a chance to speak.",
-      "source": "Glenn Christensen (@SmarterForexAU) comment",
-      "why": "Direct build of a real comment into the account's best-reach shape. No question, citable last line, corroborated by this week's wider niche scan.",
-      "why_es": "Construcción directa de un comentario real en el formato de mayor alcance de la cuenta. Sin pregunta, última línea citable, respaldado por el scan del nicho de esta semana."
+      "text": "Every time I try to predict the move, I pay for it.\nPredicting feels smart. You get to be the guy who called it.\nReacting feels boring. You just wait and take what's actually there.\nThe market keeps paying the boring one, not the smart one.",
+      "source": "Dan Emmons (@Emmonspired) comment, 122 likes",
+      "why": "Best-reach shape built from the highest-liked comment on your account this week. No question, citable last line, honest (doesn't claim consistent profit).",
+      "why_es": "Formato de mayor alcance construido desde el comentario con más likes de tu cuenta esta semana. Sin pregunta, última línea citable, honesto (no presume ganancias constantes)."
+    },
+    {
+      "rank": 2,
+      "format": "confession",
+      "antiAI": true,
+      "slot": "Thu · 7:00 PM CT",
+      "text": "I never flip sides when I'm fresh.\nI flip after an hour of getting chopped, when I'm tired and I just want the day to be over.\nThat's not a read. That's me being done, pretending it's a decision.\nThe chart didn't change in that moment. I did.",
+      "source": "Nordic (@NordicTrades) comment, 71 likes",
+      "why": "Deep-engagement format, echoes your own winning Sep 1 post but sharper. Stakes are self-honesty, blames no one but the tired version of you.",
+      "why_es": "Formato de engagement profundo, hace eco de tu propio post ganador del 1 sep pero más filoso. La apuesta es honestidad propia, no culpa a nadie salvo a tu versión cansada."
     },
     {
       "rank": 3,
       "format": "dont-be-like-me",
       "antiAI": true,
       "slot": "Sat · 11:50 AM CT",
-      "text": "Don't be like me and turn every gap against you into a referendum on your character.\nSometimes the market isn't testing you. Sometimes there was just a number at 8:30 that had nothing to do with you at all.\nI've burned hours \"reflecting\" on moves that were never personal. That's not discipline. That's ego wearing self-awareness as a costume.",
-      "source": "toddc comment on Globex gap post",
-      "why": "Fresh format for this batch, turns an overlooked comment into self-accountability that blames overthinking, not the market.",
-      "why_es": "Formato nuevo para este batch, convierte un comentario pasado por alto en autorresponsabilidad que culpa al sobrepensar, no al mercado."
+      "text": "Don't be like me.\nOn a 25k account there's no reason to risk enough to pass in two days.\nBut two days sounds better than two weeks. So I size up and call it confidence.\nThen one bad candle takes all of it, and I act surprised.\nIt was never the candle. It was the size I chose so I wouldn't have to be patient.",
+      "source": "FxGal (@sowhateh) comment on the MFF Rapid post",
+      "why": "Turns a real pushback into self-accountability on your actual revenge-sizing leak. Blames impatience, not the market, no fabricated dollar figures.",
+      "why_es": "Convierte un comentario de crítica real en autorresponsabilidad sobre tu fuga real de revenge-sizing. Culpa a la impaciencia, no al mercado, sin cifras inventadas."
     }
   ],
-  "plan": "Lead with Draft 2 (aphorism) for reach, matching what the niche scan corroborates this week. Follow with Draft 1 (confession) a couple days later for depth. Hold Draft 3 as the end-of-week reframe. Never stack two in one window.",
-  "plan_es": "Empieza con el Draft 2 (aforismo) para alcance, en línea con lo que confirma el scan del nicho esta semana. Sigue con el Draft 1 (confesión) un par de días después para profundidad. Guarda el Draft 3 como reframe de fin de semana. Nunca apiles dos en la misma ventana.",
-  "escalate": "If Draft 2 clears ~3K within a few hours, that same day reply to it going one level deeper on the need-to-be-right vs escape vs control breakdown, and credit @SmarterForexAU's comment directly. Keep riding a post that's already moving instead of starting a new one.",
-  "escalate_es": "Si el Draft 2 pasa ~3K en unas horas, ese mismo día respóndelo profundizando un nivel más en la necesidad de tener razón vs escapar vs control, y dale crédito directo al comentario de @SmarterForexAU. Sigue montando un post que ya se está moviendo en vez de empezar uno nuevo.",
+  "plan": "Lead with Draft 1 (predict vs react aphorism) for reach, it's built from your highest-liked comment this week. Post Draft 2 (flip-when-tired confession) a couple days later for depth. Hold Draft 3 (sizing) as the end-of-week reframe. After today's 3-in-2-hours mistake, be strict: one post per window, spaced out.",
+  "plan_es": "Empieza con el Draft 1 (aforismo predecir vs reaccionar) para alcance, está construido desde tu comentario con más likes de la semana. Publica el Draft 2 (confesión del flip por cansancio) un par de días después para profundidad. Guarda el Draft 3 (sizing) como reframe de fin de semana. Tras el error de hoy de 3 posts en 2 horas, sé estricto: un post por ventana, espaciados.",
+  "escalate": "If Draft 1 clears ~2K within a few hours, that same day reply to it going deeper on predict vs react (why the boring one gets paid) and credit @Emmonspired's comment. Keep riding a post that's already moving instead of starting a new one.",
+  "escalate_es": "Si el Draft 1 pasa ~2K en unas horas, ese mismo día respóndelo profundizando en predecir vs reaccionar (por qué al aburrido le pagan) y dale crédito al comentario de @Emmonspired. Sigue montando un post que ya se está moviendo en vez de empezar uno nuevo.",
   "read": {
     "working": "Fresh Sep 1 read: your reflective real-day confession ('Day's over... hunting shorts') hit 1.3K and pulled comments with more likes than the post itself (Dan Emmons 122, Nordic 71). Real, specific, present-tense trading pain with an honest unresolved lesson is still your strongest lane.",
     "working_es": "Lectura fresca 1 sep: tu confesión reflexiva del día real ('Day's over... hunting shorts') llegó a 1.3K y jaló comentarios con más likes que el propio post (Dan Emmons 122, Nordic 71). El dolor de trading real, específico y en presente con una lección honesta sin resolver sigue siendo tu carril más fuerte.",
     "stop": "You posted 3 variants of the same bad day within ~2 hours (Lucid Daily, MFF Rapid Gone, Day's over). The dry one underperformed (539) while the reflective one won (1.3K). One strong reflective post beats three near-duplicates of the same event. Space them out and pick the best angle.",
     "stop_es": "Publicaste 3 variantes del mismo mal día en ~2 horas (Lucid Daily, MFF Rapid Gone, Day's over). La versión seca rindió menos (539) y la reflexiva ganó (1.3K). Un post reflexivo fuerte le gana a tres casi-duplicados del mismo evento. Espácialos y elige el mejor ángulo.",
-    "watch": "The wider niche is talking about 'need to be right vs. being profitable' right now, the same insight class as Glenn's 10-second-window comment. Also watching whether cycle #1's 3 drafts actually get posted before next cycle, still ungraded.",
-    "watch_es": "El nicho en general está hablando de 'necesidad de tener razón vs. ser rentable' ahora mismo, la misma clase de insight que el comentario de Glenn sobre los 10 segundos. También vigilando si los 3 drafts del ciclo #1 se publican antes del próximo ciclo, aún sin calificar."
+    "watch": "Predict vs react is clearly resonating (122 likes on that comment). If Draft 1 lands, this becomes a recurring pillar. Also: the drafts from cycles 1 and 2 still went unposted, Jesus keeps posting his own real-day confessions instead. Worth deciding whether the agent should lean into fewer, real-anchor drafts vs universal ones.",
+    "watch_es": "Predecir vs reaccionar claramente resuena (122 likes en ese comentario). Si el Draft 1 pega, esto se vuelve un pilar recurrente. Además: los drafts de los ciclos 1 y 2 siguen sin publicarse, Jesus prefiere postear sus propias confesiones del día real. Vale la pena decidir si el agente debe inclinarse a menos drafts pero con ancla real, en vez de universales."
   },
   "hookBank": [
     { "hook": "Right now I feel like shit.", "views": 83900, "format": "confession" },
@@ -88,46 +88,47 @@
     "note_es": "Baja confianza aún, solo un puñado de posts. La señal clara: tu mejor post reciente (6.8K) salió a media mañana CT."
   },
   "prediction": {
-    "week": "2026-09-01",
-    "claim": "Draft 1 (confession) pulls the highest reply-to-view ratio of this week's three, if posted, matching the account's pattern of confessions landing mid-reach but deep on replies.",
-    "claim_es": "El Draft 1 (confesión) obtiene la mayor proporción de respuestas por vista de los tres de esta semana, si se publica, en línea con el patrón de la cuenta donde las confesiones llegan a alcance medio pero profundidad alta en respuestas.",
+    "week": "2026-09-01 (cycle 3)",
+    "claim": "Draft 1 (predict vs react aphorism) clears 2K views within 48h of posting, beating the aphorism format's current median (~500), because it's backed by a 122-like audience comment.",
+    "claim_es": "El Draft 1 (aforismo predecir vs reaccionar) supera 2K vistas dentro de 48h de publicado, batiendo la mediana actual del formato aforismo (~500), porque está respaldado por un comentario de la audiencia con 122 likes.",
     "status": "pending"
   },
-  "predictionAccuracy": { "hits": 0, "total": 0 },
+  "predictionAccuracy": { "hits": 0, "total": 0, "note": "cycle 1 and 2 predictions ungraded: the drafts were never posted", "note_es": "predicciones de ciclos 1 y 2 sin calificar: los drafts nunca se publicaron" },
   "engageList": [
-    { "handle": "@RealizedTrader", "postExcerpt": "The plan was written by a version of you who was calm and had nothing at stake...", "whyReply": "Still the account's sharpest, most consistent commenter and a peer running the same aphorism lane. Reply to push the thread further, don't just agree.", "whyReply_es": "Sigue siendo el comentarista más filoso y constante de la cuenta, un peer en el mismo carril de aforismos. Responde para llevar el hilo más lejos, no solo estar de acuerdo." },
-    { "handle": "@SmarterForexAU", "postExcerpt": "commented on the aphorism about the 10-second window (right / escape / status)", "whyReply": "His comment fed directly into this week's Draft 2. Reply and credit the idea, real relationship-building.", "whyReply_es": "Su comentario alimentó directo el Draft 2 de esta semana. Respóndele y dale crédito a la idea, construcción real de relación." },
-    { "handle": "@Tee_pee_TP", "postExcerpt": "commented 'it takes years to stop you, from you' + market hypnosis in live conditions", "whyReply": "His comment fed directly into this week's Draft 1. Two strong idea sources from the same thread, worth nurturing both.", "whyReply_es": "Su comentario alimentó directo el Draft 1 de esta semana. Dos fuentes de ideas fuertes del mismo hilo, vale la pena cuidar ambas." }
+    { "handle": "@Emmonspired", "postExcerpt": "'the psychological problem with trying to predict rather than react' (122 likes on your Day's-over post)", "whyReply": "Highest-liked comment on your account this week and the seed of Draft 1. Reply with genuine agreement plus one sharper line, and it becomes an ongoing relationship, not a one-off.", "whyReply_es": "El comentario con más likes de tu cuenta esta semana y la semilla del Draft 1. Respóndele con acuerdo genuino más una línea más filosa, y se vuelve una relación continua, no algo de una sola vez." },
+    { "handle": "@NordicTrades", "postExcerpt": "'you got tired, grinded down, then switched direction' (71 likes)", "whyReply": "Seed of Draft 2 and clearly a trader who's lived it. Reply admitting he nailed it, that honesty builds trust with your exact audience.", "whyReply_es": "Semilla del Draft 2 y claramente un trader que lo ha vivido. Respóndele admitiendo que le atinó, esa honestidad construye confianza con tu público exacto." },
+    { "handle": "@sowhateh", "postExcerpt": "'25k accounts I wouldn't go over 2 micros... were you oversizing to pass fast?' (23 likes)", "whyReply": "Pushback, not praise, and she's right. Reply owning it instead of defending, that's the whole brand. Seed of Draft 3.", "whyReply_es": "Es crítica, no elogio, y tiene razón. Respóndele asumiéndolo en vez de defenderte, eso es toda la marca. Semilla del Draft 3." },
+    { "handle": "@RealizedTrader", "postExcerpt": "evergreen: the account's sharpest recurring commenter, same aphorism lane", "whyReply": "Keep the standing relationship warm. Reply on his next aphorism to push the thread further, don't just agree.", "whyReply_es": "Mantén caliente la relación de siempre. Responde en su próximo aforismo para llevar el hilo más lejos, no solo estar de acuerdo." }
   ],
   "replyGoal": 5,
   "backlog": {
     "open": [
       "The two selves / calm planner, longer confession version still deliberately held open (RealizedTrader scan, 31 ago)",
-      "Discipline-erosion sequence: name the exact order compromises stack, needs a real Jesus-specific sequence (niche scan, 01 sep)",
-      "Predict vs react: the real trap is trying to predict the next move instead of reacting to what price is actually doing (Dan Emmons, 122 likes on the Day's-over post, 01 sep)",
-      "You don't flip direction when you're fresh, you flip when you're ground down and tired late in the session (Nordic, 71 likes, 01 sep)",
-      "The oversizing-to-pass-fast trap on small evals: risking too much to pass quickly is why one bad candle wipes the account (FxGal, 01 sep) — ties to Jesus's real revenge-sizing leak"
+      "Discipline-erosion sequence: name the exact order compromises stack, needs a real Jesus-specific sequence (niche scan, 01 sep)"
     ],
     "open_es": [
       "Los dos yo / el planificador tranquilo, versión confesión larga aún guardada a propósito (scan RealizedTrader, 31 ago)",
-      "Secuencia de erosión de disciplina: nombrar el orden exacto en que se acumulan las concesiones, necesita una secuencia real de Jesus (scan del nicho, 01 sep)",
-      "Predecir vs reaccionar: la trampa real es tratar de predecir el próximo movimiento en vez de reaccionar a lo que el precio de verdad está haciendo (Dan Emmons, 122 likes en el post Day's-over, 01 sep)",
-      "No cambias de dirección cuando estás fresco, cambias cuando estás desgastado y cansado tarde en la sesión (Nordic, 71 likes, 01 sep)",
-      "La trampa de sobredimensionar para pasar rápido en evals chicas: arriesgar de más para pasar rápido es por lo que una sola vela mala borra la cuenta (FxGal, 01 sep) — se conecta con tu fuga real de revenge-sizing"
+      "Secuencia de erosión de disciplina: nombrar el orden exacto en que se acumulan las concesiones, necesita una secuencia real de Jesus (scan del nicho, 01 sep)"
     ],
     "used": [
       "Aphorism riff 'Knowing the rule was never the problem' (RealizedTrader) - posted 31 ago",
       "Analyse your losers for a pattern (leahlager) - draft 2, cycle #1",
       "Not every gap is 'the market testing you' (toddc) - draft 3, cycle #2",
       "Anatomy of the 10-second window (Glenn Christensen) - draft 2, cycle #2",
-      "'Years to stop you, from you' + market hypnosis (DE-RAH) - draft 1, cycle #2"
+      "'Years to stop you, from you' + market hypnosis (DE-RAH) - draft 1, cycle #2",
+      "Predict vs react (Dan Emmons, 122 likes) - draft 1, cycle #3",
+      "Flip direction when tired, not fresh (Nordic, 71 likes) - draft 2, cycle #3",
+      "Oversizing to pass fast trap (FxGal) - draft 3, cycle #3"
     ],
     "used_es": [
       "Riff de aforismo 'Knowing the rule was never the problem' (RealizedTrader) - publicado 31 ago",
       "Analiza tus perdedores buscando un patrón (leahlager) - draft 2, ciclo #1",
       "No todo gap es 'el mercado probándote' (toddc) - draft 3, ciclo #2",
       "Anatomía de los 10 segundos (Glenn Christensen) - draft 2, ciclo #2",
-      "'Toma años dejar de estorbarte a ti mismo' + hipnosis de mercado (DE-RAH) - draft 1, ciclo #2"
+      "'Toma años dejar de estorbarte a ti mismo' + hipnosis de mercado (DE-RAH) - draft 1, ciclo #2",
+      "Predecir vs reaccionar (Dan Emmons, 122 likes) - draft 1, ciclo #3",
+      "Flip de dirección por cansancio, no frescura (Nordic, 71 likes) - draft 2, ciclo #3",
+      "Trampa de sobredimensionar para pasar rápido (FxGal) - draft 3, ciclo #3"
     ]
   },
   "scorecard": [
@@ -136,6 +137,9 @@
     { "week": "2026-08-31", "draft": "D3 gap passing/staying", "format": "question", "adopted": "pending", "url": null, "result": null },
     { "week": "2026-09-01", "draft": "D1 rule-stops-existing", "format": "confession", "adopted": "pending", "url": null, "result": null },
     { "week": "2026-09-01", "draft": "D2 ten-seconds-racing-clock", "format": "aphorism", "adopted": "pending", "url": null, "result": null },
-    { "week": "2026-09-01", "draft": "D3 dont-be-like-me-gap", "format": "dont-be-like-me", "adopted": "pending", "url": null, "result": null }
+    { "week": "2026-09-01", "draft": "D3 dont-be-like-me-gap", "format": "dont-be-like-me", "adopted": "pending", "url": null, "result": null },
+    { "week": "2026-09-01 (c3)", "draft": "D1 predict-vs-react", "format": "aphorism", "adopted": "pending", "url": null, "result": null },
+    { "week": "2026-09-01 (c3)", "draft": "D2 flip-when-tired", "format": "confession", "adopted": "pending", "url": null, "result": null },
+    { "week": "2026-09-01 (c3)", "draft": "D3 oversizing-to-pass", "format": "dont-be-like-me", "adopted": "pending", "url": null, "result": null }
   ]
 }
