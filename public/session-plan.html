@@ -194,8 +194,10 @@
 (function(){
   "use strict";
   var PLAN_URL = "https://raw.githubusercontent.com/jesusreyna2016/session-analyst-bus/main/plans/latest.json";
+  var HB_URL   = "https://raw.githubusercontent.com/jesusreyna2016/session-analyst-bus/main/live/heartbeat.json";
   var REVIEW_BASE = "https://github.com/jesusreyna2016/session-analyst-bus/blob/main/reviews/";
   var SYMS = ["NQ","ES","GC"];
+  var lastHb = null;
 
   var T = {
     en:{
@@ -227,7 +229,8 @@
       alertLevels:"Alert levels", maxCon:"Max contracts", rr:"R:R",
       news:"News risk", calendar:"Calendar", newsLvl:{NINGUNA:"none",MEDIA:"medium",ALTA:"high"},
       copyTv:"Copy TV alerts", copied:"copied",
-      tvHead:"Session Analyst alerts", tvHint:"TV: new alert > Crossing > paste the price; use the label as the name."
+      tvHead:"Session Analyst alerts", tvHint:"TV: new alert > Crossing > paste the price; use the label as the name.",
+      hbFail:"Last run failed", hbStale:"Agent silent", hbAgo:"ago", hbRun:"last run"
     },
     es:{
       loading:"Cargando plan…", err:"No se pudo cargar el plan. ",
@@ -258,7 +261,8 @@
       alertLevels:"Niveles de aviso", maxCon:"Máx contratos", rr:"R:R",
       news:"Riesgo de noticias", calendar:"Calendario", newsLvl:{NINGUNA:"ninguna",MEDIA:"media",ALTA:"alta"},
       copyTv:"Copiar alertas TV", copied:"copiado",
-      tvHead:"Avisos Session Analyst", tvHint:"TV: nuevo aviso > Cruzando > pega el precio; usa la etiqueta como nombre."
+      tvHead:"Avisos Session Analyst", tvHint:"TV: nuevo aviso > Cruzando > pega el precio; usa la etiqueta como nombre.",
+      hbFail:"Última corrida falló", hbStale:"Agente en silencio", hbAgo:"hace", hbRun:"últ. corrida"
     }
   };
 
@@ -320,7 +324,8 @@
       '<span class="pill">'+esc(plan.date||"")+'</span>'+
       '<span class="state"><span class="dot '+freshDot+'"></span>'+t.generated+' '+fmtWhen(plan.generatedAt,t)+'</span>'+
       (lagged?'<span class="pill warn">'+t.lagged+'</span>':'')+
-      dhPill(plan.dataHealth,t);
+      dhPill(plan.dataHealth,t)+
+      hbPill(lastHb,t);
 
     var html="";
     // alarma (solo en casos serios: tesis rota, datos viejos, scorecard malo, FOMC/NFP, DST, domingo)
@@ -407,6 +412,22 @@
     var txt = ok ? (t.dataOk+(dh.builtAtAgeMin!=null?" · "+dh.builtAtAgeMin+"m":""))
       : (t.dataWarn+((dh.stale&&dh.stale.length)?" "+dh.stale.join(","):"")+((dh.missing&&dh.missing.length)?" · "+t.dataMissing+" "+dh.missing.join(","):""));
     return '<span class="pill" title="'+esc(vreason(dh.notes))+'"><span class="dot '+cls+'"></span>'+esc(txt)+'</span>';
+  }
+  // #4 · aviso de heartbeat: solo alerta si la ultima corrida fallo (ok:false) o el agente
+  // lleva > 8h en silencio en dia habil (lun-vie); en fin de semana no molesta.
+  function hbPill(hb,t){
+    if(!hb || !hb.lastRun) return "";
+    var dt=new Date(hb.lastRun); if(isNaN(dt)) return "";
+    var ageH=(Date.now()-dt.getTime())/3600000;
+    var dow=new Date().getDay();            // 0=dom .. 6=sab
+    var weekday=(dow>=1 && dow<=5);
+    var failed=(hb.ok===false), stale=(weekday && ageH>8);
+    if(!failed && !stale) return "";
+    var ago = ageH<1? (Math.round(ageH*60)+"m") : (ageH<24? (Math.round(ageH)+"h") : (Math.round(ageH/24)+"d"));
+    var label = failed? t.hbFail : t.hbStale;
+    var sub = (hb.runType?esc(hb.runType)+" · ":"")+t.hbAgo+" "+ago;
+    var title = esc(hb.note||"")+" ("+t.hbRun+" "+esc(hb.lastRun)+")";
+    return '<span class="pill warn" title="'+title+'"><span class="dot old"></span>'+esc(label)+' · '+sub+'</span>';
   }
   // #3 · genera el texto de avisos TV desde los alertLevels curados del agente y lo copia
   window.copyTvAlerts=function(btn){
@@ -620,6 +641,11 @@
   function load(){
     var t=T[lang];
     if(!lastPlan){ document.getElementById("content").innerHTML='<div class="loading">'+t.loading+'</div>'; }
+    // heartbeat en paralelo (no bloquea el plan); si hay problema, el badge aparece al re-render
+    fetch(HB_URL+"?t="+Date.now(),{cache:"no-store"})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(hb){ lastHb=hb; if(lastPlan) render(lastPlan); })
+      .catch(function(){});
     fetch(PLAN_URL+"?t="+Date.now(),{cache:"no-store"})
       .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
       .then(function(p){ lastPlan=p; render(p); })
