@@ -1,10 +1,11 @@
 {
-  "updated": "2026-08-31",
-  "cycle": 1,
+  "updated": "2026-09-01",
+  "cycle": 2,
   "account": { "handle": "TradeDadLog", "followers": 771, "posts": 636 },
   "followerHistory": [
     { "date": "2026-08-26", "followers": 759 },
-    { "date": "2026-08-31", "followers": 771 }
+    { "date": "2026-08-31", "followers": 771 },
+    { "date": "2026-09-01", "followers": 771, "note": "no fresh read, snapshot unchanged since 2026-08-31 (cloud cycle, 1 day after last cycle)", "note_es": "sin lectura nueva, snapshot sin cambios desde el 2026-08-31 (ciclo cloud, 1 día después del ciclo anterior)" }
   ],
   "recentPosts": [
     { "date": "2026-08-28", "id": "2093381057781322204", "excerpt": "My 100k @Topstep Eval so far: Green day. Red day...", "views": 6800, "likes": 54, "replies": 7, "format": "pattern" },
@@ -22,46 +23,46 @@
   "drafts": [
     {
       "rank": 1,
-      "format": "aphorism",
+      "format": "confession",
       "antiAI": true,
-      "slot": "Mon · 11:50 AM CT",
-      "text": "The plan always gets written by the calm version of me.\nNothing on the line. All patience. Thinks clearly.\nThat guy is never in the room when price rips against my stop.\nThe one who shows up then just wants to be right.\nTrading is learning to obey the calm one after he's already left.",
-      "source": "RealizedTrader mechanism + Glenn 10-sec seed",
-      "why": "Universal split every trader feels, citable last line, no question = repost bait. First person makes it ours.",
-      "why_es": "División universal que todo trader siente, última línea citable, sin pregunta = carnada de repost. La primera persona la hace tuya."
+      "slot": "Thu · 7:00 PM CT",
+      "text": "It's not that I forget the rule.\nRight now, in the middle of a live trade, the rule just stops existing.\nThat's the part nobody tells you starting out. Years in this and the market can still talk you out of your own name.\nGetting out of your own way isn't a lesson you learn once. It's a fight you have again every single day you sit down in front of the charts.",
+      "source": "DE-RAH (@Tee_pee_TP) comment",
+      "why": "Turns a real audience comment about live-market hypnosis into the account's proven deep-engagement format. Stakes are identity/time, not money.",
+      "why_es": "Convierte un comentario real de la audiencia sobre la hipnosis del mercado en vivo en el formato de más engagement de la cuenta. La apuesta es identidad/tiempo, no dinero."
     },
     {
       "rank": 2,
-      "format": "truth-bomb",
+      "format": "aphorism",
       "antiAI": true,
-      "slot": "Thu · 11:50 AM CT",
-      "text": "Easiest thing in the world is to feel bad about a red day and scroll past it.\nHardest thing is to line your losses up next to each other and actually look.\nThey're never random. Same setup. Same time of day. Same feeling in your chest right before you click.\nThe shame isn't protecting you. It's protecting the pattern.",
-      "source": "@leahlager comment (used)",
-      "why": "Turns a common comment into a sharp reframe, universal so no fabricated numbers needed.",
-      "why_es": "Convierte un comentario común en un reframe filoso, universal así que no hace falta inventar números."
+      "slot": "Tue · 11:50 AM CT",
+      "text": "In the ten seconds before you break your own rule, something is racing the clock.\nNot logic. Need.\nThe need to be right. The need to escape the pain of being wrong. The need to still feel in control.\nWhichever one wins gets there before the rule even has a chance to speak.",
+      "source": "Glenn Christensen (@SmarterForexAU) comment",
+      "why": "Direct build of a real comment into the account's best-reach shape. No question, citable last line, corroborated by this week's wider niche scan.",
+      "why_es": "Construcción directa de un comentario real en el formato de mayor alcance de la cuenta. Sin pregunta, última línea citable, respaldado por el scan del nicho de esta semana."
     },
     {
       "rank": 3,
-      "format": "question",
+      "format": "dont-be-like-me",
       "antiAI": true,
-      "slot": "Tue · 7:00 PM CT",
-      "text": "Honest question for the prop firm crowd.\nWhat's the real gap between passing an eval and staying passed?\nFor me it was never the strategy. It was the ten seconds after a clean trend when I decide I suddenly know better.",
-      "source": "Jesus's own recurring theme",
-      "why": "Direct question = reply engine, ties to his real posted theme, invites the exact audience he wants.",
-      "why_es": "Pregunta directa = motor de respuestas, se ancla a tu tema real ya publicado, invita justo al público que quieres."
+      "slot": "Sat · 11:50 AM CT",
+      "text": "Don't be like me and turn every gap against you into a referendum on your character.\nSometimes the market isn't testing you. Sometimes there was just a number at 8:30 that had nothing to do with you at all.\nI've burned hours \"reflecting\" on moves that were never personal. That's not discipline. That's ego wearing self-awareness as a costume.",
+      "source": "toddc comment on Globex gap post",
+      "why": "Fresh format for this batch, turns an overlooked comment into self-accountability that blames overthinking, not the market.",
+      "why_es": "Formato nuevo para este batch, convierte un comentario pasado por alto en autorresponsabilidad que culpa al sobrepensar, no al mercado."
     }
   ],
-  "plan": "Lead with Draft 1 (aphorism) for reach. Post Draft 3 a day later for conversation. Hold Draft 2 as the mid-week reframe. Space them out, never stack two in one window.",
-  "plan_es": "Empieza con el Draft 1 (aforismo) para alcance. Publica el Draft 3 un día después para conversación. Guarda el Draft 2 como reframe de media semana. Espácialos, nunca apiles dos en la misma ventana.",
-  "escalate": "If Draft 1 clears ~3K within a few hours, that same evening reply to it with the 10-second-window breakdown (right vs escape vs status). The algorithm rewards you continuing a post that's already moving.",
-  "escalate_es": "Si el Draft 1 pasa ~3K en unas horas, esa misma noche respóndelo con el desglose de los 10 segundos (tener razón vs escapar vs estatus). El algoritmo premia que sigas un post que ya se está moviendo.",
+  "plan": "Lead with Draft 2 (aphorism) for reach, matching what the niche scan corroborates this week. Follow with Draft 1 (confession) a couple days later for depth. Hold Draft 3 as the end-of-week reframe. Never stack two in one window.",
+  "plan_es": "Empieza con el Draft 2 (aforismo) para alcance, en línea con lo que confirma el scan del nicho esta semana. Sigue con el Draft 1 (confesión) un par de días después para profundidad. Guarda el Draft 3 como reframe de fin de semana. Nunca apiles dos en la misma ventana.",
+  "escalate": "If Draft 2 clears ~3K within a few hours, that same day reply to it going one level deeper on the need-to-be-right vs escape vs control breakdown, and credit @SmarterForexAU's comment directly. Keep riding a post that's already moving instead of starting a new one.",
+  "escalate_es": "Si el Draft 2 pasa ~3K en unas horas, ese mismo día respóndelo profundizando un nivel más en la necesidad de tener razón vs escapar vs control, y dale crédito directo al comentario de @SmarterForexAU. Sigue montando un post que ya se está moviendo en vez de empezar uno nuevo.",
   "read": {
-    "working": "Concrete + numbers + a twist still wins reach (the Green/Red eval post hit 6.8K). Aphorisms pull fewer views but the highest-quality replies.",
-    "working_es": "Concreto + números + un giro sigue ganando alcance (el post del eval Green/Red llegó a 6.8K). Los aforismos jalan menos vistas pero los comentarios de más calidad.",
-    "stop": "Stacking two low-variety truth-bombs hours apart. Both underperformed (777 and 382). Space formats out.",
-    "stop_es": "Apilar dos truth-bombs de poca variedad con horas de diferencia. Los dos rindieron poco (777 y 382). Espacia los formatos.",
-    "watch": "The '10-second window' idea. Two different people named it in comments today. It's a full post: what drives that window (need to be right vs escape vs ego).",
-    "watch_es": "La idea de 'los diez segundos'. Dos personas distintas la nombraron en comentarios hoy. Da para un post entero: qué te empuja en esa ventana (querer tener razón vs escapar vs ego)."
+    "working": "Unchanged from last cycle, no fresh snapshot yet (this cycle fired 1 day after the last one): concrete + numbers + a twist still wins reach (the Green/Red eval post hit 6.8K). Aphorisms pull fewer views but the highest-quality replies.",
+    "working_es": "Sin cambios respecto al ciclo anterior, sin snapshot nuevo aún (este ciclo corrió 1 día después del anterior): concreto + números + un giro sigue ganando alcance (el post del eval Green/Red llegó a 6.8K). Los aforismos jalan menos vistas pero los comentarios de más calidad.",
+    "stop": "Stacking two low-variety, similar-energy formats hours apart. Both underperformed last cycle (777 and 382). Space formats out.",
+    "stop_es": "Apilar dos formatos de poca variedad y energía similar con horas de diferencia. Los dos rindieron poco el ciclo anterior (777 y 382). Espacia los formatos.",
+    "watch": "The wider niche is talking about 'need to be right vs. being profitable' right now, the same insight class as Glenn's 10-second-window comment. Also watching whether cycle #1's 3 drafts actually get posted before next cycle, still ungraded.",
+    "watch_es": "El nicho en general está hablando de 'necesidad de tener razón vs. ser rentable' ahora mismo, la misma clase de insight que el comentario de Glenn sobre los 10 segundos. También vigilando si los 3 drafts del ciclo #1 se publican antes del próximo ciclo, aún sin calificar."
   },
   "hookBank": [
     { "hook": "Right now I feel like shit.", "views": 83900, "format": "confession" },
@@ -78,42 +79,48 @@
     "note_es": "Baja confianza aún, solo un puñado de posts. La señal clara: tu mejor post reciente (6.8K) salió a media mañana CT."
   },
   "prediction": {
-    "week": "2026-08-31",
-    "claim": "Draft 1 (aphorism) clears the recent median of ~1.5K views within 48h of posting.",
-    "claim_es": "El Draft 1 (aforismo) supera la mediana reciente de ~1.5K vistas dentro de 48h de publicado.",
+    "week": "2026-09-01",
+    "claim": "Draft 1 (confession) pulls the highest reply-to-view ratio of this week's three, if posted, matching the account's pattern of confessions landing mid-reach but deep on replies.",
+    "claim_es": "El Draft 1 (confesión) obtiene la mayor proporción de respuestas por vista de los tres de esta semana, si se publica, en línea con el patrón de la cuenta donde las confesiones llegan a alcance medio pero profundidad alta en respuestas.",
     "status": "pending"
   },
   "predictionAccuracy": { "hits": 0, "total": 0 },
   "engageList": [
-    { "handle": "@RealizedTrader", "postExcerpt": "The plan was written by a version of you who was calm and had nothing at stake...", "whyReply": "Your best commenter and a peer running the same aphorism lane. A sharp reply here builds the relationship and borrows his audience.", "whyReply_es": "Tu mejor comentarista y un peer en el mismo carril de aforismos. Una respuesta filosa aquí construye la relación y te presta su audiencia." },
-    { "handle": "@SmarterForexAU", "postExcerpt": "commented on your aphorism about the 10-second window (right / escape / status)", "whyReply": "Thoughtful reply on your post. Answer his question back to deepen the thread and signal you actually read.", "whyReply_es": "Comentario reflexivo en tu post. Respóndele su pregunta para profundizar el hilo y mostrar que de verdad lees." }
+    { "handle": "@RealizedTrader", "postExcerpt": "The plan was written by a version of you who was calm and had nothing at stake...", "whyReply": "Still the account's sharpest, most consistent commenter and a peer running the same aphorism lane. Reply to push the thread further, don't just agree.", "whyReply_es": "Sigue siendo el comentarista más filoso y constante de la cuenta, un peer en el mismo carril de aforismos. Responde para llevar el hilo más lejos, no solo estar de acuerdo." },
+    { "handle": "@SmarterForexAU", "postExcerpt": "commented on the aphorism about the 10-second window (right / escape / status)", "whyReply": "His comment fed directly into this week's Draft 2. Reply and credit the idea, real relationship-building.", "whyReply_es": "Su comentario alimentó directo el Draft 2 de esta semana. Respóndele y dale crédito a la idea, construcción real de relación." },
+    { "handle": "@Tee_pee_TP", "postExcerpt": "commented 'it takes years to stop you, from you' + market hypnosis in live conditions", "whyReply": "His comment fed directly into this week's Draft 1. Two strong idea sources from the same thread, worth nurturing both.", "whyReply_es": "Su comentario alimentó directo el Draft 1 de esta semana. Dos fuentes de ideas fuertes del mismo hilo, vale la pena cuidar ambas." }
   ],
   "replyGoal": 5,
   "backlog": {
     "open": [
-      "Not every gap is 'the market testing you' - sometimes it's just news (toddc, 27 ago)",
-      "Anatomy of the 10-second window: right vs escape vs status (Glenn Christensen, 31 ago)",
-      "'It takes years to stop you, from you' + market hypnosis (DE-RAH, 31 ago)",
-      "The two selves / calm planner, longer confession version still open (RealizedTrader scan, 31 ago)"
+      "The two selves / calm planner, longer confession version still deliberately held open (RealizedTrader scan, 31 ago)",
+      "Discipline-erosion sequence: name the exact order compromises stack, needs a real Jesus-specific sequence (niche scan, 01 sep)"
     ],
     "open_es": [
-      "No todo gap es 'el mercado probándote', a veces es solo una noticia (toddc, 27 ago)",
-      "Anatomía de los 10 segundos: tener razón vs escapar vs estatus (Glenn Christensen, 31 ago)",
-      "'Toma años dejar de estorbarte a ti mismo' + hipnosis de mercado (DE-RAH, 31 ago)",
-      "Los dos yo / el planificador tranquilo, versión confesión larga aún abierta (scan RealizedTrader, 31 ago)"
+      "Los dos yo / el planificador tranquilo, versión confesión larga aún guardada a propósito (scan RealizedTrader, 31 ago)",
+      "Secuencia de erosión de disciplina: nombrar el orden exacto en que se acumulan las concesiones, necesita una secuencia real de Jesus (scan del nicho, 01 sep)"
     ],
     "used": [
       "Aphorism riff 'Knowing the rule was never the problem' (RealizedTrader) - posted 31 ago",
-      "Analyse your losers for a pattern (leahlager) - draft 2, cycle #1"
+      "Analyse your losers for a pattern (leahlager) - draft 2, cycle #1",
+      "Not every gap is 'the market testing you' (toddc) - draft 3, cycle #2",
+      "Anatomy of the 10-second window (Glenn Christensen) - draft 2, cycle #2",
+      "'Years to stop you, from you' + market hypnosis (DE-RAH) - draft 1, cycle #2"
     ],
     "used_es": [
       "Riff de aforismo 'Knowing the rule was never the problem' (RealizedTrader) - publicado 31 ago",
-      "Analiza tus perdedores buscando un patrón (leahlager) - draft 2, ciclo #1"
+      "Analiza tus perdedores buscando un patrón (leahlager) - draft 2, ciclo #1",
+      "No todo gap es 'el mercado probándote' (toddc) - draft 3, ciclo #2",
+      "Anatomía de los 10 segundos (Glenn Christensen) - draft 2, ciclo #2",
+      "'Toma años dejar de estorbarte a ti mismo' + hipnosis de mercado (DE-RAH) - draft 1, ciclo #2"
     ]
   },
   "scorecard": [
     { "week": "2026-08-31", "draft": "D1 calm-planner", "format": "aphorism", "adopted": "pending", "url": null, "result": null },
     { "week": "2026-08-31", "draft": "D2 analyse-your-losers", "format": "truth-bomb", "adopted": "pending", "url": null, "result": null },
-    { "week": "2026-08-31", "draft": "D3 gap passing/staying", "format": "question", "adopted": "pending", "url": null, "result": null }
+    { "week": "2026-08-31", "draft": "D3 gap passing/staying", "format": "question", "adopted": "pending", "url": null, "result": null },
+    { "week": "2026-09-01", "draft": "D1 rule-stops-existing", "format": "confession", "adopted": "pending", "url": null, "result": null },
+    { "week": "2026-09-01", "draft": "D2 ten-seconds-racing-clock", "format": "aphorism", "adopted": "pending", "url": null, "result": null },
+    { "week": "2026-09-01", "draft": "D3 dont-be-like-me-gap", "format": "dont-be-like-me", "adopted": "pending", "url": null, "result": null }
   ]
 }
