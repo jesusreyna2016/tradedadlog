@@ -3,8 +3,8 @@
 The agent reads this every run as its priors and rewrites it at the end. This is how it gets
 sharper over time instead of starting cold each week. Keep it factual and dated.
 
-## Account baselines (as of 1 sep 2026, first real Analytics pull logged in)
-- 771 followers, 639 posts, created oct 2025.
+## Account baselines (as of 1 sep 2026, cycle #3)
+- 773 followers, 649 posts, created oct 2025. (was 771/639 as of cycle #2, same day)
 - Median recent post: low thousands of views. A "good" post clears ~5K-6K. Strong week-level outliers 12K. All-time outliers 40K-84K.
 - All-time top 3: "Right now I feel like shit" (83.9K), "Don't be like me! ...$20K in payouts" (44K), "It's crazy how the mind works... losers with hope, winners with fear" (40.7K aphorism).
 - Inflection point: the account only broke out (5K-84K) once posts switched to specific, present-tense trading-crisis with exact real numbers. Generic-faith posts stayed at 100-500 views.
@@ -16,12 +16,16 @@ sharper over time instead of starting cold each week. Keep it factual and dated.
 - Audience-sourced ideas (from real comments) outperform invented topics.
 - @RealizedTrader gives the most substantive comments — a real relationship worth nurturing (reply to them, they reply back with depth).
 - Self-deprecating humor about cheap eval coupons (99% off) also performs well (12K views) — a lighter, funnier register than the crisis-confession format still works when it's specific and self-aware, not just jokey.
+- **CONFIRMED cycle #3 (1 sep): when the same real event gets posted in multiple takes, the reflective/self-aware version beats the dry recap.** Same bad session, two posts within 2h: "Day's over... hunting shorts, flipped long, damage is done" (reflective, names the mechanism) hit 1.3K views / 26 likes / 9 replies and pulled comments that out-liked the post itself (@Emmonspired 122, @NordicTrades 71). "5 x 25k MFF Rapid accounts Gone" (same event, drier recap, no reflection) only hit 539 views / 8 likes. Reflection + honest mechanism > plain loss recap, even same day same event.
+- **Real anchor posts keep out-mining drafted ones for backlog ideas.** Best comments this account has ever pulled (122, 71, 23 likes) all came from Jesus's own unscripted real-day posts, not from any agent draft. Prioritize capturing Jesus's real posts fast and mining their comments over inventing fresh topics.
+- **Gratitude/payout-milestone format, first sighting (1 sep, too fresh to grade):** "First payout of September is in @TradingLucid! ... August only gave me one payout and it came at the end of the month. This one lands at the start ... Grateful for this one" — posted same day as the above, not yet in any cycle's data pull. Early numbers at 14 min: 77 likes, 11 reposts, 1 reply. Worth checking full performance next cycle — note Jesus chose the plain gratitude/contrast angle and left out the specific dollar figure ($3,019, 25k account bought and passed same day, $4.5K made in Asia) that the account's proven inflection point (specific real numbers) would predict performs even better. If a strong specific-numbers follow-up post happens, track it as a natural A/B of "vague grateful" vs "exact numbers" on the same real event.
 
 ## What fails
 - Repeated identical template across a batch.
 - Fabricated numbers / anecdotes (Jesus can tell, and so can the audience eventually).
 - Any whiff of blaming an external factor.
 - General life hardship (housing, non-trading debt) — underperforms trading-specific pain.
+- **CONFIRMED cycle #3: posting 3 variants of the same real event within a ~2h window.** Even though each was a genuine take, the near-duplication split attention and 2 of the 3 landed below the account's normal median. One strong, well-chosen angle beats three near-duplicates of the same day.
 
 ## Draft scorecard
 
@@ -33,6 +37,9 @@ sharper over time instead of starting cold each week. Keep it factual and dated.
 | 2026-09-01 | D1 rule-stops-existing (confession) | pending | - | - | - |
 | 2026-09-01 | D2 ten-seconds-racing-the-clock (aphorism) | pending | - | - | - |
 | 2026-09-01 | D3 dont-be-like-me-gap (mature reflection) | pending | - | - | - |
+| 2026-09-01 (c3) | D1 predict-vs-react (aphorism, from @Emmonspired 122-like comment) | pending | - | - | Prediction on file: clears 2K within 48h, would beat aphorism median (~500) |
+| 2026-09-01 (c3) | D2 flip-when-tired (confession, from @NordicTrades 71-like comment) | pending | - | - | - |
+| 2026-09-01 (c3) | D3 oversizing-to-pass (dont-be-like-me, from @sowhateh/FxGal pushback) | pending | - | - | - |
 
 ## Cycle #1 observations (2026-08-31)
 - The Green/Red superstition eval post (6.8K) is the best recent = concrete + numbers + a twist still wins reach on this account.
@@ -44,6 +51,13 @@ sharper over time instead of starting cold each week. Keep it factual and dated.
 - **Cadence flag:** this cycle fired 1 day after cycle #1, not a week later. `x-snapshot.md` was still cycle #1's capture, so sections 1-3 of the report carried no new data. If the routine keeps firing this often, either fix the schedule or expect several cycles in a row with nothing new until the next INTERACTIVE run refreshes the snapshot. Not a blocker, just flagging so it doesn't get mistaken for fresh signal next time this file is read.
 - Cycle #1's 3 drafts are still ungraded (not confirmed posted, prediction can't be scored yet).
 - Niche scan (WebSearch): "need to be right vs. being profitable" is a live nerve in the wider trading-psych niche right now, corroborating Glenn's 10-second-window comment independently. Also noted the "discipline-erosion sequence" mechanism (name the exact order compromises stack, not just the moment) as a format worth trying once there's a real Jesus-specific sequence to anchor it, added to backlog.
+
+## Cycle #3 observations (2026-09-01, interactive, triggered manually by Jesus)
+- Ran hours after cycle #2, same day again — cadence is fully manual right now (Jesus fires it by hand), not on the weekly cron. Don't read same-day reruns as fresh weekly signal, they're re-checks.
+- Cycles #1 and #2 drafts (6 total) are STILL all unposted/ungraded as of this cycle. Jesus has posted 0 agent-drafted texts so far; every real post has been his own live writing. `predictionAccuracy` stayed 0/0 for a third straight cycle for this reason.
+- **Open question carried forward, still unresolved:** should the agent keep producing universal drafts Jesus rarely uses, or pivot toward faster-turnaround real-anchor mining (catch Jesus's own posts within hours, mine the comments, hand him a same-day follow-up idea)? Cycle #3's 3 drafts are already a step in that direction (all 3 sourced from comments on Jesus's own real posts, not invented). Worth deciding explicitly next time the user is asked.
+- Mined 3 new drafts from real audience comments on Jesus's own Sep 1 posts (not from research/backlog): predict-vs-react (@Emmonspired), flip-when-tired (@NordicTrades), oversizing-to-pass (@sowhateh/FxGal). All logged under backlog→used in x-growth-data.json.
+- `marked-posted.json` is still empty after 3 cycles — the dashboard's "Mark as posted" button has never successfully recorded a real post yet (either unused, or `X_BUS_TOKEN` isn't set in Netlify). Until that's fixed, adoption in this table has to be inferred by hand each cycle instead of read automatically.
 
 ## Open hypotheses to test
 - Does escalating the closing stake to "time/identity" (not money) reliably beat the money-loss frame? (voice profile says yes, needs a live A/B.)
