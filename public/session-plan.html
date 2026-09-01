@@ -246,6 +246,19 @@
   function n(x,d){ if(x==null||isNaN(x))return "—"; var v=Number(x);
     return d!=null? v.toFixed(d): (Math.abs(v)>=1000? v.toLocaleString("en-US"): String(v)); }
   function biasClass(b){ b=(b||"").toUpperCase(); return (b==="SHORT"||b==="LONG")?b:"NEUTRAL"; }
+  // slug del enum zones[].type -> etiqueta legible (bilingue). El JSON guarda el slug
+  // (es programatico); aqui solo se muestra en palabras.
+  var ZT={
+    fade_vah:["fade VAH","fade VAH"], fade_val:["fade VAL","fade VAL"],
+    bounce_val:["rebote VAL","VAL bounce"], bounce_vah:["rebote VAH","VAH bounce"],
+    sweep_onh:["sweep ONH","ONH sweep"], sweep_onl:["sweep ONL","ONL sweep"],
+    ib_fade:["fade IB","IB fade"], ib_break:["ruptura IB","IB break"],
+    pullback_cont:["pullback continuacion","pullback cont."],
+    retest_break:["retest de ruptura","retest break"], poc_fade:["fade POC","POC fade"],
+    otro:["otro","other"], other:["otro","other"]
+  };
+  function ztLabel(s){ if(!s) return ""; var k=String(s).toLowerCase();
+    return ZT[k] ? ZT[k][lang==="es"?0:1] : String(s).replace(/_/g," "); }
 
   function fmtWhen(iso, t){
     if(!iso) return "";
@@ -367,7 +380,7 @@
     var h='<div class="glance">';
     if(v.best){
       var r=(v.best.range&&v.best.range.length===2)?(n(v.best.range[0])+'–'+n(v.best.range[1])):'—';
-      h+='<div class="g"><div class="gl">'+t.vBestZone+'</div><div class="gv"><span class="z-dir '+biasClass(v.best.dir)+'">'+esc(v.best.dir||'')+'</span> '+r+(v.best.type?' · '+esc(v.best.type):'')+'</div></div>';
+      h+='<div class="g"><div class="gl">'+t.vBestZone+'</div><div class="gv"><span class="z-dir '+biasClass(v.best.dir)+'">'+esc(v.best.dir||'')+'</span> '+r+(v.best.type?' · '+esc(ztLabel(v.best.type)):'')+'</div></div>';
     }
     if(v.inval!=null){ h+='<div class="g"><div class="gl">'+t.vInval+'</div><div class="gv" style="color:var(--short)">'+n(v.inval)+'</div></div>'; }
     if(d.expectedMove){ h+='<div class="g"><div class="gl">'+t.vRange+'</div><div class="gv">'+n(d.expectedMove.base)+' '+t.pts+' / '+n(d.expectedMove.baseTk)+' '+t.tk+'</div></div>'; }
@@ -461,7 +474,7 @@
         var rk=z.risk||{};
         h+='<tr><td>'+r+'</td>'+
            '<td class="z-dir '+biasClass(z.dir)+'">'+esc(z.dir||"")+'</td>'+
-           '<td>'+esc(z.type||"")+'</td>'+
+           '<td>'+esc(ztLabel(z.type))+'</td>'+
            '<td><span class="conf">'+n(z.confluence)+'</span></td>'+
            '<td class="num">'+n(z.distPts)+' '+t.pts+' / '+n(z.distTicks)+t.tk+'</td></tr>';
         var pl=z.play||{};
