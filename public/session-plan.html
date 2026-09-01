@@ -376,6 +376,12 @@
     else { sig="WAIT"; code="NOSETUP"; }
     return {signal:sig, reason:t.vr[code], best:best, inval:inval, agent:false};
   }
+  // la razón del agente puede ser texto plano o bilingüe {es,en}; resuelve por idioma
+  function vreason(r){
+    if(r==null) return "";
+    if(typeof r==="string") return r;
+    return r[lang] || r.en || r.es || "";
+  }
   function glanceRow(v,d,t){
     var h='<div class="glance">';
     if(v.best){
@@ -401,7 +407,7 @@
     h+='</div><div class="cbody">';
 
     var v=deriveVerdict(sy,d,plan,t);
-    h+='<div class="verdict '+esc(v.signal)+'"><span class="vtag">'+esc(t['verdict'+v.signal]||v.signal)+'</span><span class="vreason">'+esc(v.reason||'')+'</span></div>';
+    h+='<div class="verdict '+esc(v.signal)+'"><span class="vtag">'+esc(t['verdict'+v.signal]||v.signal)+'</span><span class="vreason">'+esc(vreason(v.reason))+'</span></div>';
     h+=glanceRow(v,d,t);
     // continuidad de tesis + contra-caso (compactos, siempre visibles)
     if(d.thesisAlign && d.thesisAlign.state){
