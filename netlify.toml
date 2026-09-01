@@ -55,6 +55,12 @@
   to = "/.netlify/functions/sa-state-ingest"
   status = 200
 
+# Fase 5b: digest de-identificado de disciplina del journal -> bus (live/journal.json)
+[[redirects]]
+  from = "/api/journal-ingest"
+  to = "/.netlify/functions/journal-ingest"
+  status = 200
+
 [[redirects]]
   from = "/api/sa-state"
   to = "/.netlify/functions/sa-state"
