@@ -545,6 +545,14 @@ body::before{
     .fb-alarm{font-size:11.5px;font-weight:800;color:var(--red);line-height:1.4;letter-spacing:.2px}
     .fb-alarm::before{content:"\26A0  "}
     .fb-alarm + .fb-top{margin-top:6px}
+    .fb-exec{margin-top:7px;padding-top:7px;border-top:1px solid var(--border);font-size:10.5px;
+      color:var(--txt-dim);letter-spacing:.3px;line-height:1.5}
+    .fb-exec .xk{color:var(--txt-faint);text-transform:uppercase;font-size:9px;letter-spacing:1px;margin-right:5px}
+    .fb-exec b{color:var(--txt-dim);font-weight:700}
+    .fb-exec .warn{color:var(--amber);font-weight:700} .fb-exec .bad{color:var(--red);font-weight:700}
+    .fb-guard{margin-top:7px;padding:7px 10px;border-radius:8px;background:rgba(255,92,108,.12);
+      border-left:3px solid var(--red);color:var(--red);font-size:11px;font-weight:700;line-height:1.45}
+    .fb-guard::before{content:"\26D4  "}
   </style>
   <div class="focusbar" id="focusBar" style="display:none"></div>
 
@@ -2063,8 +2071,40 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   // salir a tradedadlog.com). Lo leemos directo del raw. Campo `focus` = la unica mejor
   // oportunidad de los 3 instrumentos, ya destilada.
   var SA_URL='https://raw.githubusercontent.com/jesusreyna2016/session-analyst-bus/main/plans/latest.json';
+  var JOURNAL_URL='https://raw.githubusercontent.com/jesusreyna2016/session-analyst-bus/main/live/journal.json';
   var bar=document.getElementById('focusBar');
   if(!bar) return;
+  var execData=null;   // rollup de ejecucion (del journal, de-identificado)
+  // readout de ejecucion: tu patron real (disciplina, contra-sesgo, fuera de zona) en la pantalla de operar
+  function execHtml(){
+    var r=execData&&execData.rollup; if(!r) return '';
+    var pct=function(x){ return (x!=null)?Math.round(x*100)+'%':'—'; };
+    var disc=r.disciplinedPct, ab=r.againstBiasRate, oe=r.outsideEdgeRate;
+    var discCls = disc==null?'':(disc<50?'bad':(disc<70?'warn':''));
+    var abCls = ab==null?'':(ab>0.5?'bad':(ab>0.3?'warn':''));
+    var oeCls = oe==null?'':(oe>0.4?'bad':(oe>0.25?'warn':''));
+    var parts=[];
+    if(disc!=null) parts.push('<b class="'+discCls+'">'+disc+'%</b> '+T('discip.','discip.'));
+    if(ab!=null) parts.push('<b class="'+abCls+'">'+pct(ab)+'</b> '+T('contra sesgo','vs bias'));
+    if(oe!=null) parts.push('<b class="'+oeCls+'">'+pct(oe)+'</b> '+T('fuera','off-edge'));
+    if(!parts.length) return '';
+    var d=(r.days!=null?r.days:'');
+    return '<div class="fb-exec"><span class="xk">'+T('Tu ejecución','Your execution')+(d?' '+d+'d':'')+'</span>'+parts.join(' &nbsp;·&nbsp; ')+'</div>';
+  }
+  // #3 · guardarraíl anti contra-sesgo: cuando el sesgo del instrumento en foco es claro y la
+  // fuga contra-tendencia esta activa (>30% esta semana), avisa fuerte de que lado NO operar.
+  function biasGuardHtml(plan,f){
+    if(!f||!f.sym||!plan||!plan.instruments) return '';
+    var inst=plan.instruments[f.sym]; if(!inst) return '';
+    var b=String(inst.biasSession||'').toUpperCase();
+    if(b!=='LONG' && b!=='SHORT') return '';
+    var ab=execData&&execData.rollup&&execData.rollup.againstBiasRate;
+    if(ab==null || ab<=0.3) return '';   // solo cuando la fuga esta viva; si mejoras, deja de molestar
+    var dir = b==='LONG'? T('LARGO','LONG') : T('CORTO','SHORT');
+    var wrong = b==='LONG'? T('los cortos','shorts') : T('los largos','longs');
+    return '<div class="fb-guard">'+T('Sesgo','Bias')+' '+esc(f.sym)+': <b>'+dir+'</b> — '+wrong+' '+
+      T('hoy son tu fuga','are your leak today')+' ('+Math.round(ab*100)+'% '+T('contra sesgo 45d','vs bias 45d')+')</div>';
+  }
   function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return c==='<'?'&lt;':c==='>'?'&gt;':'&amp;';}); }
   // plan bilingue {es,en}: saca el string del idioma activo; tolera strings sueltos (planes viejos)
   function L(x){ if(x==null) return ''; if(typeof x!=='object') return String(x);
@@ -2078,11 +2118,12 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var f=plan&&plan.focus;
     // la alarma del agente (tesis rota, datos viejos, FOMC/NFP, etc.) sube a la pantalla de operar
     var alarm=(plan&&plan.alarm!=null)?L(plan.alarm):'';
-    if((!f||!f.sym) && !alarm){ bar.style.display='none'; return; }
+    var xHtml=execHtml();
+    if((!f||!f.sym) && !alarm && !xHtml){ bar.style.display='none'; return; }
     var alarmHtml=alarm?'<div class="fb-alarm">'+esc(alarm)+'</div>':'';
-    if(!f||!f.sym){ // solo alarma, sin foco hoy
-      bar.className='focusbar alarm';
-      bar.innerHTML=alarmHtml;
+    if(!f||!f.sym){ // solo alarma / ejecucion, sin foco hoy
+      bar.className='focusbar'+(alarm?' alarm':'');
+      bar.innerHTML=alarmHtml+xHtml;
       bar.style.display=''; return;
     }
     var v=String(f.verdict||'WAIT').toUpperCase();
@@ -2098,13 +2139,20 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
         '<span class="fb-main">'+(main||T('sin foco hoy','no focus today'))+'</span>'+
         (age?'<span class="fb-age">'+esc(age)+'</span>':'')+'</div>'+
       (bits.length?'<div class="fb-sub">'+bits.join(' &nbsp;·&nbsp; ')+'</div>':'')+
-      (L(f.note)?'<div class="fb-note">'+esc(L(f.note))+'</div>':'');
+      (L(f.note)?'<div class="fb-note">'+esc(L(f.note))+'</div>':'')+
+      biasGuardHtml(plan,f)+
+      xHtml;
     bar.style.display='';
   }
+  var lastPlan=null;
   function load(){
+    fetch(JOURNAL_URL+'?t='+Date.now(),{cache:'no-store'})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(j){ execData=j; if(lastPlan!==null) render(lastPlan); })
+      .catch(function(){});
     fetch(SA_URL+'?t='+Date.now(),{cache:'no-store'})
       .then(function(r){ return r.ok?r.json():null; })
-      .then(function(p){ if(p) render(p); })
+      .then(function(p){ lastPlan=p||{}; render(p||{}); })
       .catch(function(){});
   }
   load();
