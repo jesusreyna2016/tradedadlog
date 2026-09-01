@@ -1,24 +1,31 @@
 {
   "updated": "2026-09-01",
   "cycle": 2,
-  "account": { "handle": "TradeDadLog", "followers": 771, "posts": 636 },
+  "account": { "handle": "TradeDadLog", "followers": 771, "posts": 639 },
   "followerHistory": [
     { "date": "2026-08-26", "followers": 759 },
     { "date": "2026-08-31", "followers": 771 },
-    { "date": "2026-09-01", "followers": 771, "note": "no fresh read, snapshot unchanged since 2026-08-31 (cloud cycle, 1 day after last cycle)", "note_es": "sin lectura nueva, snapshot sin cambios desde el 2026-08-31 (ciclo cloud, 1 día después del ciclo anterior)" }
+    { "date": "2026-09-01", "followers": 771 }
   ],
   "recentPosts": [
-    { "date": "2026-08-28", "id": "2093381057781322204", "excerpt": "My 100k @Topstep Eval so far: Green day. Red day...", "views": 6800, "likes": 54, "replies": 7, "format": "pattern" },
-    { "date": "2026-08-30", "id": "2094205399725670891", "excerpt": "Market opens and I gift myself another red day. Hit DLL...", "views": 2800, "likes": null, "replies": null, "format": "confession" },
-    { "date": "2026-08-27", "id": "2093032579708408118", "excerpt": "I've said 'this time is different' so many times it stopped meaning anything...", "views": 1500, "likes": 28, "replies": 14, "format": "confession" },
-    { "date": "2026-08-31", "id": "2094462688575283458", "excerpt": "Passing an eval isn't the hard part for me. The hard part is not sabotaging it...", "views": 777, "likes": null, "replies": null, "format": "truth-bomb" },
-    { "date": "2026-08-31", "id": "2094580592495002023", "excerpt": "Knowing the rule was never the problem... the ten seconds after you already knew better.", "views": 382, "likes": 6, "replies": 1, "format": "aphorism", "note": "too young to judge", "note_es": "muy temprano para juzgar" }
+    { "date": "2026-09-01", "id": "2094674193736503610", "excerpt": "Bought 5 $25k Lucid Daily accounts Monday. Passed 4 of 5 today...", "views": 5, "likes": null, "replies": null, "format": "confession", "dataSource": "analytics", "note": "real anchor post, not a drafted one — too young to judge yet", "note_es": "post real ancla, no fue un borrador del agente — muy temprano para juzgar" },
+    { "date": "2026-08-26", "id": "2092643864272146901", "excerpt": "Lately this market feels like it's designed to punish anyone who tries to trade it... Anyone else getting chopped up by this?", "views": 12000, "likes": 237, "replies": 61, "format": "complaint-question", "dataSource": "analytics", "note": "strongest recent-week post, corrected from an earlier undercount", "note_es": "post más fuerte de la semana reciente, corregido de un conteo previo equivocado" },
+    { "date": "2026-08-26", "id": "2092543134362223103", "excerpt": "Just got a 99% off coupon on @MyFundedFutures 25k Rapid... Still proven I don't need help destroying them.", "views": 12000, "likes": 67, "replies": 23, "format": "truth-bomb", "dataSource": "analytics", "note": "corrected from an earlier undercount (was recorded as 6.8K)", "note_es": "corregido de un conteo previo equivocado (estaba registrado como 6.8K)" },
+    { "date": "2026-08-28", "id": "2093381057781322204", "excerpt": "My 100k @Topstep Eval so far: Green day. Red day...", "views": 6800, "likes": 55, "replies": 7, "format": "pattern", "dataSource": "analytics" },
+    { "date": "2026-08-30", "id": "2094205399725670891", "excerpt": "Market opens and I gift myself another red day. Hit DLL...", "views": 2800, "likes": 18, "replies": 6, "format": "confession", "dataSource": "analytics" },
+    { "date": "2026-08-31", "id": "2094462688575283458", "excerpt": "Passing an eval isn't the hard part for me. The hard part is not sabotaging it...", "views": 788, "likes": 22, "replies": 3, "format": "truth-bomb", "dataSource": "analytics" },
+    { "date": "2026-08-31", "id": "2094580592495002023", "excerpt": "Knowing the rule was never the problem... the ten seconds after you already knew better.", "views": 412, "likes": 7, "replies": 2, "format": "aphorism", "dataSource": "analytics" }
   ],
   "formatPerformance": [
+    { "format": "complaint-question", "medianViews": 12000, "count": 1 },
     { "format": "pattern", "medianViews": 6800, "count": 1 },
-    { "format": "confession", "medianViews": 2150, "count": 2 },
-    { "format": "truth-bomb", "medianViews": 777, "count": 1 },
-    { "format": "aphorism", "medianViews": 382, "count": 1, "note": "sample too young" }
+    { "format": "confession", "medianViews": 2800, "count": 1, "note": "excludes the too-young Lucid Daily post", "note_es": "excluye el post de Lucid Daily, muy joven aún" },
+    { "format": "truth-bomb", "medianViews": 6394, "count": 2 },
+    { "format": "aphorism", "medianViews": 412, "count": 1 }
+  ],
+  "formatHistory": [
+    { "date": "2026-08-31", "formats": [ { "format": "pattern", "medianViews": 6800 }, { "format": "confession", "medianViews": 2150 }, { "format": "truth-bomb", "medianViews": 777 }, { "format": "aphorism", "medianViews": 382 } ] },
+    { "date": "2026-09-01", "formats": [ { "format": "complaint-question", "medianViews": 12000 }, { "format": "pattern", "medianViews": 6800 }, { "format": "confession", "medianViews": 2800 }, { "format": "truth-bomb", "medianViews": 6394 }, { "format": "aphorism", "medianViews": 412 } ] }
   ],
   "drafts": [
     {
@@ -116,7 +123,7 @@
     ]
   },
   "scorecard": [
-    { "week": "2026-08-31", "draft": "D1 calm-planner", "format": "aphorism", "adopted": "pending", "url": null, "result": null },
+    { "week": "2026-08-31", "draft": "D1 calm-planner", "format": "aphorism", "adopted": "no", "url": "https://x.com/TradeDadLog/status/2094580592495002023", "result": "Jesus posted a different aphorism instead (412 views) — draft itself unused" },
     { "week": "2026-08-31", "draft": "D2 analyse-your-losers", "format": "truth-bomb", "adopted": "pending", "url": null, "result": null },
     { "week": "2026-08-31", "draft": "D3 gap passing/staying", "format": "question", "adopted": "pending", "url": null, "result": null },
     { "week": "2026-09-01", "draft": "D1 rule-stops-existing", "format": "confession", "adopted": "pending", "url": null, "result": null },

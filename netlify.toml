@@ -71,3 +71,9 @@
   from = "/api/sa-bus-snapshot"
   to = "/.netlify/functions/sa-bus-snapshot"
   status = 200
+
+# X Growth Agent: boton "ya lo publique" del dashboard -> live/marked-posted.json
+[[redirects]]
+  from = "/api/x-growth-mark-posted"
+  to = "/.netlify/functions/x-growth-mark-posted"
+  status = 200

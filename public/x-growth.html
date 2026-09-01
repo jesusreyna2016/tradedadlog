@@ -9,7 +9,7 @@
   :root{
     --bg:#0b0e13; --panel:#12161f; --panel2:#171c27; --line:#232a38;
     --txt:#e7ecf4; --muted:#8b97ab; --dim:#5c6779;
-    --accent:#4da3ff; --green:#3fd08b; --amber:#f0b74a; --red:#f2637e; --violet:#9d7bff;
+    --accent:#4da3ff; --green:#3fd08b; --amber:#f0b74a; --red:#f2637e; --violet:#9d7bff; --teal:#38c9c9;
     --radius:14px; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
@@ -60,6 +60,8 @@
   .chip.question{background:rgba(77,163,255,.15);color:var(--accent)}
   .chip.truthbomb{background:rgba(240,183,74,.15);color:var(--amber)}
   .chip.pattern{background:rgba(63,208,139,.15);color:var(--green)}
+  .chip.complaintquestion{background:rgba(56,201,201,.15);color:var(--teal)}
+  .chip.dontbelikeme{background:rgba(240,183,74,.15);color:var(--amber)}
   .aibadge{font-size:10px;font-weight:700;color:var(--green);background:rgba(63,208,139,.13);
     padding:3px 8px;border-radius:999px;letter-spacing:.4px}
   .draft .why{font-size:12.5px;color:var(--muted);margin-left:auto;max-width:46%;text-align:right}
@@ -126,6 +128,10 @@
   .bl h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
   .bl .open h4{color:var(--accent)} .bl .used h4{color:var(--dim)}
   .bl .used li{color:var(--muted)}
+  .srcbadge{font-size:10px;padding:1px 6px;border-radius:999px;letter-spacing:.3px}
+  .srcbadge.v{background:rgba(63,208,139,.13);color:var(--green)}
+  .srcbadge.e{background:rgba(139,151,171,.13);color:var(--dim)}
+  .btn.marked{border-color:var(--green);color:var(--green)}
   footer{margin-top:34px;text-align:center;color:var(--dim);font-size:12px;font-family:var(--mono)}
   .err{color:var(--red);font-family:var(--mono);font-size:13px;padding:20px}
 </style>
@@ -148,7 +154,9 @@ const T = {
     medianby:"Median views by format", copy:"Copy", copied:"Copied", btn_post:"Post to X",
     status:"status", accuracy:"forecast accuracy", replygoal:"reply target this week",
     open:"Open", used:"Used", h_week:"Week", h_draft:"Draft", h_adopted:"Adopted", h_result:"Result",
-    pending:"pending", hit:"hit", miss:"miss", footer:"runs interactively, writes here every cycle" },
+    pending:"pending", hit:"hit", miss:"miss", footer:"runs interactively, writes here every cycle",
+    verified:"verified", estimated:"estimated", mark_posted:"Mark as posted", mark_prompt:"Paste the real x.com post URL",
+    marked:"Saved ✓", mark_err:"Couldn't save, try again", s_formattrend:"Format performance over time" },
   es:{ sub:"motor de crecimiento orgánico", updated:"actualizado", cycle:"ciclo #",
     followers:"Seguidores", trend:"Tendencia", posts:"Posts", thisweek:"Esta semana", draftsready:"borradores listos",
     since:"desde", notenough:"datos insuficientes",
@@ -160,12 +168,15 @@ const T = {
     medianby:"Vistas medianas por formato", copy:"Copiar", copied:"Copiado", btn_post:"Postear en X",
     status:"estado", accuracy:"precisión de pronóstico", replygoal:"meta de respuestas esta semana",
     open:"Abiertas", used:"Usadas", h_week:"Semana", h_draft:"Borrador", h_adopted:"Adoptado", h_result:"Resultado",
-    pending:"pendiente", hit:"acierto", miss:"fallo", footer:"corre en modo interactivo, escribe aquí cada ciclo" }
+    pending:"pendiente", hit:"acierto", miss:"fallo", footer:"corre en modo interactivo, escribe aquí cada ciclo",
+    verified:"verificado", estimated:"estimado", mark_posted:"Marcar como publicado", mark_prompt:"Pega la URL real del post en x.com",
+    marked:"Guardado ✓", mark_err:"No se pudo guardar, intenta de nuevo", s_formattrend:"Rendimiento por formato en el tiempo" }
 };
 
 let LANG = "en", DATA = null;
 try{ const s = localStorage.getItem("xg_lang"); if(s==="es"||s==="en") LANG=s; }catch(e){}
 
+const FMT_COLOR = {aphorism:"var(--violet)",confession:"var(--red)",question:"var(--accent)","truth-bomb":"var(--amber)",pattern:"var(--green)","complaint-question":"var(--teal)","dont-be-like-me":"var(--amber)"};
 const fmt = n => n==null ? "—" : (n>=1000 ? (n/1000).toFixed(n>=10000?0:1)+"K" : ""+n);
 const esc = s => (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const clsFmt = f => (f||"").replace(/[^a-z]/g,"");
@@ -191,7 +202,7 @@ function render(){
 
   const fp = d.formatPerformance||[];
   const maxFp = Math.max(1,...fp.map(f=>f.medianViews));
-  const fpColor = {aphorism:"var(--violet)",confession:"var(--red)",question:"var(--accent)","truth-bomb":"var(--amber)",pattern:"var(--green)"};
+  const fpColor = FMT_COLOR;
 
   const hb = d.hookBank||[];
   const maxHb = Math.max(1,...hb.map(h=>h.views));
@@ -216,6 +227,7 @@ function render(){
           ${dr.slot?`<span class="slot">🗓 ${esc(dr.slot)}</span>`:''}
           <button class="btn copy" data-t="dr${dr.rank}">${t("copy")}</button>
           <a class="btn post" href="${intent}" target="_blank" rel="noopener">${t("btn_post")}</a>
+          <button class="btn markposted" data-rank="${dr.rank}" data-format="${esc(dr.format)}">${t("mark_posted")}</button>
         </span>
       </div>
     </div>`;
@@ -279,7 +291,7 @@ function render(){
         <tbody>
         ${(d.recentPosts||[]).map(p=>`
           <tr class="${p.id===bestId?'best':''} ${p.views!=null&&p.views<600?'worst':''}">
-            <td><a class="post-ex" href="https://x.com/${esc(d.account.handle)}/status/${esc(p.id)}" target="_blank" title="${esc(p.excerpt)}">${esc(p.excerpt)}</a><div class="mini">${esc(p.date)}${(L(p,"note"))?" · "+esc(L(p,"note")):""}</div></td>
+            <td><a class="post-ex" href="https://x.com/${esc(d.account.handle)}/status/${esc(p.id)}" target="_blank" title="${esc(p.excerpt)}">${esc(p.excerpt)}</a><div class="mini">${esc(p.date)}${(L(p,"note"))?" · "+esc(L(p,"note")):""} · <span class="srcbadge ${p.dataSource==='analytics'?'v':'e'}">${p.dataSource==='analytics'?t("verified"):t("estimated")}</span></div></td>
             <td><span class="chip ${clsFmt(p.format)}" style="font-size:10px">${esc(p.format)}</span></td>
             <td>${fmt(p.views)}</td><td>${fmt(p.likes)}</td><td>${fmt(p.replies)}</td>
           </tr>`).join("")}
@@ -298,6 +310,11 @@ function render(){
       </div>
     </div>
   </div>
+
+  ${(d.formatHistory&&d.formatHistory.length>1)?`
+  <div class="section-title">${esc(t("s_formattrend"))} <span class="line"></span></div>
+  <div class="card">${formatTrendChart(d.formatHistory)}</div>
+  `:''}
 
   <div class="section-title">${esc(t("s_hooks"))} <span class="line"></span></div>
   <div class="card">
@@ -361,6 +378,50 @@ function render(){
     navigator.clipboard.writeText(txt).then(()=>{ b.textContent=t("copied"); b.classList.add("ok");
       setTimeout(()=>{b.textContent=t("copy");b.classList.remove("ok");},1400); });
   }));
+  document.querySelectorAll(".markposted").forEach(b=>b.addEventListener("click",async ()=>{
+    const url = prompt(t("mark_prompt"));
+    if(!url) return;
+    const rank = b.dataset.rank, format = b.dataset.format;
+    const drText = document.getElementById("dr"+rank) ? document.getElementById("dr"+rank).textContent : "";
+    try{
+      const r = await fetch("/api/x-growth-mark-posted", {
+        method:"POST", headers:{"content-type":"application/json"},
+        body: JSON.stringify({ cycle: DATA.cycle, draftFormat: format, draftText: drText, url: url.trim() })
+      });
+      if(!r.ok) throw new Error("http "+r.status);
+      b.textContent = t("marked"); b.classList.add("marked"); b.disabled = true;
+    }catch(e){ alert(t("mark_err")+": "+e.message); }
+  }));
+}
+
+function formatTrendChart(history){
+  // history: [{date, formats:[{format,medianViews},...]}, ...] oldest first
+  const w=680,h=160,padL=34,padR=10,padT=10,padB=22;
+  const dates = history.map(p=>p.date);
+  const formats = [...new Set(history.flatMap(p=>(p.formats||[]).map(f=>f.format)))];
+  const allVals = history.flatMap(p=>(p.formats||[]).map(f=>f.medianViews||0));
+  const maxV = Math.max(1,...allVals);
+  const x = i => padL + i*(w-padL-padR)/Math.max(1,dates.length-1);
+  const y = v => h-padB-(v/maxV)*(h-padT-padB);
+  const lines = formats.map(fmtName=>{
+    const pts = history.map((p,i)=>{
+      const rec = (p.formats||[]).find(f=>f.format===fmtName);
+      return rec ? [x(i), y(rec.medianViews||0)] : null;
+    }).filter(Boolean);
+    if(pts.length<1) return "";
+    const d = pts.map((pt,i)=>(i?"L":"M")+pt[0].toFixed(1)+" "+pt[1].toFixed(1)).join(" ");
+    const color = FMT_COLOR[fmtName]||"var(--accent)";
+    const dots = pts.map(pt=>`<circle cx="${pt[0].toFixed(1)}" cy="${pt[1].toFixed(1)}" r="2.5" fill="${color}"/>`).join("");
+    return `<path d="${d}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>${dots}`;
+  }).join("");
+  const legend = formats.map(f=>`<span class="bar" style="grid-template-columns:10px auto;display:inline-grid;margin-right:14px">
+    <span style="width:9px;height:9px;border-radius:3px;background:${FMT_COLOR[f]||'var(--accent)'}"></span>
+    <span class="lbl" style="text-transform:capitalize">${esc(f)}</span></span>`).join("");
+  const xlabels = dates.map((dt,i)=>`<text x="${x(i).toFixed(1)}" y="${h-6}" font-size="10" fill="var(--dim)" text-anchor="middle">${esc(dt.slice(5))}</text>`).join("");
+  return `<div style="margin-bottom:8px">${legend}</div>
+  <svg width="100%" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMinYMid meet">
+    ${lines}${xlabels}
+  </svg>`;
 }
 
 function sparkline(vals){
