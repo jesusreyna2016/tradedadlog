@@ -316,7 +316,10 @@
 
     // meta bar
     var sumArr = Larr(plan.summary);
-    var lagged = (plan.dataStatus==="lagged") || /rezag|lag/i.test(sumArr.join(" "));
+    var dh = plan.dataHealth || {};
+    var lagged = (dh.snapshot==="VIEJO") || (Array.isArray(dh.stale) && dh.stale.length>0)
+      || (Array.isArray(dh.missing) && dh.missing.length>0)
+      || /rezagad|datos viejos|lagged data|stale (data|snapshot)/i.test(sumArr.join(" "));
     var age = ageHours(plan.generatedAt);
     var freshDot = age>8 ? "old" : "ok";
     meta.innerHTML =
