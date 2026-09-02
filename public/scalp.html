@@ -68,7 +68,7 @@
 <script>
 const T = {
   en:{title:"Scalp CC Agent",cc:"Command Center",routine:"routine",loading:"Loading…",
-    updated:"updated",alerts:"Alerts",noalerts:"No material alerts.",gate:"Execution gate",
+    updated:"updated",alerts:"Alerts",noalerts:"No material alerts.",gate:"Execution gate",summary:"In plain words",
     ladder:"Execution ladder",totals:"Totals",pairs:"resolved pairs",pending:"pending",orphans:"orphans",
     globER:"global E[R]",wr:"WR at TP1",bySeg:"By timeframe / kind / side",bySym:"By instrument",
     slc:"Stop-loss post-mortem",decay:"Weekly WR TP1",wf:"Walk-forward (out of sample)",
@@ -79,7 +79,7 @@ const T = {
     none:"nothing yet",accum:"data still accumulating",notReady:"not enough sample",
     ver:"verdict",week:"week"},
   es:{title:"Agente Scalp CC",cc:"Command Center",routine:"rutina",loading:"Cargando…",
-    updated:"actualizado",alerts:"Alertas",noalerts:"Sin alertas materiales.",gate:"Gate de ejecucion",
+    updated:"actualizado",alerts:"Alertas",noalerts:"Sin alertas materiales.",gate:"Gate de ejecucion",summary:"En palabras",
     ladder:"Escalera de ejecucion",totals:"Totales",pairs:"pares resueltos",pending:"pendientes",orphans:"huerfanos",
     globER:"E[R] global",wr:"WR a TP1",bySeg:"Por timeframe / tipo / lado",bySym:"Por instrumento",
     slc:"Autopsia de stop-loss",decay:"WR TP1 semanal",wf:"Walk-forward (fuera de muestra)",
@@ -131,6 +131,12 @@ function render(data){
 
   if(alerts.length)
     H += `<div class="alertbar"><h2>⚠ ${tk.alerts}</h2><ul>${alerts.map(a=>`<li>${esc(a)}</li>`).join("")}</ul></div>`;
+
+  const nar = (st.narrative||rep.narrative||{});
+  const narTxt = nar[lang] || nar.es || nar.en || "";
+  if(narTxt)
+    H += `<div class="card" style="margin-bottom:12px;border-color:var(--acc)"><h2>${tk.summary}</h2>`+
+         `<div style="font-size:14px;line-height:1.6;white-space:pre-wrap">${esc(narTxt)}</div></div>`;
 
   H += `<div class="grid tiles" style="margin-bottom:12px">
     <div class="card tile"><div class="k">${tk.pairs}</div><div class="v">${t.pairs_resolved??0}</div><div class="s">${t.pending??0} ${tk.pending} · ${t.orphan_outcomes??0} ${tk.orphans}</div></div>
