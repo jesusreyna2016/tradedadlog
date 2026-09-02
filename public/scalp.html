@@ -75,6 +75,8 @@ const T = {
     model:"P(TP1) model — top features",exps:"Experiments",preds:"Prediction scoreboard",
     mgd:"Managed model (scale-in + partials) vs naive",naiveER:"naive E[R]",mgdER:"managed E[R]",
     fill:"deep fill %",m1r:"reached +1R",
+    slo:"Stop: 3-layer vs candle-1 of the FVG (parallel, same TPs)",sloLayer:"3-layer E[R]",sloOrig:"candle-1 E[R]",
+    sloDelta:"delta (candle-1 − 3-layer)",sloSaved:"stops avoided",sloCaused:"stops caused",sloWider:"candle-1 wider %",
     sig:"Recent signals (CT)",out:"Recent outcomes (CT)",n:"n",pf:"PF",sl:"SL",rev:"rev%",mfe:"MFE p50",
     none:"nothing yet",accum:"data still accumulating",notReady:"not enough sample",
     ver:"verdict",week:"week"},
@@ -86,6 +88,8 @@ const T = {
     model:"Modelo P(TP1) — features top",exps:"Experimentos",preds:"Scoreboard de predicciones",
     mgd:"Modelo gestionado (escalera + parciales) vs ingenuo",naiveER:"E[R] ingenuo",mgdER:"E[R] gestionado",
     fill:"% fill profundo",m1r:"llegó a +1R",
+    slo:"Stop: 3 capas vs vela 1 del FVG (paralelo, mismos TP)",sloLayer:"E[R] 3 capas",sloOrig:"E[R] vela 1",
+    sloDelta:"delta (vela 1 − 3 capas)",sloSaved:"stops evitados",sloCaused:"stops provocados",sloWider:"% vela 1 más ancho",
     sig:"Señales recientes (CT)",out:"Resultados recientes (CT)",n:"n",pf:"PF",sl:"SL",rev:"rev%",mfe:"MFE p50",
     none:"nada todavia",accum:"data aun acumulandose",notReady:"muestra insuficiente",
     ver:"veredicto",week:"semana"}
@@ -170,6 +174,8 @@ function render(data){
 
   H += `<div class="card" style="margin-top:12px"><h2>${tk.mgd}</h2>${mgdPanel(rep.managed_vs_naive||st.managed_vs_naive, tk)}</div>`;
 
+  H += `<div class="card" style="margin-top:12px"><h2>${tk.slo}</h2>${sloPanel(rep.sl_origin_vs_layer||st.sl_origin_vs_layer, tk)}</div>`;
+
   H += `<div class="grid two" style="margin-top:12px">
     <div class="card"><h2>${tk.exps}</h2>${expsPanel(rep.experiments, tk)}</div>
     <div class="card"><h2>${tk.preds}</h2>${predsPanel(rep.prediction_scoreboard||st.prediction_scoreboard, tk)}</div>
@@ -225,6 +231,19 @@ function mgdPanel(mv, tk){
     `<td>${num(m.fill_t3plus_pct,0)}%</td><td>${num(m.m1_rate,0)}%</td><td>${num(m.m2_rate,0)}%</td><td>${num(m.m3_rate,0)}%</td></tr>`;
   h += row("overall", o);
   for(const [k,m] of Object.entries(mv.by_tf_kind_side||{})) h += row(k,m);
+  return h+"</tbody></table>";
+}
+function sloPanel(so, tk){
+  if(!so || so.n===0 || !so.overall) return `<p class="empty">${so?.note||tk.none}</p>`;
+  const ci = m => (m.delta_ci90 && m.delta_ci90[0]!==null) ? ` [${num(m.delta_ci90[0])}, ${num(m.delta_ci90[1])}]` : "";
+  let h = `<table><thead><tr><th>seg</th><th>${tk.n}</th><th>${tk.sloLayer}</th><th>${tk.sloOrig}</th><th>${tk.sloDelta}</th><th>WR 3c</th><th>WR v1</th><th>${tk.sloWider}</th><th>${tk.sloSaved}</th><th>${tk.sloCaused}</th></tr></thead><tbody>`;
+  const row = (k,m)=>`<tr><td>${esc(k)}</td><td>${m.n}</td><td class="${cls(m.layer_expR)}">${num(m.layer_expR)}</td>`+
+    `<td class="${cls(m.orig_expR)}">${num(m.orig_expR)}</td>`+
+    `<td class="${m.delta_beats_zero?"pos":m.delta_below_zero?"neg":"mut"}">${num(m.delta_orig_minus_layer)}${ci(m)}</td>`+
+    `<td>${num(m.layer_wrTP1,0)}%</td><td>${num(m.orig_wrTP1,0)}%</td><td>${num(m.orig_wider_pct,0)}%</td>`+
+    `<td>${m.orig_saved_from_SL}</td><td>${m.orig_caused_SL}</td></tr>`;
+  h += row("overall", so.overall);
+  for(const [k,m] of Object.entries(so.by_tf_kind_side||{})) h += row(k,m);
   return h+"</tbody></table>";
 }
 function predsPanel(ps, tk){
