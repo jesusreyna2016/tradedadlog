@@ -1,32 +1,32 @@
 // Espeja los eventos de Scalp CC (Netlify Blobs store 'scalp', claves
 // ev/<YYYY-MM-DD>/<sigId>__<evt> que escribe scalp-ingest.mjs) al repo git
-// jesusreyna2016/scalp-cc-bus:
-//   evt=signal   -> signals/<fecha>.jsonl
-//   evt=outcome  -> outcomes/<fecha>.jsonl
+// jesusreyna2016/scalp-cc-bus: signals/<fecha>.jsonl y outcomes/<fecha>.jsonl.
 //
-// Diseño a prueba de la consistencia eventual de store.list():
-//  1. descubre sigIds del dia por store.list() (best-effort) + por los .jsonl ya
-//     commiteados en el repo.
-//  2. por cada sigId conocido hace store.get() DIRECTO por clave exacta de
-//     __signal y __outcome (store.get es fuertemente consistente), asi se rellena
-//     la mitad que list() todavia no devuelve.
-//  3. MERGE-ONLY: fusiona con lo que ya hay en el .jsonl (dedup por sigId, gana el
-//     receivedAt mas nuevo). Un rebuild solo puede añadir filas, nunca borrar.
-// busPut omite el commit si el contenido no cambio. Procesa hoy y ayer.
+// Robusto ante:
+//  - consistencia eventual de store.list(): descubre sigIds por list + por los
+//    .jsonl ya commiteados; luego hace store.get() DIRECTO por clave exacta.
+//  - señal y outcome en dias UTC distintos (sesion Asia cruza medianoche): la
+//    sonda por clave prueba TODOS los dias de la ventana, no solo el del outcome.
+//  - MERGE-ONLY: un rebuild solo puede añadir filas, nunca borrar una guardada.
+// Cada registro se escribe en el .jsonl del dia de SU receivedAt.
 //
 // Invocable por HTTP para pruebas (GET); el schedule vive en scalp-bus-cron.mjs.
 import { getStore } from '@netlify/blobs';
 import { busGet, busPut } from './_scalp-bus.mjs';
 
-function daysToProcess() {
-  const now = new Date();
-  const today = now.toISOString().slice(0, 10);
-  const y = new Date(now.getTime() - 24 * 3600 * 1000).toISOString().slice(0, 10);
-  return [y, today];
+const WINDOW_DAYS = 4; // hoy + 3 atras: sonda de claves y ficheros
+
+function windowDays() {
+  const now = Date.now();
+  return Array.from({ length: WINDOW_DAYS }, (_, k) =>
+    new Date(now - k * 864e5).toISOString().slice(0, 10)
+  );
 }
 
 const safeKey = (s) => String(s).replace(/[^A-Za-z0-9._-]/g, '_');
 const idOf = (r) => r?.sigId || r?.raw?.sigId || null;
+const evtOf = (r) => r?.evt || r?.raw?.evt || 'signal';
+const dayOf = (r) => String(r?.receivedAt || '').slice(0, 10) || null;
 
 async function listSigIds(store, day) {
   const ids = new Set();
@@ -42,28 +42,12 @@ async function listSigIds(store, day) {
   return ids;
 }
 
-function collectIds(content, into) {
+function parseJsonl(content, into) {
   if (!content) return;
   for (const line of content.split('\n')) {
     const t = line.trim();
     if (!t) continue;
-    try {
-      const id = idOf(JSON.parse(t));
-      if (id) into.add(id);
-    } catch { /* linea corrupta */ }
-  }
-}
-
-function mergeExisting(content, map) {
-  if (!content) return;
-  for (const line of content.split('\n')) {
-    const t = line.trim();
-    if (!t) continue;
-    try {
-      const r = JSON.parse(t);
-      const id = idOf(r);
-      if (id) map.set(id, r);
-    } catch { /* linea corrupta */ }
+    try { into.push(JSON.parse(t)); } catch { /* linea corrupta */ }
   }
 }
 
@@ -79,50 +63,64 @@ export async function runSnapshot() {
   if (!token) return { ok: false, error: 'falta SCALP_BUS_TOKEN' };
 
   const store = getStore('scalp');
-  const out = [];
+  const days = windowDays();
 
-  for (const day of daysToProcess()) {
-    const known = await listSigIds(store, day);
-
-    const existingSig = await busGet(`signals/${day}.jsonl`, { token });
-    const existingOut = await busGet(`outcomes/${day}.jsonl`, { token });
-    collectIds(existingSig?.content, known);
-    collectIds(existingOut?.content, known);
-    if (known.size === 0) continue;
-
-    const sigMap = new Map();
-    const outMap = new Map();
-    mergeExisting(existingSig?.content, sigMap);
-    mergeExisting(existingOut?.content, outMap);
-
-    for (const sig of known) {
-      const base = `ev/${day}/${safeKey(sig)}`;
-      const s = await store.get(`${base}__signal`, { type: 'json' });
-      if (s) {
-        const id = idOf(s) || sig;
-        const prev = sigMap.get(id);
-        if (!prev || String(s.receivedAt || '') >= String(prev.receivedAt || '')) sigMap.set(id, s);
-      }
-      const o = await store.get(`${base}__outcome`, { type: 'json' });
-      if (o) {
-        const id = idOf(o) || sig;
-        const prev = outMap.get(id);
-        if (!prev || String(o.receivedAt || '') >= String(prev.receivedAt || '')) outMap.set(id, o);
-      }
+  // 1. descubrir sigIds y cargar lo ya commiteado
+  const known = new Set();
+  const existing = {}; // "signals/<day>.jsonl" -> { content, sha }
+  const existingRows = []; // todas las filas ya commiteadas en la ventana
+  for (const day of days) {
+    for (const s of await listSigIds(store, day)) known.add(s);
+    for (const kind of ['signals', 'outcomes']) {
+      const path = `${kind}/${day}.jsonl`;
+      const cur = await busGet(path, { token });
+      existing[path] = cur;
+      const rows = [];
+      parseJsonl(cur?.content, rows);
+      for (const r of rows) { const id = idOf(r); if (id) known.add(id); }
+      existingRows.push(...rows);
     }
+  }
+  if (known.size === 0) return { ok: true, wrote: [] };
 
-    if (sigMap.size) {
-      out.push(await busPut(`signals/${day}.jsonl`, serialize(sigMap),
-        `scalp-bus: signals ${day} (${sigMap.size})`, { token, known: existingSig }));
-    }
-    if (outMap.size) {
-      out.push(await busPut(`outcomes/${day}.jsonl`, serialize(outMap),
-        `scalp-bus: outcomes ${day} (${outMap.size})`, { token, known: existingOut }));
+  // 2. por cada sigId, sonda directa de __signal y __outcome en toda la ventana
+  const fresh = [];
+  for (const sig of known) {
+    const sk = safeKey(sig);
+    for (const evt of ['signal', 'outcome']) {
+      let rec = null;
+      for (const day of days) {
+        const r = await store.get(`ev/${day}/${sk}__${evt}`, { type: 'json' });
+        if (r && (!rec || String(r.receivedAt || '') > String(rec.receivedAt || ''))) rec = r;
+      }
+      if (rec) fresh.push(rec);
     }
   }
 
-  // espeja report.json / state.json del repo a Blobs para que el dashboard los
-  // sirva sin el retraso de cache de raw.githubusercontent
+  // 3. fusion merge-only, agrupando por (kind, dia-de-receivedAt)
+  const files = {}; // path -> Map(sigId -> record)
+  const put = (r) => {
+    const kind = evtOf(r) === 'outcome' ? 'outcomes' : 'signals';
+    const day = dayOf(r);
+    if (!day) return;
+    const path = `${kind}/${day}.jsonl`;
+    (files[path] ||= new Map());
+    const id = idOf(r);
+    if (!id) return;
+    const prev = files[path].get(id);
+    if (!prev || String(r.receivedAt || '') >= String(prev.receivedAt || '')) files[path].set(id, r);
+  };
+  for (const r of existingRows) put(r);
+  for (const r of fresh) put(r);
+
+  const out = [];
+  for (const [path, map] of Object.entries(files)) {
+    if (!map.size) continue;
+    out.push(await busPut(path, serialize(map), `scalp-bus: ${path} (${map.size})`,
+      { token, known: existing[path] }));
+  }
+
+  // espejo report/state a Blobs para el dashboard (sin lag de raw)
   const mirrored = [];
   for (const name of ['report', 'state']) {
     try {
@@ -137,7 +135,6 @@ export async function runSnapshot() {
   return { ok: true, wrote: out, mirrored };
 }
 
-// invocable por HTTP para pruebas: GET /api/scalp-bus-snapshot
 export default async () => {
   const r = await runSnapshot();
   return new Response(JSON.stringify(r), {
