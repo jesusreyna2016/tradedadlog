@@ -98,6 +98,11 @@ body::before{
 @media(max-width:600px){
   .ticker{flex-direction:column;align-items:flex-start;gap:4px}
   .ticker .q{white-space:normal;overflow:visible;font-size:12px;line-height:1.45}
+  /* la fila de chips (idioma · PLAN · X GROWTH · SCALP CC · sonido · TILT-LOCK) no
+     cabe en una linea en el movil: que envuelva en vez de salirse de la pantalla */
+  .topbar{gap:12px}
+  .status{flex-wrap:wrap;gap:6px}
+  .clock{margin-left:0}
 }
 @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
 /* banner ventana de noticia */
