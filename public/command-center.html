@@ -568,7 +568,7 @@ body::before{
     .fb-guard{margin-top:7px;padding:7px 10px;border-radius:8px;background:rgba(255,92,108,.12);
       border-left:3px solid var(--red);color:var(--red);font-size:11px;font-weight:700;line-height:1.45}
     .fb-guard::before{content:"\26D4  "}
-    /* tira "El agente hoy": los 3 verdicts NQ/ES/GC + noticias, del bus */
+    /* tira "El agente hoy": los verdicts NQ/ES/GC/YM/CL + noticias, del bus */
     .sastrip{margin:8px 0 0;padding:10px 12px;border-radius:12px;background:var(--panel-2);border:1px solid var(--border)}
     .sav-head{font-family:"Orbitron","JetBrains Mono",monospace;font-size:9px;font-weight:800;letter-spacing:1.2px;
       color:var(--txt-faint);text-transform:uppercase;margin-bottom:7px}
@@ -2119,8 +2119,9 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       var b=String(d.biasSession||'').toUpperCase();
       var bias=b==='LONG'?T('largo','long'):(b==='SHORT'?T('corto','short'):T('neutral','neutral'));
       var z=(d.zones&&d.zones[0])||null;
-      var zTxt=z?(esc(z.type||'')+' · '+T('conf','conf')+' '+(z.confluence!=null?z.confluence:'?')+
-        (z.risk&&z.risk.rr!=null?' · R:R '+z.risk.rr:'')):T('sin zona','no zone');
+      var zParts=z?[zoneLabel(z.type), zoneStrength(z.confluence),
+        (z.risk&&z.risk.rr!=null?T('premio','reward')+' '+z.risk.rr+':1':'')].filter(Boolean):null;
+      var zTxt=zParts?esc(zParts.join(' · ')):T('sin zona cerca','no setup nearby');
       return '<div class="sav '+vc+'"><span class="sav-sym">'+sym+'</span>'+
         '<span class="sav-v">'+(v||'—')+'</span><span class="sav-bias">'+bias+'</span>'+
         '<span class="sav-z">'+zTxt+'</span></div>';
@@ -2166,6 +2167,31 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       T('hoy son tu fuga','are your leak today')+' ('+Math.round(ab*100)+'% '+T('contra sesgo 45d','vs bias 45d')+')</div>';
   }
   function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return c==='<'?'&lt;':c==='>'?'&gt;':'&amp;';}); }
+  // el agente manda el tipo de zona como enum en clave (pullback_cont, liq_reclaim...). Aqui lo
+  // pasamos a lenguaje llano para la tira; si aparece uno nuevo, se muestra con guiones bajos por espacios.
+  function zoneLabel(t){
+    var m={
+      fade_vah:['rechazo en la VAH','rejection at the VAH'], fade_val:['rechazo en la VAL','rejection at the VAL'],
+      poc_reversion:['giro en el POC','reversal at the POC'], poc_breakout:['ruptura del POC','POC breakout'], poc_break:['ruptura del POC','POC breakout'],
+      bounce_val:['rebote en la VAL','bounce at the VAL'], bounce_vah:['rebote en la VAH','bounce at the VAH'],
+      sweep_pdh:['barrida del maximo de ayer',"sweep of yesterday's high"], sweep_pdl:['barrida del minimo de ayer',"sweep of yesterday's low"],
+      sweep_pwh:['barrida del maximo de la semana pasada',"sweep of last week's high"], sweep_pwl:['barrida del minimo de la semana pasada',"sweep of last week's low"],
+      sweep_asiaH:['barrida del maximo de Asia','sweep of the Asia high'], sweep_asiaL:['barrida del minimo de Asia','sweep of the Asia low'],
+      sweep_onh:['barrida del maximo nocturno','sweep of the overnight high'], sweep_onl:['barrida del minimo nocturno','sweep of the overnight low'],
+      ib_fade:['rechazo del borde del rango inicial','fade of the initial-balance edge'], ib_break:['ruptura del rango inicial','initial-balance breakout'],
+      pullback_cont:['retroceso a favor de la tendencia','pullback with the trend'], retest_break:['ruptura y retest','break and retest'],
+      liq_reclaim:['barrida y recuperacion','sweep and reclaim'], asia_range_break:['ruptura del rango de Asia','Asia range break'], range_break:['ruptura del rango','range break'],
+      golden_zone:['zona dorada (Fib 62-79%)','golden zone (Fib 62-79%)'], supply:['zona de oferta','supply zone'], demand:['zona de demanda','demand zone'],
+      ext_target:['objetivo de extension','extension target'], otro:['otro tipo','other'], other:['otro tipo','other']
+    };
+    var k=String(t||'').trim(); if(m[k]) return T(m[k][0],m[k][1]);
+    return k?k.replace(/_/g,' '):T('zona','zone');
+  }
+  // confluence -> palabra (mismos cortes que el metodo: >=6 A+, 3-5 B, <=2 nada)
+  function zoneStrength(c){
+    if(c==null) return '';
+    return c>=6?T('confluencia fuerte','strong confluence'):c>=3?T('confluencia media','moderate confluence'):T('poca confluencia','weak confluence');
+  }
   // plan bilingue {es,en}: saca el string del idioma activo; tolera strings sueltos (planes viejos)
   function L(x){ if(x==null) return ''; if(typeof x!=='object') return String(x);
     var lg=(window.CC_LANG==='es')?'es':'en'; var v=(x[lg]!=null)?x[lg]:(x.en!=null?x.en:(x.es!=null?x.es:''));
