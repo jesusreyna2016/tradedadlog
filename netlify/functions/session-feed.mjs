@@ -20,7 +20,13 @@ export default async () => {
     const entry = {};
     try {
       const orb = await store.get('sym:' + sym, { type: 'json' });
-      if (orb) entry.orb = orb;
+      if (orb) {
+        // el backbone (cc-ingest) estampa `updatedAt`; el resto de fuentes (ind-ingest)
+        // usan `receivedAt`. Normalizamos para que el chequeo de frescura del agente
+        // (umbrales por `receivedAt`) valga tambien para orb.
+        if (!orb.receivedAt && orb.updatedAt) orb.receivedAt = orb.updatedAt;
+        entry.orb = orb;
+      }
     } catch (e) { /* sin backbone para ese simbolo todavia */ }
 
     await Promise.all(SOURCES.map(async (src) => {

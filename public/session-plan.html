@@ -473,7 +473,10 @@
     }
     var ctx=L(d.context).toLowerCase();
     var conv=(d.conviction||"").toLowerCase();
-    var aligned=d.biasAligned;
+    // "alineado" = el sesgo de la sesion coincide con el del dia (antes venia como
+    // plan.instruments.<x>.biasAligned, campo redundante ya retirado del schema).
+    // null = no se puede saber (falta alguno de los dos).
+    var aligned=(d.biasDay && d.biasSession) ? (d.biasDay === d.biasSession) : null;
     var sig,code;
     if(/muy estirad|no perseguir|sobre-?extend|overext/.test(ctx)){ sig="AVOID"; code="STRETCHED"; }
     else if(/\bchop\b|tierra de nadie|sin borde/.test(ctx)){ sig="WAIT"; code="CHOP"; }
@@ -504,7 +507,7 @@
     var bc=biasClass(d.biasSession||d.biasDay);
     var convRaw=(d.conviction||"").toLowerCase();
     var conv=(t.convMap[convRaw]||d.conviction||"");
-    var alignedTxt = d.biasAligned ? t.aligned : t.notAligned;
+    var alignedTxt = (d.biasDay && d.biasSession && d.biasDay === d.biasSession) ? t.aligned : t.notAligned;
     var h='<div class="card">';
     h+='<div class="chead"><span class="sym">'+sy+'</span>'+
        '<span class="bias '+bc+'">'+esc((d.biasSession||d.biasDay||"").toUpperCase())+'</span>'+
