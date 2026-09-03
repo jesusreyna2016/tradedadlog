@@ -1,25 +1,23 @@
-# Live X snapshot — captured 2026-09-01 (interactive, logged out)
+# Live X snapshot — captured 2026-09-03 (interactive, logged in, Analytics)
 
 Freshest read of @TradeDadLog performance. CLOUD-mode runs read THIS instead of x.com (which is blocked in the cloud). Refresh every interactive cycle.
 
-Followers: 773 · Posts: 649 · captured 2026-09-01 ~03:20 CT (refreshed)
+Followers: 785 · captured 2026-09-03 (refreshed). Posts counter on profile jumped 649→708 in 2 days — looks inflated (likely counts replies now), don't treat as 59 new original posts.
 
-## Sep 1 real-day posts (3 variants of the same bad session, posted within ~2h)
-- status 2094700731781513692 (3:15 AM) "Day's over. I'm going to sleep..." confession, hunting shorts / flipped long / it dumped / "punished either way if you force it" — 1.3K views, 26 likes, 9 replies. BEST of the 3. Top comments: @Emmonspired "the psychological problem with trying to predict rather than react" (122 likes); @NordicTrades "you got tired, grinded down, then switched direction, wouldn't happen if fresh at the start" (71 likes); @SebbyDinero1017 "come back after 6pm eastern" (14).
-- status 2094694217331183676 (2:49 AM) "5 x 25k MFF Rapid accounts Gone! ...less than $100 away" confession w/ 2 images — 539 views, 8 likes, 4 replies. Drier take, underperformed. Comment @sowhateh (FxGal) "25k accounts I wouldn't go over 2 micros... were you oversizing trying to pass fast?" (23) — real pushback tied to a known leak.
-- status 2094674193736503610 (Lucid Daily, passed 4 of 5) — matured to 1.2K.
+## Viral-tier event (2-3 sep): a big post + next-day proof-screenshot sequel compounded to ~25K combined views
+- Sep 2, "Passed 10 evals today. 5 x 25k MFF Rapid / 5 x 25k Lucid Daily. Bought them this morning. Passed them during Asia. Same day. That's the part I'm good at... The hard part starts now. Funded is where the pressure shows up... That's where my demons come back. God got me through the evals. Pray He gets me through keeping them." — **15K views, 74 likes, 19 replies, 1 repost.** Best-performing post since the 12K posts, closing in on all-time top 3 (40K-84K). Format: confession/aphorism hybrid, exact real numbers, faith-anchored vulnerable close.
+- Sep 3, direct sequel/quote-tweet of the above: "Yesterday I posted that I had just passed 10 accounts and that funded was the hard part for me. A little while later I found out how true that was. I was in a trade. All 10 copying. My youngest needed a toy that fell behind the sofa. I go grab it. Knock the router over. [stayed and played with him for a bit] ... Router went down. WiFi dropped. The exit never copied. Trailing drawdown burned the other 9. The one that survived, I could've taken a little over $1K and walked. I didn't. I was pissed. I wanted a bigger payout. I traded the frustration. That last one is gone too. 10 funded after Asia. Zero funded after a toy behind the sofa. The market didn't even need a bad setup. It just needed me away from the desk for one minute! Sat there numb for a bit. Then reminded myself, He got me through 10 evals in a day, He'll get me through this too." — quote-tweeted with a screenshot of the real funded-account balance table (several near-breakeven, small ~$204 drawdowns). **10K views, 62 likes, 15 replies**, still climbing (captured ~10h after posting).
+- **Confirmed reusable pattern: a same-story sequel 1-2 days later (with a proof screenshot) reliably compounds reach on top of an already-big post, doesn't just scrape leftovers.**
 
-## Last 5 posts
-1. Sep 1 (1m, too young to judge) · status 2094674193736503610 · real anchor post (real numbers, not a drafted format): "Bought 5 $25k Lucid Daily accounts Monday. Passed 4 of 5 today. Would've been 5 for 5 but my @tradecopia subscription expired..." confession format, real trailing-drawdown story (5 accounts bought, 4 passed, lost 3 of the 4 passed to trailing DD/chop/one NQ wick-to-entry, 4th taken to $4.5k and locked deliberately). Not one of the agent's drafts — Jesus wrote/posted this one himself from a real day. Track its performance next cycle.
-2. Aug 28 · status 2093381057781322204 · "My 100k @Topstep Eval so far: Green day. Red day..." · 6.8K views / 54 likes / 7 replies. Top replies: @kevystocks "Least them numbers is consistent 🔥"; @LVnFehm "You got this!"; @leahlager "Analyse the losers. See if there's a pattern."
-3. Aug 30 · status 2094205399725670891 · "Market opens and I gift myself another red day. Hit DLL..." (image) · 2.8K views.
-4. Aug 27 · status 2093032579708408118 · "I've said 'this time is different' so many times it stopped meaning anything..." · 1.5K views / 28 likes / 14 replies.
-5. Aug 31 (4h→now ~406 views) · status 2094580592495002023 · "Knowing the rule was never the problem... It's about what you do in the ten seconds after you already knew better." · Top replies: @SmarterForexAU (the 10-sec window: right/escape/status); @Tee_pee_TP ("it takes years to stop you, from you", market hypnosis).
-
-## Peer scan
-- @RealizedTrader (214 followers, aphorism strategy): "The plan was written by a version of you who was calm and had nothing at stake... also not in the room when you need him" — 264 likes. Also a rested/behind self-awareness question.
+## Other 2-3 sep posts
+- "Grabbed 5 of the new @Topstep 2-micro evals... all 5 gone" (self-deprecating humor, no real stakes) — 2.5K views, 18 likes, 9 replies.
+- "@Topstep just dropped another little account for $39..." (market commentary, no personal stakes) — 566 views, 11 likes, 5 replies. Weakest of the week, confirms commentary-without-personal-stakes underperforms.
+- "September is 2 days old and I already turned a payout day into a reset day. 5 accounts gone... I wasn't beaten by the market. I was wrong, and I kept going anyway." — 1.3K views, 23 likes, 7 replies. Pure self-accountability, no market-blame.
+- "First payout of September is in @TradingLucid!... August only gave me one payout and it came at the end of the month. This one lands at the start... Grateful for this one" — matured to 1.3K views, 50 likes, 7 replies.
+- "Day's over. I'm going to sleep... hunting shorts... flipped long..." — matured to 2.6K views, 41 likes, 14 replies.
+- "5 x 25k MFF Rapid accounts Gone!" (drier same-event variant from the Day's-over story) — matured to 971 views, 18 likes, 8 replies. Confirms: reflective version still beats the dry recap of the same event.
 
 ## Notes for next cycle
-- The Sep 1 Lucid Daily post is a real, non-drafted post — it's a strong template for future real-anchor posts: exact account counts, exact dollar swings, the specific mechanism (trailing drawdown forces fast profit-taking, doesn't forgive one bad candle), and a self-aware disciplined close (locking the 4th account on purpose). Worth checking its performance and mining any comments for backlog ideas next interactive pass.
-- Cycle #1 drafts (calm-planner aphorism — posted; analyse-your-losers truth-bomb; gap passing/staying question) — only the aphorism has been posted so far. The other 2 are still open/unposted as of this snapshot.
-- Cycle #2 drafts (DE-RAH confession, Glenn aphorism, toddc "don't be like me") — none posted yet as of this snapshot.
+- Jesus is now writing all his own real-anchor posts and they are outperforming every agent draft by a wide margin (up to 15K-25K vs the agent's best draft-sourced post at 12K). Keep leaning the agent toward fast real-anchor capture + comment mining over inventing universal drafts, per the open question logged in `_state.md`.
+- Cycle #1/#2/#3 drafts (9 total) remain unposted/ungraded.
+- `marked-posted.json` still empty.
