@@ -582,9 +582,29 @@ body::before{
     .sanews{margin-top:8px;padding:6px 9px;border-radius:7px;font-size:10.5px;font-weight:700;line-height:1.45}
     .sanews.med{background:rgba(245,197,66,.12);color:var(--amber)} .sanews.high{background:rgba(255,92,108,.12);color:var(--red)}
     .sanews::before{content:"\26A0  "}
+    /* salud del feed (watchdog) + meta-review semanal, del bus */
+    .sahealth{margin:8px 0 0;padding:6px 10px;border-radius:8px;font-size:10.5px;font-weight:700;line-height:1.45}
+    .sahealth.warn{background:rgba(245,197,66,.12);color:var(--amber)}
+    .sahealth.down{background:rgba(255,92,108,.14);color:var(--red)}
+    .sahealth::before{content:"\1F6E0\FE0F  "}
+    .saweekly{margin:8px 0 0;border-radius:12px;background:var(--panel-2);border:1px solid var(--border);overflow:hidden}
+    .saweekly>summary{list-style:none;cursor:pointer;padding:9px 12px;font-family:"Orbitron","JetBrains Mono",monospace;
+      font-size:9px;font-weight:800;letter-spacing:1.2px;color:var(--txt-faint);text-transform:uppercase}
+    .saweekly>summary::-webkit-details-marker{display:none}
+    .saweekly>summary::after{content:"\25B8";float:right;color:var(--txt-faint)}
+    .saweekly[open]>summary::after{content:"\25BE"}
+    .saweekly .wk-body{padding:4px 14px 12px;font-size:11.5px;line-height:1.6;color:var(--txt-dim);
+      white-space:pre-wrap;max-height:440px;overflow:auto;border-top:1px solid var(--border)}
+    .saweekly .wk-body h2{font-size:10.5px;color:var(--txt);letter-spacing:.6px;text-transform:uppercase;margin:12px 0 4px}
+    .saweekly .wk-body strong{color:var(--txt)}
   </style>
   <div class="focusbar" id="focusBar" style="display:none"></div>
   <div class="sastrip" id="saStrip" style="display:none"></div>
+  <div id="saHealth" style="display:none"></div>
+  <details class="saweekly" id="saWeekly" style="display:none">
+    <summary data-i18n-es="Meta-review semanal" data-i18n-en="Weekly meta-review">Weekly meta-review</summary>
+    <div class="wk-body" id="saWeeklyBody"></div>
+  </details>
 
   <!-- DASH · orden por importancia: 1) contexto del día 2) gate de entrada 3) sesgo/niveles
        4) noticias 5) reglas/disciplina 6) rendimiento 7) roadmap (colapsado, es progreso a largo plazo) -->
@@ -2230,6 +2250,29 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       xHtml;
     bar.style.display='';
   }
+  // salud del feed (rutina Watchdog, cada 6 h -> live/health.json). Solo aparece si algo
+  // esta viejo/caido; si status=ok o el archivo aun no existe, no molesta.
+  var HEALTH_URL='https://raw.githubusercontent.com/jesusreyna2016/session-analyst-bus/main/live/health.json';
+  var WEEKLY_URL='https://raw.githubusercontent.com/jesusreyna2016/session-analyst-bus/main/reviews/weekly-latest.md';
+  function renderHealth(h){
+    var el=document.getElementById('saHealth'); if(!el) return;
+    var st=h&&String(h.status||'').toLowerCase();
+    if(!h || !st || st==='ok'){ el.style.display='none'; el.textContent=''; return; }
+    var iss=(Array.isArray(h.issues)&&h.issues.length)?h.issues.slice(0,4).join(' · '):L(h.note);
+    el.className='sahealth '+(st==='down'?'down':'warn');
+    el.textContent=T('Datos','Feed')+' '+st.toUpperCase()+(iss?' · '+iss:'');
+    el.style.display='';
+  }
+  // meta-review semanal (rutina weekly, sabado -> reviews/weekly-latest.md). Panel colapsable.
+  function mdLite(s){
+    return esc(s).replace(/^\s*#{1,6}\s*(.+?)\s*$/gm,'<h2>$1</h2>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  }
+  function renderWeekly(md){
+    var d=document.getElementById('saWeekly'),b=document.getElementById('saWeeklyBody');
+    if(!d||!b) return;
+    if(!md || !String(md).trim() || /^404|Not Found/i.test(md)){ d.style.display='none'; return; }
+    b.innerHTML=mdLite(md); d.style.display='';
+  }
   var lastPlan=null;
   function load(){
     fetch(JOURNAL_URL+'?t='+Date.now(),{cache:'no-store'})
@@ -2240,6 +2283,10 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       .then(function(r){ return r.ok?r.json():null; })
       .then(function(p){ lastPlan=p||{}; render(p||{}); renderStrip(p||{}); })
       .catch(function(){});
+    fetch(HEALTH_URL+'?t='+Date.now(),{cache:'no-store'})
+      .then(function(r){ return r.ok?r.json():null; }).then(renderHealth).catch(function(){});
+    fetch(WEEKLY_URL+'?t='+Date.now(),{cache:'no-store'})
+      .then(function(r){ return r.ok?r.text():null; }).then(renderWeekly).catch(function(){});
   }
   load();
   setInterval(load, 5*60000);
