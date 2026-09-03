@@ -258,7 +258,7 @@ body::before{
 .box{width:18px;height:18px;border-radius:6px;border:1.5px solid var(--txt-faint);display:grid;place-items:center;font-size:11px;flex-shrink:0}
 .check li.done .box{background:var(--lime);border-color:var(--lime);color:#04121a}
 .check li.done .box::after{content:"\2713";font-size:11px;font-weight:700}
-.check small{margin-left:auto;color:var(--txt-faint);font-size:9px;letter-spacing:.5px}
+.check small{margin-left:auto;padding-left:9px;flex-shrink:0;white-space:nowrap;color:var(--txt-faint);font-size:9px;letter-spacing:.5px}
 .check.dim{opacity:.4;pointer-events:none}
 .gate{text-align:center;padding:10px;border-radius:10px;font-family:"Chakra Petch","JetBrains Mono",sans-serif;font-size:11px;letter-spacing:1.5px;font-weight:600}
 .gate.no{background:rgba(255,95,116,0.07);border:1px solid rgba(255,95,116,0.32);color:var(--red)}
@@ -454,7 +454,7 @@ body::before{
     </div>
     <div class="clock">
       <div class="t" id="clk">03:42:18</div>
-      <div class="d" id="ccDate">MON · AUG 24 2026 · GMT-6</div>
+      <div class="d" id="ccDate">MON · AUG 24 2026 · CT</div>
     </div>
   </div>
 
@@ -1355,7 +1355,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     try{ if(p.date){ var H=JSON.parse(localStorage.getItem('cc_plan_hist')||'{}')||{}; H[p.date]={ntz:(p.noTradeZone||null),vah:L.vah,poc:L.poc,val:L.val,pdh:L.pdh,pdl:L.pdl,pwh:L.pwh,pwl:L.pwl,dayOpen:L.dayOpen,tdo:L.tdo,sym:(p.sym||'NQ'),bias:(p.biasDir||null),weekly:(p.weeklyDir||null)}; localStorage.setItem('cc_plan_hist',JSON.stringify(H)); if(window.__refreshJournal) window.__refreshJournal(); } }catch(e){}
     if(p.date){ var dt=new Date(p.date+'T00:00:00');
       var DIASL=T(DIAS,['SUN','MON','TUE','WED','THU','FRI','SAT']), MESL=T(MES,['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']);
-      if($('ccDate')) $('ccDate').textContent=DIASL[dt.getDay()]+' · '+dt.getDate()+' '+MESL[dt.getMonth()]+' '+dt.getFullYear()+' · GMT-6';
+      if($('ccDate')) $('ccDate').textContent=DIASL[dt.getDay()]+' · '+dt.getDate()+' '+MESL[dt.getMonth()]+' '+dt.getFullYear()+' · CT';
       if($('planTag')) $('planTag').textContent=T('PLAN','PLAN')+' · '+dt.getDate()+' '+MESL[dt.getMonth()]; }
     // niveles (incluye PRICE + edge completo: VA, apertura DO/TDO, semanales PWH/PWL)
     if($('levels')){
@@ -2015,7 +2015,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if(oe!=null) parts.push('<b class="'+oeCls+'">'+pct(oe)+'</b> '+T('fuera','off-edge'));
     if(!parts.length) return '';
     var d=(r.days!=null?r.days:'');
-    return '<div class="fb-exec"><span class="xk">'+T('Tu ejecución','Your execution')+(d?' '+d+'d':'')+'</span>'+parts.join(' &nbsp;·&nbsp; ')+'</div>';
+    return '<div class="fb-exec"><span class="xk">'+T('Tu ejecución','Your execution')+(d?' '+d+'d':'')+'</span> &nbsp;·&nbsp; '+parts.join(' &nbsp;·&nbsp; ')+'</div>';
   }
   // #3 · guardarraíl anti contra-sesgo: cuando el sesgo del instrumento en foco es claro y la
   // fuga contra-tendencia esta activa (>30% esta semana), avisa fuerte de que lado NO operar.
