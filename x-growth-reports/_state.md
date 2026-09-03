@@ -43,6 +43,9 @@ sharper over time instead of starting cold each week. Keep it factual and dated.
 | 2026-09-01 (c3) | D1 predict-vs-react (aphorism, from @Emmonspired 122-like comment) | pending | - | - | Prediction on file: clears 2K within 48h, would beat aphorism median (~500) |
 | 2026-09-01 (c3) | D2 flip-when-tired (confession, from @NordicTrades 71-like comment) | pending | - | - | - |
 | 2026-09-01 (c3) | D3 oversizing-to-pass (dont-be-like-me, from @sowhateh/FxGal pushback) | pending | - | - | - |
+| 2026-09-03 (c4) | D1 two-selves (confession, backlog idea held open since 31 ago) | pending | - | - | - |
+| 2026-09-03 (c4) | D2 evaluation-vs-funded (aphorism, universal truism) | pending | - | - | - |
+| 2026-09-03 (c4) | D3 negotiate-with-stop-loss (complaint+question, niche-scan mechanism) | pending | - | - | Biased toward the confirmed top-performing recent format |
 
 ## Cycle #1 observations (2026-08-31)
 - The Green/Red superstition eval post (6.8K) is the best recent = concrete + numbers + a twist still wins reach on this account.
@@ -61,6 +64,14 @@ sharper over time instead of starting cold each week. Keep it factual and dated.
 - **Open question carried forward, still unresolved:** should the agent keep producing universal drafts Jesus rarely uses, or pivot toward faster-turnaround real-anchor mining (catch Jesus's own posts within hours, mine the comments, hand him a same-day follow-up idea)? Cycle #3's 3 drafts are already a step in that direction (all 3 sourced from comments on Jesus's own real posts, not invented). Worth deciding explicitly next time the user is asked.
 - Mined 3 new drafts from real audience comments on Jesus's own Sep 1 posts (not from research/backlog): predict-vs-react (@Emmonspired), flip-when-tired (@NordicTrades), oversizing-to-pass (@sowhateh/FxGal). All logged under backlog→used in x-growth-data.json.
 - `marked-posted.json` is still empty after 3 cycles — the dashboard's "Mark as posted" button has never successfully recorded a real post yet (either unused, or `X_BUS_TOKEN` isn't set in Netlify). Until that's fixed, adoption in this table has to be inferred by hand each cycle instead of read automatically.
+
+## Cycle #4 observations (2026-09-03, cloud, autonomous)
+- An interactive session refreshed `live/x-snapshot.md` and this file earlier the same day with a viral pair (15K + 10K) and the new proof-screenshot-sequel mechanism, before this cloud cycle fired. Picked that up as the self-performance read instead of stale data, per the runbook's intent.
+- Confirmed: 0/9 drafts from cycles 1-3 adopted, still ungraded. `marked-posted.json` still empty after 4 cycles.
+- Niche scan (WebSearch, cloud mode, generic sources not real X posts): "being right vs. being profitable" ego trap and "revenge-buying a new account same day" both surfaced as recurring mechanisms, added to backlog.
+- Finally cashed in the long-held-open "two selves / calm planner" backlog idea as a full confession draft.
+- Cycle #4's 3 drafts: two-selves (confession, backlog), evaluation-vs-funded (aphorism, distinct wording from this week's own viral post so it doesn't compete with it), negotiate-with-a-stop-loss (complaint+question, niche-scan mechanism, biased toward the confirmed top format).
+- Flagged for the next interactive run: the viral pair's 19+15 replies were never individually captured, that's the richest unmined comment pool on the account right now.
 
 ## Open hypotheses to test
 - Does escalating the closing stake to "time/identity" (not money) reliably beat the money-loss frame? (voice profile says yes, needs a live A/B.)
