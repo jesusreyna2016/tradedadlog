@@ -1,16 +1,18 @@
 {
-  "updated": "2026-09-03",
-  "cycle": 4,
-  "account": { "handle": "TradeDadLog", "followers": 785, "posts": 649 },
+  "updated": "2026-09-04",
+  "cycle": 5,
+  "account": { "handle": "TradeDadLog", "followers": 796, "posts": 649 },
   "followerHistory": [
     { "date": "2026-08-26", "followers": 759 },
     { "date": "2026-08-31", "followers": 771 },
     { "date": "2026-09-01", "followers": 773 },
-    { "date": "2026-09-03", "followers": 785 }
+    { "date": "2026-09-03", "followers": 785 },
+    { "date": "2026-09-04", "followers": 796 }
   ],
   "recentPosts": [
-    { "date": "2026-09-02", "id": null, "excerpt": "Passed 10 evals today. 5 x 25k MFF Rapid / 5 x 25k Lucid Daily. Bought them this morning. Passed them during Asia. Same day... The hard part starts now. Funded is where the pressure shows up... God got me through the evals. Pray He gets me through keeping them.", "views": 15000, "likes": 74, "replies": 19, "format": "confession", "dataSource": "analytics", "note": "viral-tier real anchor post, best since the 12K posts, closing in on the all-time top 3", "note_es": "post real ancla de nivel viral, el mejor desde los posts de 12K, cerca del top 3 histórico" },
-    { "date": "2026-09-03", "id": null, "excerpt": "Yesterday I posted that I had just passed 10 accounts and that funded was the hard part. A little while later I found out how true that was... router knocked over, WiFi dropped, trailing drawdown burned 9 of 10. The one that survived, I could've taken a little over $1K and walked. I didn't...", "views": 10000, "likes": 62, "replies": 15, "format": "confession", "dataSource": "analytics", "note": "proof-screenshot sequel to the 15K post, posted next day, still climbing at capture time, confirms the sequel mechanism compounds reach", "note_es": "secuela con captura de pantalla del post de 15K, publicada al día siguiente, seguía subiendo al momento de la captura, confirma que la secuela multiplica el alcance" },
+    { "date": "2026-09-04", "id": null, "excerpt": "Trading is hard. The mental part is harder. I needed $250... I still found a way to lose the account. I know exactly what to call that. I just don't like the answer... This week already took 10 accounts over a router and a copier problem. Now this one too... Still here. Still His.", "views": 6283, "likes": 128, "replies": 41, "reposts": 6, "format": "confession", "dataSource": "analytics", "note": "real Jesus draft, agent-assisted line edit before posting; top comment quoted the edited line back as the most honest thing they'd read on the platform", "note_es": "borrador real de Jesus, con ajuste de línea asistido por el agente antes de publicar; el comentario principal citó la línea editada como lo más honesto que habían leído en la plataforma" },
+    { "date": "2026-09-02", "id": null, "excerpt": "Passed 10 evals today. 5 x 25k MFF Rapid / 5 x 25k Lucid Daily. Bought them this morning. Passed them during Asia. Same day... The hard part starts now. Funded is where the pressure shows up... God got me through the evals. Pray He gets me through keeping them.", "views": 23000, "likes": 78, "replies": 20, "reposts": 1, "format": "confession", "dataSource": "analytics", "note": "viral-tier real anchor post, still growing 2 days later (was 15K/74/19)", "note_es": "post real ancla de nivel viral, sigue creciendo 2 días después (era 15K/74/19)" },
+    { "date": "2026-09-03", "id": null, "excerpt": "Yesterday I posted that I had just passed 10 accounts and that funded was the hard part. A little while later I found out how true that was... router knocked over, WiFi dropped, trailing drawdown burned 9 of 10. The one that survived, I could've taken a little over $1K and walked. I didn't...", "views": 18600, "likes": 86, "replies": 21, "reposts": 3, "format": "confession", "dataSource": "analytics", "note": "proof-screenshot sequel, still growing 2 days later (was 10K/62/15); combined with the parent post now ~41.6K views", "note_es": "secuela con captura de pantalla, sigue creciendo 2 días después (era 10K/62/15); combinado con el post original ya suma ~41.6K vistas" },
     { "date": "2026-09-01", "id": "2094700731781513692", "excerpt": "Day's over. I'm going to sleep. The damage is already done. Spent the session hunting shorts, flipped long and it dumped...", "views": 2600, "likes": 41, "replies": 14, "format": "confession", "dataSource": "analytics", "note": "matured; real anchor post; best of 3 same-day variants of the same bad day — the reflective one won", "note_es": "maduró; post real ancla; el mejor de 3 variantes del mismo mal día — ganó el reflexivo" },
     { "date": "2026-09-02", "id": null, "excerpt": "September is 2 days old and I already turned a payout day into a reset day. 5 accounts gone... I wasn't beaten by the market. I was wrong, and I kept going anyway.", "views": 1300, "likes": 23, "replies": 7, "format": "confession", "dataSource": "analytics", "note": "pure self-accountability, no market-blame, real numbers", "note_es": "autorresponsabilidad pura, sin culpar al mercado, números reales" },
     { "date": "2026-09-01", "id": null, "excerpt": "First payout of September is in @TradingLucid! August only gave me one payout and it came at the end of the month. This one lands at the start... Grateful for this one.", "views": 1300, "likes": 50, "replies": 7, "format": "victory", "dataSource": "analytics", "note": "gratitude/milestone format, matured; chose plain gratitude over the exact dollar figure", "note_es": "formato de gratitud/hito, maduró; eligió gratitud simple en vez de la cifra exacta" },
@@ -28,7 +30,7 @@
   "formatPerformance": [
     { "format": "complaint-question", "medianViews": 12000, "count": 1 },
     { "format": "pattern", "medianViews": 6800, "count": 1 },
-    { "format": "confession", "medianViews": 2600, "count": 7, "note": "incl. the 15K/10K viral pair and the reset-day post", "note_es": "incl. el par viral de 15K/10K y el post del reset day" },
+    { "format": "confession", "medianViews": 2700, "count": 8, "note": "incl. the 23K/18.6K viral pair (still growing) and today's 6.3K post", "note_es": "incl. el par viral de 23K/18.6K (sigue creciendo) y el post de hoy de 6.3K" },
     { "format": "truth-bomb", "medianViews": 2500, "count": 3 },
     { "format": "victory", "medianViews": 1300, "count": 1, "note": "new tag, gratitude/milestone format", "note_es": "etiqueta nueva, formato de gratitud/hito" },
     { "format": "aphorism", "medianViews": 565, "count": 1 },
@@ -37,58 +39,60 @@
   "formatHistory": [
     { "date": "2026-08-31", "formats": [ { "format": "pattern", "medianViews": 6800 }, { "format": "confession", "medianViews": 2150 }, { "format": "truth-bomb", "medianViews": 777 }, { "format": "aphorism", "medianViews": 382 } ] },
     { "date": "2026-09-01", "formats": [ { "format": "complaint-question", "medianViews": 12000 }, { "format": "pattern", "medianViews": 6800 }, { "format": "confession", "medianViews": 2800 }, { "format": "truth-bomb", "medianViews": 6394 }, { "format": "aphorism", "medianViews": 412 } ] },
-    { "date": "2026-09-03", "formats": [ { "format": "complaint-question", "medianViews": 12000 }, { "format": "pattern", "medianViews": 6800 }, { "format": "confession", "medianViews": 2600 }, { "format": "truth-bomb", "medianViews": 2500 }, { "format": "victory", "medianViews": 1300 }, { "format": "aphorism", "medianViews": 565 }, { "format": "commentary", "medianViews": 566 } ] }
+    { "date": "2026-09-03", "formats": [ { "format": "complaint-question", "medianViews": 12000 }, { "format": "pattern", "medianViews": 6800 }, { "format": "confession", "medianViews": 2600 }, { "format": "truth-bomb", "medianViews": 2500 }, { "format": "victory", "medianViews": 1300 }, { "format": "aphorism", "medianViews": 565 }, { "format": "commentary", "medianViews": 566 } ] },
+    { "date": "2026-09-04", "formats": [ { "format": "complaint-question", "medianViews": 12000 }, { "format": "pattern", "medianViews": 6800 }, { "format": "confession", "medianViews": 2700 }, { "format": "truth-bomb", "medianViews": 2500 }, { "format": "victory", "medianViews": 1300 }, { "format": "aphorism", "medianViews": 565 }, { "format": "commentary", "medianViews": 566 } ] }
   ],
   "drafts": [
     {
       "rank": 1,
-      "format": "confession",
-      "antiAI": true,
-      "slot": "Wed · 7:00 PM CT",
-      "text": "I write the plan at night when nothing's on the line. Calm. Clear. Two ticks and I'm out. Three losers and I'm done for the day.\nThen the open happens and that guy never shows up.\nThe one who shows up wants to be right. He moves the stop \"just this once.\" He forgets the plan was written by someone who wasn't scared yet.\nNobody swaps us out. I do it to myself, every single bell.",
-      "source": "Backlog idea held open since 31 ago (the longer confession version of the two-selves aphorism)",
-      "why": "Cashes in the backlog idea deliberately saved for this deeper self-quote treatment instead of a quick aphorism. Stake is identity, not money.",
-      "why_es": "Cobra la idea del backlog que se guardó a propósito para este tratamiento de autoconfesión más profundo en vez de un aforismo rápido. La apuesta es la identidad, no el dinero."
-    },
-    {
-      "rank": 2,
       "format": "aphorism",
       "antiAI": true,
       "slot": "Fri · 11:50 AM CT",
-      "text": "Passing the evaluation proves you can follow the rules for a few weeks with nothing real on the line.\nKeeping the funded account proves whether you can follow them with real money watching every trade.\nMost blowups don't happen during the evaluation. They happen after, once the pressure finally has something to protect.",
-      "source": "Universal prop-trading truism, sharpened, deliberately distinct wording from this week's own viral post",
-      "why": "Best-reach shape, keeps at least one aphorism in rotation per the standing rule. Same insight class as this week's own viral post but original wording, so it doesn't compete with or echo it.",
-      "why_es": "Formato de mayor alcance, mantiene al menos un aforismo en rotación según la regla fija. Misma clase de idea que el post viral propio de esta semana pero con redacción original, para no competir ni hacerle eco."
+      "text": "Need is what gets me into the trade too early.\nWant is what gets me out of it too late.\nBoth are me negotiating with a plan that was fine until I needed something from it.",
+      "source": "@apodochiHQ's comment (\"What if you didn't need the payout?\", 241 likes) + Jesus's own reply (203 likes) on the 15K post",
+      "why": "The single richest comment exchange on the account right now, 444 combined likes, more than either parent post. Aphorism form keeps it citable.",
+      "why_es": "El intercambio de comentarios más rico de la cuenta ahora mismo, 444 likes combinados, más que cualquiera de los dos posts originales. La forma de aforismo lo mantiene citable."
     },
     {
-      "rank": 3,
+      "rank": 2,
       "format": "complaint-question",
       "antiAI": true,
       "slot": "Mon · 11:50 AM CT",
-      "text": "The hardest part of this game isn't reading the chart. It's admitting you're wrong fast enough for it to matter.\nI'll hold a loser twenty minutes past where I already knew, just so I don't have to say it yet.\nAnyone else negotiate with a stop loss like it's a person?",
-      "source": "Niche scan (03 sep): the \"need to be right vs. profitable\" mechanism, reframed as a direct question",
-      "why": "Complaint+question is the confirmed strongest recent-week format. Question invites the audience to self-identify, the same lever that drove 61 replies on the \"getting chopped\" post.",
-      "why_es": "Queja + pregunta es el formato más fuerte confirmado de la semana reciente. La pregunta invita a la audiencia a identificarse, la misma palanca que generó 61 respuestas en el post de \"getting chopped\"."
+      "text": "I know the plan. I still break it the same way, almost every time.\nSomebody in the replies told me to put a picture of my kids on my desk so I'd remember why I'm doing this before I click.\nAnyone else need something in your face to actually stop you, because knowing better in your head clearly isn't enough?",
+      "source": "@LPH733's comment (\"put a picture of your kids on your desk... make it count\", 35 likes) on the 15K post",
+      "why": "On-brand family angle for @TradeDadLog's dad identity. Complaint+question is the confirmed strongest recent-week format for reply volume.",
+      "why_es": "Ángulo familiar muy propio de la identidad de papá de @TradeDadLog. Queja+pregunta es el formato más fuerte confirmado de la semana reciente para volumen de respuestas."
+    },
+    {
+      "rank": 3,
+      "format": "truth-bomb",
+      "antiAI": true,
+      "slot": "Wed · 7:00 PM CT",
+      "text": "Somebody called it \"payout maxxing\" in my replies and I haven't stopped thinking about it.\nFunny because it's true. Not funny because it's also why the account is gone.\nA win isn't proof I'm a genius and a loss isn't proof I'm an idiot. Both are just what happened. I keep forgetting that part.",
+      "source": "@jacktradesnq's comment (\"payout maxxing\", 248 likes, on the 15K post) + @EdmundoFutures's comment (emotional neutrality toward outcomes, 107 likes, on the 4 sep post)",
+      "why": "Lighter self-deprecating register that's worked before (12K on the coupon post) while still landing a real point. Rotates format away from confession/aphorism/question.",
+      "why_es": "Registro más ligero de autocrítica que ya ha funcionado antes (12K en el post del cupón) sin dejar de aterrizar un punto real. Rota el formato lejos de confesión/aforismo/pregunta."
     }
   ],
-  "plan": "No drafted post should compete with an active real story arc. Hold all 3 until the '10 evals / keeping funded' arc cools off, you're already mining it live better than any draft could. Once it does: Draft 3 (complaint+question, top format) leads late morning CT, Draft 1 (two-selves confession) a couple days later evening CT, Draft 2 (aphorism) held as a standalone whenever there's a gap with no real anchor.",
-  "plan_es": "Ningún post redactado debería competir con un evento real activo. Guarda los 3 hasta que el arco de '10 evals / mantener lo fondeado' se enfríe, ya lo estás explotando en vivo mejor que cualquier draft. Cuando se enfríe: el Draft 3 (queja+pregunta, formato top) va primero a media mañana CT, el Draft 1 (confesión de los dos yo) un par de días después en la noche, el Draft 2 (aforismo) se guarda como independiente para cuando no haya un evento real ancla.",
-  "escalate": "If you post another proof-screenshot sequel within 1-2 days of a big post (repeating this week's 15K to 10K pattern), that confirms the sequel mechanism as a repeatable lever, not a one-off. Keep riding real events with a follow-up instead of starting a new draft.",
-  "escalate_es": "Si publicas otra secuela con captura de pantalla dentro de 1-2 días de un post grande (repitiendo el patrón de esta semana de 15K a 10K), eso confirma el mecanismo de la secuela como una palanca repetible, no algo de una sola vez. Sigue montando eventos reales con un seguimiento en vez de empezar un draft nuevo.",
+  "plan": "The viral pair is STILL growing 2 days out (now ~41.6K combined) and today's 'Trading is hard' post is also fresh and climbing. No drafted post should compete with either. Hold all 3 until both quiet down. Once clear: Draft 2 (complaint+question, top format) leads, Draft 1 (aphorism) as a citable standalone, Draft 3 (truth-bomb) whenever there's room for a lighter post.",
+  "plan_es": "El par viral SIGUE creciendo 2 días después (ya ~41.6K combinado) y el post de hoy 'Trading is hard' también está fresco y subiendo. Ningún post redactado debería competir con ninguno de los dos. Guarda los 3 hasta que ambos se enfríen. Cuando se enfríen: el Draft 2 (queja+pregunta, formato top) va primero, el Draft 1 (aforismo) como pieza citable independiente, el Draft 3 (truth-bomb) cuando haya espacio para un post más ligero.",
+  "escalate": "Today's post ('Trading is hard') was a real Jesus draft the agent only line-edited, and it landed (6.3K views, 128 likes in 5h, a top comment quoting the edited line back). That's now a second confirmed agent contribution mode alongside comment-mining, distinct from inventing universal drafts (still 0/12 posted). Lean into editing real drafts and mining real comments over inventing new universal ones.",
+  "escalate_es": "El post de hoy ('Trading is hard') fue un borrador real de Jesus que el agente solo ajustó en líneas, y funcionó (6.3K vistas, 128 likes en 5h, un comentario top citando la línea editada). Ese es ahora un segundo modo de contribución del agente confirmado junto con minar comentarios, distinto de inventar drafts universales (siguen 0/12 publicados). Inclínate hacia editar borradores reales y minar comentarios reales en vez de inventar nuevos universales.",
   "read": {
-    "working": "Huge week: your own '10 evals passed' post hit 15K views, and the next-day proof-screenshot sequel (router knocked over, 9 of 10 funded accounts lost to trailing drawdown, screenshot of the real balance table) independently pulled 10K more. Exact real numbers plus present-tense stakes, told in two honest parts, is your single strongest lever right now, bigger than any drafted format.",
-    "working_es": "Semana enorme: tu propio post de '10 evals pasados' llegó a 15K vistas, y la secuela del día siguiente con captura de pantalla (router tirado, 9 de 10 cuentas fondeadas perdidas por trailing drawdown, foto de la tabla real de balances) jaló otras 10K de forma independiente. Números reales exactos más apuestas en presente, contados en dos partes honestas, es tu palanca más fuerte ahora mismo, más grande que cualquier formato redactado.",
-    "stop": "The weakest post of the week was dry market commentary with no personal stakes ('Topstep dropped another account for $39', 566 views) — confirms commentary without a personal stake underperforms every first-person format you have. Also still standing from cycle 3: don't post 3 variants of the same event within a couple hours.",
-    "stop_es": "El post más débil de la semana fue comentario de mercado seco sin apuesta personal ('Topstep dropped another account for $39', 566 vistas) — confirma que el comentario sin apuesta personal rinde menos que cualquier formato en primera persona que tienes. Además sigue vigente desde el ciclo 3: no publiques 3 variantes del mismo evento en un par de horas.",
-    "watch": "New confirmed mechanism: a proof-screenshot sequel 1-2 days after a big post compounds reach instead of just scraping leftovers (15K then 10K). Worth reusing deliberately next time a post goes big. Also: 9 drafts across 3 cycles are still unposted, keep leaning the agent toward fast real-anchor capture over inventing universal drafts. The viral pair's 19+15 replies were never individually mined, that's the richest untapped comment pool right now.",
-    "watch_es": "Nuevo mecanismo confirmado: una secuela con captura de pantalla 1-2 días después de un post grande multiplica el alcance en vez de solo recoger las sobras (15K y luego 10K). Vale la pena reutilizarlo a propósito la próxima vez que un post explote. Además: 9 drafts en 3 ciclos siguen sin publicarse, sigue inclinando al agente hacia capturar eventos reales rápido en vez de inventar drafts universales. Las 19+15 respuestas del par viral nunca se minaron individualmente, es el pozo de comentarios sin explotar más rico ahora mismo."
+    "working": "The viral pair keeps growing 2 days later (23K + 18.6K, ~41.6K combined) and a brand-new post today ('Trading is hard,' which the agent helped line-edit before Jesus posted it) already hit 6.3K views/128 likes/41 replies in 5 hours. Exact real numbers plus present-tense stakes remains the single strongest lever, and a light agent edit on a REAL Jesus draft can help without becoming an invented post.",
+    "working_es": "El par viral sigue creciendo 2 días después (23K + 18.6K, ~41.6K combinado) y un post nuevo hoy ('Trading is hard,' que el agente ayudó a ajustar en líneas antes de que Jesus lo publicara) ya llegó a 6.3K vistas/128 likes/41 respuestas en 5 horas. Números reales exactos más apuestas en presente sigue siendo la palanca más fuerte, y un ajuste ligero del agente sobre un borrador REAL de Jesus puede ayudar sin volverse un post inventado.",
+    "stop": "The weakest post of the week was dry market commentary with no personal stakes ('Topstep dropped another account for $39', 566 views) — confirms commentary without a personal stake underperforms every first-person format you have. Also still standing: don't post 3 variants of the same event within a couple hours.",
+    "stop_es": "El post más débil de la semana fue comentario de mercado seco sin apuesta personal ('Topstep dropped another account for $39', 566 vistas) — confirma que el comentario sin apuesta personal rinde menos que cualquier formato en primera persona que tienes. Además sigue vigente: no publiques 3 variantes del mismo evento en un par de horas.",
+    "watch": "Comment-mining paid off this cycle: a reply exchange (@apodochiHQ + Jesus's own reply, 444 combined likes) out-performed both parent posts. That need-vs-want idea is now Draft 1. 12 drafts across 4 cycles are still unposted, keep leaning the agent toward real-anchor capture, light edits on real drafts, and comment mining over inventing universal drafts.",
+    "watch_es": "Minar comentarios rindió este ciclo: un intercambio de respuestas (@apodochiHQ + la respuesta del propio Jesus, 444 likes combinados) superó a ambos posts originales. Esa idea de necesidad-vs-deseo es ahora el Draft 1. 12 drafts en 4 ciclos siguen sin publicarse, sigue inclinando al agente hacia capturar eventos reales, ajustes ligeros sobre borradores reales, y minar comentarios en vez de inventar drafts universales."
   },
   "hookBank": [
     { "hook": "Right now I feel like shit.", "views": 83900, "format": "confession" },
     { "hook": "Don't be like me!", "views": 44000, "format": "confession" },
     { "hook": "It's crazy how the mind works in trading...", "views": 40700, "format": "aphorism" },
-    { "hook": "Passed 10 evals today.", "views": 15000, "format": "confession" },
-    { "hook": "Yesterday I posted that I had just passed 10 accounts...", "views": 10000, "format": "confession" },
+    { "hook": "Passed 10 evals today.", "views": 23000, "format": "confession" },
+    { "hook": "Yesterday I posted that I had just passed 10 accounts...", "views": 18600, "format": "confession" },
+    { "hook": "Trading is hard. The mental part is harder.", "views": 6283, "format": "confession" },
     { "hook": "My 100k Eval so far: Green day. Red day...", "views": 6800, "format": "pattern" },
     { "hook": "Passing an eval isn't the hard part for me.", "views": 777, "format": "truth-bomb" }
   ],
@@ -100,31 +104,31 @@
     "note_es": "Baja confianza aún, solo un puñado de posts. La señal clara: tu mejor post reciente (6.8K) salió a media mañana CT."
   },
   "prediction": {
-    "week": "2026-09-03 (cycle 4)",
-    "claim": "If you post another proof-screenshot sequel within 1-2 days of a big post, it clears at least half the original post's views, confirming the sequel mechanism as repeatable rather than a one-off. Separately, if Draft 1 (two-selves confession) gets posted, it clears the confession format's new median (~2.6K) within 48h.",
-    "claim_es": "Si publicas otra secuela con captura de pantalla dentro de 1-2 días de un post grande, supera al menos la mitad de las vistas del post original, confirmando el mecanismo de la secuela como repetible y no un caso único. Aparte, si el Draft 1 (confesión de los dos yo) se publica, supera la nueva mediana del formato confesión (~2.6K) dentro de 48h.",
+    "week": "2026-09-04 (cycle 5)",
+    "claim": "If Jesus posts Draft 1 (need-vs-want aphorism) or a close variant, it clears the aphorism format's current low-count baseline (~565), because it's sourced from the highest-engagement comment exchange found on the account to date (444 combined likes). Separately, the viral pair (now ~41.6K combined) crosses 50K combined before it fully cools off.",
+    "claim_es": "Si Jesus publica el Draft 1 (aforismo de necesidad-vs-deseo) o una variante cercana, supera la línea base actual del formato aforismo (~565), porque viene del intercambio de comentarios con más participación encontrado en la cuenta hasta ahora (444 likes combinados). Aparte, el par viral (ya ~41.6K combinado) supera los 50K combinados antes de enfriarse del todo.",
     "status": "pending"
   },
-  "predictionAccuracy": { "hits": 0, "total": 0, "note": "cycles 1-3 predictions still ungraded: none of the 9 drafts have appeared among Jesus's real posts, every real post this week (up to 15K/10K) came from him writing live, not from a draft", "note_es": "predicciones de los ciclos 1-3 aún sin calificar: ninguno de los 9 drafts ha aparecido entre los posts reales de Jesus, cada post real de esta semana (hasta 15K/10K) vino de que él escribió en vivo, no de un draft" },
+  "predictionAccuracy": { "hits": 0, "total": 0, "note": "cycles 1-4 predictions still ungraded: none of the 12 drafts have appeared among Jesus's real posts, every real post this week (up to 23K/18.6K/6.3K) came from him writing live (one, today's, with an agent line-edit before posting), not from an invented draft", "note_es": "predicciones de los ciclos 1-4 aún sin calificar: ninguno de los 12 drafts ha aparecido entre los posts reales de Jesus, cada post real de esta semana (hasta 23K/18.6K/6.3K) vino de que él escribió en vivo (uno, el de hoy, con un ajuste de línea del agente antes de publicar), no de un draft inventado" },
   "engageList": [
-    { "handle": "viral pair replies", "postExcerpt": "19 replies on the 15K 'Passed 10 evals' post + 15 replies on its 10K sequel, not individually captured this round", "whyReply": "The richest untapped comment pool on the account right now. Priority for the next interactive pass to mine for backlog ideas and reply targets.", "whyReply_es": "El pozo de comentarios sin explotar más rico de la cuenta ahora mismo. Prioridad para la próxima pasada interactiva, para minar ideas de backlog y objetivos de respuesta." },
-    { "handle": "@Emmonspired", "postExcerpt": "'the psychological problem with trying to predict rather than react' (122 likes on your Day's-over post)", "whyReply": "Still the account's highest-liked commenter this window. Can't confirm from this snapshot whether you already replied, carrying forward from cycle 3 rather than assuming it's done.", "whyReply_es": "Sigue siendo el comentario con más likes de tu cuenta en esta ventana. No se puede confirmar con este snapshot si ya respondiste, se traslada desde el ciclo 3 en vez de asumir que ya está hecho." },
-    { "handle": "@NordicTrades", "postExcerpt": "'you got tired, grinded down, then switched direction' (71 likes)", "whyReply": "Same carry-forward from cycle 3, unconfirmed. Reply admitting he nailed it, that honesty builds trust with your exact audience.", "whyReply_es": "Mismo traslado desde el ciclo 3, sin confirmar. Respóndele admitiendo que le atinó, esa honestidad construye confianza con tu público exacto." },
+    { "handle": "@apodochiHQ", "postExcerpt": "'What if you didn't need the payout?' (241 likes on the 15K post)", "whyReply": "The seed of this cycle's top draft (need-vs-want aphorism). Worth telling him directly his line became a post.", "whyReply_es": "La semilla del mejor draft de este ciclo (aforismo de necesidad-vs-deseo). Vale la pena decirle directamente que su línea se volvió un post." },
+    { "handle": "@PeterG_Layer0", "postExcerpt": "'I recognize the shape, I'm just a step behind you in it... Still here is the part that matters' (on today's post)", "whyReply": "Real vulnerability, a relationship worth nurturing rather than just liking.", "whyReply_es": "Vulnerabilidad real, una relación que vale la pena cultivar en vez de solo darle like." },
+    { "handle": "@Emmonspired", "postExcerpt": "'the psychological problem with trying to predict rather than react' (122 likes on your Day's-over post)", "whyReply": "Still unconfirmed whether you replied, carrying forward from cycle 3 rather than assuming it's done.", "whyReply_es": "Aún sin confirmar si respondiste, se traslada desde el ciclo 3 en vez de asumir que ya está hecho." },
     { "handle": "@RealizedTrader", "postExcerpt": "evergreen: the account's sharpest recurring commenter, same aphorism lane", "whyReply": "Keep the standing relationship warm. Reply on his next aphorism to push the thread further, don't just agree.", "whyReply_es": "Mantén caliente la relación de siempre. Responde en su próximo aforismo para llevar el hilo más lejos, no solo estar de acuerdo." }
   ],
   "replyGoal": 5,
   "backlog": {
     "open": [
       "Discipline-erosion sequence: name the exact order compromises stack, needs a real Jesus-specific sequence (niche scan, 01 sep)",
-      "Being-right-vs-profitable ego trap, direct \"cut winners short to be right\" angle (niche scan, 03 sep, partially used as draft 3's complaint+question)",
+      "Being-right-vs-profitable ego trap, direct \"cut winners short to be right\" angle (niche scan, 03 sep, partially used as cycle 4's complaint+question)",
       "Revenge-buying a new funded account same day instead of sitting with the loss (niche scan, 03 sep)",
-      "Mine the viral pair's comments (19+15 replies on the 15K/10K posts, not yet individually captured) (03 sep)"
+      "Physical accountability ritual, pure form (put a picture of your kids on your desk) (@LPH733, 04 sep, partially folded into cycle 5 draft 2)"
     ],
     "open_es": [
       "Secuencia de erosión de disciplina: nombrar el orden exacto en que se acumulan las concesiones, necesita una secuencia real de Jesus (scan del nicho, 01 sep)",
-      "Trampa del ego tener-razón-vs-ser-rentable, el ángulo directo de \"cortar ganadores por tener razón\" (scan del nicho, 03 sep, parcialmente usado en el draft 3 de queja+pregunta)",
+      "Trampa del ego tener-razón-vs-ser-rentable, el ángulo directo de \"cortar ganadores por tener razón\" (scan del nicho, 03 sep, parcialmente usado en el draft de queja+pregunta del ciclo 4)",
       "Recomprar una cuenta fondeada el mismo día en vez de sentarse con la pérdida (scan del nicho, 03 sep)",
-      "Minar los comentarios del par viral (19+15 respuestas en los posts de 15K/10K, aún no capturados individualmente) (03 sep)"
+      "Ritual de responsabilidad física, forma pura (poner una foto de tus hijos en el escritorio) (@LPH733, 04 sep, parcialmente incluido en el draft 2 del ciclo 5)"
     ],
     "used": [
       "Aphorism riff 'Knowing the rule was never the problem' (RealizedTrader) - posted 31 ago",
@@ -135,7 +139,9 @@
       "Predict vs react (Dan Emmons, 122 likes) - draft 1, cycle #3",
       "Flip direction when tired, not fresh (Nordic, 71 likes) - draft 2, cycle #3",
       "Oversizing to pass fast trap (FxGal) - draft 3, cycle #3",
-      "The two selves / calm planner, longer confession version (RealizedTrader scan, 31 ago) - draft 1, cycle #4"
+      "The two selves / calm planner, longer confession version (RealizedTrader scan, 31 ago) - draft 1, cycle #4",
+      "Need vs want (@apodochiHQ + Jesus's own reply, 444 combined likes) - draft 1, cycle #5",
+      "Payout maxxing meme + emotional neutrality toward outcomes (@jacktradesnq + @EdmundoFutures) - draft 3, cycle #5"
     ],
     "used_es": [
       "Riff de aforismo 'Knowing the rule was never the problem' (RealizedTrader) - publicado 31 ago",
@@ -146,7 +152,9 @@
       "Predecir vs reaccionar (Dan Emmons, 122 likes) - draft 1, ciclo #3",
       "Flip de dirección por cansancio, no frescura (Nordic, 71 likes) - draft 2, ciclo #3",
       "Trampa de sobredimensionar para pasar rápido (FxGal) - draft 3, ciclo #3",
-      "Los dos yo / el planificador tranquilo, versión confesión larga (scan RealizedTrader, 31 ago) - draft 1, ciclo #4"
+      "Los dos yo / el planificador tranquilo, versión confesión larga (scan RealizedTrader, 31 ago) - draft 1, ciclo #4",
+      "Necesidad vs deseo (@apodochiHQ + la respuesta del propio Jesus, 444 likes combinados) - draft 1, ciclo #5",
+      "Meme de payout maxxing + neutralidad emocional ante resultados (@jacktradesnq + @EdmundoFutures) - draft 3, ciclo #5"
     ]
   },
   "scorecard": [
@@ -161,6 +169,9 @@
     { "week": "2026-09-01 (c3)", "draft": "D3 oversizing-to-pass", "format": "dont-be-like-me", "adopted": "pending", "url": null, "result": null },
     { "week": "2026-09-03 (c4)", "draft": "D1 two-selves", "format": "confession", "adopted": "pending", "url": null, "result": null },
     { "week": "2026-09-03 (c4)", "draft": "D2 evaluation-vs-funded", "format": "aphorism", "adopted": "pending", "url": null, "result": null },
-    { "week": "2026-09-03 (c4)", "draft": "D3 negotiate-with-stop-loss", "format": "complaint-question", "adopted": "pending", "url": null, "result": null }
+    { "week": "2026-09-03 (c4)", "draft": "D3 negotiate-with-stop-loss", "format": "complaint-question", "adopted": "pending", "url": null, "result": null },
+    { "week": "2026-09-04 (c5)", "draft": "D1 need-vs-want", "format": "aphorism", "adopted": "pending", "url": null, "result": null },
+    { "week": "2026-09-04 (c5)", "draft": "D2 picture-of-your-kids", "format": "complaint-question", "adopted": "pending", "url": null, "result": null },
+    { "week": "2026-09-04 (c5)", "draft": "D3 payout-maxxing-neutrality", "format": "truth-bomb", "adopted": "pending", "url": null, "result": null }
   ]
 }
