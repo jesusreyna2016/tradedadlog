@@ -1,14 +1,18 @@
 // Feed de lectura del store 'plan-coach' (ver plan-coach-ingest.mjs) para el
 // Plan Coach: eventos recientes (evt=signal / evt=outcome / evt=or_signal) y
-// conteos simples por tipo. Sin analisis pesado aqui todavia -- eso sigue
-// corriendo como plan-agent/analysis/effectiveness.py sobre exports del
-// journal; este endpoint es el primer paso para que ese motor eventualmente
-// lea del feed en vivo en lugar de un export manual.
+// conteos simples por tipo. Sin analisis pesado aqui -- eso corre en
+// plan-agent/analysis/effectiveness.py, que llama a este mismo endpoint con
+// ?days=30&limit=5000 (o lo que necesite) para jalar un rango mas amplio que
+// el default liviano que usa el dashboard.
 import { getStore } from '@netlify/blobs';
 
-export default async () => {
+export default async (req) => {
+  const url = new URL(req.url);
+  const daysBack = Math.min(90, Math.max(1, parseInt(url.searchParams.get('days') || '3', 10) || 3));
+  const limit = Math.min(5000, Math.max(1, parseInt(url.searchParams.get('limit') || '100', 10) || 100));
+
   const store = getStore('plan-coach');
-  const days = [0, 1, 2].map((n) => {
+  const days = Array.from({ length: daysBack }, (_, n) => {
     const d = new Date(Date.now() - n * 864e5);
     return d.toISOString().slice(0, 10);
   });
@@ -39,9 +43,10 @@ export default async () => {
 
   return new Response(JSON.stringify({
     generatedAt: new Date().toISOString(),
+    daysBack,
     counts,
     last,
-    recentEvents: events.slice(0, 100),
+    recentEvents: events.slice(0, limit),
   }), {
     headers: {
       'content-type': 'application/json',
