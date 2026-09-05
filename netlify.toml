@@ -95,3 +95,16 @@
   from = "/api/scalp-state"
   to = "/.netlify/functions/scalp-state"
   status = 200
+
+# TDL Plan Coach · ingesta del feed de trading_plan_agent.pine (store 'plan-coach',
+# separado de 'scalp' a proposito, ver plan-coach-ingest.mjs)
+[[redirects]]
+  from = "/api/plan-coach-ingest"
+  to = "/.netlify/functions/plan-coach-ingest"
+  status = 200
+
+# TDL Plan Coach · feed de lectura (eventos recientes + conteos)
+[[redirects]]
+  from = "/api/plan-coach-state"
+  to = "/.netlify/functions/plan-coach-state"
+  status = 200
