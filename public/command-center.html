@@ -1626,6 +1626,13 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
 
   function render(data){
     var syms=(data&&data.symbols)||{};
+    // publica el feed live mas fresco para que el banner de salud (cron 6h) no
+    // grite "dead" cuando los datos en vivo estan entrando (falso positivo domingo/apertura).
+    try{
+      var fresh=0;
+      Object.keys(syms).forEach(function(k){ var u=syms[k]&&syms[k].updatedAt; if(u){ var t=Date.parse(u); if(t>fresh) fresh=t; } });
+      if(fresh){ window.__feedFreshTs=fresh; if(window.__reHealth) window.__reHealth(); }
+    }catch(e){}
     var rows=ORDER.map(function(sym){
       var p=syms[sym];
       if(!p || p.date!==today()){ return {sym:sym, has:false}; }
@@ -2121,15 +2128,24 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   // esta viejo/caido; si status=ok o el archivo aun no existe, no molesta.
   var HEALTH_URL='https://raw.githubusercontent.com/jesusreyna2016/session-analyst-bus/main/live/health.json';
   var WEEKLY_URL='https://raw.githubusercontent.com/jesusreyna2016/session-analyst-bus/main/reviews/weekly-latest.md';
+  var lastHealth=null;
   function renderHealth(h){
+    if(h!==undefined) lastHealth=h;   // fetch pasa el json (o null); __reHealth() reevalúa sin arg
+    var hh=lastHealth;
     var el=document.getElementById('saHealth'); if(!el) return;
-    var st=h&&String(h.status||'').toLowerCase();
-    if(!h || !st || st==='ok'){ el.style.display='none'; el.textContent=''; return; }
-    var iss=(Array.isArray(h.issues)&&h.issues.length)?h.issues.slice(0,4).join(' · '):L(h.note);
+    var st=hh&&String(hh.status||'').toLowerCase();
+    if(!hh || !st || st==='ok'){ el.style.display='none'; el.textContent=''; return; }
+    // El banner sale del Watchdog (cron cada 6 h), así que llega tarde a la apertura del
+    // domingo: sigue diciendo "dead" horas después de que el mercado abrió. Si los feeds en
+    // vivo (cc-scan) están frescos (<20 min), es un falso positivo: no molestamos.
+    var fresh=window.__feedFreshTs||0;
+    if(fresh && (Date.now()-fresh) < 20*60000){ el.style.display='none'; el.textContent=''; return; }
+    var iss=(Array.isArray(hh.issues)&&hh.issues.length)?hh.issues.slice(0,4).join(' · '):L(hh.note);
     el.className='sahealth '+(st==='down'?'down':'warn');
     el.textContent=T('Datos','Feed')+' '+st.toUpperCase()+(iss?' · '+iss:'');
     el.style.display='';
   }
+  window.__reHealth=function(){ renderHealth(); };
   // meta-review semanal (rutina weekly, sabado -> reviews/weekly-latest.md). Panel colapsable.
   function mdLite(s){
     return esc(s).replace(/^\s*#{1,6}\s*(.+?)\s*$/gm,'<h2>$1</h2>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
