@@ -150,7 +150,20 @@ export async function runSnapshot() {
       const cur = await busGet(path, { token });
       const merged = new Map();
       mergeExisting(cur?.content, merged);
+      const existing = merged.size; // filas validas ANTES de anadir huerfanos
       for (const [id, r] of map) if (!merged.has(id)) merged.set(id, r);
+      // Guarda anti-borrado: el heal SOLO puede ANADIR huerfanos, jamas reescribir
+      // un dia hacia abajo. Si el archivo ya existe (tiene sha) pero (a) no ganamos
+      // ninguna fila, o (b) el contents API devolvio contenido vacio/parcial (pasa
+      // con blobs >1MB), NO pisamos: se salta y se reintenta en la proxima corrida.
+      // Ver bug heal 2026-09-04/06 que trunco signals/2026-09-03 de 1280 a 24 lineas
+      // dos veces por sobreescribir con solo las huerfanas recuperadas.
+      const hadSha = !!(cur && cur.sha);
+      const contentEmpty = !cur?.content || !cur.content.trim();
+      if (hadSha && (merged.size <= existing || contentEmpty)) {
+        out.push({ skipped: true, path, guard: 'heal-noshrink', existing, wouldWrite: merged.size });
+        continue;
+      }
       out.push(await busPut(path, serialize(merged),
         `scalp-bus: heal ${map.size} orphan signal(s) ${day}`, { token, known: cur }));
     }
