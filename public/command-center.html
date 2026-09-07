@@ -2129,6 +2129,27 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   var HEALTH_URL='https://raw.githubusercontent.com/jesusreyna2016/session-analyst-bus/main/live/health.json';
   var WEEKLY_URL='https://raw.githubusercontent.com/jesusreyna2016/session-analyst-bus/main/reviews/weekly-latest.md';
   var lastHealth=null;
+  // El ind-ingest solo "muere" de verdad si el mercado esta operando. Fin de semana,
+  // paron nocturno CME (16:00-17:00 CT) y feriados (cierre total o temprano 12:00 CT)
+  // dejan los webhooks quietos por horas y eso NO es una caida. Hora local = CT, igual
+  // que el resto del HUD. Tabla de feriados: refrescar cada ano (valor = hora CT de
+  // cierre temprano; 0 = cerrado todo el dia).
+  var CC_MKT_CLOSED_DAYS={
+    '2026-01-01':0,'2026-01-19':12,'2026-02-16':12,'2026-04-03':0,'2026-05-25':0,
+    '2026-06-19':12,'2026-07-03':12,'2026-09-07':12,'2026-11-26':0,'2026-11-27':12.25,
+    '2026-12-24':12.25,'2026-12-25':0
+  };
+  function ccMarketClosedNow(){
+    var d=new Date(), day=d.getDay(), h=d.getHours()+d.getMinutes()/60;
+    if(day===6 || (day===5 && h>=16) || (day===0 && h<17)) return true;   // finde
+    if(h>=16 && h<17) return true;                                        // paron CME lun-jue
+    var k=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+    var ec=CC_MKT_CLOSED_DAYS[k];
+    // feriado: cerrado hasta la reapertura de Globex 17:00 CT. Cierre total (ec=0) o
+    // temprano (ya pasada la hora ec). Despues de las 17:00 vuelven las reglas normales.
+    if(ec!=null && h<17 && (ec===0 || h>=ec)) return true;
+    return false;
+  }
   function renderHealth(h){
     if(h!==undefined) lastHealth=h;   // fetch pasa el json (o null); __reHealth() reevalúa sin arg
     var hh=lastHealth;
@@ -2140,6 +2161,15 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     // vivo (cc-scan) están frescos (<20 min), es un falso positivo: no molestamos.
     var fresh=window.__feedFreshTs||0;
     if(fresh && (Date.now()-fresh) < 20*60000){ el.style.display='none'; el.textContent=''; return; }
+    // Mercado cerrado (finde / paron nocturno / feriado): que el ind-ingest lleve horas
+    // quieto es lo esperado. Solo dejamos pasar el banner si lo caido es infra server-side
+    // (snapshot o news), que no depende de que el mercado opere.
+    if(ccMarketClosedNow()){
+      var okRx=/^ok$/i;
+      var infraDown=(hh.snapshot && !okRx.test(String(hh.snapshot.state||'ok'))) ||
+                    (hh.news && !okRx.test(String(hh.news.state||'ok')));
+      if(!infraDown){ el.style.display='none'; el.textContent=''; return; }
+    }
     var iss=(Array.isArray(hh.issues)&&hh.issues.length)?hh.issues.slice(0,4).join(' · '):L(hh.note);
     el.className='sahealth '+(st==='down'?'down':'warn');
     el.textContent=T('Datos','Feed')+' '+st.toUpperCase()+(iss?' · '+iss:'');
