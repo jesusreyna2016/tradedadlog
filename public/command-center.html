@@ -2016,6 +2016,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var t2=saT2(d,t1,bias); if(t2!=null) parts.push('T2='+t2);
     var nt=saRange(d.noTradeZone); if(nt) parts.push('NT='+nt);
     var fvg=z&&z.fvg&&z.fvg[0]&&saRange(z.fvg[0].range); if(fvg) parts.push('FVG='+fvg);
+    if(z&&z.fvg&&z.fvg[0]){ var f0=z.fvg[0]; if(f0.dir) parts.push('FVGDIR='+String(f0.dir).toLowerCase()); if(f0.tf) parts.push('FVGTF='+f0.tf); }
     var em=saNum(d.expectedMove&&d.expectedMove.base); if(em!=null) parts.push('EM='+Math.round(em));
     return parts.join(';');
   }
