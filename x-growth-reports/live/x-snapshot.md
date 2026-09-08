@@ -1,8 +1,13 @@
-# Live X snapshot — captured 2026-09-07 (interactive, logged in, Analytics)
+# Live X snapshot — captured 2026-09-08 (interactive, logged in, Analytics)
 
 Freshest read of @TradeDadLog performance. CLOUD-mode runs read THIS instead of x.com (which is blocked in the cloud). Refresh every interactive cycle.
 
-Followers: 809 (was 802 on 6 sep, +7 in 1 day). Posts counter reads 768, still noisy/inflated, not tracked closely.
+Followers: 806 (was 809 on 7 sep, small -3 dip, not a meaningful signal). Posts counter reads 768, still noisy/inflated, not tracked closely.
+
+## Quick check 8 sep (no new post since 7 sep, light capture)
+- "Market's basically closed today" matured to **747 views, 6 likes, 4 replies**, still the weakest real post of the week by a wide margin.
+- The 4 replies were generic trader-to-trader advice (tilt, self-love/ego framing, a DM offer, someone plugging their own thread), nothing worth mining into a new draft.
+- No new post has gone up since 7 sep. Draft 1 ("the buying is the addiction," sourced 7 sep) is still unused and is the strongest ready-to-post real material.
 
 ## Two new posts captured this cycle
 - **"This week in numbers" (6 sep, real dashboard numbers turned into a post): $3,019 payout Monday, $5,024 spent by Friday rebuying accounts after the router incident, net -$2,005. Closed with "It's a spending problem."** → **1.7K views, 25 likes, 11 replies.** Solid mid-tier "receipts" format.
