@@ -1983,11 +1983,55 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   if(!bar) return;
   var strip=document.getElementById('saStrip');
   var execData=null;   // rollup de ejecucion (del journal, de-identificado)
+  var lastPlan=null;   // ultimo plan cargado, para el boton "copiar a TradingView"
+  // payload compacto para el indicador Pine "SA Plan Overlay" (una linea por simbolo).
+  // el indicador lo parsea: SYM/SESS/BIAS/SIG/AZ/BZ/INVAL/T1/T2/NT/FVG/EM. Todo sale del plan del bus.
+  function saNum(x){ return (x==null||isNaN(+x))?null:(+x); }
+  function saRange(a){ return (Array.isArray(a)&&a.length===2&&a[0]!=null&&a[1]!=null)?(a[0]+'-'+a[1]):null; }
+  function saGolden(d,az){   // zona dorada / escenario B: estructurada si existe, si no del texto
+    var r=null;
+    if(d && d.scenarioB && saRange(d.scenarioB.zone)) r=saRange(d.scenarioB.zone);
+    else { var t=d&&d.scenarioB?L(d.scenarioB.text):''; var m=t&&t.match(/(\d{3,6}(?:\.\d+)?)\s*[-–]\s*(\d{3,6}(?:\.\d+)?)/); if(m) r=m[1]+'-'+m[2]; }
+    return (r && r!==az)?r:null;   // descarta si coincide con la zona A+ (seria un duplicado)
+  }
+  function saT2(d,t1,bias){   // segundo objetivo: estructurado si existe, si no del texto del escenario A
+    var s=d&&d.scenarioA; if(!s) return null;
+    if(s.target2!=null && !isNaN(+s.target2)) return +s.target2;
+    if(t1==null) return null;
+    var t=L(s.text)||'', short=String(bias).toUpperCase()==='SHORT';
+    var nums=(t.match(/\d{3,6}(?:\.\d+)?/g)||[]).map(Number);
+    for(var i=0;i<nums.length;i++){ var n=nums[i]; if(short? n<t1 : n>t1) return n; }
+    return null;
+  }
+  function buildPayload(sym,d,plan){
+    if(!d) return '';
+    var z=(d.zones&&d.zones[0])||null;
+    var parts=['SYM='+sym,'SESS='+((plan&&plan.session)||'')];
+    var bias=String(d.biasSession||'').toUpperCase(); if(bias) parts.push('BIAS='+bias);
+    var sig=String((d.verdict&&d.verdict.signal)||'').toUpperCase(); if(sig) parts.push('SIG='+sig);
+    var az=z&&saRange(z.range); if(az) parts.push('AZ='+az);
+    var bz=saGolden(d,az); if(bz) parts.push('BZ='+bz);
+    var inval=saNum(d.invalidation&&d.invalidation.level); if(inval!=null) parts.push('INVAL='+inval);
+    var t1=saNum(d.scenarioA&&d.scenarioA.target); if(t1!=null) parts.push('T1='+t1);
+    var t2=saT2(d,t1,bias); if(t2!=null) parts.push('T2='+t2);
+    var nt=saRange(d.noTradeZone); if(nt) parts.push('NT='+nt);
+    var fvg=z&&z.fvg&&z.fvg[0]&&saRange(z.fvg[0].range); if(fvg) parts.push('FVG='+fvg);
+    var em=saNum(d.expectedMove&&d.expectedMove.base); if(em!=null) parts.push('EM='+Math.round(em));
+    return parts.join(';');
+  }
+  function saCopy(txt,btn){
+    function ok(){ if(!btn) return; var o=btn.textContent, c=btn.style.color; btn.textContent='✓'; btn.style.color='var(--lime)'; setTimeout(function(){ btn.textContent=o; btn.style.color=c; },1200); }
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(ok,function(){saCopyFallback(txt,ok);}); return; } }catch(e){}
+    saCopyFallback(txt,ok);
+  }
+  function saCopyFallback(txt,ok){ try{ var ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); ok&&ok(); }catch(e){} }
+  if(strip){ strip.addEventListener('click',function(e){ var b=e.target.closest&&e.target.closest('.sav-copy'); if(!b) return; e.stopPropagation(); var sym=b.getAttribute('data-sym'); var d=lastPlan&&lastPlan.instruments&&lastPlan.instruments[sym]; var p=buildPayload(sym,d,lastPlan); if(p) saCopy(p,b); }); }
   // tira "El agente hoy": los verdicts NQ/ES/GC/YM/CL + la lectura de noticias del agente, en la
   // pantalla de operar (antes solo vivian en session-plan.html). El foco es UN instrumento; esto
   // te da todos y ancla el CC al cerebro del agente. YM/CL solo salen si el agente los incluyo.
   function renderStrip(plan){
     if(!strip) return;
+    lastPlan=plan;
     if(!plan || !plan.instruments){ strip.style.display='none'; return; }
     var rows=['NQ','ES','GC','YM','CL'].map(function(sym){
       var d=plan.instruments[sym]; if(!d) return '';
@@ -2001,7 +2045,8 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       var zTxt=zParts?esc(zParts.join(' · ')):T('sin zona cerca','no setup nearby');
       return '<div class="sav '+vc+'"><span class="sav-sym">'+sym+'</span>'+
         '<span class="sav-v">'+(v||'—')+'</span><span class="sav-bias">'+bias+'</span>'+
-        '<span class="sav-z">'+zTxt+'</span>'+fvgChip(z)+'</div>';
+        '<span class="sav-z">'+zTxt+'</span>'+fvgChip(z)+
+        '<button class="sav-copy" data-sym="'+sym+'" title="'+esc(T('copiar niveles para TradingView','copy levels for TradingView'))+'" style="margin-left:auto;font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--txt-dim);cursor:pointer;flex:none">TV</button></div>';
     }).filter(Boolean);
     if(!rows.length){ strip.style.display='none'; return; }
     var nr=plan.newsRisk, lvl=nr&&String(nr.level||'').toUpperCase(), newsHtml='';
