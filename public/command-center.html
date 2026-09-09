@@ -2032,7 +2032,20 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var rr=saNum(z&&z.risk&&z.risk.rr); if(rr!=null) parts.push('RR='+rr);
     var stop=saStop(z); if(stop!=null) parts.push('STOP='+stop);
     var win=saWin(z); if(win) parts.push('WIN='+win);
-    var nt=saRange(d.noTradeZone); if(nt) parts.push('NT='+nt);
+    // guarda de coherencia: si un plan viejo/con bug trae un noTradeZone que se come la entrada
+    // de la Zona A+, recortalo al borde de la zona antes de emitir el payload (en corto baja el
+    // techo hasta el lo de la A+, en largo sube el piso hasta el hi). Asi el overlay nunca recibe
+    // un payload que se contradice (entrada dentro del no-trade).
+    var ntz=d.noTradeZone;
+    if(ntz&&ntz[0]!=null&&ntz[1]!=null&&z&&z.range&&z.range[0]!=null&&z.range[1]!=null){
+      var zlo=Math.min(z.range[0],z.range[1]), zhi=Math.max(z.range[0],z.range[1]), zmid=(zlo+zhi)/2;
+      var nlo=Math.min(ntz[0],ntz[1]), nhi=Math.max(ntz[0],ntz[1]);
+      if(zmid>=nlo&&zmid<=nhi){
+        if(bias==='SHORT') nhi=Math.min(nhi,zlo); else nlo=Math.max(nlo,zhi);
+        ntz=(nhi>nlo)?[nlo,nhi]:null;
+      }
+    }
+    var nt=saRange(ntz); if(nt) parts.push('NT='+nt);
     var fvg=z&&z.fvg&&z.fvg[0]&&saRange(z.fvg[0].range); if(fvg) parts.push('FVG='+fvg);
     if(z&&z.fvg&&z.fvg[0]){ var f0=z.fvg[0]; if(f0.dir) parts.push('FVGDIR='+String(f0.dir).toLowerCase()); if(f0.tf) parts.push('FVGTF='+f0.tf); }
     var em=saNum(d.expectedMove&&d.expectedMove.base); if(em!=null) parts.push('EM='+Math.round(em));
