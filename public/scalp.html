@@ -275,6 +275,7 @@ function feed(rows, kind, tk){
 }
 
 async function load(){
+  if(document.hidden) return;   // pestaña oculta: no gastes invocaciones de la funcion
   try{
     const r = await fetch("/api/scalp-state", {cache:"no-store"});
     render(await r.json());
@@ -284,7 +285,8 @@ async function load(){
 }
 document.getElementById("lang").onclick = ()=>{ lang = lang==="en"?"es":"en"; localStorage.setItem("scalp_lang",lang); load(); };
 load();
-setInterval(load, 90000);
+setInterval(load, 300000);
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) load(); });
 </script>
 </body>
 </html>

@@ -66,7 +66,7 @@
   to = "/.netlify/functions/sa-state"
   status = 200
 
-# Snapshot del bus GitHub (cron cada 5 min; tambien invocable a mano para probar)
+# Snapshot del bus GitHub (cron cada 15 min; tambien invocable a mano para probar)
 [[redirects]]
   from = "/api/sa-bus-snapshot"
   to = "/.netlify/functions/sa-bus-snapshot"
@@ -84,7 +84,7 @@
   to = "/.netlify/functions/scalp-ingest"
   status = 200
 
-# Scalp CC · snapshot del bus scalp-cc-bus (cron cada 10 min; invocable a mano para probar)
+# Scalp CC · snapshot del bus scalp-cc-bus (cron cada 30 min; invocable a mano para probar)
 [[redirects]]
   from = "/api/scalp-bus-snapshot"
   to = "/.netlify/functions/scalp-bus-snapshot"

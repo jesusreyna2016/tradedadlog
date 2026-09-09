@@ -1584,13 +1584,15 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   // usa la API absoluta salvo cuando el propio Center está servido desde tradedadlog.com
   var CC_API=/(^|\.)tradedadlog\.com$/i.test(location.hostname)?'':'https://tradedadlog.com';
   function syncPlan(){
+    if(document.hidden) return;   // pestaña oculta: no gastes invocaciones de la funcion
     fetch(CC_API+'/api/cc-plan',{cache:'no-store'})
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(p){ if(p && p.date) applyRemote(p); })
       .catch(function(){});
   }
   syncPlan();
-  setInterval(syncPlan, 45000);
+  setInterval(syncPlan, 240000);
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden) syncPlan(); });
 })();
 </script>
 
@@ -1698,6 +1700,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   }
 
   function load(){
+    if(document.hidden) return;   // pestaña oculta: no gastes invocaciones de la funcion
     fetch(CC_API+'/api/cc-scan',{cache:'no-store'})
       .then(function(r){return r.ok?r.json():null;})
       .then(function(d){ if(d) render(d); })
@@ -1705,7 +1708,8 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   }
   window.__refreshScan=load;
   load();
-  setInterval(load, 45000);
+  setInterval(load, 300000);
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden) load(); });
   window.__i18nRefresh.push(load);
 })();
 </script>
@@ -1917,13 +1921,15 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   }
 
   function load(){
+    if(document.hidden) return;   // pestaña oculta: no gastes invocaciones de la funcion
     fetch(CC_API+'/api/cc-news',{cache:'no-store'})
       .then(function(r){return r.ok?r.json():null;})
       .then(function(d){ if(d&&Array.isArray(d.events)){ events=d.events; render(); } })
       .catch(function(){});
   }
   load();
-  setInterval(load, 10*60000);   // datos frescos cada 10 min
+  setInterval(load, 20*60000);   // datos frescos cada 20 min
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden) load(); });
   setInterval(render, 30000);    // countdown/candado cada 30 s
   window.__i18nRefresh.push(render);
 })();
