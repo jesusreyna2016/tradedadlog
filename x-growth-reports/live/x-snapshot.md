@@ -1,33 +1,31 @@
-# Live X snapshot — captured 2026-09-08 (interactive, logged in, Analytics)
+# Live X snapshot — captured 2026-09-10 (interactive, logged in, Analytics)
 
 Freshest read of @TradeDadLog performance. CLOUD-mode runs read THIS instead of x.com (which is blocked in the cloud). Refresh every interactive cycle.
 
-Followers: 806 (was 809 on 7 sep, small -3 dip, not a meaningful signal). Posts counter reads 768, still noisy/inflated, not tracked closely.
+Followers: ~810 (806-810 band all week, no real trend). Posts counter still noisy, not tracked closely.
 
-## Quick check 8 sep (no new post since 7 sep, light capture)
-- "Market's basically closed today" matured to **747 views, 6 likes, 4 replies**, still the weakest real post of the week by a wide margin.
-- The 4 replies were generic trader-to-trader advice (tilt, self-love/ego framing, a DM offer, someone plugging their own thread), nothing worth mining into a new draft.
-- No new post has gone up since 7 sep. Draft 1 ("the buying is the addiction," sourced 7 sep) is still unused and is the strongest ready-to-post real material.
+## New posts captured this cycle (Sep 8 + Sep 9)
+- **"I can read price. I struggle to read myself. One of those skills pays. The other one bills me." (8 sep, pure aphorism)** → **657 views, 21 likes, 3 replies, 1 repost. 5.3% engagement rate** (highest of the week) but the lowest reach. Aphorism with no story/number = converts the few who see it, gets almost no push.
+- **"Switched from 50k accounts to 25ks... I keep trading a 25k like it has a 50k drawdown. Half the room. Same size. Same habits. Different ending. Anyone else notice their results change when they drop account size?" (9 sep, real-anchor + open question)** → **2.5K views, 20 likes, 13 replies, 2 reposts, 3.0% eng.** Recovery post after two weak ones. Concrete real decision + concrete mechanism + "anyone else?" question = the account's strongest recent-week shape.
 
-## Two new posts captured this cycle
-- **"This week in numbers" (6 sep, real dashboard numbers turned into a post): $3,019 payout Monday, $5,024 spent by Friday rebuying accounts after the router incident, net -$2,005. Closed with "It's a spending problem."** → **1.7K views, 25 likes, 11 replies.** Solid mid-tier "receipts" format.
-- **"Market's basically closed today... here's what I keep doing to myself" (7 sep, reflective multi-problem list: rebuying too fast, breaking the plan, chasing price, treating a payout as permission to relax)** → **348 views, 5 likes, 2 replies.** Weakest real post of the week, even below the "Topstep $39" post (566). Likely causes: posted during an actual market holiday (may suppress reach regardless of content), a 4-item list dilutes focus vs. one sharp anchor, "market's basically closed" as an opener may itself read as a low-stakes/skip signal.
-
-## Comment-mining gold on the "This week in numbers" post
-- @NordicTrades: "go slower... it's addictive" (104 likes). **Jesus's own reply: "That's the part I keep skipping. Get paid. Stop buying. The buying is the addiction." (71 likes)** — the strongest available real quote right now for a future draft.
-- @apodochiHQ: "it's not discipline/trading/spending, it's an identity wired a certain way... surface-level actions" (41 likes). Jesus's reply: "The spending is the action. The wiring underneath it is the real work." (10 likes).
-- @cryptokrazee named it revenge trading. **Jesus's reply coined "revenge buying. Same habit as revenge trading. I know it. Still did it."** (10 likes) — ties to the open backlog idea about revenge-buying a new account same day.
-- @Mateo Rivera: practical tip, set a monthly account budget in advance so mid-week rebuys aren't a live decision (14 likes).
-- @Peter G: relationship comment, validates the honesty (25 likes).
+## Comment-mining gold on the "50k vs 25k" post (Sep 9) — richest thread since "This week in numbers"
+- **@RealizedTrader (5 likes): "The 50k wasn't giving you edge but technically it was giving you room to be human in."** — top phrase available right now.
+- **@KutKeeper: "I was already overleveraging on the 50k's with similar bad habits, but was able to get away with it. With the 25k's they do not forgive."**
+- **@aces_and_8s (6 likes): "If you're having trouble with risk management, why on earth would you buy yourself less drawdown?"** — the contradiction, stated bluntly.
+- @chartsmeancash: re-run the comparison in R (win/loss as multiples of actual risk per trade). If R matches on both sizes, size was never the problem.
+- @Mama__Wick: personal rule, 1 micro/trade + self-imposed $200 max drawdown (losing >50% of the real drawdown is very hard to recover from).
+- @MosaicFunds: payout math favors 25ks (need ~$3,600 profit for max vs ~$7,100 on a 50k).
+- Jesus has not replied in this thread yet, unusual. Opening to reply directly to "room to be human in."
 
 ## Other posts, matured
-- "Trading is hard" (4 sep): now 8.7K views, 173-175 likes, 51-52 replies. Still the 3rd best post on the account.
-- "No charts today" (5 sep): now 1.4K views, 25-28 likes, 7 replies.
-- Viral pair (2-3 sep): "Passed 10 evals" holds at 23K/79/20. Sequel holds at 19K/88/20. Combined ~42K, fully plateaued.
+- "Trading is hard" (4 sep): 8.8K views, 175 likes, 52 replies. Still 3rd best on the account.
+- "This week in numbers" (6 sep): 1.8K views, 25 likes, 11 replies.
+- "Market's basically closed" (7 sep): 853 views, 6 likes, 4 replies. Still the weakest real post of the week. Its 4 replies were generic trader advice, nothing mineable.
+- "No charts today" (5 sep): 1.5K views, 28 likes, 7 replies.
+- Viral pair (2-3 sep): 23K/19K, fully plateaued (~42K combined).
 
 ## Notes for next cycle
-- The "buying is the addiction" quote (71 likes) is now the top unused real-quote material, use almost verbatim.
-- "Revenge buying" is now a real Jesus-coined term, usable directly.
-- Don't repeat the exact shape of the 7 sep underperforming post (generic multi-problem list opened with "market's basically closed"), especially on an actual holiday.
-- 15+ drafts across cycles 1-5 remain unposted. Real financial data turned into posts, live wording edits, and comment mining continue to be the agent's highest-value contributions.
-- `marked-posted.json` still empty.
+- Today's post (Sep 10) should build on the still-warm 9 sep thread. The "room to be human in" / "they do not forgive" insight = the bigger account was hiding the discipline problem, not solving it. That is a real realization Jesus can own.
+- Pattern reconfirmed: concrete real specifics + a question > abstract reflection or pure aphorism for reach.
+- Cycle #7 Draft 1 ("the buying is the addiction," 71-like real quote) STILL unposted after 3 days, plus drafts 2 and 3. 
+- `marked-posted.json` still empty after 8 cycles.
