@@ -58,8 +58,12 @@ export default async () => {
 
   let keys = [];
   try {
-    const { blobs } = await store.list({ prefix: 'sa:' });
-    keys = (blobs || []).map(x => x.key);
+    let cursor;
+    do {
+      const page = await store.list({ prefix: 'sa:', cursor });
+      for (const b of page?.blobs || []) keys.push(b.key);
+      cursor = page?.cursor;
+    } while (cursor); // paginar: sin esto se truncaba en silencio a 1000 claves
   } catch (e) { /* list no disponible */ }
 
   for (const k of tailByKey(keys, 'sa:review:', 7)) out.reviews[k.slice('sa:review:'.length)] = await txt(k);
