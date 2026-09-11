@@ -14,7 +14,7 @@
 // N+1) ignorando `limit` -> ~30s y 502 con queries pesadas (days=2&limit=5000).
 import { getStore } from '@netlify/blobs';
 
-const GET_CONCURRENCY = 32;
+const GET_CONCURRENCY = 64;
 
 // evt = ultimo segmento tras '__' del nombre de clave (sigId nunca contiene '__'
 // porque el ingest lo pasa por safeKey, que solo deja [A-Za-z0-9._-]).
