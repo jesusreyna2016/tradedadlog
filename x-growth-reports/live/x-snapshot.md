@@ -1,31 +1,20 @@
-# Live X snapshot — captured 2026-09-10 (interactive, logged in, Analytics)
+# Live X snapshot — captured 2026-09-11 (interactive, LOGGED IN)
 
 Freshest read of @TradeDadLog performance. CLOUD-mode runs read THIS instead of x.com (which is blocked in the cloud). Refresh every interactive cycle.
 
-Followers: ~810 (806-810 band all week, no real trend). Posts counter still noisy, not tracked closely.
+Followers: 813 · Posts: 800 · Bio updated to "Dad of 2 | Trading futures and fighting my own worst habits | Sharing the real journey: setbacks, lessons & small wins | God & family keep me going." · captured 2026-09-11 ~afternoon CT
 
-## New posts captured this cycle (Sep 8 + Sep 9)
-- **"I can read price. I struggle to read myself. One of those skills pays. The other one bills me." (8 sep, pure aphorism)** → **657 views, 21 likes, 3 replies, 1 repost. 5.3% engagement rate** (highest of the week) but the lowest reach. Aphorism with no story/number = converts the few who see it, gets almost no push.
-- **"Switched from 50k accounts to 25ks... I keep trading a 25k like it has a 50k drawdown. Half the room. Same size. Same habits. Different ending. Anyone else notice their results change when they drop account size?" (9 sep, real-anchor + open question)** → **2.5K views, 20 likes, 13 replies, 2 reposts, 3.0% eng.** Recovery post after two weak ones. Concrete real decision + concrete mechanism + "anyone else?" question = the account's strongest recent-week shape.
+## Two new posts since last snapshot
+1. Sep 11 · status 2098428350230577407 · "Nobody knows what I carry to this chart. You see the payout screenshots. You don't see the nights I already told myself I was done and opened the platform anyway... You don't see me trying to stay standing for two little boys." · 712 views / 17 likes / 11 replies / 1 repost at 4h (young, climbing). Fuses trading struggle + dad identity. Strong direction.
+2. Sep 10 · status 2098110403955843479 · "Every day this week I've passed an eval. Not one has become a payout. Same setups, same hands, two completely different traders... The need makes me worse every time. Reading the market was never the problem." · 1093 views / 22 likes / 12 replies / 1 repost. Richest thread of the week.
 
-## Comment-mining gold on the "50k vs 25k" post (Sep 9) — richest thread since "This week in numbers"
-- **@RealizedTrader (5 likes): "The 50k wasn't giving you edge but technically it was giving you room to be human in."** — top phrase available right now.
-- **@KutKeeper: "I was already overleveraging on the 50k's with similar bad habits, but was able to get away with it. With the 25k's they do not forgive."**
-- **@aces_and_8s (6 likes): "If you're having trouble with risk management, why on earth would you buy yourself less drawdown?"** — the contradiction, stated bluntly.
-- @chartsmeancash: re-run the comparison in R (win/loss as multiples of actual risk per trade). If R matches on both sizes, size was never the problem.
-- @Mama__Wick: personal rule, 1 micro/trade + self-imposed $200 max drawdown (losing >50% of the real drawdown is very hard to recover from).
-- @MosaicFunds: payout math favors 25ks (need ~$3,600 profit for max vs ~$7,100 on a 50k).
-- Jesus has not replied in this thread yet, unusual. Opening to reply directly to "room to be human in."
-
-## Other posts, matured
-- "Trading is hard" (4 sep): 8.8K views, 175 likes, 52 replies. Still 3rd best on the account.
-- "This week in numbers" (6 sep): 1.8K views, 25 likes, 11 replies.
-- "Market's basically closed" (7 sep): 853 views, 6 likes, 4 replies. Still the weakest real post of the week. Its 4 replies were generic trader advice, nothing mineable.
-- "No charts today" (5 sep): 1.5K views, 28 likes, 7 replies.
-- Viral pair (2-3 sep): 23K/19K, fully plateaued (~42K combined).
+## Mined comments (Sep 10 thread)
+- @RealizedTrader (5 likes): "You can say it clean now... most people never get to the sentence. Saying it doesn't survive contact with the funded account though." → cycle #9 draft 1.
+- @vwapx (10 likes): "You are going through desensitization... eventually the funded feels the same as the eval. It's just a psych thing." → cycle #9 draft 2.
+- @_jackzen: "It's ok to treat fundeds like evals... detach from the urge to make it to payout."
+- Jesus's own honest replies in-thread: "I blew them all the same day. So no, I didn't win that part."; "Treat it like an eval and detach from the payout clock. Harder than it sounds when the money is sitting there."; "Time only helps if I stop rushing the funded days."
 
 ## Notes for next cycle
-- Today's post (Sep 10) should build on the still-warm 9 sep thread. The "room to be human in" / "they do not forgive" insight = the bigger account was hiding the discipline problem, not solving it. That is a real realization Jesus can own.
-- Pattern reconfirmed: concrete real specifics + a question > abstract reflection or pure aphorism for reach.
-- Cycle #7 Draft 1 ("the buying is the addiction," 71-like real quote) STILL unposted after 3 days, plus drafts 2 and 3. 
-- `marked-posted.json` still empty after 8 cycles.
+- Bio change is live (dropped "Full-time trader by faith & grind" for "Trading futures and fighting my own worst habits"). More honest positioning, matches the account's winning angle.
+- Jesus has NOT replied to @RealizedTrader or @vwapx on the Sep 10 thread yet. Both gave real content. Reply drafts are in engageList.
+- Pattern still holds after 9 cycles: he writes his own posts; the agent's real value is fast thread-mining + reads + reply drafts, not verbatim drafts. Consider formalizing that in the runbook.
