@@ -896,8 +896,6 @@ body::before{
   </div>
 </div>
 
-<script src="cc_data.js" onerror="window.__noData=1"></script>
-<script src="cc_plan.js" onerror="window.__noPlan=1"></script>
 <script>
 /* ================= IDIOMA · aplica traducciones estaticas + toggle EN/ES ================= */
 (function(){
@@ -2104,7 +2102,12 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if(oe!=null) parts.push('<b class="'+oeCls+'">'+pct(oe)+'</b> '+T('fuera','off-edge'));
     if(!parts.length) return '';
     var d=(r.days!=null?r.days:'');
-    return '<div class="fb-exec"><span class="xk">'+T('Tu ejecución','Your execution')+(d?' '+d+'d':'')+'</span> &nbsp;·&nbsp; '+parts.join(' &nbsp;·&nbsp; ')+'</div>';
+    var stale='', upd=execData&&execData.updatedAt, updT=upd?Date.parse(upd):NaN;
+    if(!isNaN(updT)){
+      var ageD=Math.floor((Date.now()-updT)/86400000);
+      if(ageD>=2) stale=' <span class="'+(ageD>=7?'bad':'warn')+'" title="'+esc(T('journal sin actualizar desde ','journal not updated since ')+upd)+'">('+T('desactualizado','stale')+' '+ageD+'d)</span>';
+    }
+    return '<div class="fb-exec"><span class="xk">'+T('Tu ejecución','Your execution')+(d?' '+d+'d':'')+'</span> &nbsp;·&nbsp; '+parts.join(' &nbsp;·&nbsp; ')+stale+'</div>';
   }
   // #3 · guardarraíl anti contra-sesgo: cuando el sesgo del instrumento en foco es claro y la
   // fuga contra-tendencia esta activa (>30% esta semana), avisa fuerte de que lado NO operar.
