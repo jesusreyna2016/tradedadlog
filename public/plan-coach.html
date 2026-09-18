@@ -268,7 +268,7 @@ function renderPlaybooks(iborStats){
 var FLAGS = [
   {severity:"warn", title:"golden_zone: candidato a pausar", desc:"4.8% de acierto en 21 trades. NO se ha pausado todavía en el indicador, solo anotado.", evidence:"n=21 · 4.8%"},
   {severity:"warn", title:"fade_vah: buen acierto, expectativa negativa", desc:"63.6% de acierto pero corta ganadores muy rápido, expectativa -$297. Falta más muestra antes de cambiar la regla.", evidence:"63.6% · -$297"},
-  {severity:"bad", title:"Cobertura de tags", desc:"Solo 15% de los trades tenían contexto al momento del análisis del 4 sep. Objetivo: taggear el 100% desde entonces.", evidence:"15% cobertura"}
+  {severity:"bad", title:"Cobertura de tags: objetivo parado", desc:"15% de cobertura al 4 sep. Cero capturas nuevas desde el 8 sep (10+ días) - el objetivo de taggear el 100% nunca arrancó de verdad. La cobertura real hoy, contando todo lo operado sin capturar desde entonces, es más baja que ese 15%.", evidence:"15% al 4 sep · 0 desde 8 sep"}
 ];
 function renderFlags(){
   var host = document.getElementById("flags");
