@@ -1,20 +1,30 @@
-# Live X snapshot — captured 2026-09-11 (interactive, LOGGED IN)
+# Live X snapshot — captured 2026-09-18 (interactive, LOGGED IN)
 
 Freshest read of @TradeDadLog performance. CLOUD-mode runs read THIS instead of x.com (which is blocked in the cloud). Refresh every interactive cycle.
 
-Followers: 813 · Posts: 800 · Bio updated to "Dad of 2 | Trading futures and fighting my own worst habits | Sharing the real journey: setbacks, lessons & small wins | God & family keep me going." · captured 2026-09-11 ~afternoon CT
+Followers: 820 · Posts: 802 · captured 2026-09-18 morning CT
 
 ## Two new posts since last snapshot
-1. Sep 11 · status 2098428350230577407 · "Nobody knows what I carry to this chart. You see the payout screenshots. You don't see the nights I already told myself I was done and opened the platform anyway... You don't see me trying to stay standing for two little boys." · 712 views / 17 likes / 11 replies / 1 repost at 4h (young, climbing). Fuses trading struggle + dad identity. Strong direction.
-2. Sep 10 · status 2098110403955843479 · "Every day this week I've passed an eval. Not one has become a payout. Same setups, same hands, two completely different traders... The need makes me worse every time. Reading the market was never the problem." · 1093 views / 22 likes / 12 replies / 1 repost. Richest thread of the week.
+1. Sep 14 · "On the road to Miami. Wife has surgery next week. Two days of driving with stops in New Orleans and St. Augustine so the boys can rest... I'll still trade when I can. Not many accounts left to mess up anyway. Family first. Chart second." · 756 views / 21 likes / 6 replies / 0 reposts. Real personal/travel post, replies pure well-wishes, no mechanism to mine. Lowest reach of the window.
+2. Sep 13 · "Gap down. Feed screaming. Hands itchy. That itch has blown more of my accounts than any bad chart ever did. My edge tonight isn't a level. It's the 4 lines I wrote before I opened the app: Wait for the open. One entry. Hard stop. Size like the account matters, because it does. The gap will still be there after I breathe. Will yours?" · 866 views / 16 likes / 4 replies / 0 reposts. Modest reach, richest comment thread of the window.
+3. Sep 11 post matured final: 1,098 views / 25 likes / 15 replies / 1 repost. Missed cycle #9's 1.5K prediction.
 
-## Mined comments (Sep 10 thread)
-- @RealizedTrader (5 likes): "You can say it clean now... most people never get to the sentence. Saying it doesn't survive contact with the funded account though." → cycle #9 draft 1.
-- @vwapx (10 likes): "You are going through desensitization... eventually the funded feels the same as the eval. It's just a psych thing." → cycle #9 draft 2.
-- @_jackzen: "It's ok to treat fundeds like evals... detach from the urge to make it to payout."
-- Jesus's own honest replies in-thread: "I blew them all the same day. So no, I didn't win that part."; "Treat it like an eval and detach from the payout clock. Harder than it sounds when the money is sitting there."; "Time only helps if I stop rushing the funded days."
+## Mined comments (Sep 13 thread)
+- @Bodhi_Karma_ (156 likes, richest comment of the window): "Set a daily loss limit to auto liquidate and lock you. You'll stop blowing accounts. Trading is a game of lasting." → cycle #10 draft 1.
+- @Adarsh_Onchain (32 likes): "The market will always give you another opportunity, but your capital won't always give you another chance. Survive first, trade second." → cycle #10 draft 3.
+- @Mama__Wick (33 likes): "equal highs here we come" — market commentary, not mechanism.
+- @Btrader00 (20 likes): "Did you enter?" — engagement question, not mechanism.
+
+## Mined comments (Sep 11 thread, matured, re-checked)
+- Jesus's own real reply (27 likes): "Amen. Still here is enough for today." — added to backlog, not yet drafted.
+- @traderjamesfx (15 likes): "People only see the screenshots. They rarely see everything that happened before them."
+- @RealizedTrader (47 likes): "God does. And He is the only one that has to. 'Still here' counts brother."
+
+## Niche scan (@RealizedTrader, logged in)
+- "Willpower is usually the sign, not the fix. If you're having to use it, the demand was already too high. Lower the demand first, then run the reps." (271 likes)
+- Fresh post (2h old at capture, 155 likes): the gap between explaining a setup calmly and executing it once real money is live — adjacent to ground TradeDadLog has already covered heavily (eval-vs-funded). Added to backlog, needs a genuinely different angle before drafting.
 
 ## Notes for next cycle
-- Bio change is live (dropped "Full-time trader by faith & grind" for "Trading futures and fighting my own worst habits"). More honest positioning, matches the account's winning angle.
-- Jesus has NOT replied to @RealizedTrader or @vwapx on the Sep 10 thread yet. Both gave real content. Reply drafts are in engageList.
-- Pattern still holds after 9 cycles: he writes his own posts; the agent's real value is fast thread-mining + reads + reply drafts, not verbatim drafts. Consider formalizing that in the runbook.
+- Pattern holds after 10 cycles: Jesus writes his own posts; the agent's real value is fast thread-mining + reads + reply drafts, not verbatim drafts.
+- The account's richest untouched backlog item (need-vs-want, 444 combined likes) sat unused for two full weeks before this cycle finally used it. Next cycle: scan backlog for oldest/highest-like open items first, not just the newest finds.
+- marked-posted.json still empty after 10 cycles.
