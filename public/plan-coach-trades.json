@@ -1,0 +1,523 @@
+[
+ {
+  "date": "2026-09-04",
+  "source": "backtest_replay",
+  "taken_live": false,
+  "symbol": "NQ",
+  "chart_tf": "1",
+  "setup": "fvg_ifvg_poi",
+  "poi": "iFVG 15m",
+  "confirmation": "FVG alcista en 1m + varias velas alcistas sin mecha inferior (zona de relleno esperada) dentro de la zona del iFVG 15m",
+  "direction": "long",
+  "entry": 30196,
+  "stop": 30171,
+  "target": 30221,
+  "stop_ticks": 100,
+  "target_ticks": 100,
+  "rr_planned": 1,
+  "rr_rule": "minimo 1:1 respecto al SL de la estructura, siempre, sin importar cuantos ticks de por si; el 100/100 de este ejemplo fue coincidencia con el SL de esta entrada, no un numero fijo",
+  "result": "tp_hit",
+  "followed_plan": null,
+  "notes": "Trade que el usuario hubiera querido tomar (no fue en vivo). Precio fue a rellenar las velas sin mecha antes de continuar al TP. Confirma que sc_min_rr=1.0 (default del indicador) ya coincide con la regla real del usuario."
+ },
+ {
+  "date": "2026-09-04",
+  "source": "backtest_replay",
+  "taken_live": false,
+  "symbol": "NQ",
+  "chart_tf": "1",
+  "setup": "initial_balance",
+  "poi": "IB 50% (retroceso tras la apertura de Asia real, ~2h post-Globex)",
+  "confirmation": "Precio retrocedio al 50% del IB despues de que abrio la sesion real de Asia. El usuario confirmo que este nivel tambien coincidia con el iFVG de 15m del trade 1 (mismo dia).",
+  "direction": "long",
+  "entry": 30187.75,
+  "stop": 30175.75,
+  "target": 30215.25,
+  "stop_ticks": 48,
+  "target_ticks": 110,
+  "rr_planned": 2.29,
+  "rr_rule": "SL en IB 25%, TP en IB High, desde entrada en IB 50%",
+  "result": null,
+  "followed_plan": null,
+  "notes": "Mismo dia que el trade 1, mas tarde en la sesion de Asia, y en la MISMA zona de precio que el iFVG de 15m del trade 1 (confluencia IB50% + iFVG HTF, un solo caso, no es edge todavia). El motor de OR del indicador tambien marco 'OR A+ LONG (fade)' ahi por su cuenta, sin que el usuario lo mencionara como parte de su razonamiento. Tamano sugerido por el indicador en el dashboard: 7 MNQ ($234 riesgo) con Scalp SL de 67t, no coincide exactamente con el SL de 48t que el usuario armo a mano en la herramienta de TradingView para este trade especifico -- son dos calculos distintos (el del indicador es sobre su propia señal de scalp en ese momento, no sobre el trade de IB dibujado a mano), no es un bug, pero hay que tenerlo claro al leer el journal despues."
+ },
+ {
+  "date": "2026-09-06",
+  "source": "live",
+  "taken_live": true,
+  "symbol": "NQ",
+  "chart_tf": "2",
+  "session": "asia_open",
+  "setup": "fvg_ifvg_poi",
+  "poi": "apertura fuerte al alza que invirtio varios FVG (no un POI planeado)",
+  "confirmation": "entrada sin esperar cierre de 5m; persecucion del breakout",
+  "direction": "long",
+  "entry": 29578.5,
+  "stop": 29553.5,
+  "target": 29629.75,
+  "stop_ticks": 100,
+  "target_ticks": 205,
+  "rr_planned": 2.05,
+  "size_used": "6 MNQ (micros)",
+  "averaged_up": true,
+  "sizing_note": "entro con 3 micros mas abajo y sumo 3 mas despues, promediando MAS ARRIBA en un movimiento ya extendido",
+  "mfe": null,
+  "mae": null,
+  "indicator_signal_at_entry": "mixto/contra: motor principal 'SELL RETEST (2v)' como ultima senal + 'MUY ESTIRADO (3.3A)' con bloqueo por estiramiento; scalp 'B LONG (2v)', IB NY A+ LONG y OR A+ LONG a favor. Sesgo LONG +9. Entro LONG.",
+  "emotional_state_before": "fomo / persiguiendo el precio",
+  "followed_plan": "no",
+  "followed_plan_why": "reconoce FOMO; el plan pedia esperar cierre de 5m para confirmacion y entrada planificada",
+  "moved_stop": "si: de 100t a 50t, para reducir riesgo tras ver un FVG de 1min invertido (lectura reactiva de que podia retroceder). Resultado: el stop de 50t quedo DENTRO del ruido en un regimen CHOP/RANGO y lo barrio.",
+  "impulse_to_break_plan": "el impulso fue la propia entrada y sobre todo AGREGAR 3 micros mas arriba con el precio ya estirado; actuo desde el impulso",
+  "result": "sl_hit",
+  "notes": "Primer trade en vivo Asia 6 sep (noche intento pase MFF). Auto-diagnostico: FOMO. Coincide con patron persecucion/churn+revenge-sizing: entrar en extension + promediar hacia arriba subiendo tamano en un chase. Ultima senal del motor era SELL RETEST => entro LONG contra la senal mas reciente en 'MUY ESTIRADO 3.3A'. Pendiente MFE/MAE y resultado.",
+  "impulse_trigger_named": "'se me escapa' (miedo a perderse el movimiento / escasez). El usuario identifico que ese fue el sentimiento exacto al sumar los 3 micros de mas.",
+  "coach_reframe": "una entrada con edge se siente como que el precio VIENE a ti (retest), no como que se escapa. 'Se me escapa' = senal de STOP, no de add. Regla acordada: al sentir 'se me escapa', manos fuera, dejarlo ir.",
+  "pnl_usd": -159,
+  "final_size": "6 MNQ (no lleno la orden de sumar 3 mas -> 9)",
+  "pending_add_note": "tenia orden pendiente para sumar 3 MNQ (llevar a 9) si el precio reclamaba por encima de los iFVG; es el mismo patron de 'se me escapa'/presionar en otra forma. No lleno porque salto el SL antes.",
+  "mfe_approx_ticks": "~40-46t a favor como maximo (alcanzo ~29590 tras entrada 29578.50), nunca cerca del TP 29629.75; luego revirtio al SL",
+  "outcome_read": "Perdida CONTENIDA (~$159, 6 micros). Proceso de entrada malo (FOMO/chase), pero gestion de riesgo limito el dano y NO escalo a 9 ni a revancha. El stop hizo su trabajo. La fuga de proceso fue: entrar por FOMO, y tightening reactivo del stop hacia el ruido en chop.",
+  "session_full_pnl_usd": -865,
+  "session_note_correction": "El -159 registrado era SOLO el primer stop (18:12). El CSV de Tradovate (Performance (3).csv) muestra que la sesion Asia 6 sep cerro en -$865 con 14 fills, TODOS largos en tape chop/bajista. Escalada de tamano de 6 a 12 micros. Ultimo trade 20:24: 12 MNQ, -$300 en 4.5min, DESPUES de que el coach pregunto si cerraba la sesion. Patron de revenge/no-stop confirmado, no hipotesis.",
+  "max_size_session": "12 MNQ (doble del tamano inicial)",
+  "pattern": "fomo_chase_sizing"
+ },
+ {
+  "date": "2026-09-06",
+  "type": "session_summary",
+  "source": "tradovate_csv",
+  "file": "Performance (3).csv",
+  "symbol": "MNQU6",
+  "session": "asia",
+  "session_pnl_usd": -865,
+  "n_fills": 14,
+  "all_longs": true,
+  "market_regime": "chop/bajista",
+  "size_escalation": "de 6 a 12 micros",
+  "worst_trade": "20:24 12 MNQ -$300 en 4min27s (revenge, tras hablar de cerrar)",
+  "sequence": "18:12 stop -148; 18:19-23 largo -205; 18:25-19:00 largos ~BE; 19:00-20:20 12MNQ -210; 20:24 12MNQ -300",
+  "key_finding": "No paro despues del primer stop pese al plan y al gatillo ya nombrado. El conocimiento estaba, el freno no. Confirma [[patron-persecucion-perdidas-sep2026]]: compulsion > sistema.",
+  "sep4_context": "El mismo CSV: 4 sep cerro +$1160 pero con trades de 20-30 micros (ej +$830 una vela y -$315 en 24s). El P&L lo mueve el TAMANO y la suerte, no el plan. Verde y rojo vienen del mismo problema: size sin freno.",
+  "coach_actions_pending": "Confirmar si la cuenta (MFF 25k trailing 1000?) sigue viva tras -865; confirmar si paro esta noche; confirmar conversacion con esposa. Reforzar gate de tamano fijo y hard-stop de sesion, no solo reglas por-trade."
+ },
+ {
+  "date": "2026-09-07",
+  "type": "session_reflection",
+  "source": "screenshots_tradingview",
+  "symbol": "NQ/MNQ",
+  "chart_tf": "1/2/5",
+  "session": "asia_open",
+  "session_date_uncertain": true,
+  "session_date_note": "usuario no recuerda la hora exacta; cree que fue tras la apertura de Asia, entre la noche del 6 sep y la manana del 7 sep (dia feriado en EEUU). Confirmado por el propio dashboard en las capturas: 'Kill Zone: Asia Session'.",
+  "pattern": "no_toma_ganancia_disponible",
+  "pattern_desc": "a diferencia del patron de FOMO/revenge-sizing del 6 sep (agregar tamano por miedo a perderse el movimiento), aqui el problema fue el opuesto: hubo ganancia flotante varias veces y no se tomo, esperando una ruptura y continuacion que nunca llego.",
+  "floating_pnl_sequence_observed": "de perdida flotante a +85.50 a +387.00 a -179.50 (tamano ya en 12 contratos) a +504.50, sin tomar nada en el camino",
+  "size_progression_observed": "3 -> 9 -> 12 contratos (leido de las capturas, aproximado)",
+  "market_context": "Confluencia Bias oscilando entre -2, 0 (debil) y +2 en minutos; Tendencia LTF cambiando de bajista a alcista y de vuelta a bajista en el mismo tramo; ATR14 en compresion en varios momentos. Lectura: regimen sin direccion clara (chop), condicion pobre para esperar ruptura+continuacion.",
+  "self_report": "tengo que reconocer que en varias ocasiones pude haber recuperado el pnl negativo que tenia en ese momento y llevar la cuenta a BE en el dia pero no tome ganancias, estuve esperando una ruptura y continuacion que no llego (durante asia + dia feriado)",
+  "final_result": null,
+  "result_uncertain": true,
+  "notes": "Usuario no recuerda el cierre final de esta secuencia. Registrado por el valor del patron identificado (no tomar BE/ganancia disponible en regimen de baja calidad), no por precision de cifras. Propuesta pendiente de discutir, no aplicada: tomar parcial/BE cuando este disponible en sesion Asia + dia feriado o con Confluencia Bias debil/oscilante, en vez de esperar ruptura que el regimen no sostiene."
+ },
+ {
+  "date": "2026-09-06",
+  "type": "session_summary",
+  "source": "tradovate_csv",
+  "file": "Performance (4).csv",
+  "symbol": "MNQU6/MGCZ6",
+  "session": "post_blowup_same_night",
+  "account_note": "usuario dice que son 'las primeras 3 cuentas' compradas tras perder la anterior, copiadas entre si; no confirmado si este CSV es de 1 sola cuenta (y las otras 2 replican igual via copiador) o ya viene agregado.",
+  "window": "21:13:43 - 22:18:58 (mismo 6 sep, ~45min despues del ultimo trade de la sesion que cerro en -$865)",
+  "session_pnl_usd_this_csv": 779,
+  "n_fills": 5,
+  "size_used": "1, 5, 5, 1, 1 (mucho mas modesto que la escalada a 12 micros de la sesion anterior esa misma noche)",
+  "result_breakdown": "4 de 5 winners (+58, +295, +420, +9), 1 loser chico (-3)",
+  "notes": "Sesion posterior, MISMA noche, en las cuentas nuevas compradas tras el blowup. A diferencia de la sesion anterior (-865, tamano 6->12, todo largo en chop), esta fue mas corta, tamano estable y controlado, resultado neto positivo. Pendiente confirmar con el usuario si el PnL real fue 3x esto (si las 3 cuentas replicaron el mismo trade) o si es solo 1 cuenta representativa."
+ },
+ {
+  "date": "2026-09-07",
+  "type": "session_summary",
+  "source": "tradovate_csv",
+  "file": "Performance (5).csv",
+  "symbol": "NQU6/MGCZ6",
+  "account_note": "4ta cuenta comprada, unas horas despues de las primeras 3 (confirmado por el usuario).",
+  "window": "02:20:02 - 02:57:15 (~37min), horas despues de la sesion de las 3 cuentas (21:13-22:18 del 6 sep)",
+  "session_pnl_usd": 814,
+  "n_fills": 8,
+  "size_note": "aqui NQ completo (no micro), 1 contrato por trade en NQ; gold en 2-3 contratos",
+  "result_breakdown": "2 trades NQ solidos (+290 short cubierto, +385 long) + 2 gold ganadores (+105, +70) = +850, seguido de un cluster de 4 trades de gold en apenas 7 segundos (02:57:08 a 02:57:15), TODOS perdedores (-9,-6,-3,-18 = -36 total)",
+  "flag": "consistency_rule_management",
+  "flag_desc": "CORREGIDO: no fue tilt/clicks reactivos. El usuario explico que se paso de la regla del 50%% de consistencia (regla de prop firm: ningun dia puede ser mas del 50%% de la ganancia total), asi que abrio y cerro operaciones de oro rapido a proposito, dejando que las comisiones/spread generaran perdida controlada para bajar ese porcentaje. Fue una accion deliberada de gestion de regla, no una perdida de control.",
+  "notes": "Sesion neta positiva (+814). El cluster de 4 trades de oro en 7s fue gestion deliberada de la regla de consistencia (50%%), no impulsividad. Diagnostico inicial del coach fue incorrecto y quedo corregido en este mismo registro.",
+  "self_report_correction": "esos trades negativos en el oro fueron pq me pase de la regla del 50%% y tuve que perder dinero obligado para bajar esa consistencia entonces abri y cerre operaciones rapido para con las comisiones ir perdiendo dinero"
+ },
+ {
+  "date": "2026-09-07",
+  "type": "session_summary",
+  "source": "tradovate_csv+self_report",
+  "file": [
+   "Performance (7).csv",
+   "Performance (8).csv"
+  ],
+  "symbol": "MNQU6",
+  "session": "asia_open",
+  "window": "17:01:11 - 17:05:26 CT",
+  "trades": [
+   {
+    "seq": 1,
+    "direction": "short",
+    "entry_avg_note": "empezo con 3 micros, promedio en contra de 3 en 3 hasta 9 total, SL de 50 ticks sobre la posicion ya agrandada",
+    "result": "sl_hit",
+    "pnl_usd": -226,
+    "self_report": "el precio con una mecha toco mi sl y despues se regreso"
+   },
+   {
+    "seq": 2,
+    "direction": "long",
+    "entry_note": "9 contratos, entrada inmediata tras el SL del trade 1, antes de que el precio se devolviera",
+    "result": "sl_hit",
+    "pnl_usd": -351,
+    "self_report": "mi segundo trade... fue en long mas bien por venganza persiguiendo y me saco en sl"
+   },
+   {
+    "seq": 3,
+    "direction": "short",
+    "entry_note": "entrada 29583.25, 48s despues del SL del trade 2 (venganza)",
+    "exit_note": "cerrado en 29524.25, casi exacto al hueco 29523 del plan de pre-Asia",
+    "result": "closed_manual_win",
+    "pnl_usd": 354,
+    "self_report": "fue un trade mio no por senal"
+   },
+   {
+    "seq": 4,
+    "direction": "short",
+    "entry_note": "29534.50, 18:19",
+    "result": "sl_hit",
+    "pnl_usd": -64.5
+   }
+  ],
+  "session_pnl_usd_these_2_trades": -577,
+  "pattern": [
+   "averaging_down_losing_position",
+   "revenge_chase_reversal",
+   "ganancia_discrecional_sin_senal"
+  ],
+  "flag_desc": "Patron 1: promediar una posicion perdedora (3->9 micros) en vez de mantener tamano fijo, lo que agranda el riesgo justo cuando el precio ya iba en contra. Patron 2: revenge trade INMEDIATO en direccion CONTRARIA tras el stop del trade 1 (distinto de fomo_chase_sizing del 6 sep, que fue agregar tamano EN LA MISMA direccion de una extension). Autoetiquetado por el usuario mismo como venganza. Patron 3 (trade 3, GANANCIA no perdida): entrada corta SIN señal ni confirmacion, discrecional, que salio muy bien (+354, casi exacto al nivel del plan). El usuario confirmo el mismo que no fue por señal. Se registra como patron aunque el resultado en $ fue positivo: una ganancia sin proceso repetible no es evidencia de que el metodo funciona, es el mismo riesgo que una perdida sin proceso, solo que pago esta vez.",
+  "notes": "No se recibio el pre-commitment de tamano/stop de sesion acordado antes de esta sesion. El plan de pre-Asia del Session Analyst tenia sesgo LONG (golden zone 29552-29577); el usuario opero CORTO primero, contra ese sesgo.",
+  "paired_account_confirmed": true,
+  "pair_note": "Confirmado por el usuario: cuenta gemela (Performance (8).csv), copio TODO el trade 1 y 2 (numeros casi identicos por diferencia de fill entre cuentas), mas 2 operaciones nuevas.",
+  "session_pnl_usd_this_account_full": -289,
+  "session_pnl_usd_pair_approx": -578
+ },
+ {
+  "type": "session_summary",
+  "date": "2026-09-07",
+  "account": "MFFUSFRPD04505680",
+  "symbol_mix": [
+   "NQ",
+   "MNQ",
+   "MGC"
+  ],
+  "trades": [
+   {
+    "symbol": "NQ",
+    "side": "short",
+    "entry": 29649.75,
+    "exit": 29675,
+    "pnl": -505,
+    "note": "primer lote del corto promediado"
+   },
+   {
+    "symbol": "NQ",
+    "side": "short",
+    "entry": 29658.5,
+    "exit": 29675,
+    "pnl": -330,
+    "note": "segundo lote, promedio el corto perdedor"
+   },
+   {
+    "symbol": "MGC",
+    "side": "short",
+    "entry": 4480.6,
+    "exit": 4470,
+    "pnl": 106
+   },
+   {
+    "symbol": "MGC",
+    "side": "long",
+    "entry": 4468.9,
+    "exit": 4475.5,
+    "pnl": 66
+   },
+   {
+    "symbol": "MGC",
+    "side": "long",
+    "entry": 4469.8,
+    "exit": 4475.5,
+    "pnl": 57
+   },
+   {
+    "symbol": "MNQ",
+    "side": "short",
+    "entry": 29706.25,
+    "exit": 29684.75,
+    "pnl": 43
+   },
+   {
+    "symbol": "MNQ",
+    "side": "short",
+    "entry": 29692.5,
+    "exit": 29684.75,
+    "pnl": 15.5
+   },
+   {
+    "symbol": "NQ",
+    "side": "short",
+    "entry": 29699.75,
+    "exit": 29704.75,
+    "pnl": -100
+   },
+   {
+    "symbol": "NQ",
+    "side": "short",
+    "entry": 29701,
+    "exit": 29717.25,
+    "pnl": -325
+   }
+  ],
+  "total_pnl_csv": -972.5,
+  "total_pnl_dashboard": -1006.54,
+  "diff_note": "diferencia ~34 dolares, probablemente comisiones no incluidas en el CSV crudo",
+  "pattern": [
+   "averaging_down_losing_position",
+   "contra_sesgo_fuerte_confirmado"
+  ],
+  "notes": "Cuenta 680, la 3ra de 4 en morir esta noche (7 sep). El golpe fatal fue el primer trade: corto NQ 2 lotes promediado (29649.75 y 29658.50) justo al inicio del rally fuerte de la sesion (sesgo dashboard ya marcaba LONG +7 FUERTE, regimen TENDENCIA), cubierto 21min despues en -835 total. Hubo trades correctos en medio (MGC longs +229, MNQ corto en pullback +58.50) que muestran que no todo fue mala ejecucion, pero cerca del techo del rally (22:19-22:28) volvio a cortar contra la misma tendencia fuerte dos veces mas (-100, -325). Mismo patron que hundio 680, 681 y 682 la misma noche: corto contra sesgo LONG fuerte confirmado por el propio dashboard.",
+  "source": "Performance (2).csv"
+ },
+ {
+  "type": "session_summary",
+  "date": "2026-09-07",
+  "account": "MFFUSFRPD04505683",
+  "symbol_mix": [
+   "NQ"
+  ],
+  "trades": [
+   {
+    "symbol": "NQ",
+    "side": "short",
+    "entry": 29707.75,
+    "exit": 29701.5,
+    "pnl": 125
+   },
+   {
+    "symbol": "NQ",
+    "side": "short",
+    "entry": 29714.5,
+    "exit": 29708.25,
+    "pnl": 125
+   },
+   {
+    "symbol": "NQ",
+    "side": "short",
+    "entry": 29668.25,
+    "exit": 29662,
+    "pnl": 125
+   },
+   {
+    "symbol": "NQ",
+    "side": "short",
+    "entry": 29667,
+    "exit": 29673,
+    "pnl": -120
+   },
+   {
+    "symbol": "NQ",
+    "side": "short",
+    "entry": 29680.75,
+    "exit": 29695,
+    "pnl": -285
+   },
+   {
+    "symbol": "NQ",
+    "side": "short",
+    "entry": 29701,
+    "exit": 29718.75,
+    "pnl": -355
+   }
+  ],
+  "total_pnl_csv": -385,
+  "total_pnl_dashboard": -419.56,
+  "diff_note": "diferencia ~34 dolares, comisiones no incluidas en el CSV crudo, consistente con las otras cuentas",
+  "pattern": [
+   "contra_sesgo_fuerte_confirmado"
+  ],
+  "notes": "Cuenta 683 (la unica de las 4 aun con acceso al momento del CSV, trade de oro con 3 micros seguia abierto sin stop, no incluido aqui). Los 6 trades cerrados fueron todos cortos en NQ full-size: los primeros 3 ganaron (+375, en pullbacks 29707-29662 antes del tramo final del rally), los ultimos 3 perdieron (-760, entre 22:09 y 22:28) cortando la misma extension final del rally que tambien mato los cortos de la cuenta 680 en la misma ventana horaria. Cuarta cuenta la misma noche con el mismo patron de fondo.",
+  "source": "Performance (3).csv"
+ },
+ {
+  "type": "session_summary",
+  "date": "2026-09-08",
+  "account": "cuenta nueva (Eco2, copiada), necesitaba 750 en el dia",
+  "symbol_mix": [
+   "NQ",
+   "MGC"
+  ],
+  "trades": [
+   {
+    "symbol": "NQ",
+    "side": "short",
+    "entry": 29609.5,
+    "exit": 29596.5,
+    "pnl": 260,
+    "note": "salio antes de objetivo real por miedo en un retroceso, dice que respetando el plan original hubiera hecho los 750 del dia"
+   },
+   {
+    "symbol": "NQ",
+    "side": "long",
+    "entry": 29600.25,
+    "exit": 29569,
+    "pnl": -625,
+    "note": "giro a largo 6seg despues de cerrar el corto ganador; el mercado se desplomo por noticia de Iran"
+   },
+   {
+    "symbol": "MGC",
+    "side": "long",
+    "entry": 4430,
+    "exit": 4424.3,
+    "pnl": -114,
+    "qty": 2,
+    "note": "retroceso alcista visto en oro, mismo evento de noticia"
+   },
+   {
+    "symbol": "MGC",
+    "side": "long",
+    "entry": 4428.7,
+    "exit": 4424.3,
+    "pnl": -88,
+    "qty": 2,
+    "note": "promedio el largo de oro a peor precio mientras caia"
+   }
+  ],
+  "total_pnl_csv": -567,
+  "pattern": [
+   "salida_prematura_miedo_retroceso",
+   "averaging_down_losing_position"
+  ],
+  "notes": "Dia siguiente (8 sep) a perder las 4 cuentas MFF, ya en una cuenta nueva de otra firma (Eco2). El corto inicial iba bien encaminado hacia el objetivo del dia (750) pero salio antes por miedo en un retroceso normal, asegurando solo 260. El giro a largo y la entrada en oro fueron golpeados por una noticia real de Iran (riesgo de mercado, no necesariamente mal criterio de entrada), pero el oro ademas repite el patron de promediar una posicion perdedora (2 lotes, luego 2 mas a peor precio) que ya costo 3 cuentas la noche anterior.",
+  "source": "Performance (4).csv"
+ },
+ {
+  "type": "session_summary",
+  "date": "2026-09-08",
+  "account": "cuenta que si cerro los 750 del dia",
+  "symbol_mix": [
+   "NQ",
+   "MGC"
+  ],
+  "trades": [
+   {
+    "symbol": "NQ",
+    "side": "short",
+    "entry": 29741.5,
+    "exit": 29753.25,
+    "pnl": -235,
+    "note": "perdida cortada limpia, sin promediar"
+   },
+   {
+    "symbol": "NQ",
+    "side": "short",
+    "entry": 29755.75,
+    "exit": 29703.75,
+    "pnl": 1040,
+    "note": "reentrada corta minutos despues de cortar la perdida, gano grande"
+   },
+   {
+    "symbol": "MGC",
+    "side": "short",
+    "qty": 3,
+    "entry": 4431.3,
+    "exit": 4431.1,
+    "pnl": -6,
+    "note": "perdida intencional, regla de consistencia"
+   },
+   {
+    "symbol": "MGC",
+    "side": "short",
+    "qty": 3,
+    "entry": 4430.3,
+    "exit": 4430.2,
+    "pnl": -3,
+    "note": "perdida intencional, regla de consistencia"
+   },
+   {
+    "symbol": "MGC",
+    "side": "short",
+    "qty": 3,
+    "entry": 4430.3,
+    "exit": 4430.2,
+    "pnl": -3,
+    "note": "perdida intencional, regla de consistencia"
+   }
+  ],
+  "total_pnl_csv": 793,
+  "pattern": [
+   "consistency_rule_management"
+  ],
+  "notes": "Contraste positivo dentro de la misma racha de cuentas: perdida inicial cortada sin promediar, reentrada limpia que gano +1040, y las 3 perdidas de oro fueron gestion deliberada de la regla de consistencia (mismo patron ya confirmado antes esta semana), no fallo de disciplina. Cerro en +793, cumpliendo el objetivo de 750 del dia.",
+  "source": "Performance (5).csv"
+ },
+ {
+  "type": "session_summary",
+  "date": "2026-09-08",
+  "account": "la cuenta que habia hecho los 750 el 7-8 sep (Performance (6).csv, mismo origen que Performance (5).csv)",
+  "symbol_mix": [
+   "NQ"
+  ],
+  "trades": [
+   {
+    "symbol": "NQ",
+    "side": "short",
+    "entry": 29522.25,
+    "exit": 29534.25,
+    "pnl": -240,
+    "time": "17:00-17:03 CT"
+   },
+   {
+    "symbol": "NQ",
+    "side": "long",
+    "entry": 29538,
+    "exit": 29520.5,
+    "pnl": -350,
+    "time": "17:03-17:15 CT",
+    "note": "entro 8 segundos despues de cerrar el corto anterior"
+   },
+   {
+    "symbol": "NQ",
+    "side": "long",
+    "entry": 29522.75,
+    "exit": 29517,
+    "pnl": -115,
+    "time": "17:15-17:22 CT",
+    "note": "entro 25 segundos despues del cierre anterior"
+   },
+   {
+    "symbol": "NQ",
+    "side": "short",
+    "entry": 29517,
+    "exit": 29526.5,
+    "pnl": -190,
+    "time": "17:23-17:26 CT",
+    "note": "entro 35 segundos despues del cierre anterior"
+   }
+  ],
+  "total_pnl_csv": -895,
+  "pattern": [
+   "revenge_chase_reversal"
+  ],
+  "rule_violated": "R1 (pausa obligatoria post-SL/post-salida, rules.md)",
+  "notes": "Cuenta perdida el 8 sep. 4 trades consecutivos en 23 minutos (17:00-17:26 CT), cada uno abierto entre 8 y 35 segundos despues de cerrar el anterior, sin pausa ni tarjeta de 4 lineas, alternando direccion (corto-largo-largo-corto). Violacion directa y clara de R1. Esta era la misma cuenta que habia cerrado +793 el dia anterior; hoy devolvio eso y rompio el trailing drawdown.",
+  "source": "Performance (6).csv"
+ }
+]
