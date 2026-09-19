@@ -2243,13 +2243,18 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var fresh=window.__feedFreshTs||0;
     if(fresh && (Date.now()-fresh) < 20*60000){ el.style.display='none'; el.textContent=''; return; }
     // Mercado cerrado (finde / paron nocturno / feriado): que el ind-ingest lleve horas
-    // quieto es lo esperado. Solo dejamos pasar el banner si lo caido es infra server-side
-    // (snapshot o news), que no depende de que el mercado opere.
+    // quieto es lo esperado, y snapshot/news se construyen del mismo feed de webhooks asi
+    // que tambien envejecen por la misma razon (no es infra rota). Unica senal de infra
+    // real e independiente del mercado: el watchdog mismo dejo de correr (checkedAt viejo,
+    // deberia refrescar cada 6h pase lo que pase).
     if(ccMarketClosedNow()){
-      var okRx=/^ok$/i;
-      var infraDown=(hh.snapshot && !okRx.test(String(hh.snapshot.state||'ok'))) ||
-                    (hh.news && !okRx.test(String(hh.news.state||'ok')));
-      if(!infraDown){ el.style.display='none'; el.textContent=''; return; }
+      var checkedAgeMin=hh.checkedAt?(Date.now()-Date.parse(hh.checkedAt))/60000:0;
+      var watchdogStuck=checkedAgeMin>7*60;
+      if(!watchdogStuck){ el.style.display='none'; el.textContent=''; return; }
+      el.className='sahealth warn';
+      el.textContent=T('Watchdog sin correr hace '+Math.round(checkedAgeMin/60)+'h (mercado cerrado, no deberia detenerse)','Watchdog hasn\'t run in '+Math.round(checkedAgeMin/60)+'h (market closed, shouldn\'t stop)');
+      el.style.display='';
+      return;
     }
     var iss=(Array.isArray(hh.issues)&&hh.issues.length)?hh.issues.slice(0,4).join(' · '):L(hh.note);
     el.className='sahealth '+(st==='down'?'down':'warn');
