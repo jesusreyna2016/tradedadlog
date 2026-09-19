@@ -16,29 +16,32 @@ window.__i18nRefresh = [];
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+/* Retinted to the shared TradeDadLog dark-gold identity (design-system/tradedadlog/MASTER.md).
+   Names kept as-is (--cyan etc.) so every var() usage below cascades without touching each site;
+   only the values moved from the old cool cyan/blue HUD palette to the warm gold terminal one. */
 :root{
-  --bg:#04060c;
-  --panel:#0b0f1a;
-  --panel-2:#0e131f;
-  --panel-solid:#0b1120;
-  --border:rgba(126,160,224,0.12);
-  --border-hot:rgba(120,200,255,0.30);
-  --txt:#e7ecf7;
-  --txt-dim:#8a95b0;
-  --txt-faint:#525d78;
-  --cyan:#3fd8e6;
-  --cyan-dim:rgba(63,216,230,0.12);
-  --lime:#5fe08a;
-  --amber:#f5b944;
-  --red:#ff5f74;
+  --bg:#0a0d11;
+  --panel:#11161c;
+  --panel-2:#161e26;
+  --panel-solid:#161e26;
+  --border:rgba(233,238,243,0.12);
+  --border-hot:rgba(199,146,53,0.35);
+  --txt:#e9eef3;
+  --txt-dim:#93a1b3;
+  --txt-faint:#5b6675;
+  --cyan:#c79235;
+  --cyan-dim:rgba(199,146,53,0.12);
+  --lime:#34c98a;
+  --amber:#e8933a;
+  --red:#ef5f6b;
   --violet:#9d8cff;
-  --grid:rgba(120,160,255,0.045);
+  --grid:rgba(233,238,243,0.045);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
 body{
   background:
-    radial-gradient(1100px 520px at 82% -12%, rgba(63,216,230,0.06), transparent 60%),
+    radial-gradient(1100px 520px at 82% -12%, rgba(199,146,53,0.06), transparent 60%),
     radial-gradient(900px 480px at 8% 112%, rgba(157,140,255,0.05), transparent 58%),
     var(--bg);
   color:var(--txt);
@@ -56,7 +59,7 @@ body::before{
 /* ---------- TOP BAR ---------- */
 .topbar{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:10px 18px;border:1px solid var(--border);border-radius:14px;background:var(--panel)}
 .brand{display:flex;align-items:center;gap:12px}
-.logo{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--cyan),var(--violet));color:#04121a;font-weight:800;font-size:14px;letter-spacing:-1px;box-shadow:0 0 18px rgba(63,216,230,0.28);overflow:hidden;flex-shrink:0}
+.logo{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--cyan),var(--violet));color:#04121a;font-weight:800;font-size:14px;letter-spacing:-1px;box-shadow:0 0 18px rgba(199,146,53,0.28);overflow:hidden;flex-shrink:0}
 .logo img{width:100%;height:100%;object-fit:cover;display:block}
 .brand h1{font-family:"Orbitron","JetBrains Mono",monospace;font-size:13px;letter-spacing:3px;font-weight:900}
 .brand span{display:block;font-size:8.5px;letter-spacing:3px;color:var(--txt-faint);margin-top:3px}
@@ -125,8 +128,8 @@ body::before{
 /* ---------- HERO · PUESTO DE MANDO ---------- */
 .hero{display:grid;grid-template-columns:1.25fr 1fr .85fr;gap:12px;
   border:1px solid var(--border-hot);border-radius:16px;padding:14px 16px;
-  background:linear-gradient(120deg,rgba(63,216,230,0.05),rgba(157,140,255,0.04) 60%,transparent);
-  box-shadow:0 0 0 1px rgba(63,216,230,0.05),0 18px 60px -40px rgba(63,216,230,0.5)}
+  background:linear-gradient(120deg,rgba(199,146,53,0.05),rgba(157,140,255,0.04) 60%,transparent);
+  box-shadow:0 0 0 1px rgba(199,146,53,0.05),0 18px 60px -40px rgba(199,146,53,0.5)}
 @media(max-width:960px){.hero{grid-template-columns:1fr}}
 .hcol{display:flex;flex-direction:column;gap:9px;min-width:0}
 .hcol+.hcol{border-left:1px solid var(--border);padding-left:14px}
@@ -182,7 +185,7 @@ body::before{
 @media(max-width:1150px){.dash{grid-template-columns:repeat(2,1fr)}.dash .span2{grid-column:span 2}}
 @media(max-width:760px){.dash{grid-template-columns:1fr}.dash .span2,.dash .full{grid-column:auto}}
 .panel{border:1px solid var(--border);border-radius:14px;background:var(--panel);padding:13px 15px;display:flex;flex-direction:column;gap:10px;transition:border-color .2s,box-shadow .2s}
-.panel:hover{border-color:var(--border-hot);box-shadow:0 12px 40px -28px rgba(63,216,230,0.5)}
+.panel:hover{border-color:var(--border-hot);box-shadow:0 12px 40px -28px rgba(199,146,53,0.5)}
 .phead{display:flex;align-items:center;gap:8px}
 .phead .dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);flex-shrink:0}
 .phead h2{font-family:"Chakra Petch","JetBrains Mono",sans-serif;font-size:10.5px;letter-spacing:1.8px;color:var(--txt-dim);font-weight:600;text-transform:uppercase}
@@ -220,7 +223,7 @@ body::before{
 .watch .wl.info{border-left-color:var(--cyan)}
 
 /* ---------- SESGO / NIVELES ---------- */
-.bias{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:11px;background:rgba(63,216,230,0.05);border:1px solid var(--border-hot)}
+.bias{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:11px;background:rgba(199,146,53,0.05);border:1px solid var(--border-hot)}
 .bias .big{font-family:"Orbitron","JetBrains Mono",monospace;font-size:20px;font-weight:800;letter-spacing:-.5px;color:var(--cyan);line-height:1}
 .bias .meta{font-size:9.5px;color:var(--txt-dim);line-height:1.45;letter-spacing:.3px}
 .bias .meta b{color:var(--txt)}
@@ -244,7 +247,7 @@ body::before{
 .lrow .pr{font-family:"Orbitron","JetBrains Mono",monospace;font-variant-numeric:tabular-nums;font-weight:700;letter-spacing:.5px;width:62px;color:var(--txt)}
 .lrow .lbl{color:var(--txt-dim);font-size:9.5px}
 .lrow .bdg{margin-left:auto;font-size:8px;letter-spacing:1px;padding:2px 6px;border-radius:4px;border:1px solid var(--border);color:var(--txt-faint);font-variant-numeric:tabular-nums}
-.lrow.now{background:rgba(63,216,230,0.1);border-radius:8px;padding:6px 8px;margin:2px -8px;border:1px solid var(--cyan)}
+.lrow.now{background:rgba(199,146,53,0.1);border-radius:8px;padding:6px 8px;margin:2px -8px;border:1px solid var(--cyan)}
 .lrow.now .dot2{background:var(--cyan);box-shadow:0 0 12px var(--cyan);left:-12px}
 .lrow.now .pr,.lrow.now .bdg{color:var(--cyan)}
 .lrow.now .bdg{border-color:var(--cyan)}
@@ -332,7 +335,7 @@ body::before{
 .countdown{font-size:8.5px;letter-spacing:1px;color:var(--red);border:1px solid rgba(255,95,116,0.3);padding:2px 6px;border-radius:5px}
 
 /* ---------- NORTH STAR ---------- */
-.north{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:13px 20px;border:1px solid var(--border);border-radius:14px;background:linear-gradient(100deg,rgba(157,140,255,0.06),rgba(63,216,230,0.03))}
+.north{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:13px 20px;border:1px solid var(--border);border-radius:14px;background:linear-gradient(100deg,rgba(157,140,255,0.06),rgba(199,146,53,0.03))}
 .north .why{flex:1;min-width:220px}
 .north .why h3{font-size:9px;letter-spacing:3px;color:var(--violet);margin-bottom:8px;display:flex;align-items:center;gap:8px}
 .north .why p{font-size:14px;line-height:1.5;color:#fff;font-style:italic}
@@ -340,7 +343,7 @@ body::before{
 .debt .dh{display:flex;justify-content:space-between;font-size:9.5px;letter-spacing:.5px;color:var(--txt-dim);margin-bottom:7px}
 .debt .dh b{color:var(--cyan)}
 .debt .track{height:11px;border-radius:6px;background:rgba(255,255,255,0.06);overflow:hidden}
-.debt .fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--cyan),var(--lime));width:62%;box-shadow:0 0 12px rgba(63,216,230,0.35)}
+.debt .fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--cyan),var(--lime));width:62%;box-shadow:0 0 12px rgba(199,146,53,0.35)}
 .debt .sub{font-size:9.5px;color:var(--txt-faint);margin-top:6px;letter-spacing:.3px}
 .debt .sub b{color:var(--lime)}
 .goals{display:flex;gap:18px;flex-wrap:wrap}
@@ -366,7 +369,7 @@ body::before{
 /* ---------- MODALES ---------- */
 .planmodal{position:fixed;inset:0;z-index:60;display:none;place-items:center;background:rgba(4,6,12,0.82);backdrop-filter:blur(6px);padding:16px}
 .planmodal.show{display:grid;animation:fade .25s}
-.planmodal .card{width:min(680px,96vw);max-height:92vh;overflow:auto;background:var(--panel-solid);border:1px solid var(--border-hot);border-radius:16px;padding:22px;box-shadow:0 0 50px rgba(63,216,230,0.15)}
+.planmodal .card{width:min(680px,96vw);max-height:92vh;overflow:auto;background:var(--panel-solid);border:1px solid var(--border-hot);border-radius:16px;padding:22px;box-shadow:0 0 50px rgba(199,146,53,0.15)}
 .planmodal h3{font-family:"Chakra Petch","JetBrains Mono",monospace;font-size:14px;letter-spacing:2px;color:#fff;margin-bottom:4px}
 .planmodal .hint{font-size:11px;color:var(--txt-dim);margin-bottom:16px;line-height:1.6}
 .pf{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -387,7 +390,7 @@ body::before{
 #boot{position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:var(--bg);transition:opacity .5s ease;font-family:"JetBrains Mono",monospace}
 #boot.gone{opacity:0;pointer-events:none}
 #boot .term{width:min(520px,86vw)}
-#boot .blogo{font-family:"Orbitron",monospace;font-weight:900;font-size:24px;letter-spacing:6px;color:#fff;text-shadow:0 0 24px rgba(63,216,230,0.5);margin-bottom:4px}
+#boot .blogo{font-family:"Orbitron",monospace;font-weight:900;font-size:24px;letter-spacing:6px;color:#fff;text-shadow:0 0 24px rgba(199,146,53,0.5);margin-bottom:4px}
 #boot .bsub{font-size:9px;letter-spacing:4px;color:var(--txt-faint);margin-bottom:22px}
 #boot .line{font-size:12px;color:var(--txt-dim);line-height:1.9;white-space:pre}
 #boot .line b{color:var(--lime)}
