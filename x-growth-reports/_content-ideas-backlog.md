@@ -25,9 +25,17 @@ Running list of post ideas sourced from real audience comments and trend scans. 
 
 - **Survive first, trade second, source: @Adarsh_Onchain's reply on the same post (13 sep 2026)** — "the market will always give you another opportunity, but your capital won't always give you another chance." `[USED 2026-09-18 as aphorism draft 3, cycle #10]`
 
-- **"Still here is enough for today.", source: Jesus's own real reply (27 likes) to a well-wisher on the "nobody knows what I carry" post (11 sep 2026)** — short, real self-quote, said after acknowledging a rough stretch. Matches the account's proven pattern of real self-quotes beating invented lines. Not yet drafted as its own post, prime candidate.
+- **"Still here is enough for today.", source: Jesus's own real reply (27 likes) to a well-wisher on the "nobody knows what I carry" post (11 sep 2026)** — short, real self-quote, said after acknowledging a rough stretch. Matches the account's proven pattern of real self-quotes beating invented lines. `[USED 2026-09-20 as confession draft 1, cycle #11]`
 
 - **Willpower is the sign, not the fix, source: niche scan of @RealizedTrader (17-18 sep 2026)** — "if you're having to use willpower, the demand was already too high, lower the demand first, then run the reps" (271 likes on his own account). Mechanism only — never copy phrasing. Note: Jesus has already covered adjacent ground (eval-vs-funded gap) heavily; a future draft on this needs a genuinely different angle, not a rehash.
+
+- **Trailing drawdown "floor rises behind you," source: @AxelrodCoach's reply (Sep 19 2026) + Jesus's own real reply on the "Made it to Miami" post** — "Every good day moves the floor up behind you, so rushing the payout pushes the floor at you while you are still holding risk." Jesus: "Good day raises the floor, I keep size on, trailing eats me." `[USED 2026-09-20 as complaint+question draft 2, cycle #11]`
+
+- **Chart projection bias, source: niche scan of @RealizedTrader (Sep 18 2026)** — "A chart is empty on the right hand side and your brain will not leave it empty. It fills that space with what you already want." Mechanism only, reworked for a funded-account context (seeing the setup you want when the payout's close). `[USED 2026-09-20 as aphorism draft 3, cycle #11]`
+
+- **"Spend eval fees on therapy instead," tough-love pushback, source: @jc_futures_ on the Sep 20 $6K Challenge launch post** — not draft material (too close to armchair-diagnosing), but real audience pushback worth a direct, non-defensive reply. Added to engage list cycle #11, not drafted.
+
+- **$6K Challenge documented series, source: Jesus's own real post (20 sep 2026, started the challenge Friday 18 sep)** — a new recurring content arc ("documenting the whole thing here, good or bad"). Future cycles should track and update against this series directly — it's the account's first built-in narrative arc. Not a one-off idea to mark used, an ongoing thread to watch every cycle.
 
 ## Used ideas
 - **Mine the viral pair's comments, source: own account, Sep 2-3** — `[USED 2026-09-04 — mined the 15K/10K posts' replies interactively, yielded the need-vs-want, payout-maxxing, physical-ritual and emotional-neutrality ideas above]`

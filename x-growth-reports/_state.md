@@ -60,6 +60,17 @@ sharper over time instead of starting cold each week. Keep it factual and dated.
 - Cycle #1's 3 drafts are still ungraded (not confirmed posted, prediction can't be scored yet).
 - Niche scan (WebSearch): "need to be right vs. being profitable" is a live nerve in the wider trading-psych niche right now, corroborating Glenn's 10-second-window comment independently. Also noted the "discipline-erosion sequence" mechanism (name the exact order compromises stack, not just the moment) as a format worth trying once there's a real Jesus-specific sequence to anchor it, added to backlog.
 
+## Cycle #11 observations (2026-09-20, interactive, triggered manually by Jesus)
+- Slow window again: only 2 new posts since cycle #10 (Sep 19, Sep 20), followers flat at 819 (was 820).
+- **Cycle #10 prediction graded MIXED**: personal/travel-tinted content stayed under 900 (Sep 19 Miami post, 528 views, hit); the next trading-crisis post (Sep 20 $6K Challenge launch) sits at 363 views so far, missing the predicted 1K clear, though it's only hours old at capture.
+- **NEW: Jesus opened a documented $6K Challenge series (Sep 20), started Friday Sep 18** — "documenting the whole thing here, good or bad... I actually want to break that this time, not just hit a number and call it a pass." First time this account has had a built-in recurring narrative arc instead of one-off posts. Track and update against it every future cycle.
+- **NEW mechanism, Sep 19 thread: trailing drawdown "floor rises behind you."** @AxelrodCoach: "every good day moves the floor up behind you, so rushing the payout pushes the floor at you while you are still holding risk." Jesus's own real reply: "Good day raises the floor, I keep size on, trailing eats me. I keep learning it the expensive way." Used as cycle #11 draft 2 (complaint+question).
+- **Bio changed** (captured live on profile): dropped "Full-time trader by faith & grind" for "Trading futures and fighting my own worst habits." Blunter, more self-critical framing, consistent with the tone of the Sep 20 post. Updated in `_voice-profile.md`.
+- Finally cashed in "Still here is enough for today" (Jesus's real quote, 27 likes, open since cycle #10) as draft 1 (confession) — second cycle in a row where the lesson "don't let real material sit" got followed through on.
+- Niche scan (@RealizedTrader): found a genuinely new mechanism (chart projection bias — the brain fills the empty right side of the chart with what it wants) distinct from the eval-vs-funded/willpower ground already mined hard on this account. Used as draft 3 (aphorism).
+- Checked the Sep 10 thread for completeness (was tempted to re-mine it) — confirmed it was already used as cycle #9 drafts 1 and 2, correctly left alone this cycle. Worth remembering: always check `x-growth-data.json` recentPosts/backlog-used before treating an older post as fresh material.
+- `marked-posted.json` still empty after 11 cycles.
+
 ## Cycle #10 observations (2026-09-18, interactive, triggered manually by Jesus)
 - Slower week: only 2 new real posts since cycle #9 (Sep 11), both Jesus's own writing again — 9 for 9 cycles now with zero agent drafts posted verbatim.
 - **Sep 13, "Gap down. Feed screaming. Hands itchy... My edge tonight isn't a level. It's the 4 lines I wrote before I opened the app."** → 866 views, 16 likes, 4 replies, modest reach but the richest single comment thread of the window.
