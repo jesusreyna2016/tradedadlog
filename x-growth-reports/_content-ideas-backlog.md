@@ -35,7 +35,15 @@ Running list of post ideas sourced from real audience comments and trend scans. 
 
 - **"Spend eval fees on therapy instead," tough-love pushback, source: @jc_futures_ on the Sep 20 $6K Challenge launch post** — not draft material (too close to armchair-diagnosing), but real audience pushback worth a direct, non-defensive reply. Added to engage list cycle #11, not drafted.
 
-- **$6K Challenge documented series, source: Jesus's own real post (20 sep 2026, started the challenge Friday 18 sep)** — a new recurring content arc ("documenting the whole thing here, good or bad"). Future cycles should track and update against this series directly — it's the account's first built-in narrative arc. Not a one-off idea to mark used, an ongoing thread to watch every cycle.
+- **$6K Challenge documented series, source: Jesus's own real post (20 sep 2026, started the challenge Friday 18 sep)** — a new recurring content arc ("documenting the whole thing here, good or bad"). Future cycles should track and update against this series directly — it's the account's first built-in narrative arc. **Update 21 sep: the challenge FAILED Sunday night** (14 trades, -$3,148, fighting an invalidated 30,000 level with almost no pause between entries). Jesus posted a real 5-tweet thread about the failure instead of any agent draft, tweet 1 hit 3,316 views / 43 likes / 20 replies, the account's best non-viral post since early Sep. Confirms the arc works through failure, not just wins. Still an ongoing thread to watch, not a one-off idea to mark used.
+
+- **"Once the rules are gone the account is already gone", source: Jesus's own real reply to @THouseTraders on the Sep 21 failure thread** `[USED 2026-09-21 as aphorism draft 1, cycle #12]`
+
+- **27 vs 14 trades / overtrading, source: @JasonKelleyUK's real observation + Jesus's own real reply, Sep 21 thread** — real public numbers (27 trades made $1,105, 14 trades lost $3,148 and the account) `[USED 2026-09-21 as truth-bomb draft 2, cycle #12]`
+
+- **Strangers kinder than self-judgment, source: @R3G5B7's real reply (64 likes, unanswered) on the Sep 21 thread** `[USED 2026-09-21 as complaint+question draft 3, cycle #12]`
+
+- **"That's the whole lesson. Stop fighting the tape.", source: Jesus's own real reply to @imda11111111 (55-like comment) on the Sep 21 failure thread** — short, punchy, held open, not yet drafted.
 
 ## Used ideas
 - **Mine the viral pair's comments, source: own account, Sep 2-3** — `[USED 2026-09-04 — mined the 15K/10K posts' replies interactively, yielded the need-vs-want, payout-maxxing, physical-ritual and emotional-neutrality ideas above]`
