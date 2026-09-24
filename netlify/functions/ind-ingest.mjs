@@ -1,6 +1,7 @@
 // Recibe los webhooks de los indicadores STATE EXPORT del Session Analyst:
 //   R3R1| (3reads) · DRB1| (dr bias) · SRZ1| (sr zones) · HCZ1| (htf context zones)
 //   CMDC1| (command center all-in-one · feed de sintesis: sesgo fusionado + veredicto)
+//   RGM1| (market regime · CHOP/BULL/BEAR + eventos de ruptura, fake, retest)
 // Valida el secreto, parsea la cadena k=v y guarda el ultimo estado por
 // fuente+simbolo en Netlify Blobs (store 'cc', key 'ind:<src>:<SYM>').
 // El backbone orb_sesgo (TDL1) sigue entrando por cc-ingest como 'sym:<SYM>'.
@@ -8,8 +9,27 @@ import { getStore } from '@netlify/blobs';
 
 const PREFIX_SRC = {
   R3R1: '3reads', DRB1: 'drbias', SRZ1: 'srzones', HCZ1: 'htfzones', TDL1: 'orb',
-  CMDC1: 'command'
+  CMDC1: 'command', RGM1: 'regime'
 };
+
+// Market Regime keeps a per-day log of changes and events (not heartbeats) so a
+// trade can later be tagged with the regime it was taken in. Key rlog:<SYM>:<YYYY-MM-DD>
+// (Chicago date from the indicator's ts). Capped so a runaway alert cannot grow it forever.
+const RLOG_MAX = 400;
+async function appendRegimeLog(store, sym, kv){
+  if(kv.chg !== '1' && !kv.event) return;
+  const day = String(kv.ts || '').slice(0, 10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(day)) return;
+  const key = `rlog:${sym}:${day}`;
+  let log = [];
+  try { log = (await store.get(key, { type: 'json' })) || []; } catch (e) { log = []; }
+  const t = Number(kv.t) || null;
+  if(t && log.some(e => e.t === t && e.event === (kv.event || ''))) return;   // alert retried
+  log.push({ t, ts: kv.ts, regime: kv.regime || null, event: kv.event || '', sess: kv.sess || null,
+             grade: kv.grade || '', top: kv.top || '', bot: kv.bot || '', close: kv.close || '' });
+  if(log.length > RLOG_MAX) log = log.slice(-RLOG_MAX);
+  await store.setJSON(key, log);
+}
 
 function parsePipe(text){
   if(!text) return null;
@@ -50,5 +70,6 @@ export default async (req) => {
 
   const store = getStore('cc');
   await store.setJSON(`ind:${src}:${sym}`, record);
+  if(src === 'regime') await appendRegimeLog(store, sym, kv);
   return new Response(`ok · ${src} · ${sym} · ${kv.ts || ''}`, { status: 200 });
 };

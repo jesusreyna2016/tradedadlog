@@ -172,6 +172,12 @@ body::before{
 .ccctx{display:flex;flex-wrap:wrap;gap:6px}
 .ccctx .cx{font-size:9px;letter-spacing:.5px;color:var(--txt-dim);background:var(--panel-2);border:1px solid var(--border);border-radius:6px;padding:3px 7px}
 .ccctx .cx b{color:var(--txt);font-weight:600}
+.ccregime{margin-top:6px;font-size:10px;letter-spacing:.4px;line-height:1.4;color:var(--txt-dim);background:var(--panel-2);border:1px solid var(--border);border-left:3px solid var(--txt-faint);border-radius:6px;padding:5px 8px}
+.ccregime b{color:var(--txt);font-weight:700;letter-spacing:.8px}
+.ccregime.chop{border-left-color:var(--amber)}.ccregime.chop b{color:var(--amber)}
+.ccregime.bull{border-left-color:var(--lime)}.ccregime.bull b{color:var(--lime)}
+.ccregime.bear{border-left-color:var(--red)}.ccregime.bear b{color:var(--red)}
+.ccregime.stale{opacity:.55}
 /* racha */
 .hstreak{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;flex:1;border-radius:12px;background:var(--panel-2);border:1px solid var(--border);padding:10px}
 .hstreak .n{font-family:"Orbitron","JetBrains Mono",monospace;font-size:44px;font-weight:800;color:var(--lime);line-height:1;text-shadow:0 0 24px rgba(95,224,138,0.3)}
@@ -555,6 +561,7 @@ body::before{
       <div class="hlabel"><span data-i18n-es="Se&ntilde;al en vivo" data-i18n-en="Live signal">Live signal</span></div>
       <div class="ccsignal wait" id="ccSignal"><b>WAIT</b><span>no edge yet</span></div>
       <div class="ccctx" id="ccCtx"></div>
+      <div class="ccregime" id="ccRegime" hidden></div>
       <div class="hrule" id="ruleToday">"Level of interest + with the bias + my trigger. Never in the air, never out of revenge."</div>
     </div>
     <!-- RACHA -->
@@ -1832,6 +1839,53 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   window.__i18nRefresh.push(load);
 })();
 </script>
+<script>
+/* ================= MARKET REGIME · feed RGM1 de market_regime.pine (via /api/cc-regime) ================= */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var el=$('ccRegime'); if(!el) return;
+  var CC_API=/(^|\.)tradedadlog\.com$/i.test(location.hostname)?'':'https://tradedadlog.com';
+  var SYM='NQ', STALE_MIN=40, last=null;
+  // el panel de salud lo lee para la fila "Operar el chop"
+  window.__mrRegime=function(){
+    if(!last) return null;
+    var age=(Date.now()-Date.parse(last.receivedAt))/60000;
+    return {regime:last.regime||'', fresh:age<STALE_MIN, age:age, top:last.top, bot:last.bot};
+  };
+  function px(v){ var n=parseFloat(v); return isFinite(n)?n.toLocaleString('en-US',{maximumFractionDigits:2}):''; }
+  function render(){
+    var st=window.__mrRegime();
+    if(!st){ el.hidden=true; return; }
+    var r=last, reg=st.regime;
+    var cls=reg==='CHOP'?'chop':reg==='BULL'?'bull':reg==='BEAR'?'bear':'';
+    var name={CHOP:T('CHOP · RANGO','CHOP · RANGE'),BULL:T('TENDENCIA ALCISTA','BULL TREND'),
+              BEAR:T('TENDENCIA BAJISTA','BEAR TREND'),NEUTRAL:T('NEUTRAL','NEUTRAL')}[reg]||reg;
+    var parts=['Market Regime '+SYM+' · <b>'+name+'</b>'];
+    if(r.score) parts.push('score '+r.score+'/5');
+    if(reg==='CHOP'&&r.top&&r.bot) parts.push(T('caja ','box ')+px(r.bot)+'–'+px(r.top));
+    if(r.sess) parts.push(r.sess);
+    if(r.event) parts.push(T('evento ','event ')+r.event.replace(/_/g,' '));
+    var tip = reg==='CHOP' ? T('Dentro de la caja: solo bordes, nada de entradas de tendencia.','Inside the box: edges only, no trend entries.')
+            : (reg==='BULL'||reg==='BEAR') ? T('Tendencia: entradas a favor, nada de fades.','Trend: entries with it, no fades.') : '';
+    var old = st.fresh ? '' : '<br>'+T('Feed sin actualizar hace ','Feed not updated for ')+Math.round(st.age)+' min';
+    el.className='ccregime '+cls+(st.fresh?'':' stale');
+    el.innerHTML=parts.join(' · ')+(tip?'<br>'+tip:'')+old;
+    el.hidden=false;
+    if(window.__refreshHealth) window.__refreshHealth();
+  }
+  function load(){
+    if(document.hidden) return;   // pestaña oculta: no gastes invocaciones de la funcion
+    fetch(CC_API+'/api/cc-regime',{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){ if(d){ last=(d.symbols&&d.symbols[SYM])||null; render(); } })
+      .catch(function(){});
+  }
+  load();
+  setInterval(load, 120000);
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden) load(); });
+  window.__i18nRefresh.push(render);
+})();
+</script>
 
 <!-- ===================== JOURNAL REAL · importar CSV de Tradovate ===================== -->
 <script>
@@ -2640,7 +2694,8 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if(!sysEl) return;
     var st=ps(), sc=sigCls(), rg=regimeTxt(), rok=st.ritual;
     var closed=st.stopped, tope=st.used>=st.max;
-    var chop = sc==='stop' ? {c:'bad',b:T('EN EL AIRE','IN THE AIR')} : (rg.indexOf('rango')>=0||rg.indexOf('transici')>=0||rg.indexOf('range')>=0||rg.indexOf('transition')>=0 ? {c:'warn',b:T('OJO RANGO','WATCH RANGE')} : {c:'ok',b:T('FILTRO ON','FILTER ON')});
+    var mr=(window.__mrRegime&&window.__mrRegime())||null;
+    var chop = sc==='stop' ? {c:'bad',b:T('EN EL AIRE','IN THE AIR')} : (mr&&mr.fresh&&mr.regime==='CHOP') ? {c:'warn',b:T('CAJA CHOP','CHOP BOX')} : (rg.indexOf('rango')>=0||rg.indexOf('transici')>=0||rg.indexOf('range')>=0||rg.indexOf('transition')>=0 ? {c:'warn',b:T('OJO RANGO','WATCH RANGE')} : {c:'ok',b:T('FILTRO ON','FILTER ON')});
     var rows=[
       {c: closed?'ok':'ok', b: closed?T('ACTIVA · cerrado','ACTIVE · closed'):T('ARMADA','ARMED'), leak:T('Seguir tras el target','Chasing after the target'), sub:T('El portero cierra el día al tope · tilt-lock','The gatekeeper closes the day at the cap · tilt-lock')},
       {c:'ok', b: st.used+'/'+st.max+(tope?(' · '+T('TOPE','CAP')):''), leak:T('Sobreoperar','Overtrading'), sub:T('Tope de '+st.max+' trades, el siguiente no existe','Cap of '+st.max+' trades, the next one doesn\'t exist')},

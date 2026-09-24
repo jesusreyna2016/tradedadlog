@@ -29,6 +29,11 @@
   to = "/.netlify/functions/cc-scan"
   status = 200
 
+[[redirects]]
+  from = "/api/cc-regime"
+  to = "/.netlify/functions/cc-regime"
+  status = 200
+
 # Session Analyst · ingesta de indicadores, feed unificado y plan de sesion
 [[redirects]]
   from = "/api/ind-ingest"
