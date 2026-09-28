@@ -45,6 +45,14 @@ Running list of post ideas sourced from real audience comments and trend scans. 
 
 - **"That's the whole lesson. Stop fighting the tape.", source: Jesus's own real reply to @imda11111111 (55-like comment) on the Sep 21 failure thread** — short, punchy, held open, not yet drafted.
 
+- **Green days are the dangerous ones, source: Jesus's own reply to @CandleSpec on the Sep 27 post** ("I know the rules. I just stop following them when I'm green.") `[USED 2026-09-28 as complaint+question draft 1, cycle #13]`
+
+- **Proved I can take money out, not keep it alive, source: Jesus's own reply to @mTraderNDX on the Sep 27 post** `[USED 2026-09-28 as aphorism draft 2, cycle #13]`
+
+- **"Eval-me follows rules. Funded-me doesn't.", source: Jesus's own reply to @Propfirmease on the Sep 27 post (28 sep 2026)**. Held open, overlaps the eval-vs-funded ground, needs a fresh angle.
+
+- **"Tired still counts.", source: Jesus's own reply to @TheJadeNinja247 on the Sep 27 post (28 sep 2026)**. Very short, held for a single-line post on a rough day.
+
 ## Used ideas
 - **Mine the viral pair's comments, source: own account, Sep 2-3** — `[USED 2026-09-04 — mined the 15K/10K posts' replies interactively, yielded the need-vs-want, payout-maxxing, physical-ritual and emotional-neutrality ideas above]`
 - **Aphorism riff, @RealizedTrader comment (27 ago 2026)** — "Knowing the rule was never the problem. Breaking it anyway is." `[USED 2026-08-31 — posted as the Aug 31 aphorism, status 2094580592495002023]`

@@ -141,3 +141,10 @@ sharper over time instead of starting cold each week. Keep it factual and dated.
 - Skipped a deep niche scan this cycle, the self-generated material was already unusually strong and the runbook prioritizes real audience comments over scanned/invented material. Not a pattern to repeat every cycle, just this one.
 - `marked-posted.json` still empty after 12 cycles. `predictionAccuracy` now 2/3 (cycle #11's prediction was a clean hit).
 - Followers flat at 819. The account's growth lever right now is clearly depth of engagement on real crisis threads, not follower count movement week to week.
+
+## Cycle #13 observations (2026-09-28, interactive, logged in, triggered manually by Jesus)
+- Followers 819 -> 824. 5 new posts, all Jesus's own writing (0 for 13 cycles on verbatim drafts). Cycle #12 prediction ungradable (draft unposted, no new $6K attempt), score stays 2/3.
+- **Family posts broke their ceiling:** Sep 23 surgery post 2.2K/59 likes, Sep 24 update 1.2K/47 likes/13 replies, vs 756-1.5K for earlier family posts. Revises the "personal content underperforms" rule: after a month of crisis threads, the audience now shows up for family moments too. Still zero mineable replies there.
+- **Best trading post: Sep 27 "$10k-$30k months" (2.2K/50/8).** Jesus's own replies were the gold again: "I already proved I can take the money out. I haven't proved I can keep the account alive.", "Eval-me follows rules. Funded-me doesn't.", "I know the rules. I just stop following them when I'm green.", "Tired still counts."
+- **NEW accuracy guardrail:** the Sep 28 "Today felt different" post says "maxed was 4", but the same day's trade screenshots (imported to the journal) show a 10-lot and a 7-lot MNQ. The agent now has cross-source data (journal screenshots vs posts). Rule: never repeat a size/number claim in a draft that the trade data contradicts, and flag it to Jesus privately.
+- @RealizedTrader's Sep 25 post describes a trader who picked a level the night before and shorted it 7 times, near-identical to Jesus's Sep 20 night. Engage target, not draft material.
