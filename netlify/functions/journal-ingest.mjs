@@ -49,7 +49,13 @@ function cleanDay(d) {
     withBias: int(d.withBias),
     againstBias: int(d.againstBias),
     validEdge: int(d.validEdge),
-    outsideEdge: int(d.outsideEdge)
+    outsideEdge: int(d.outsideEdge),
+    // exit quality: counts + a unitless pts ratio (avg win pts / avg loss pts), never money
+    positions: int(d.positions),
+    partials: int(d.partials),
+    scratches: int(d.scratches),
+    fullStops: int(d.fullStops),
+    wlPtsRatio: num(d.wlPtsRatio)
   };
 }
 
@@ -58,6 +64,7 @@ function recomputeRollup(byDay) {
   if (!n) return null;
   const sum = (f) => byDay.reduce((s, r) => s + (f(r) || 0), 0);
   const gtot = sum((r) => r.graded);
+  const ptot = sum((r) => r.positions); // old days carry null exit fields and count as 0
   return {
     days: n,
     disciplinedPct: Math.round(sum((r) => (r.disciplined ? 1 : 0)) / n * 100),
@@ -66,7 +73,11 @@ function recomputeRollup(byDay) {
     againstBiasRate: gtot ? +(sum((r) => r.againstBias) / gtot).toFixed(2) : null,
     outsideEdgeRate: gtot ? +(sum((r) => r.outsideEdge) / gtot).toFixed(2) : null,
     overtradeDays: sum((r) => (r.overtrade ? 1 : 0)),
-    revengeDays: sum((r) => (r.revenge ? 1 : 0))
+    revengeDays: sum((r) => (r.revenge ? 1 : 0)),
+    positions: ptot,
+    partialRate: ptot ? +(sum((r) => r.partials) / ptot).toFixed(2) : null,
+    scratchRate: ptot ? +(sum((r) => r.scratches) / ptot).toFixed(2) : null,
+    fullStopRate: ptot ? +(sum((r) => r.fullStops) / ptot).toFixed(2) : null
   };
 }
 
