@@ -1,27 +1,27 @@
-# X Snapshot, captured 2026-09-28 (cycle #13, interactive, logged in)
+# X Snapshot, captured 2026-10-13 (cycle #14, interactive, logged in)
 
-Account: @TradeDadLog, 824 followers (+5 since Sep 21), 671 following.
+Account: @TradeDadLog, 874 followers (+50 since Sep 28), 918 posts.
 
 ## Headline
-Quiet, healthy week. Jesus's wife had surgery Sep 23 and it went well. No new $6K Challenge attempt. Monday Sep 28 back trading: 3 MFF accounts each closed around +$750 (from trade screenshots imported to the journal). His post that day says "maxed was 4", but the screenshots show a 10-lot and a 7-lot MNQ.
+15-day gap. Jesus was away for his wife's surgery and the drive (back home Oct 5). Oct 12 (Monday) he lost almost $1k in one session on a Vest account he had run from $10 to about $3K peak, because he would not admit the trade was wrong. He posted it Oct 13.
 
-## Real posts this window (X Analytics 7D, logged in)
-1. "Today felt different. Not because I printed a monster day. I didn't." (Sep 28, id 2104675154567557478): 88 views, 5 likes, 1 reply, hours old. Close: "How'd your Monday actually feel? not the P&L, the chair."
-2. "Monday! Wife's recovering. Boys are with us. I'm back at the chart with fewer accounts and fewer excuses." (Sep 28, id 2104571873719631972): 391 views, 19 likes, 3 replies.
-3. "I know what $10k - $30k months feel like..." (Sep 27, id 2104182767454151040): 2.2K views, 50 likes, 8 replies. Best trading post of the week.
-4. "Update: Wife surgery went well..." (Sep 24, id 2103305667431838073): 1.2K views, 47 likes, 13 replies, 1 repost.
-5. "Heading in with my wife for surgery..." (Sep 23, id 2102787708523307104): 2.2K views, 59 likes, 9 replies.
+## Real posts this window (X Analytics 4W, logged in)
+1. Oct 13, id 2110009171860963486, "I turned a $10 @VestExchange account into about $3,000. Pulled $1,200 already but yesterday I lost almost $1k in one session because I wouldn't admit I was wrong...": 3,049 views, 48 likes, 23 replies. Best post since the Sep 21 failure thread.
+2. Oct 13, id 2110061209827319825, "Yes! $10 @VestExchange account to about $3k peak... So here's the proof": 722 views, 18 likes, 6 replies.
+3. Oct 5, id 2107231035968946242, "Been off the timeline for a bit... So what did I miss?": 665 views, 5 likes, 2 replies.
+4. Oct 5, id 2107121682817204591, "Home. Almost 2,000 miles in the car. Wife's recovering...": 506 views, 19 likes.
+Matured: Sep 28 "Today felt different" 1.2K/29/4; Sep 27 2.3K/53/8; Sep 21 failure thread tweet 1 5.3K/49/29; Sep 20 launch 2.6K.
 
-## Top comments (Sep 27 post)
-- @mTraderNDX (4): "Slow down brother... In 2025 I had 5 XFA accounts... This year I haven't been able to stay above one XFA." Jesus: "I already proved I can take the money out. I haven't proved I can keep the account alive. Cutting size and costs from here."
-- @Propfirmease: passing evals proves skill, holding funded takes a different mindset. Jesus: "Eval-me follows rules. Funded-me doesn't."
-- @CandleSpec: stop focusing on money, follow risk rules. Jesus: "I know the rules. I just stop following them when I'm green."
-- @TheJadeNinja247: "If you're tired then do it tired." Jesus: "Amen. Tired still counts."
-- @daytradederic: suggested automating one account.
+## Top comments (Oct 13 post)
+- Jesus to @dctrades22: "The hard part isn't the setup. It's admitting the trade is dead while you're still in it."
+- Jesus to @mannyjplays (how did you do it): "was luck".
+- @SerPenkjaminF: "Vest still got you live, don't revenge trade it." Jesus: "No more revenge clicks on this one."
+- @FxGal: "did you trade with max size and margin?" Jesus: "Yes!"
+- @Mama__Wick: "How did you avoid that SMALL AF drawdown" (unanswered).
+- @capital_jn offered a free code by DM.
 
-## Sep 28 posts
-- @OkoTrading on "Today felt different": copy-trader flatten-all slipped ~0.9R across accounts, "old me would have tilted, I locked accounts for tomorrow". Unanswered.
+## Peers (@RealizedTrader, Oct 9-13)
+- Cut winners early and call it discipline when it's relief (203 likes). Position size is a regulation demand, drawdown too (244). A flat trade on a live account feels dead (290).
 
-## Peers
-- @RealizedTrader Sep 25: a trader who decided the night before a level was resistance and shorted it 7 times (reads like Jesus's Sep 20). Sep 27: journal that tracks access to what you know under pressure, not P&L (753 views).
-- @TopstepGal Sep 25: "being rewarded for breaking my rules... you usually give it all back" (582 views). Sep 25 consistency/milestone post 3.3K.
+## Accuracy flag still open
+Sep 28 post says "Maxed was 4", screenshots showed a 10-lot and a 7-lot MNQ. No correction seen.

@@ -43,7 +43,7 @@ Running list of post ideas sourced from real audience comments and trend scans. 
 
 - **Strangers kinder than self-judgment, source: @R3G5B7's real reply (64 likes, unanswered) on the Sep 21 thread** `[USED 2026-09-21 as complaint+question draft 3, cycle #12]`
 
-- **"That's the whole lesson. Stop fighting the tape.", source: Jesus's own real reply to @imda11111111 (55-like comment) on the Sep 21 failure thread** — short, punchy, held open, not yet drafted.
+- **"That's the whole lesson. Stop fighting the tape.", source: Jesus's own real reply to @imda11111111 (55-like comment) on the Sep 21 failure thread** — short, punchy. `[USED 2026-10-13 as confession draft 1, cycle #14, paired with the Oct 13 Vest giveback]`
 
 - **Green days are the dangerous ones, source: Jesus's own reply to @CandleSpec on the Sep 27 post** ("I know the rules. I just stop following them when I'm green.") `[USED 2026-09-28 as complaint+question draft 1, cycle #13]`
 
@@ -52,6 +52,14 @@ Running list of post ideas sourced from real audience comments and trend scans. 
 - **"Eval-me follows rules. Funded-me doesn't.", source: Jesus's own reply to @Propfirmease on the Sep 27 post (28 sep 2026)**. Held open, overlaps the eval-vs-funded ground, needs a fresh angle.
 
 - **"Tired still counts.", source: Jesus's own reply to @TheJadeNinja247 on the Sep 27 post (28 sep 2026)**. Very short, held for a single-line post on a rough day.
+
+- **Admitting the trade is dead while you're still in it, source: Jesus's own reply to @dctrades22 on the Oct 13 Vest post (3,049 views)** `[USED 2026-10-13 as aphorism draft 2, cycle #14]`
+
+- **"Was luck", source: Jesus's own reply to @mannyjplays (the top question) + the Oct 13 proof post ("not pure skill")** `[USED 2026-10-13 as truth-bomb draft 3, cycle #14]`
+
+- **Cut winners early and call it discipline when it's relief, source: niche scan of @RealizedTrader (Oct 12, 203 likes)** — mechanism only, too close to his wording to draft as is. Also open: position size as a regulation demand (his Oct 9 post, 244 likes), engage don't draft.
+
+- **Honest-loss framing beats win framing, same event (13 oct 2026)** — 3,049 views leading with the giveback vs 722 for the "Yes! here's the proof" post. Not an idea to draft, a rule: tell the impressive number inside the honest version.
 
 ## Used ideas
 - **Mine the viral pair's comments, source: own account, Sep 2-3** — `[USED 2026-09-04 — mined the 15K/10K posts' replies interactively, yielded the need-vs-want, payout-maxxing, physical-ritual and emotional-neutrality ideas above]`

@@ -148,3 +148,13 @@ sharper over time instead of starting cold each week. Keep it factual and dated.
 - **Best trading post: Sep 27 "$10k-$30k months" (2.2K/50/8).** Jesus's own replies were the gold again: "I already proved I can take the money out. I haven't proved I can keep the account alive.", "Eval-me follows rules. Funded-me doesn't.", "I know the rules. I just stop following them when I'm green.", "Tired still counts."
 - **NEW accuracy guardrail:** the Sep 28 "Today felt different" post says "maxed was 4", but the same day's trade screenshots (imported to the journal) show a 10-lot and a 7-lot MNQ. The agent now has cross-source data (journal screenshots vs posts). Rule: never repeat a size/number claim in a draft that the trade data contradicts, and flag it to Jesus privately.
 - @RealizedTrader's Sep 25 post describes a trader who picked a level the night before and shorted it 7 times, near-identical to Jesus's Sep 20 night. Engage target, not draft material.
+
+## Cycle #14 observations (2026-10-13, interactive, logged in, triggered manually by Jesus)
+- 15-day gap since cycle #13 (Jesus away for the wife's surgery and the drive). Only 4 new real posts, all his own writing: **0 for 14 cycles** on verbatim drafts. Followers 824 -> 874 (+50).
+- **Cycle #13 prediction HIT:** "Today felt different" matured 88 -> 1.2K. Running score 3/4. Sep 21 failure thread tweet 1 also matured to 5.3K (was 3.3K).
+- **Oct 13 Vest post: same event, two framings, 4x gap.** Confession leading with the giveback ("lost almost $1k because I wouldn't admit I was wrong") = 3,049 views, 48 likes, 23 replies. "Yes! here's the proof" win post = 722 views. Honest-loss framing beats win framing again. Rule: put the impressive number inside the honest version, never in its own post.
+- Best real line: Jesus's reply to @dctrades22, "The hard part isn't the setup. It's admitting the trade is dead while you're still in it."
+- New insight used as draft 1: the same mistake at $6K-challenge scale (-$3,148, Sep 21) and $10-account scale (almost $1k, Oct 12) means size was never the variable.
+- Family/check-in posts fell back to 506-665 once the surgery news cycle ended; the 2.2K surgery posts were the exception.
+- Flags kept visible: Sep 28 "Maxed was 4" still uncorrected vs the 10-lot/7-lot screenshots; a reply offered a free code by DM (disclose any referral); Vest run at max size and margin by his own reply.
+- `marked-posted.json` still empty after 14 cycles.

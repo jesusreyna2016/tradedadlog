@@ -1,10 +1,10 @@
 {
-  "updated": "2026-09-28",
-  "cycle": 13,
+  "updated": "2026-10-13",
+  "cycle": 14,
   "account": {
     "handle": "TradeDadLog",
-    "followers": 824,
-    "posts": 847
+    "followers": 874,
+    "posts": 918
   },
   "followerHistory": [
     {
@@ -66,28 +66,84 @@
     {
       "date": "2026-09-28",
       "followers": 824
+    },
+    {
+      "date": "2026-10-13",
+      "followers": 874
     }
   ],
   "recentPosts": [
     {
-      "date": "2026-09-28",
-      "id": "2104675154567557478",
-      "excerpt": "Today felt different. Not because I printed a monster day. I didn't.",
-      "views": 88,
-      "likes": 5,
-      "replies": 1,
+      "date": "2026-10-13",
+      "id": "2110009171860963486",
+      "excerpt": "I turned a $10 @VestExchange account into about $3,000. Pulled $1,200 already but yesterday I lost almost $1k in one session because I wouldn't admit I was wrong. I kept hoping. I watched the drawdown get thinner and thinner and I still didn't stop.",
+      "views": 3049,
+      "likes": 48,
+      "replies": 23,
       "reposts": 0,
       "format": "confession",
       "dataSource": "analytics",
-      "note": "posted hours before capture, too fresh to judge. Real anchor: a calm, small-size Monday. Closes with a sharp question ('not the P&L, the chair'). One unanswered reply from @OkoTrading.",
-      "note_es": "publicado horas antes de la captura, muy fresco para juzgar. Ancla real: un lunes tranquilo y de tamaño chico. Cierra con una pregunta afilada ('not the P&L, the chair'). Una respuesta sin contestar de @OkoTrading."
+      "note": "best post since the Sep 21 failure thread; led with the giveback and got 4x the views of the win-and-proof follow-up; best line is Jesus's own reply to @dctrades22: 'The hard part isn't the setup. It's admitting the trade is dead while you're still in it.'",
+      "note_es": "mejor post desde el hilo del fallo del 21 sep; abrió con la devolución y sacó 4x las vistas del post de victoria con prueba; la mejor línea es la propia respuesta de Jesus a @dctrades22: 'Lo difícil no es el setup. Es admitir que el trade está muerto mientras sigues dentro.'"
+    },
+    {
+      "date": "2026-10-13",
+      "id": "2110061209827319825",
+      "excerpt": "Yes! $10 @VestExchange account to about $3k peak. That's roughly a 30,000% ROI on the fee... I'm not going to pretend this was pure skill... So here's the proof. It's real. It's possible. And it can disappear the same way it showed up.",
+      "views": 722,
+      "likes": 18,
+      "replies": 6,
+      "reposts": 0,
+      "format": "victory",
+      "dataSource": "analytics",
+      "note": "proof post, quote of @PSK10x asking for evidence; 722 views vs 3,049 for the same-day confession framing of the same event",
+      "note_es": "post de prueba, cita a @PSK10x que pidió evidencia; 722 vistas vs 3,049 del mismo evento enmarcado como confesión el mismo día"
+    },
+    {
+      "date": "2026-10-05",
+      "id": "2107231035968946242",
+      "excerpt": "Been off the timeline for a bit! Wife's surgery, the drive, the hospital, the kids. Just got back home. So what did I miss? Who's been eating? Who got cooked? How's the market been treating y'all",
+      "views": 665,
+      "likes": 5,
+      "replies": 2,
+      "reposts": 0,
+      "format": "check-in",
+      "dataSource": "analytics",
+      "note": "open community question after the break; only 2 replies, nothing mineable",
+      "note_es": "pregunta abierta a la comunidad tras la pausa; solo 2 respuestas, nada minable"
+    },
+    {
+      "date": "2026-10-05",
+      "id": "2107121682817204591",
+      "excerpt": "Home. Almost 2,000 miles in the car. Wife's recovering. Boys are back in their rooms. That part already feels like a win.",
+      "views": 506,
+      "likes": 19,
+      "replies": 0,
+      "reposts": 0,
+      "format": "family-rest",
+      "dataSource": "analytics",
+      "note": "family posts back to the old ceiling once the surgery news cycle ended",
+      "note_es": "los posts familiares vuelven al techo de antes al terminar el ciclo de noticias de la cirugía"
+    },
+    {
+      "date": "2026-09-28",
+      "id": "2104675154567557478",
+      "excerpt": "Today felt different. Not because I printed a monster day. I didn't.",
+      "views": 1200,
+      "likes": 29,
+      "replies": 4,
+      "reposts": 0,
+      "format": "confession",
+      "dataSource": "analytics",
+      "note": "matured: 88 views at capture, 1.2K final, cycle #13 prediction HIT",
+      "note_es": "maduró: 88 vistas al capturar, 1.2K final, la predicción del ciclo #13 ACERTÓ"
     },
     {
       "date": "2026-09-28",
       "id": "2104571873719631972",
       "excerpt": "Monday! Wife's recovering. Boys are with us. I'm back at the chart with fewer accounts and fewer excuses.",
-      "views": 391,
-      "likes": 19,
+      "views": 650,
+      "likes": 24,
       "replies": 3,
       "reposts": 0,
       "format": "victory",
@@ -99,8 +155,8 @@
       "date": "2026-09-27",
       "id": "2104182767454151040",
       "excerpt": "I know what $10k - $30k months feel like. The relief, the room to breathe... but August and September took that away.",
-      "views": 2200,
-      "likes": 50,
+      "views": 2300,
+      "likes": 53,
       "replies": 8,
       "reposts": 0,
       "format": "confession",
@@ -112,8 +168,8 @@
       "date": "2026-09-24",
       "id": "2103305667431838073",
       "excerpt": "Update: Wife surgery went well. She's recovering. Boys have their mom and I can breathe again.",
-      "views": 1200,
-      "likes": 47,
+      "views": 1300,
+      "likes": 48,
       "replies": 13,
       "reposts": 1,
       "format": "family-rest",
@@ -125,7 +181,7 @@
       "date": "2026-09-23",
       "id": "2102787708523307104",
       "excerpt": "Heading in with my wife for surgery. Just wanting her to come out of this okay and the boys to have their mom back tonight.",
-      "views": 2200,
+      "views": 2300,
       "likes": 59,
       "replies": 9,
       "reposts": 0,
@@ -138,9 +194,9 @@
       "date": "2026-09-21",
       "id": "2102053589946434043",
       "excerpt": "Sitting here honestly feeling ashamed of myself right now.",
-      "views": 3316,
-      "likes": 43,
-      "replies": 20,
+      "views": 5300,
+      "likes": 49,
+      "replies": 29,
       "reposts": 0,
       "format": "confession",
       "dataSource": "analytics",
@@ -203,9 +259,9 @@
       "date": "2026-09-20",
       "id": "2101810888617398758",
       "excerpt": "Day 1 closed green. $1,105. Was up $1,696 by mid morning, gave it all back and then some, down $857 by mid afternoon. Clawed back to green by the close instead of tilting into it. First time in a long time I didn't blow up the comeback.",
-      "views": 828,
-      "likes": null,
-      "replies": null,
+      "views": 1000,
+      "likes": 14,
+      "replies": 2,
       "reposts": 0,
       "format": "confession",
       "dataSource": "analytics",
@@ -216,9 +272,9 @@
       "date": "2026-09-20",
       "id": "2101729139539493099",
       "excerpt": "Weeks of passing Daily Payout accounts just to blow the funded account after. Trailing drawdown catching me every time I got close... Started one @Topstep 6k Challenge Friday, i will be documenting the whole thing here, good or bad. I'm tired of being the guy who knows exactly what he's doing wrong and does it anyway.",
-      "views": 2300,
-      "likes": 12,
-      "replies": 3,
+      "views": 2600,
+      "likes": 25,
+      "replies": 12,
       "reposts": 0,
       "format": "confession",
       "dataSource": "analytics",
@@ -229,7 +285,7 @@
       "date": "2026-09-19",
       "id": "2101350185561375173",
       "excerpt": "Made it to Miami. How'd your week end? I passed evals and blew them funded. Nothing green to show for it. Stepping away from Rapid / trailing DD for now. Speeding up the payout is what's wrecking me.",
-      "views": 528,
+      "views": 682,
       "likes": 13,
       "replies": 7,
       "reposts": 0,
@@ -551,14 +607,14 @@
     },
     {
       "format": "confession",
-      "medianViews": 1800,
-      "count": 21,
-      "note": "17 confession-tagged posts now (added the 5-tweet Sep 21 failure thread + the Sep 20 Day 1 quote-tweet, updated the Sep 20 launch post 363->2300 as it matured). Median dipped slightly from 1300 to 1098 because 4 of the thread's continuation tweets (327/264/205/208) are real but small; tweet 1 alone (3316) is the best non-viral post since early Sep.",
-      "note_es": "17 posts etiquetados confession ahora (se sumó el hilo de 5 tweets del fallo del 21 sep + la cita del Día 1 del 20 sep, se actualizó el post de lanzamiento del 20 sep de 363 a 2300 al madurar). La mediana bajó un poco de 1300 a 1098 porque 4 tweets de continuación del hilo (327/264/205/208) son reales pero chicos; el tweet 1 solo (3316) es el mejor post no viral desde inicios de sep."
+      "medianViews": 1250,
+      "count": 22,
+      "note": "Oct 13 Vest confession (3,049) added; same event framed as a win with proof got 722",
+      "note_es": "Se sumó la confesión del Vest del 13 oct (3,049); el mismo evento como victoria con prueba sacó 722"
     },
     {
       "format": "complaint-question",
-      "medianViews": 1677,
+      "medianViews": 1806,
       "count": 4,
       "note": "wide range: 12K 'getting chopped', 853 holiday list, 866 'gap down/hands itchy', 2489 '50k vs 25k'. The ones that worked had a sharp real anchor + question; the 13 sep post had modest reach but the richest comment thread of the window (156-like reply).",
       "note_es": "rango amplio: 12K 'getting chopped', 853 lista de feriado, 866 'gap down/hands itchy', 2489 '50k vs 25k'. Los que funcionaron tenían un ancla real afilada + pregunta; el post del 13 sep tuvo alcance modesto pero el hilo de comentarios más rico de la ventana (respuesta con 156 likes)."
@@ -570,21 +626,21 @@
     },
     {
       "format": "victory",
-      "medianViews": 846,
-      "count": 2,
-      "note": "new tag, gratitude/milestone format",
-      "note_es": "etiqueta nueva, formato de gratitud/hito"
+      "medianViews": 722,
+      "count": 3,
+      "note": "Oct 13 win-with-proof post (722) is the weakest framing of that event",
+      "note_es": "El post de victoria con prueba del 13 oct (722) es el peor enmarque de ese evento"
     },
     {
       "format": "family-rest",
-      "medianViews": 1350,
-      "count": 4,
-      "note": "4 posts now. The two Sep 23-24 surgery posts (2.2K, 1.2K) beat the older family posts (756-1.5K). Still no mineable replies, but not the dead zone it was in early Sep.",
-      "note_es": "4 posts ya. Los dos posts de la cirugía del 23-24 sep (2.2K, 1.2K) superaron a los familiares anteriores (756-1.5K). Siguen sin respuestas minables, pero ya no es la zona muerta de inicios de sep."
+      "medianViews": 1300,
+      "count": 5,
+      "note": "surgery-week posts (2.2K, 1.2K) were the exception; Oct 5 homecoming posts fell back to 506-665",
+      "note_es": "los posts de la semana de la cirugía (2.2K, 1.2K) fueron la excepción; los del regreso del 5 oct bajaron a 506-665"
     },
     {
       "format": "aphorism",
-      "medianViews": 611,
+      "medianViews": 654,
       "count": 2,
       "note": "565 and 657, tight cluster. Aphorisms convert (5.3% eng rate on the 657 post) but get almost no reach.",
       "note_es": "565 y 657, grupo apretado. Los aforismos convierten (5.3% de engagement en el post de 657) pero casi no consiguen alcance."
@@ -595,30 +651,16 @@
       "count": 1,
       "note": "new tag, weakest format, no personal stakes",
       "note_es": "etiqueta nueva, formato más débil, sin apuesta personal"
+    },
+    {
+      "format": "check-in",
+      "medianViews": 665,
+      "count": 1,
+      "note": "new tag, open community question after a break",
+      "note_es": "etiqueta nueva, pregunta abierta a la comunidad tras una pausa"
     }
   ],
   "formatHistory": [
-    {
-      "date": "2026-08-31",
-      "formats": [
-        {
-          "format": "pattern",
-          "medianViews": 6800
-        },
-        {
-          "format": "confession",
-          "medianViews": 2150
-        },
-        {
-          "format": "truth-bomb",
-          "medianViews": 777
-        },
-        {
-          "format": "aphorism",
-          "medianViews": 382
-        }
-      ]
-    },
     {
       "date": "2026-09-01",
       "formats": [
@@ -997,51 +1039,92 @@
           "medianViews": 566
         }
       ]
+    },
+    {
+      "date": "2026-10-13",
+      "formats": [
+        {
+          "format": "pattern",
+          "medianViews": 6800
+        },
+        {
+          "format": "truth-bomb",
+          "medianViews": 2500
+        },
+        {
+          "format": "complaint-question",
+          "medianViews": 1806
+        },
+        {
+          "format": "family-rest",
+          "medianViews": 1300
+        },
+        {
+          "format": "confession",
+          "medianViews": 1250
+        },
+        {
+          "format": "victory",
+          "medianViews": 722
+        },
+        {
+          "format": "check-in",
+          "medianViews": 665
+        },
+        {
+          "format": "aphorism",
+          "medianViews": 654
+        },
+        {
+          "format": "commentary",
+          "medianViews": 566
+        }
+      ]
     }
   ],
   "drafts": [
     {
       "rank": 1,
-      "format": "complaint-question",
+      "format": "confession",
       "antiAI": true,
-      "slot": "Tue · 11:50 AM CT",
-      "text": "The rules don't break me on red days.\nThey break on green ones.\nUp a few hundred and size starts feeling safe. The stop starts feeling optional. One more trade feels earned.\nAnyone else more dangerous to yourself when you're green than when you're red?",
-      "source": "Jesus's own real reply to @CandleSpec on the Sep 27 post ('I know the rules. I just stop following them when I'm green.') + the 'rewarded for breaking my rules' mechanism seen on @TopstepGal (mechanism only).",
-      "why": "The account's strongest reach+reply format, built on a real line he already said, and it names a trap almost every funded trader recognizes. It's also exactly what his own trade history shows.",
-      "why_es": "El formato más fuerte de la cuenta en alcance+respuestas, montado sobre una línea real que ya dijo, y nombra una trampa que casi cualquier trader fondeado reconoce. También es justo lo que muestra su propio historial de trades."
+      "slot": "Wed · 11:50 AM CT",
+      "text": "Same lesson. Different account.\nSeptember it cost me the $6K Challenge, -$3,148 in one session.\nMonday it was almost $1k of a Vest account I'd run up from $10.\nDifferent size. Same move. I stayed in because leaving meant admitting I was wrong.\nStop fighting the tape. That's the whole lesson. I just keep paying to relearn it.",
+      "source": "Sep 21 failure thread (-$3,148, real) + Oct 13 Vest post (almost $1k, real) + Jesus's own held line 'Stop fighting the tape. That's the whole lesson.'",
+      "why": "The same mistake at two very different sizes proves size was never the variable, an insight he hasn't posted yet. Real numbers on both sides, keeps the $6K arc alive.",
+      "why_es": "El mismo error en dos tamaños muy distintos prueba que el tamaño nunca fue la variable, un insight que aún no ha publicado. Números reales de ambos lados y mantiene vivo el arco del $6K."
     },
     {
       "rank": 2,
       "format": "aphorism",
       "antiAI": true,
-      "slot": "Wed · 11:50 AM CT",
-      "text": "I've proven I can take money out of a funded account.\nI haven't proven I can keep one alive after.\nTwo different skills. I only ever practiced the first one.",
-      "source": "Jesus's own real reply to @mTraderNDX on the Sep 27 post ('I already proved I can take the money out. I haven't proved I can keep the account alive.').",
-      "why": "Real self-quote, already nearly a finished aphorism. Short, citable, a contrast most of his audience lives.",
-      "why_es": "Autocita real, casi ya un aforismo terminado. Corto, citable, un contraste que vive la mayoría de su audiencia."
+      "slot": "Fri · 11:50 AM CT",
+      "text": "The setup was never the hard part.\nThe hard part is admitting the trade is dead while you're still in it.\nYou don't hold a loser because you think it'll come back. You hold it because leaving makes it official.",
+      "source": "Jesus's own reply to @dctrades22 on the Oct 13 Vest post.",
+      "why": "Distilled version of his best real line of the window, no question, post 2+ days after the Vest post so it isn't a duplicate.",
+      "why_es": "Versión destilada de su mejor línea real de la ventana, sin pregunta, publicar 2+ días después del post del Vest para que no sea duplicado."
     },
     {
       "rank": 3,
-      "format": "confession",
+      "format": "truth-bomb",
       "antiAI": true,
-      "slot": "Tue · 7:00 PM CT",
-      "text": "Follow up on yesterday.\nThree accounts. All three closed around +$750.\nNot a monster day. A day I didn't hand back.\nIt wasn't clean though. Early in the session I took two losses and answered with a 10-lot I had no business taking. Biggest loss of the day.\nThe calm part came after that. I want to be honest about both.",
-      "source": "Real anchor: Jesus's own trade screenshots for the 3 MFF accounts, imported to the journal today (+$753 / +$754 / +$759, and the 10-lot MNQ long at 4:30 AM ET after two losses, -$527).",
-      "why": "Uses the proven 'sequel 1-2 days later' mechanism with real numbers, and it corrects the record honestly. Yesterday's post said max size was 4, the screenshots show a 10-lot and a 7-lot. Owning that is on-brand and protects his credibility.",
-      "why_es": "Usa el mecanismo probado de 'secuela 1-2 días después' con números reales, y corrige el registro con honestidad. El post de ayer dijo que el tamaño máximo fue 4, las capturas muestran un 10-lot y un 7-lot. Asumirlo va con la marca y protege su credibilidad."
+      "slot": "Sun · 11:50 AM CT",
+      "text": "Most people asked how I made it. Fewer asked about the part where I almost gave it back.\nThe honest answer on making it: luck, and a few clean days in a row.\nThe honest answer on giving it back: me, at my desk, refusing to say I was wrong.\nOnly one of those two is something I can actually work on.",
+      "source": "Jesus's own 'was luck' reply to @mannyjplays + the proof post's 'I'm not going to pretend this was pure skill'.",
+      "why": "Turns the 4x framing gap (3,049 vs 722) into a post. Confirm 'fewer asked' feels true before posting.",
+      "why_es": "Convierte la brecha de 4x entre enmarques (3,049 vs 722) en un post. Confirma que 'fewer asked' se siente cierto antes de publicar."
     }
   ],
-  "plan": "Quiet, healthy week. Wife's surgery went well, and the two family posts about it (2.2K, 1.2K) did better than any family post before. The trading post of the week was Sep 27 ('I know what $10k-$30k months feel like'), 2.2K views and the richest thread. Today's 'Today felt different' post is hours old. Let it breathe tonight. Tomorrow late morning post Draft 1 (complaint+question, green days are the dangerous ones). Wednesday Draft 2 (aphorism). Draft 3 is the honest sequel, use it only if you're willing to name the 10-lot.",
-  "plan_es": "Semana tranquila y sana. La cirugía de tu esposa salió bien, y los dos posts familiares (2.2K, 1.2K) rindieron más que cualquier post familiar anterior. El post de trading de la semana fue el del 27 sep ('I know what $10k-$30k months feel like'), 2.2K vistas y el hilo más rico. El 'Today felt different' de hoy tiene horas. Déjalo respirar esta noche. Mañana a media mañana publica el Draft 1 (queja+pregunta, los días verdes son los peligrosos). El miércoles el Draft 2 (aforismo). El Draft 3 es la secuela honesta, úsalo solo si estás dispuesto a nombrar el 10-lot.",
-  "escalate": "Your 'Today felt different' post says max size was 4. The trade screenshots you sent today show a 10-lot MNQ and a 7-lot MNQ across two accounts. Don't repeat the '1-2 micros, maxed 4' line in any follow-up. The audience trusts this account because the numbers are real. Reply to @OkoTrading on today's post (unanswered) and to @RealizedTrader's Sep 25 post about a trader who picked a level the night before.",
-  "escalate_es": "Tu post 'Today felt different' dice que el tamaño máximo fue 4. Las capturas que mandaste hoy muestran un 10-lot MNQ y un 7-lot MNQ en dos cuentas. No repitas la línea '1-2 micros, maxed 4' en ningún seguimiento. La audiencia confía en esta cuenta porque los números son reales. Responde a @OkoTrading en el post de hoy (sin contestar) y al post del 25 sep de @RealizedTrader sobre un trader que eligió un nivel la noche anterior.",
+  "plan": "Thin 15-day window: only 4 real posts, all Jesus's own writing again (0 for 14 on verbatim drafts). The Oct 13 Vest confession (3,049 views, 23 replies) is the best post since the Sep 21 failure thread and followers jumped 824 -> 874. The win-with-proof post on the same event got 722, so honest-loss framing beat win framing 4x. Plan: Draft 1 Wed late morning (same mistake at $6K scale and $10 scale), Draft 2 Fri, Draft 3 only if the thread is still alive. One per window, don't stack the Vest story three days in a row.",
+  "plan_es": "Ventana delgada de 15 días: solo 4 posts reales, todos escritos por el propio Jesus (0 de 14 en drafts textuales). La confesión del Vest del 13 oct (3,049 vistas, 23 respuestas) es el mejor post desde el hilo del fallo del 21 sep y los seguidores subieron 824 -> 874. El post de victoria con prueba del mismo evento sacó 722, así que el enmarque de pérdida honesta le ganó 4x al de victoria. Plan: Draft 1 miércoles a media mañana (el mismo error a escala $6K y a escala $10), Draft 2 viernes, Draft 3 solo si el hilo sigue vivo. Uno por ventana, no apilar la historia del Vest tres días seguidos.",
+  "escalate": "If Draft 1 clears 1.5K, the cross-scale insight (the mistake is the same at any size) is a repeatable series hook: each time it recurs, post the two sizes side by side.",
+  "escalate_es": "Si el Draft 1 pasa 1.5K, el insight entre escalas (el error es el mismo a cualquier tamaño) es un gancho de serie repetible: cada vez que reaparezca, publicar los dos tamaños lado a lado.",
   "read": {
-    "working": "WEEK IN REVIEW (Sep 22-28): followers 819 -> 824. 5 new posts, all Jesus's own writing (0 for 13 cycles on verbatim drafts). Family posts around the surgery landed 2.2K and 1.2K, the best family numbers yet. Best trading post: Sep 27 '$10k-$30k months', 2.2K views, 50 likes, and your own replies in that thread are the best raw material of the week.",
-    "working_es": "SEMANA EN REVISIÓN (22-28 sep): seguidores 819 -> 824. 5 posts nuevos, todos escritos por Jesus (0 de 13 ciclos con drafts tal cual). Los posts familiares de la cirugía llegaron a 2.2K y 1.2K, los mejores números familiares hasta ahora. Mejor post de trading: el del 27 sep '$10k-$30k months', 2.2K vistas, 50 likes, y tus propias respuestas en ese hilo son la mejor materia prima de la semana.",
-    "stop": "Stop rounding your own numbers down to sound disciplined. 'Maxed was 4' vs a real 10-lot is the kind of gap the audience eventually catches, and the account's whole edge is that it doesn't do that.",
-    "stop_es": "Deja de redondear tus propios números hacia abajo para sonar disciplinado. 'Maxed was 4' contra un 10-lot real es el tipo de hueco que la audiencia termina notando, y todo el edge de la cuenta es que no hace eso.",
-    "watch": "@RealizedTrader posted (Sep 25) about a trader who decided the night before that a level was resistance and shorted it 7 times. It reads a lot like your Sep 20 night. A reply there ('that was me a week ago') is a high-value engagement move.",
-    "watch_es": "@RealizedTrader publicó (25 sep) sobre un trader que decidió la noche anterior que un nivel era resistencia y lo shorteó 7 veces. Se parece mucho a tu noche del 20 sep. Responder ahí ('ese fui yo hace una semana') es un movimiento de engagement de alto valor."
+    "working": "Honest-loss framing beat win framing 4x on the same event (3,049 vs 722). Followers +50 in 15 days (824 -> 874), most likely from the Vest post. Cycle #13 prediction HIT: 'Today felt different' matured 88 -> 1.2K. The Sep 21 failure thread tweet 1 also matured to 5.3K.",
+    "working_es": "El enmarque de pérdida honesta le ganó 4x al de victoria sobre el mismo evento (3,049 vs 722). Seguidores +50 en 15 días (824 -> 874), muy probablemente por el post del Vest. La predicción del ciclo #13 ACERTÓ: 'Today felt different' maduró de 88 a 1.2K. El tweet 1 del hilo del fallo del 21 sep también maduró a 5.3K.",
+    "stop": "Posting the win with proof as a separate post. It got 722 views against 3,049 for the confession. If a number is impressive, tell it inside the honest version, don't give it its own post. Also still open: the Sep 28 'Maxed was 4' line contradicts the screenshots (10-lot and 7-lot), no correction seen.",
+    "stop_es": "Publicar la victoria con prueba como un post aparte. Sacó 722 vistas contra 3,049 de la confesión. Si un número es impresionante, cuéntalo dentro de la versión honesta, no le des su propio post. Sigue abierto: la línea del 28 sep 'Maxed was 4' contradice las capturas (10 lotes y 7 lotes), no se ve corrección.",
+    "watch": "Vest was run at max size and margin (his own reply). A 30,000% ROI headline pulls moonshot followers, which clashes with the 'survive first' voice the account built. Also a reply offered a free code by DM: if any referral is involved, disclose it, the account's edge is honesty.",
+    "watch_es": "El Vest se operó a tamaño y margen máximos (su propia respuesta). Un titular de 30,000% de ROI atrae seguidores de moonshot, lo que choca con la voz de 'sobrevive primero' que construyó la cuenta. Además una respuesta ofreció un código gratis por DM: si hay algún referido de por medio, decláralo, el edge de la cuenta es la honestidad."
   },
   "hookBank": [
     {
@@ -1116,35 +1199,35 @@
     "note_es": "Baja confianza aún, solo un puñado de posts. La señal clara: tu mejor post reciente (6.8K) salió a media mañana CT."
   },
   "prediction": {
-    "week": "2026-09-28 (cycle 13)",
-    "claim": "The 'Today felt different' post (88 views at capture, hours old) matures past 1,000 views by next cycle. Separately, if Draft 1 is posted, it out-replies the Sep 27 post (8 replies) within 48h, because the question invites a confession people recognize.",
-    "claim_es": "El post 'Today felt different' (88 vistas al capturar, horas de vida) madura por encima de 1,000 vistas para el próximo ciclo. Aparte, si se publica el Draft 1, supera en respuestas al post del 27 sep (8 respuestas) dentro de 48h, porque la pregunta invita a una confesión que la gente reconoce.",
+    "week": "2026-10-13 (cycle 14)",
+    "claim": "The next post that leads with a giveback or admission beats the next pure-win post by 2x or more on views (anchor: 3,049 vs 722 on Oct 13). If Draft 1 is posted, it clears 1.5K views within 48h.",
+    "claim_es": "El próximo post que abra con una devolución o admisión supera al próximo post de pura victoria por 2x o más en vistas (ancla: 3,049 vs 722 el 13 oct). Si se publica el Draft 1, pasa 1.5K vistas en 48h.",
     "status": "pending"
   },
   "predictionAccuracy": {
-    "hits": 2,
-    "total": 3,
-    "note": "cycle 12 prediction UNGRADABLE: Draft 1 was never posted, and no new $6K Challenge attempt was launched this week. Not counted as a hit or a miss. Running score stays 2/3. cycle 11 prediction HIT clearly: the next update in the $6K Challenge series (the Sep 21 failure thread) beat the launch post's 363 views by more than 9x (3,316). The second half (Draft 2 beating 528 within 2 days) stayed ungradable, Draft 2 itself was never posted, Jesus wrote his own real thread instead, same pattern as every cycle. 0/12 cycles have had a draft posted verbatim; the agent's edge keeps being thread-mining and reads, not verbatim drafts.",
-    "note_es": "predicción del ciclo 12 SIN CALIFICAR: el Draft 1 nunca se publicó y no hubo un nuevo intento del $6K Challenge esta semana. No cuenta ni como acierto ni como fallo. El marcador sigue 2/3. predicción del ciclo 11 ACERTÓ claramente: la siguiente actualización de la serie del $6K Challenge (el hilo del fallo del 21 sep) superó las 363 vistas del post de lanzamiento por más de 9x (3,316). La segunda mitad (Draft 2 superando 528 en 2 días) quedó sin poder calificarse, el Draft 2 nunca se publicó, Jesus escribió su propio hilo real, mismo patrón que cada ciclo. 0/12 ciclos han tenido un draft publicado tal cual; el edge del agente sigue siendo minar hilos y las lecturas, no drafts textuales."
+    "hits": 3,
+    "total": 4,
+    "note": "cycle 13 prediction HIT: 'Today felt different' matured from 88 views at capture to 1.2K, past the 1,000 mark. The Draft 1 half stayed ungradable, never posted. 0/14 cycles have had a draft posted verbatim. cycle 12 prediction UNGRADABLE: Draft 1 was never posted, and no new $6K Challenge attempt was launched this week. Not counted as a hit or a miss. Running score stays 2/3. cycle 11 prediction HIT clearly: the next update in the $6K Challenge series (the Sep 21 failure thread) beat the launch post's 363 views by more than 9x (3,316). The second half (Draft 2 beating 528 within 2 days) stayed ungradable, Draft 2 itself was never posted, Jesus wrote his own real thread instead, same pattern as every cycle. 0/12 cycles have had a draft posted verbatim; the agent's edge keeps being thread-mining and reads, not verbatim drafts.",
+    "note_es": "predicción del ciclo 13 ACERTÓ: 'Today felt different' maduró de 88 vistas al capturar a 1.2K, por encima de las 1,000. La mitad del Draft 1 quedó sin calificar, nunca se publicó. 0/14 ciclos han tenido un draft publicado tal cual. predicción del ciclo 12 SIN CALIFICAR: el Draft 1 nunca se publicó y no hubo un nuevo intento del $6K Challenge esta semana. No cuenta ni como acierto ni como fallo. El marcador sigue 2/3. predicción del ciclo 11 ACERTÓ claramente: la siguiente actualización de la serie del $6K Challenge (el hilo del fallo del 21 sep) superó las 363 vistas del post de lanzamiento por más de 9x (3,316). La segunda mitad (Draft 2 superando 528 en 2 días) quedó sin poder calificarse, el Draft 2 nunca se publicó, Jesus escribió su propio hilo real, mismo patrón que cada ciclo. 0/12 ciclos han tenido un draft publicado tal cual; el edge del agente sigue siendo minar hilos y las lecturas, no drafts textuales."
   },
   "engageList": [
     {
-      "handle": "@RealizedTrader",
-      "postExcerpt": "'A guy I was talking to decided the night before that a level was going to be resistance... Next day he shorted it 7 times while it climbed' (25 sep)",
-      "whyReply": "Reads almost exactly like your Sep 20 night at 30,000. An honest 'that was me' reply deepens the account's most valuable peer relationship.",
-      "whyReply_es": "Se lee casi igual a tu noche del 20 sep en 30,000. Una respuesta honesta tipo 'ese fui yo' profundiza la relación más valiosa de la cuenta con un par."
+      "handle": "@dctrades22",
+      "postExcerpt": "'I've held losing trades way longer than I should just hoping they'd turn around.' (Oct 13 Vest post, two substantive replies)",
+      "whyReply": "The reply that sparked the best line of the window. Ask what he does now to force himself out of a dead trade.",
+      "whyReply_es": "La respuesta que provocó la mejor línea de la ventana. Pregúntale qué hace ahora para obligarse a salir de un trade muerto."
     },
     {
-      "handle": "@OkoTrading",
-      "postExcerpt": "'hit flatten all on my copy trader... ate around 0.9r on all accounts... Old me would have tilted. I locked accounts for tomorrow' (28 sep, on your post)",
-      "whyReply": "Only reply on today's post and still unanswered. He's describing the same 'old me vs today' shift you wrote about.",
-      "whyReply_es": "Única respuesta en el post de hoy y sigue sin contestar. Describe el mismo cambio 'yo de antes vs hoy' del que escribiste."
+      "handle": "@RealizedTrader (evergreen)",
+      "postExcerpt": "'Position size is a regulation demand. So is drawdown.' (244 likes, Oct 9)",
+      "whyReply": "Most valuable ongoing relationship. An honest short reply: Monday was max size and no exit, exactly his point.",
+      "whyReply_es": "La relación continua más valiosa. Una respuesta honesta y corta: el lunes fue tamaño máximo y sin salida, justo su punto."
     },
     {
-      "handle": "@mTraderNDX",
-      "postExcerpt": "'Slow down brother... In 2025 I had 5 XFA accounts with Topstep... This year I haven't been able to stay above one XFA' (27 sep)",
-      "whyReply": "Most substantive reply of the week and the seed of Draft 2. You replied once; a follow-up question about what changed for him keeps a real peer talking.",
-      "whyReply_es": "La respuesta más sustanciosa de la semana y semilla del Draft 2. Ya le respondiste una vez; una pregunta de seguimiento sobre qué cambió para él mantiene hablando a un par real."
+      "handle": "@Mama__Wick",
+      "postExcerpt": "'How did you avoid that SMALL AF drawdown' (Oct 13 Vest post, unanswered)",
+      "whyReply": "Honest answer is he didn't avoid it, it nearly cost him. Fits the account's voice and reopens the thread.",
+      "whyReply_es": "La respuesta honesta es que no lo evitó, casi le costó. Encaja con la voz de la cuenta y reabre el hilo."
     }
   ],
   "replyGoal": 5,
@@ -1159,7 +1242,8 @@
       "$6K Challenge documented series (Jesus's own real post, 20 sep, started Friday 18 sep, FAILED Sunday night 20 sep) - a recurring content arc that just proved it works through failure too, not just wins. Keep tracking whatever Jesus does next.",
       "\"That's the whole lesson. Stop fighting the tape.\" - Jesus's own real reply (@imda11111111, 55-like comment) on the Sep 21 failure thread. Short, punchy, held for a future single-line aphorism or as a closing line, not used yet.",
       "Eval-me follows rules, funded-me doesn't: Jesus's own reply to @Propfirmease (27 sep)",
-      "'Tired still counts': Jesus's own reply to @TheJadeNinja247 (27 sep), short, held for a single-line post"
+      "'Tired still counts': Jesus's own reply to @TheJadeNinja247 (27 sep), short, held for a single-line post",
+      "Cut winners early and call it discipline when it's relief (@RealizedTrader, Oct 12, 203 likes). Mechanism only, too close to his wording to draft as is."
     ],
     "open_es": [
       "Secuencia de erosión de disciplina: nombrar el orden exacto en que se acumulan las concesiones, necesita una secuencia real de Jesus (scan del nicho, 01 sep)",
@@ -1171,7 +1255,8 @@
       "Serie documentada del $6K Challenge (post real del propio Jesus, 20 sep, arrancó el viernes 18 sep, FALLÓ el domingo en la noche 20 sep) - un arco de contenido recurrente que acaba de probar que funciona también a través del fallo, no solo de las victorias. Seguir rastreando lo que Jesus haga después.",
       "\"That's the whole lesson. Stop fighting the tape.\" - respuesta real del propio Jesus (@imda11111111, comentario con 55 likes) en el hilo del fallo del 21 sep. Corta, contundente, guardada para un futuro aforismo de una línea o como línea de cierre, aún no usada.",
       "El yo de la eval sigue reglas, el yo fondeado no: respuesta del propio Jesus a @Propfirmease (27 sep)",
-      "'Tired still counts': respuesta del propio Jesus a @TheJadeNinja247 (27 sep), corta, guardada para un post de una línea"
+      "'Tired still counts': respuesta del propio Jesus a @TheJadeNinja247 (27 sep), corta, guardada para un post de una línea",
+      "Cortar ganadores temprano y llamarlo disciplina cuando es alivio (@RealizedTrader, 12 oct, 203 likes). Solo el mecanismo, demasiado cerca de su redacción para redactarlo tal cual."
     ],
     "used": [
       "Aphorism riff 'Knowing the rule was never the problem' (RealizedTrader) - posted 31 ago",
@@ -1206,7 +1291,10 @@
       "27 trades vs 14 trades, overtrading is how one bad idea becomes a closed account (@JasonKelleyUK + Jesus's own reply) - draft 2, cycle #12",
       "Strangers kinder to me than I am to myself (@R3G5B7 + thread tone) - draft 3, cycle #12",
       "Green days are the dangerous ones (own reply to @CandleSpec 27 sep) - cycle 13 draft 1",
-      "Proved I can take money out, not keep it alive (own reply to @mTraderNDX 27 sep) - cycle 13 draft 2"
+      "Proved I can take money out, not keep it alive (own reply to @mTraderNDX 27 sep) - cycle 13 draft 2",
+      "Same mistake at $6K scale and $10 scale, 'Stop fighting the tape' (Jesus's own held line + Oct 13 post) - draft 1, cycle #14",
+      "Admitting the trade is dead while you're still in it (Jesus's reply to @dctrades22) - draft 2, cycle #14",
+      "Luck vs giving it back, 'was luck' (Jesus's reply to @mannyjplays) - draft 3, cycle #14"
     ],
     "used_es": [
       "Riff de aforismo 'Knowing the rule was never the problem' (RealizedTrader) - publicado 31 ago",
@@ -1241,7 +1329,10 @@
       "27 vs 14 trades, overtrading es como una mala idea se vuelve cuenta cerrada (@JasonKelleyUK + respuesta del propio Jesus) - draft 2, ciclo #12",
       "Extraños más amables conmigo de lo que yo soy conmigo mismo (@R3G5B7 + tono del hilo) - draft 3, ciclo #12",
       "Los días verdes son los peligrosos (respuesta propia a @CandleSpec 27 sep) - draft 1 del ciclo 13",
-      "Probé que puedo sacar dinero, no mantener viva la cuenta (respuesta propia a @mTraderNDX 27 sep) - draft 2 del ciclo 13"
+      "Probé que puedo sacar dinero, no mantener viva la cuenta (respuesta propia a @mTraderNDX 27 sep) - draft 2 del ciclo 13",
+      "El mismo error a escala $6K y a escala $10, 'Stop fighting the tape' (línea retenida de Jesus + post del 13 oct) - draft 1, ciclo #14",
+      "Admitir que el trade está muerto mientras sigues dentro (respuesta de Jesus a @dctrades22) - draft 2, ciclo #14",
+      "Suerte vs devolverlo, 'was luck' (respuesta de Jesus a @mannyjplays) - draft 3, ciclo #14"
     ]
   },
   "scorecard": [
@@ -1537,22 +1628,46 @@
       "week": "2026-09-28 (c13)",
       "draft": "D1 green-days-dangerous",
       "format": "complaint-question",
+      "adopted": "no",
+      "url": null,
+      "result": "not posted"
+    },
+    {
+      "week": "2026-09-28 (c13)",
+      "draft": "D2 take-money-out-vs-keep-alive",
+      "format": "aphorism",
+      "adopted": "no",
+      "url": null,
+      "result": "not posted"
+    },
+    {
+      "week": "2026-09-28 (c13)",
+      "draft": "D3 honest-sequel-three-accounts",
+      "format": "confession",
+      "adopted": "no",
+      "url": null,
+      "result": "not posted"
+    },
+    {
+      "week": "2026-10-13 (c14)",
+      "draft": "D1 same-lesson-two-scales",
+      "format": "confession",
       "adopted": "pending",
       "url": null,
       "result": null
     },
     {
-      "week": "2026-09-28 (c13)",
-      "draft": "D2 take-money-out-vs-keep-alive",
+      "week": "2026-10-13 (c14)",
+      "draft": "D2 trade-is-dead",
       "format": "aphorism",
       "adopted": "pending",
       "url": null,
       "result": null
     },
     {
-      "week": "2026-09-28 (c13)",
-      "draft": "D3 honest-sequel-three-accounts",
-      "format": "confession",
+      "week": "2026-10-13 (c14)",
+      "draft": "D3 luck-vs-giving-back",
+      "format": "truth-bomb",
       "adopted": "pending",
       "url": null,
       "result": null
