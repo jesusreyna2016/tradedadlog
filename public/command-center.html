@@ -1898,7 +1898,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   function vName(v){ v=Number(v);
     return v>=2?T('SOLO LARGOS · tamaño normal','LONGS ONLY · normal size'):v===1?T('SOLO LARGOS · tamaño reducido','LONGS ONLY · reduced size')
       :v<=-2?T('SOLO CORTOS · tamaño normal','SHORTS ONLY · normal size'):v===-1?T('SOLO CORTOS · tamaño reducido','SHORTS ONLY · reduced size')
-      :T('NO OPERO · espera al 1H','NO TRADE · wait for the 1H'); }
+      :T('SIN DIRECCIÓN · niveles en ambos sentidos','NO DIRECTION · levels both ways'); }
   window.__trendVerdict=function(){
     if(!last) return null;
     var age=(Date.now()-Date.parse(last.receivedAt))/60000;
@@ -1914,7 +1914,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var flip = v<0 ? T('cambia si 1H cierra sobre ','flips if 1H closes above ')+px(r.flip)+T(' y rompe ',' and breaks ')+px(r.sh)
              : v>0 ? T('cambia si 1H cierra bajo ','flips if 1H closes below ')+px(r.flip)+T(' y rompe ',' and breaks ')+px(r.sl)
              : T('largos: 1H > ','longs: 1H > ')+px(r.flip)+T(' y rompe ',' and breaks ')+px(r.sh)+' · '+T('cortos: 1H < ','shorts: 1H < ')+px(r.flip)+T(' y rompe ',' and breaks ')+px(r.sl);
-    var zone = v===0 ? '' : r.zone ? T('🎯 en zona a favor: ','🎯 at a zone in favor: ')+r.zone : r.next ? T('próxima zona a favor: ','next zone in favor: ')+r.next : '';
+    var zone = v===0 ? '' : r.zone ? T('🎯 en zona a favor: ','🎯 at a zone in favor: ')+r.zone : r.ag ? T('✖ toque en contra, sáltalo: ','✖ touch against the verdict, skip it: ')+r.ag : r.next ? T('próxima zona a favor: ','next zone in favor: ')+r.next : '';
     var range = Number(r.flips)>=3 ? T('⚠ día de rango: ','⚠ range day: ')+r.flips+T(' cambios de veredicto, menos tamaño',' verdict changes, less size') : '';
     var old = st.fresh ? '' : '<br>'+T('Feed sin actualizar hace ','Feed not updated for ')+Math.round(st.age)+' min';
     el.className='ccregime '+cls+(st.fresh?'':' stale');
