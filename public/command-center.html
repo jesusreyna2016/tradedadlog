@@ -562,6 +562,7 @@ body::before{
       <div class="ccsignal wait" id="ccSignal"><b>WAIT</b><span>no edge yet</span></div>
       <div class="ccctx" id="ccCtx"></div>
       <div class="ccregime" id="ccRegime" hidden></div>
+      <div class="ccregime" id="ccTrend" hidden></div>
       <div class="hrule" id="ruleToday">"Level of interest + with the bias + my trigger. Never in the air, never out of revenge."</div>
     </div>
     <!-- RACHA -->
@@ -1887,6 +1888,53 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
 })();
 </script>
 
+<script>
+/* ================= TREND CHECKLIST · feed TCL1 de trend_checklist.pine (via /api/cc-trend) ================= */
+(function(){
+  var el=document.getElementById('ccTrend'); if(!el) return;
+  var CC_API=/(^|\.)tradedadlog\.com$/i.test(location.hostname)?'':'https://tradedadlog.com';
+  var SYM='NQ', STALE_MIN=75, last=null;   // heartbeat every 1H close
+  function px(v){ var n=parseFloat(v); return isFinite(n)?n.toLocaleString('en-US',{maximumFractionDigits:2}):''; }
+  function vName(v){ v=Number(v);
+    return v>=2?T('SOLO LARGOS · tamaño normal','LONGS ONLY · normal size'):v===1?T('SOLO LARGOS · tamaño reducido','LONGS ONLY · reduced size')
+      :v<=-2?T('SOLO CORTOS · tamaño normal','SHORTS ONLY · normal size'):v===-1?T('SOLO CORTOS · tamaño reducido','SHORTS ONLY · reduced size')
+      :T('NO OPERO · espera al 1H','NO TRADE · wait for the 1H'); }
+  window.__trendVerdict=function(){
+    if(!last) return null;
+    var age=(Date.now()-Date.parse(last.receivedAt))/60000;
+    return {v:Number(last.v), fresh:age<STALE_MIN, age:age};
+  };
+  function render(){
+    var st=window.__trendVerdict();
+    if(!st){ el.hidden=true; return; }
+    var r=last, v=st.v;
+    var cls=v>0?'bull':v<0?'bear':'chop';
+    var parts=['Trend Checklist '+SYM+' · <b>'+vName(v)+'</b>'];
+    if(Number(r.vl)!==v) parts.push(T('vela abierta marca ','open candle shows ')+vName(r.vl));
+    var flip = v<0 ? T('cambia si 1H cierra sobre ','flips if 1H closes above ')+px(r.flip)+T(' y rompe ',' and breaks ')+px(r.sh)
+             : v>0 ? T('cambia si 1H cierra bajo ','flips if 1H closes below ')+px(r.flip)+T(' y rompe ',' and breaks ')+px(r.sl)
+             : T('largos: 1H > ','longs: 1H > ')+px(r.flip)+T(' y rompe ',' and breaks ')+px(r.sh)+' · '+T('cortos: 1H < ','shorts: 1H < ')+px(r.flip)+T(' y rompe ',' and breaks ')+px(r.sl);
+    var zone = v===0 ? '' : r.zone ? T('🎯 en zona a favor: ','🎯 at a zone in favor: ')+r.zone : r.next ? T('próxima zona a favor: ','next zone in favor: ')+r.next : '';
+    var range = Number(r.flips)>=3 ? T('⚠ día de rango: ','⚠ range day: ')+r.flips+T(' cambios de veredicto, menos tamaño',' verdict changes, less size') : '';
+    var old = st.fresh ? '' : '<br>'+T('Feed sin actualizar hace ','Feed not updated for ')+Math.round(st.age)+' min';
+    el.className='ccregime '+cls+(st.fresh?'':' stale');
+    el.innerHTML=parts.join(' · ')+'<br>'+flip+(zone?'<br>'+zone:'')+(range?'<br>'+range:'')+old;
+    el.hidden=false;
+  }
+  function load(){
+    if(document.hidden) return;
+    fetch(CC_API+'/api/cc-trend',{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){ if(d){ last=(d.symbols&&d.symbols[SYM])||null; render(); } })
+      .catch(function(){});
+  }
+  load();
+  setInterval(load, 120000);
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden) load(); });
+  window.__i18nRefresh.push(render);
+})();
+</script>
+
 <!-- ===================== JOURNAL REAL · importar CSV de Tradovate ===================== -->
 <script>
 (function(){
@@ -2164,7 +2212,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   var execData=null;   // rollup de ejecucion (del journal, de-identificado)
   var lastPlan=null;   // ultimo plan cargado, para el boton "copiar a TradingView"
   // payload compacto para el indicador Pine "SA Plan Overlay" (una linea por simbolo).
-  // el indicador lo parsea: SYM/SESS/BIAS/DIR/ZT/SIG/TRG/SLW/Z2*/AZ/BZ/INVAL/T1/T2/NT/FVG/EM. Todo sale del plan del bus.
+  // el indicador lo parsea: SYM/SESS/GEN/BIAS/DIR/ZT/SIG/TRG/SLW/Z2*/AZ/BZ/INVAL/T1/T2/NT/FVG/EM. Todo sale del plan del bus.
   function saNum(x){ return (x==null||isNaN(+x))?null:(+x); }
   function saRange(a){ return (Array.isArray(a)&&a.length===2&&a[0]!=null&&a[1]!=null)?(a[0]+'-'+a[1]):null; }
   function saGolden(d,az){   // zona dorada / escenario B: estructurada si existe, si no del texto
@@ -2204,6 +2252,8 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if(!d) return '';
     var z=(d.zones&&d.zones[0])||null;
     var parts=['SYM='+sym,'SESS='+((plan&&plan.session)||'')];
+    // plan timestamp (epoch ms): the overlay only runs the zone lifecycle from here on and expires it after the window
+    var gen=plan&&plan.generatedAt?Date.parse(plan.generatedAt):NaN; if(!isNaN(gen)) parts.push('GEN='+gen);
     var bias=String(d.biasSession||'').toUpperCase(); if(bias) parts.push('BIAS='+bias);
     // the A+ zone can go AGAINST the session bias (e.g. a VAL bounce LONG on a SHORT day): send its own
     // direction so the overlay judges SL/targets by the trade side, not by the bias

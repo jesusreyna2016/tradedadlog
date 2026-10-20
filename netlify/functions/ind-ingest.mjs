@@ -2,6 +2,7 @@
 //   R3R1| (3reads) · DRB1| (dr bias) · SRZ1| (sr zones) · HCZ1| (htf context zones)
 //   CMDC1| (command center all-in-one · feed de sintesis: sesgo fusionado + veredicto)
 //   RGM1| (market regime · CHOP/BULL/BEAR + eventos de ruptura, fake, retest)
+//   TCL1| (trend checklist · confirmed verdict, flip levels, zone touches, range day; hb = hourly heartbeat)
 // Valida el secreto, parsea la cadena k=v y guarda el ultimo estado por
 // fuente+simbolo en Netlify Blobs (store 'cc', key 'ind:<src>:<SYM>').
 // El backbone orb_sesgo (TDL1) sigue entrando por cc-ingest como 'sym:<SYM>'.
@@ -9,7 +10,7 @@ import { getStore } from '@netlify/blobs';
 
 const PREFIX_SRC = {
   R3R1: '3reads', DRB1: 'drbias', SRZ1: 'srzones', HCZ1: 'htfzones', TDL1: 'orb',
-  CMDC1: 'command', RGM1: 'regime'
+  CMDC1: 'command', RGM1: 'regime', TCL1: 'trendcl'
 };
 
 // Market Regime keeps a per-day log of changes and events (not heartbeats) so a
@@ -27,6 +28,23 @@ async function appendRegimeLog(store, sym, kv){
   if(t && log.some(e => e.t === t && e.event === (kv.event || ''))) return;   // alert retried
   log.push({ t, ts: kv.ts, regime: kv.regime || null, event: kv.event || '', sess: kv.sess || null,
              grade: kv.grade || '', top: kv.top || '', bot: kv.bot || '', close: kv.close || '' });
+  if(log.length > RLOG_MAX) log = log.slice(-RLOG_MAX);
+  await store.setJSON(key, log);
+}
+
+// Trend Checklist keeps the same kind of per-day log (verdict changes, zone touches, range day; not the hourly
+// heartbeat) so a trade can be graded against the verdict that was in force when it was taken. Key tlog:<SYM>:<day>.
+async function appendTrendLog(store, sym, kv){
+  if(!kv.ev || kv.ev === 'hb') return;
+  const day = String(kv.ts || '').slice(0, 10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(day)) return;
+  const key = `tlog:${sym}:${day}`;
+  let log = [];
+  try { log = (await store.get(key, { type: 'json' })) || []; } catch (e) { log = []; }
+  const t = Number(kv.t) || null;
+  if(t && log.some(e => e.t === t && e.ev === kv.ev)) return;   // alert retried
+  log.push({ t, ts: kv.ts, ev: kv.ev, v: Number(kv.v), flip: kv.flip || '', sh: kv.sh || '', sl: kv.sl || '',
+             zone: kv.zone || '', flips: Number(kv.flips) || 0, px: kv.px || '' });
   if(log.length > RLOG_MAX) log = log.slice(-RLOG_MAX);
   await store.setJSON(key, log);
 }
@@ -71,5 +89,6 @@ export default async (req) => {
   const store = getStore('cc');
   await store.setJSON(`ind:${src}:${sym}`, record);
   if(src === 'regime') await appendRegimeLog(store, sym, kv);
+  if(src === 'trendcl') await appendTrendLog(store, sym, kv);
   return new Response(`ok · ${src} · ${sym} · ${kv.ts || ''}`, { status: 200 });
 };
