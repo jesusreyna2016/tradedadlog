@@ -2164,7 +2164,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   var execData=null;   // rollup de ejecucion (del journal, de-identificado)
   var lastPlan=null;   // ultimo plan cargado, para el boton "copiar a TradingView"
   // payload compacto para el indicador Pine "SA Plan Overlay" (una linea por simbolo).
-  // el indicador lo parsea: SYM/SESS/BIAS/DIR/ZT/SIG/AZ/BZ/INVAL/T1/T2/NT/FVG/EM. Todo sale del plan del bus.
+  // el indicador lo parsea: SYM/SESS/BIAS/DIR/ZT/SIG/TRG/SLW/Z2*/AZ/BZ/INVAL/T1/T2/NT/FVG/EM. Todo sale del plan del bus.
   function saNum(x){ return (x==null||isNaN(+x))?null:(+x); }
   function saRange(a){ return (Array.isArray(a)&&a.length===2&&a[0]!=null&&a[1]!=null)?(a[0]+'-'+a[1]):null; }
   function saGolden(d,az){   // zona dorada / escenario B: estructurada si existe, si no del texto
@@ -2191,6 +2191,15 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var t=z&&z.play?L(z.play.structStop):''; var nums=t?(t.match(/\d{3,6}(?:\.\d+)?/g)||[]).map(Number):[];
     return nums.length?nums[nums.length-1]:null;
   }
+  function saBoth(x){ return x==null?'':(typeof x==='object'?((x.en||'')+' | '+(x.es||'')):String(x)); }
+  function saTrig(z){   // trigger level of the play: "5m close back above 29692" -> 29692
+    var t=z&&z.play?saBoth(z.play.trigger):''; var m=t.match(/(?:above|below|sobre|bajo)\s+(\d{3,6}(?:\.\d+)?)/i);
+    return m?+m[1]:null;
+  }
+  function saSlow(z){   // slow stop: "wicks only -> hold to 29660"
+    var t=z&&z.play?saBoth(z.play.ifWrong):''; var m=t.match(/(?:hold to|aguanta hasta)\s+(\d{3,6}(?:\.\d+)?)/i);
+    return m?+m[1]:null;
+  }
   function buildPayload(sym,d,plan){
     if(!d) return '';
     var z=(d.zones&&d.zones[0])||null;
@@ -2210,6 +2219,19 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var rr=saNum(z&&z.risk&&z.risk.rr); if(rr!=null) parts.push('RR='+rr);
     var stop=saStop(z); if(stop!=null) parts.push('STOP='+stop);
     var win=saWin(z); if(win) parts.push('WIN='+win);
+    var trg=saTrig(z); if(trg!=null) parts.push('TRG='+trg);
+    var slw=saSlow(z); if(slw!=null) parts.push('SLW='+slw);
+    // second zone (often the one WITH the bias when the first is a counter bounce)
+    var z2=d.zones&&d.zones[1]; var z2r=z2&&saRange(z2.range);
+    if(z2r&&z2r!==az){
+      if(z2r===bz) parts=parts.filter(function(x){ return x!=='BZ='+bz; });   // same box as the flip zone: Z2 carries more info
+      parts.push('Z2='+z2r);
+      var z2d=String(z2.dir||'').toUpperCase(); if(z2d==='LONG'||z2d==='SHORT') parts.push('Z2D='+z2d);
+      if(z2.type) parts.push('Z2T='+String(z2.type).replace(/[;=\s]/g,'_'));
+      var z2rr=saNum(z2.risk&&z2.risk.rr); if(z2rr!=null) parts.push('Z2RR='+z2rr);
+      var z2s=saStop(z2); if(z2s!=null) parts.push('Z2S='+z2s);
+      var z2t=saTrig(z2); if(z2t!=null) parts.push('Z2TRG='+z2t);
+    }
     // guarda de coherencia: si un plan viejo/con bug trae un noTradeZone que se come la entrada
     // de la Zona A+, recortalo al borde de la zona antes de emitir el payload (en corto baja el
     // techo hasta el lo de la A+, en largo sube el piso hasta el hi). Asi el overlay nunca recibe
