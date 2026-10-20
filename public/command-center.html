@@ -2164,7 +2164,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   var execData=null;   // rollup de ejecucion (del journal, de-identificado)
   var lastPlan=null;   // ultimo plan cargado, para el boton "copiar a TradingView"
   // payload compacto para el indicador Pine "SA Plan Overlay" (una linea por simbolo).
-  // el indicador lo parsea: SYM/SESS/BIAS/SIG/AZ/BZ/INVAL/T1/T2/NT/FVG/EM. Todo sale del plan del bus.
+  // el indicador lo parsea: SYM/SESS/BIAS/DIR/ZT/SIG/AZ/BZ/INVAL/T1/T2/NT/FVG/EM. Todo sale del plan del bus.
   function saNum(x){ return (x==null||isNaN(+x))?null:(+x); }
   function saRange(a){ return (Array.isArray(a)&&a.length===2&&a[0]!=null&&a[1]!=null)?(a[0]+'-'+a[1]):null; }
   function saGolden(d,az){   // zona dorada / escenario B: estructurada si existe, si no del texto
@@ -2196,12 +2196,17 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var z=(d.zones&&d.zones[0])||null;
     var parts=['SYM='+sym,'SESS='+((plan&&plan.session)||'')];
     var bias=String(d.biasSession||'').toUpperCase(); if(bias) parts.push('BIAS='+bias);
+    // the A+ zone can go AGAINST the session bias (e.g. a VAL bounce LONG on a SHORT day): send its own
+    // direction so the overlay judges SL/targets by the trade side, not by the bias
+    var zdir=String((z&&z.dir)||'').toUpperCase(); if(zdir==='LONG'||zdir==='SHORT') parts.push('DIR='+zdir);
+    if(z&&z.type) parts.push('ZT='+String(z.type).replace(/[;=\s]/g,'_'));
+    var side=zdir||bias;
     var sig=String((d.verdict&&d.verdict.signal)||'').toUpperCase(); if(sig) parts.push('SIG='+sig);
     var az=z&&saRange(z.range); if(az) parts.push('AZ='+az);
     var bz=saGolden(d,az); if(bz) parts.push('BZ='+bz);
     var inval=saNum(d.invalidation&&d.invalidation.level); if(inval!=null) parts.push('INVAL='+inval);
     var t1=saNum(d.scenarioA&&d.scenarioA.target); if(t1!=null) parts.push('T1='+t1);
-    var t2=saT2(d,t1,bias); if(t2!=null) parts.push('T2='+t2);
+    var t2=saT2(d,t1,side); if(t2!=null) parts.push('T2='+t2);
     var rr=saNum(z&&z.risk&&z.risk.rr); if(rr!=null) parts.push('RR='+rr);
     var stop=saStop(z); if(stop!=null) parts.push('STOP='+stop);
     var win=saWin(z); if(win) parts.push('WIN='+win);
@@ -2214,7 +2219,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       var zlo=Math.min(z.range[0],z.range[1]), zhi=Math.max(z.range[0],z.range[1]), zmid=(zlo+zhi)/2;
       var nlo=Math.min(ntz[0],ntz[1]), nhi=Math.max(ntz[0],ntz[1]);
       if(zmid>=nlo&&zmid<=nhi){
-        if(bias==='SHORT') nhi=Math.min(nhi,zlo); else nlo=Math.max(nlo,zhi);
+        if(side==='SHORT') nhi=Math.min(nhi,zlo); else nlo=Math.max(nlo,zhi);
         ntz=(nhi>nlo)?[nlo,nhi]:null;
       }
     }
