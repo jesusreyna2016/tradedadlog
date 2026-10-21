@@ -158,3 +158,13 @@ sharper over time instead of starting cold each week. Keep it factual and dated.
 - Family/check-in posts fell back to 506-665 once the surgery news cycle ended; the 2.2K surgery posts were the exception.
 - Flags kept visible: Sep 28 "Maxed was 4" still uncorrected vs the 10-lot/7-lot screenshots; a reply offered a free code by DM (disclose any referral); Vest run at max size and margin by his own reply.
 - `marked-posted.json` still empty after 14 cycles.
+
+## Cycle #15 observations (2026-10-20, interactive, logged in, triggered manually by Jesus)
+- Busiest week since the $6K Challenge: 8 real posts Oct 13-20, all his own writing, **0 for 15 cycles** on verbatim drafts. Followers 874 -> 905 (+31), posts 967.
+- **Cycle #14 prediction HIT:** the Oct 15 Vest loss post (3.9K) beat the next pure-win post (Oct 16 payout, 1.2K) by 3.3x. Running score 4/5.
+- **Specificity beats everything, emojis are not the variable.** Real number plus own mistake: 4.6K (Oct 13), 3.9K (Oct 15), 1.2K (-$242). Live position with cashtags and a choice question: 3.5K (Oct 17), 2.6K ("Fly $NQ fly", n=1). Generic psychology with no number: 227 (Oct 20), 597 (Oct 19).
+- The Oct 19 post came out of the chat session about the 3 trades (let it run reversed, secured early flew). He kept the question and dropped the numbers and the confession, and added emojis. 597 views, 10 generic replies. The numbers and the confession were the post.
+- **One leak, three data points in 6 days:** Oct 15 up $1,698 -> -$242, Oct 18 held too long and barely green, Oct 20 "I keep letting great trades round trip back to BE". The audience gave the structural fix: @yoshiretails "write the exit before the entry", @drippy_eth "there is a lockout rule in the settings" (Jesus said he would check).
+- Real quote worth keeping: Jesus's reply "That little bit more has killed more accounts than bad setups" (24 likes).
+- Watch items: whether the platform lockout rule is on; disclose any sponsored or affiliate @MyFundedPerps posts (Oct 16 payout post carries a marketing line and a link).
+- `marked-posted.json` still empty after 15 cycles.

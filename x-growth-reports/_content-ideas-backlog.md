@@ -61,6 +61,16 @@ Running list of post ideas sourced from real audience comments and trend scans. 
 
 - **Honest-loss framing beats win framing, same event (13 oct 2026)** — 3,049 views leading with the giveback vs 722 for the "Yes! here's the proof" post. Not an idea to draft, a rule: tell the impressive number inside the honest version.
 
+- **"That little bit more has killed more accounts than bad setups", source: Jesus's own reply (24 likes) on the Oct 15 -$242 post** `[USED 2026-10-20 as aphorism draft 2, cycle #15]`
+
+- **Write the exit before the entry, source: @yoshiretails (8 likes, Oct 19) on the "let it run / secure early" post** — structural fix from a stranger. `[USED 2026-10-20 inside confession draft 1, cycle #15]`
+
+- **The Vest account died on a bad morning, source: Jesus's own Oct 15 post ("family situation early that morning... I knew better") + @RealizedTrader's state-before-the-trade mechanism** `[USED 2026-10-20 as complaint+question draft 3, cycle #15]`
+
+- **Platform lockout rule in settings, source: @drippy_eth (Oct 16)** — Jesus said he would check. Follow-up post once he knows whether it is on. Open.
+
+- **Specificity rule (20 oct 2026)** — real number plus own mistake got 4.6K and 3.9K; generic psychology on the same topic got 227 and 597. Not an idea to draft, a rule.
+
 ## Used ideas
 - **Mine the viral pair's comments, source: own account, Sep 2-3** — `[USED 2026-09-04 — mined the 15K/10K posts' replies interactively, yielded the need-vs-want, payout-maxxing, physical-ritual and emotional-neutrality ideas above]`
 - **Aphorism riff, @RealizedTrader comment (27 ago 2026)** — "Knowing the rule was never the problem. Breaking it anyway is." `[USED 2026-08-31 — posted as the Aug 31 aphorism, status 2094580592495002023]`

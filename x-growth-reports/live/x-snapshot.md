@@ -1,27 +1,33 @@
-# X Snapshot, captured 2026-10-13 (cycle #14, interactive, logged in)
+# X Snapshot, captured 2026-10-20 (cycle #15, interactive, logged in)
 
-Account: @TradeDadLog, 874 followers (+50 since Sep 28), 918 posts.
+Account: @TradeDadLog, 905 followers (+31 since Oct 13), 967 posts.
 
 ## Headline
-15-day gap. Jesus was away for his wife's surgery and the drive (back home Oct 5). Oct 12 (Monday) he lost almost $1k in one session on a Vest account he had run from $10 to about $3K peak, because he would not admit the trade was wrong. He posted it Oct 13.
+Busiest week since the $6K Challenge, 8 real posts Oct 13-20. Same leak three times in six days: up $1,698 then ended -$242 (Oct 15), held too long and barely green (Oct 18), "I keep letting great trades round trip back to BE" (Oct 20). The Oct 19 post came from the chat session about the 3 trades but kept only the question.
 
-## Real posts this window (X Analytics 4W, logged in)
-1. Oct 13, id 2110009171860963486, "I turned a $10 @VestExchange account into about $3,000. Pulled $1,200 already but yesterday I lost almost $1k in one session because I wouldn't admit I was wrong...": 3,049 views, 48 likes, 23 replies. Best post since the Sep 21 failure thread.
-2. Oct 13, id 2110061209827319825, "Yes! $10 @VestExchange account to about $3k peak... So here's the proof": 722 views, 18 likes, 6 replies.
-3. Oct 5, id 2107231035968946242, "Been off the timeline for a bit... So what did I miss?": 665 views, 5 likes, 2 replies.
-4. Oct 5, id 2107121682817204591, "Home. Almost 2,000 miles in the car. Wife's recovering...": 506 views, 19 likes.
-Matured: Sep 28 "Today felt different" 1.2K/29/4; Sep 27 2.3K/53/8; Sep 21 failure thread tweet 1 5.3K/49/29; Sep 20 launch 2.6K.
+## Real posts this window (X Analytics 2W, logged in)
+1. Oct 20, id 2112664316386202077, "The constant battle in trading: Greed vs. Discipline...": 227 views (hours old), 4 likes, 1 reply.
+2. Oct 19, id 2112158320584708175, "The market really knows how to test your patience! Let it run? Reverses on you. Secure early? Flies to the moon...": 597 views, 10 likes, 10 replies.
+3. Oct 18, id 2111946773572821057, "Fly $NQ fly!": 2.6K views, 40 likes, 7 replies.
+4. Oct 18, id 2111838556679241856, "Turns out greed didn't pay this time! Held too long...": 616 views, 12 likes, 2 replies.
+5. Oct 17, id 2111586088427139109, "Beautiful drop on $ETH... Do we secure the profits or let greed take the wheel?": 3.5K views, 33 likes, 6 replies, 1 repost.
+6. Oct 16, id 2111152995740041686, "$1,429.63 payout on my 10K account on @MyFundedPerps" + certificate link: 1.2K views, 43 likes, 11 replies.
+7. Oct 15, id 2110791681737933227, "Was up $1,698... Ended the day at -$242!": 1.2K views, 28 likes, 17 replies.
+8. Oct 15, id 2110634134930432119, "Got the free 25k eval code from @capital_jn on @VestExchange... Lost it the same day. I knew better. I did it anyway.": 3.9K views, 40 likes, 11 replies.
+Matured: Oct 13 Vest confession 4.6K/60/25, proof post 1.4K/20/8.
 
-## Top comments (Oct 13 post)
-- Jesus to @dctrades22: "The hard part isn't the setup. It's admitting the trade is dead while you're still in it."
-- Jesus to @mannyjplays (how did you do it): "was luck".
-- @SerPenkjaminF: "Vest still got you live, don't revenge trade it." Jesus: "No more revenge clicks on this one."
-- @FxGal: "did you trade with max size and margin?" Jesus: "Yes!"
-- @Mama__Wick: "How did you avoid that SMALL AF drawdown" (unanswered).
-- @capital_jn offered a free code by DM.
+## Top comments
+- Jesus's own reply (24 likes, Oct 15): "That 'little bit more' has killed more accounts than bad setups."
+- @yoshiretails (8 likes, Oct 19, unanswered): "Write the exit before the entry."
+- @drippy_eth (Oct 16): "We have a lockout rule in settings, this may help." Jesus: "Didn't know that was in the settings. I'll check it out."
+- @Creeks2025 (Oct 19): "Make some money and hit that manual lockout."
+- @PThangDo (Oct 19): you'll never capture the top nor call the bottom, extracting money is doing really well.
+- @dd_degens (Oct 15, Vest thread): run Vest at 20x until base hits, then scale up.
+- @EdmundoFutures (Oct 15): "It wasn't about the free eval. It was about how much money you made out of $10."
 
-## Peers (@RealizedTrader, Oct 9-13)
-- Cut winners early and call it discipline when it's relief (203 likes). Position size is a regulation demand, drawdown too (244). A flat trade on a live account feels dead (290).
+## Peers (@RealizedTrader, Oct 17-20)
+- Put one word on your state before the next trade (298 likes). You don't break rules out of nowhere, there's a moment before it (380). The mistake isn't the trade, it's what happened right before it (177). Urge test: your hand is on the mouse when price leaves (185).
 
-## Accuracy flag still open
-Sep 28 post says "Maxed was 4", screenshots showed a 10-lot and a 7-lot MNQ. No correction seen.
+## Flags
+- Sep 28 "Maxed was 4" still uncorrected vs the 10-lot and 7-lot screenshots.
+- Disclose any sponsored or affiliate @MyFundedPerps posts.
