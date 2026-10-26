@@ -1483,7 +1483,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   // Niveles edge: VAH/POC/VAL, PDH/PDL, PWH/PWL, apertura del dia (DO), true day open (TDO).
   var NML_TICKS = 100;                         // radio de "en un nivel", en ticks. Baja a 60-80 si queda muy laxo.
   function symTick(s){ s=(s||'NQ').toUpperCase();
-    return s==='GC'?0.10 : s==='CL'?0.01 : s==='SI'?0.005 : (s==='YM'||s==='DOW')?1 : s==='ETHUSDT'?0.05 : s==='BTCUSDT'?1 : 0.25; } // NQ/ES = 0.25 · crypto: CC ticks sized so 100t ~ 0.1% of price
+    return s==='GC'?0.10 : s==='CL'?0.01 : s==='SI'?0.005 : (s==='YM'||s==='DOW')?1 : s==='ETHUSDT'?0.02 : s==='BTCUSDT'?1 : 0.25; } // NQ/ES = 0.25 · crypto: CC ticks sized so 100t ~ 0.1% of price
   function noMansLand(p){
     if(!p || p.price==null) return {far:false, n:0};
     var L=p.levels||{}, P=p.price;
@@ -2618,7 +2618,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   var onEl=$('nudgeOn'), rEl=$('nudgeR'), copyEl=$('nudgeCopy'), nearEl=$('nudgeNear');
   var LS_ON='cc_nudge_on', LS_R='cc_nudge_ticks';
   function fmt(n){ return n==null?'—':Number(n).toLocaleString('en-US',{maximumFractionDigits:(Math.abs(n%1)>1e-9?2:0)}); }
-  function symTick(s){ s=(s||'NQ').toUpperCase(); return s==='GC'?0.10:s==='CL'?0.01:s==='SI'?0.005:(s==='YM'||s==='DOW')?1:s==='ETHUSDT'?0.05:s==='BTCUSDT'?1:0.25; }
+  function symTick(s){ s=(s||'NQ').toUpperCase(); return s==='GC'?0.10:s==='CL'?0.01:s==='SI'?0.005:(s==='YM'||s==='DOW')?1:s==='ETHUSDT'?0.02:s==='BTCUSDT'?1:0.25; }
   var radius=20, on=true, armed=false;
   try{ var v=parseInt(localStorage.getItem(LS_R),10); if(v>0) radius=v; }catch(e){}
   try{ on=localStorage.getItem(LS_ON)!=='0'; }catch(e){}
