@@ -42,6 +42,16 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
+  // Command Center v2 modules are NOT hashed: network-first so an update shows on the next load,
+  // cached copy only as the offline fallback.
+  if (url.pathname.startsWith('/cc2/')) {
+    e.respondWith(
+      fetch(req).then((r) => { if (r && r.status === 200) { const cp = r.clone(); caches.open(CACHE).then((c) => c.put(req, cp)); } return r; })
+                .catch(() => caches.match(req))
+    );
+    return;
+  }
+
   // Static assets (hashed JS/CSS/img, fonts stylesheet): cache-first.
   e.respondWith(
     caches.match(req).then((c) => c || fetch(req).then((r) => {
