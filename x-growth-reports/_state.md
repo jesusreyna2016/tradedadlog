@@ -168,3 +168,12 @@ sharper over time instead of starting cold each week. Keep it factual and dated.
 - Real quote worth keeping: Jesus's reply "That little bit more has killed more accounts than bad setups" (24 likes).
 - Watch items: whether the platform lockout rule is on; disclose any sponsored or affiliate @MyFundedPerps posts (Oct 16 payout post carries a marketing line and a link).
 - `marked-posted.json` still empty after 15 cycles.
+
+## Cycle #16 observations (2026-10-26, interactive, logged in, triggered manually by Jesus)
+- Only 3 new real posts since cycle #15 (Oct 21, 23, 25) plus an Oct 14 quote post missed last time. **0 for 16 cycles** on verbatim drafts. Followers 905 -> 887 (-18), first real dip since Sep. Posts counter 972.
+- **Cycle #15 prediction MISS on both halves.** Oct 25 payout (a number plus a vague mistake line) = 840; Oct 21 shared-pain question (no number) = 1.5K. Running score 4/6. Rule that survives: wins are the weakest framing every time (840, 1.3K, 722); shared-pain question or honest loss carries reach; a vague "I make mistakes" line is not specificity.
+- **Oct 23 wick post: 7.3K views but weakest engagement per view** (33 likes, 13 replies, corrections instead of sympathy, a technical explanation from @0xDevin_). First outside-blame post since the voice rule. Followers dipped 18 in the same window (one data point, watch two more cycles).
+- **Oct 21 NY open question: 1.5K, 15 replies, Jesus replied to none.** Two replies are the two halves of his own hold-vs-cut dilemma, three independent traders now back "we fix the last mistake and walk into the opposite one". Used as draft 1.
+- A quote of a bigger account's offer (Oct 14, @capital_jn) got 5.2K on 20 likes: reach came from the quoted account.
+- Jesus has not replied this window to @dctrades22 (repeat engager, 3 substantive replies in 2 weeks), @0xDevin_ or @yoshiretails. Two payout certificates with a firm link in 10 days: disclosure question still open. No answer on the platform lockout rule.
+- `marked-posted.json` still empty after 16 cycles.

@@ -71,6 +71,16 @@ Running list of post ideas sourced from real audience comments and trend scans. 
 
 - **Specificity rule (20 oct 2026)** — real number plus own mistake got 4.6K and 3.9K; generic psychology on the same topic got 227 and 597. Not an idea to draft, a rule.
 
+- **Fix the last mistake and walk into the opposite one, source: @RichBroker101 ("too easily satisfied once I passed the $100", could have held) + @R3G5B7 ("up 110 should have been 200, got nervous") on the Oct 21 NY open post + Jesus's own Oct 19 post** `[USED 2026-10-26 as complaint+question draft 1, cycle #16]`
+
+- **A wick can print without the book reaching it, source: @0xDevin_ on the Oct 23 pass-target post (unanswered)** — turns the outside-blame post into ownership. `[USED 2026-10-26 as confession draft 2, cycle #16]`
+
+- **"Which rule are you tightening first?", source: @dctrades22 on the Oct 25 payout post (unanswered)** — needs Jesus's real rule. `[USED 2026-10-26 as truth-bomb draft 3, cycle #16, bracketed]`
+
+- **Dad lane travels, source: niche scan of @RealizedTrader (Oct 23, 293 likes)** — surprising his son at a school award after leaving a job that denied PTO. Mechanism only, needs a real Jesus anchor.
+
+- **Rule (26 oct 2026)** — wins are the weakest framing every time (840, 1.3K, 722); shared-pain question or honest loss carries reach. Outside blame draws corrections and a follower dip.
+
 ## Used ideas
 - **Mine the viral pair's comments, source: own account, Sep 2-3** — `[USED 2026-09-04 — mined the 15K/10K posts' replies interactively, yielded the need-vs-want, payout-maxxing, physical-ritual and emotional-neutrality ideas above]`
 - **Aphorism riff, @RealizedTrader comment (27 ago 2026)** — "Knowing the rule was never the problem. Breaking it anyway is." `[USED 2026-08-31 — posted as the Aug 31 aphorism, status 2094580592495002023]`

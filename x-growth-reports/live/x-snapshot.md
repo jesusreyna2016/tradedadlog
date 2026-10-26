@@ -1,33 +1,27 @@
-# X Snapshot, captured 2026-10-20 (cycle #15, interactive, logged in)
+# X Snapshot, captured 2026-10-26 (cycle #16, interactive, logged in)
 
-Account: @TradeDadLog, 905 followers (+31 since Oct 13), 967 posts.
-
-## Headline
-Busiest week since the $6K Challenge, 8 real posts Oct 13-20. Same leak three times in six days: up $1,698 then ended -$242 (Oct 15), held too long and barely green (Oct 18), "I keep letting great trades round trip back to BE" (Oct 20). The Oct 19 post came from the chat session about the 3 trades but kept only the question.
+Account: @TradeDadLog, 887 followers (-18 since Oct 20), 972 posts.
 
 ## Real posts this window (X Analytics 2W, logged in)
-1. Oct 20, id 2112664316386202077, "The constant battle in trading: Greed vs. Discipline...": 227 views (hours old), 4 likes, 1 reply.
-2. Oct 19, id 2112158320584708175, "The market really knows how to test your patience! Let it run? Reverses on you. Secure early? Flies to the moon...": 597 views, 10 likes, 10 replies.
-3. Oct 18, id 2111946773572821057, "Fly $NQ fly!": 2.6K views, 40 likes, 7 replies.
-4. Oct 18, id 2111838556679241856, "Turns out greed didn't pay this time! Held too long...": 616 views, 12 likes, 2 replies.
-5. Oct 17, id 2111586088427139109, "Beautiful drop on $ETH... Do we secure the profits or let greed take the wheel?": 3.5K views, 33 likes, 6 replies, 1 repost.
-6. Oct 16, id 2111152995740041686, "$1,429.63 payout on my 10K account on @MyFundedPerps" + certificate link: 1.2K views, 43 likes, 11 replies.
-7. Oct 15, id 2110791681737933227, "Was up $1,698... Ended the day at -$242!": 1.2K views, 28 likes, 17 replies.
-8. Oct 15, id 2110634134930432119, "Got the free 25k eval code from @capital_jn on @VestExchange... Lost it the same day. I knew better. I did it anyway.": 3.9K views, 40 likes, 11 replies.
-Matured: Oct 13 Vest confession 4.6K/60/25, proof post 1.4K/20/8.
+1. Oct 25, id 2114322766820155870, "Payout locked in: $1,929.77 on @MyFundedPerps... Still making mistakes with position sizing and greed": 840 views, 27 likes, 6 replies.
+2. Oct 23, id 2113767015513297176, "The wick literally TOUCHED my Pass Target on ETH, but no fill and no pass on @MyFundedPerps... Slippage / spread really said not today bro": 7.3K views, 33 likes, 13 replies, 1 repost.
+3. Oct 21, id 2112914159470023086, "NY open was pure garbage today!... How did your open go?": 1.5K views, 22 likes, 15 replies.
+4. Oct 14, id 2110338818066800845, quote of @capital_jn's free-eval offer: 5.2K views, 20 likes, 3 replies.
+Matured: Oct 20 526 · Oct 19 637 · Oct 18 "Fly $NQ" 2.7K · Oct 18 640 · Oct 17 ETH question 3.6K · Oct 16 payout 1.3K · Oct 15 -$242 1.2K · Oct 15 Vest loss 3.9K.
 
 ## Top comments
-- Jesus's own reply (24 likes, Oct 15): "That 'little bit more' has killed more accounts than bad setups."
-- @yoshiretails (8 likes, Oct 19, unanswered): "Write the exit before the entry."
-- @drippy_eth (Oct 16): "We have a lockout rule in settings, this may help." Jesus: "Didn't know that was in the settings. I'll check it out."
-- @Creeks2025 (Oct 19): "Make some money and hit that manual lockout."
-- @PThangDo (Oct 19): you'll never capture the top nor call the bottom, extracting money is doing really well.
-- @dd_degens (Oct 15, Vest thread): run Vest at 20x until base hits, then scale up.
-- @EdmundoFutures (Oct 15): "It wasn't about the free eval. It was about how much money you made out of $10."
+- @dctrades22 (Oct 25, unanswered): "What rule are you tightening first to make that harder to repeat next week?"
+- @0xDevin_ (Oct 23, unanswered): a wick is just the highest or lowest trade that printed, a single trade can print a wick without the book getting there.
+- @dd_degens (Oct 23): the body of the candle has to fully touch before it triggers.
+- @Yeahsowhat2 (Oct 23): "Is this from your phone? Could you have manually closed it?"
+- @RichBroker101 (Oct 21): too easily satisfied once he passed $100, could have held for more. @R3G5B7 (Oct 21): up 110 on a fresh 5k, should have been 200, got nervous.
+- @GammaSqueezer (Oct 21): worst trading of his life this week, need to reset. @thehenryfam: blew two accounts in the first 30 minutes.
+- Jesus replied only to payout-post questions (Rise for payout, thanks).
 
-## Peers (@RealizedTrader, Oct 17-20)
-- Put one word on your state before the next trade (298 likes). You don't break rules out of nowhere, there's a moment before it (380). The mistake isn't the trade, it's what happened right before it (177). Urge test: your hand is on the mouse when price leaves (185).
+## Peers (@RealizedTrader, Oct 22-23)
+- A red day keeps running in the body after you close the platform (240 likes). Around 11 you take the trade you swore you were done with (189). Dad post, surprising his son at a school award (293).
 
 ## Flags
 - Sep 28 "Maxed was 4" still uncorrected vs the 10-lot and 7-lot screenshots.
-- Disclose any sponsored or affiliate @MyFundedPerps posts.
+- Two @MyFundedPerps payout posts with a certificate link in 10 days, disclosure question open.
+- Outside-blame post (Oct 23) drew corrections, followers dipped 18 in the window.
