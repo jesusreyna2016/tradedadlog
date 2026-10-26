@@ -7,11 +7,12 @@
 //   htfzones -> HTF Context & Zones     (ind:htfzones:<SYM>)
 //   command  -> NQ Command All-in-One   (ind:command:<SYM>) · sesgo fusionado + veredicto Portero
 //   regime   -> Market Regime           (ind:regime:<SYM>) · CHOP/BULL/BEAR, caja y ultimo evento
+//   trendcl  -> Trend Checklist         (ind:trendcl:<SYM>) · confirmed D/4H/1H verdict, flip levels, zone touches
 // El calendario economico se pide aparte a /api/cc-news.
 import { getStore } from '@netlify/blobs';
 
 const SYMBOLS = ['NQ', 'ES', 'GC', 'YM', 'CL'];
-const SOURCES = ['3reads', 'drbias', 'srzones', 'htfzones', 'command', 'regime'];
+const SOURCES = ['3reads', 'drbias', 'srzones', 'htfzones', 'command', 'regime', 'trendcl'];
 
 export default async () => {
   const store = getStore('cc');
