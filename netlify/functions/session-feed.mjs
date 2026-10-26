@@ -8,17 +8,21 @@
 //   command  -> NQ Command All-in-One   (ind:command:<SYM>) · sesgo fusionado + veredicto Portero
 //   regime   -> Market Regime           (ind:regime:<SYM>) · CHOP/BULL/BEAR, caja y ultimo evento
 //   trendcl  -> Trend Checklist         (ind:trendcl:<SYM>) · confirmed D/4H/1H verdict, flip levels, zone touches
+// ETHUSDT / BTCUSDT van aparte en `crypto` (mismo esquema por simbolo): solo los lee la rutina
+// crypto-weekend del Session Analyst, las corridas de futuros no los tocan.
 // El calendario economico se pide aparte a /api/cc-news.
 import { getStore } from '@netlify/blobs';
 
 const SYMBOLS = ['NQ', 'ES', 'GC', 'YM', 'CL'];
+const CRYPTO = ['ETHUSDT', 'BTCUSDT'];
 const SOURCES = ['3reads', 'drbias', 'srzones', 'htfzones', 'command', 'regime', 'trendcl'];
 
 export default async () => {
   const store = getStore('cc');
   const symbols = {};
+  const crypto = {};
 
-  await Promise.all(SYMBOLS.map(async (sym) => {
+  await Promise.all([...SYMBOLS, ...CRYPTO].map(async (sym) => {
     const entry = {};
     try {
       const orb = await store.get('sym:' + sym, { type: 'json' });
@@ -38,10 +42,10 @@ export default async () => {
       } catch (e) { /* sin dato de esa fuente todavia */ }
     }));
 
-    symbols[sym] = entry;
+    (CRYPTO.includes(sym) ? crypto : symbols)[sym] = entry;
   }));
 
-  return new Response(JSON.stringify({ symbols, generatedAt: new Date().toISOString() }), {
+  return new Response(JSON.stringify({ symbols, crypto, generatedAt: new Date().toISOString() }), {
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
