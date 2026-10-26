@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Command Center · TradeDadLog</title>
+<meta name="theme-color" content="#07090c">
+<link rel="icon" href="td-logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="cc2/cc2.css">
+<script>
+  /* language before first paint, shared with the classic Command Center (key cc_lang) */
+  try { document.documentElement.lang = localStorage.getItem('cc_lang') === 'es' ? 'es' : 'en'; } catch (e) {}
+</script>
+</head>
+<body class="hud-bg">
+<div class="wrap">
+
+  <header class="topbar glass">
+    <div class="brand">
+      <img class="logo" src="td-logo.jpg" alt="" width="34" height="34">
+      <div>
+        <div class="brand-name">COMMAND CENTER</div>
+        <div class="brand-sub"><span class="live-dot" aria-hidden="true"></span><span id="liveAge" data-i18n="connecting">Connecting</span></div>
+      </div>
+    </div>
+    <div class="symbar" id="symBar" role="group" data-i18n-aria="market"></div>
+    <div class="sessions" id="sessions"></div>
+    <div class="top-right">
+      <a class="classic" href="command-center.html" data-i18n="classic">Classic view</a>
+      <button type="button" class="icon-btn" id="soundBtn" aria-pressed="true" data-i18n-aria="sound">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path id="soundWave" d="M16 8a5 5 0 0 1 0 8"/></svg>
+      </button>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="en">EN</button>
+        <button type="button" data-lang="es">ES</button>
+      </div>
+      <div class="clock">
+        <div class="clock-t" id="clock">--:--:--</div>
+        <div class="clock-d" id="clockDate"></div>
+      </div>
+    </div>
+  </header>
+
+  <div id="newsAlert" class="news-alert" hidden></div>
+
+  <!-- shown right after an exit: the pause takes the top of the screen -->
+  <section id="pauseCard" class="pause glass" hidden aria-live="polite"></section>
+
+  <!-- the one card that answers "can I trade right now?" -->
+  <section id="decision" class="decision glass" aria-live="polite">
+    <span class="corner c-tl"></span><span class="corner c-tr"></span><span class="corner c-bl"></span><span class="corner c-br"></span>
+    <span class="scan" aria-hidden="true"></span>
+    <div class="dec-top">
+      <div class="dec-main">
+        <div class="eyebrow" id="decEyebrow"></div>
+        <h1 class="verdict" id="decVerdict"></h1>
+        <p class="dec-why" id="decWhy"></p>
+      </div>
+      <div class="agree">
+        <div class="agree-head"><span data-i18n="agreeLabel">How many signals agree</span><b id="agreeN">0 / 4</b></div>
+        <div class="agree-bar" id="agreeBar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="agree-sub" id="agreeSub"></div>
+      </div>
+    </div>
+    <div class="dec-boxes">
+      <div class="box"><div class="box-k" data-i18n="whichWay">Which way</div><div class="box-v mono" id="decDir"></div><div class="box-s" id="decDirSub"></div></div>
+      <div class="box"><div class="box-k" data-i18n="whereLook">Where to look for it</div><div class="box-v mono" id="decWhere"></div><div class="box-s" id="decWhereSub"></div></div>
+      <div class="box"><div class="box-k" data-i18n="firstHappen">What has to happen first</div><div class="box-t" id="decTrigger"></div></div>
+    </div>
+    <div class="eyebrow dim" data-i18n="whyAnswer">// WHY THIS ANSWER</div>
+    <div class="inputs" id="decInputs"></div>
+    <div class="dec-actions" id="decActions"></div>
+  </section>
+
+  <div class="row3">
+    <section class="panel glass" aria-labelledby="lvTitle">
+      <div class="panel-head"><h2 id="lvTitle" class="eyebrow"></h2><span class="mono strong" id="lvPrice"></span></div>
+      <div class="panel-sub" data-i18n="lvSub">How far each one is from the current price</div>
+      <div id="levels" class="levels"></div>
+      <div class="panel-foot" id="lvFoot"></div>
+    </section>
+    <section class="panel glass" aria-labelledby="coachTitle">
+      <h2 id="coachTitle" class="eyebrow" data-i18n="coachTitle">// THE AI COACH TODAY</h2>
+      <div id="coach"></div>
+    </section>
+    <section class="panel glass" aria-labelledby="newsTitle">
+      <h2 id="newsTitle" class="eyebrow" data-i18n="newsTitle">// NEWS COMING UP</h2>
+      <div id="news" class="news"></div>
+      <div class="panel-foot" id="newsFoot"></div>
+    </section>
+  </div>
+
+  <section class="details" aria-labelledby="moreTitle">
+    <div id="moreTitle" class="eyebrow dim" data-i18n="moreTitle">// MORE DETAIL · OPEN WHEN YOU NEED IT</div>
+    <div id="detailList"></div>
+  </section>
+
+  <footer class="foot" data-i18n="foot">TRADEDADLOG · COMMAND CENTER v2 · THE PLAN OVER THE IMPULSE</footer>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-card glass" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <span class="corner c-tl"></span><span class="corner c-tr"></span><span class="corner c-bl"></span><span class="corner c-br"></span>
+    <div id="modalBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script type="module" src="cc2/app.js"></script>
+</body>
+</html>
