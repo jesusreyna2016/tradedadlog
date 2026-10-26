@@ -2367,7 +2367,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if(!strip) return;
     lastPlan=plan;
     if(!plan || !plan.instruments){ strip.style.display='none'; return; }
-    var rows=['NQ','ES','GC','YM','CL'].map(function(sym){
+    var rows=['NQ','ES','GC','YM','CL','ETHUSDT','BTCUSDT'].map(function(sym){
       var d=plan.instruments[sym]; if(!d) return '';
       var v=String((d.verdict&&d.verdict.signal)||'').toUpperCase();
       var vc=v==='GO'?'go':(v==='AVOID'?'avoid':'wait');
@@ -2377,7 +2377,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       var zParts=z?[zoneLabel(z.type), zoneStrength(z.confluence),
         (z.risk&&z.risk.rr!=null?T('premio','reward')+' '+z.risk.rr+':1':'')].filter(Boolean):null;
       var zTxt=zParts?esc(zParts.join(' · ')):T('sin zona cerca','no setup nearby');
-      return '<div class="sav '+vc+'"><span class="sav-sym">'+sym+'</span>'+
+      return '<div class="sav '+vc+'"><span class="sav-sym">'+(window.__ccSymName?window.__ccSymName(sym):sym)+'</span>'+
         '<span class="sav-v">'+(v||'—')+'</span><span class="sav-bias">'+bias+'</span>'+
         '<span class="sav-z">'+zTxt+'</span>'+fvgChip(z)+
         '<button class="sav-copy" data-sym="'+sym+'" title="'+esc(T('copiar niveles para TradingView','copy levels for TradingView'))+'" style="margin-left:auto;font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--txt-dim);cursor:pointer;flex:none">TV</button></div>';
@@ -2597,13 +2597,22 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       .catch(function(){});
     fetch(SA_URL+'?t='+Date.now(),{cache:'no-store'})
       .then(function(r){ return r.ok?r.json():null; })
-      .then(function(p){ lastPlan=p||{}; render(p||{}); renderStrip(p||{}); saNewPlan(p||{}); })
+      .then(function(p){ lastPlan=p||{}; render(p||{}); renderStrip(p||{}); saNewPlan(p||{}); loadCrypto(); })
       .catch(function(){});
     fetch(HEALTH_URL+'?t='+Date.now(),{cache:'no-store'})
       .then(function(r){ return r.ok?r.json():null; }).then(renderHealth).catch(function(){});
     fetch(WEEKLY_URL+'?t='+Date.now(),{cache:'no-store'})
       .then(function(r){ return r.ok?r.text():null; }).then(renderWeekly).catch(function(){});
   }
+  // ETH/BTC picked in the symbol bar: the "agent today" strip shows the crypto-weekend plan instead
+  function loadCrypto(){
+    var s=window.__ccSym?window.__ccSym():'NQ'; if(s!=='ETHUSDT'&&s!=='BTCUSDT') return;
+    fetch(SA_URL.replace('/latest.json','/crypto-latest.json')+'?t='+Date.now(),{cache:'no-store'})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(cp){ if(!cp||!cp.instruments) return; var keep=lastPlan; renderStrip(cp); lastPlan=keep; })
+      .catch(function(){});
+  }
+  document.addEventListener('ccsymchange', function(){ if(lastPlan) renderStrip(lastPlan); loadCrypto(); });
   load();
   setInterval(load, 5*60000);
   if(window.__i18nRefresh) window.__i18nRefresh.push(load);
