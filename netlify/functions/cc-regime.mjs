@@ -4,7 +4,7 @@
 // Written by ind-ingest from the RGM1 alert of market_regime.pine.
 import { getStore } from '@netlify/blobs';
 
-const SYMBOLS = ['NQ', 'ES', 'GC', 'YM', 'CL'];
+const SYMBOLS = ['NQ', 'ES', 'GC', 'YM', 'CL', 'ETHUSDT', 'BTCUSDT'];
 const HEADERS = {
   'content-type': 'application/json',
   'access-control-allow-origin': '*',

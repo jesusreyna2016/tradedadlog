@@ -174,6 +174,9 @@ body::before{
 .ccctx .cx b{color:var(--txt);font-weight:600}
 .ccregime{margin-top:6px;font-size:10px;letter-spacing:.4px;line-height:1.4;color:var(--txt-dim);background:var(--panel-2);border:1px solid var(--border);border-left:3px solid var(--txt-faint);border-radius:6px;padding:5px 8px}
 .ccregime b{color:var(--txt);font-weight:700;letter-spacing:.8px}
+.ccsym{display:flex;gap:4px;margin:0 0 6px}
+.ccsym button{flex:none;font-size:9px;font-weight:700;letter-spacing:.8px;padding:2px 8px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--txt-dim);cursor:pointer}
+.ccsym button.on{border-color:var(--amber);color:var(--amber)}
 .ccregime.chop{border-left-color:var(--amber)}.ccregime.chop b{color:var(--amber)}
 .ccregime.bull{border-left-color:var(--lime)}.ccregime.bull b{color:var(--lime)}
 .ccregime.bear{border-left-color:var(--red)}.ccregime.bear b{color:var(--red)}
@@ -559,6 +562,32 @@ body::before{
     <!-- SEÑAL EN VIVO -->
     <div class="hcol">
       <div class="hlabel"><span data-i18n-es="Se&ntilde;al en vivo" data-i18n-en="Live signal">Live signal</span></div>
+      <div class="ccsym" id="ccSym"></div>
+      <script>
+      /* active symbol for the HUD, Market Regime and Trend Checklist: NQ on weekdays, ETH while
+         CME futures are closed (Fri 16:00 CT to Sun 17:00 CT), unless picked by hand today */
+      (function(){
+        var LIST=[['NQ','NQ'],['ETHUSDT','ETH'],['BTCUSDT','BTC']];
+        function futuresClosed(){
+          var p={}; new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',weekday:'short',hour:'numeric',hourCycle:'h23'})
+            .formatToParts(new Date()).forEach(function(x){p[x.type]=x.value;});
+          var h=+p.hour; return p.weekday==='Sat'||(p.weekday==='Fri'&&h>=16)||(p.weekday==='Sun'&&h<17);
+        }
+        function day(){ return new Date().toISOString().slice(0,10); }
+        window.__ccSym=function(){
+          try{ var s=JSON.parse(localStorage.getItem('cc_sym')||'null'); if(s&&s.day===day()) return s.sym; }catch(e){}
+          return futuresClosed()?'ETHUSDT':'NQ';
+        };
+        window.__ccSymName=function(s){ return String(s||'').replace(/USDT$/,''); };
+        var el=document.getElementById('ccSym');
+        function paint(){ var cur=window.__ccSym();
+          el.innerHTML=LIST.map(function(x){ return '<button data-s="'+x[0]+'" class="'+(x[0]===cur?'on':'')+'">'+x[1]+'</button>'; }).join(''); }
+        el.addEventListener('click',function(e){ var b=e.target.closest&&e.target.closest('button'); if(!b) return;
+          try{ localStorage.setItem('cc_sym',JSON.stringify({sym:b.getAttribute('data-s'),day:day()})); }catch(e){}
+          paint(); document.dispatchEvent(new Event('ccsymchange')); });
+        paint();
+      })();
+      </script>
       <div class="ccsignal wait" id="ccSignal"><b>WAIT</b><span>no edge yet</span></div>
       <div class="ccctx" id="ccCtx"></div>
       <div class="ccregime" id="ccRegime" hidden></div>
@@ -1454,7 +1483,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   // Niveles edge: VAH/POC/VAL, PDH/PDL, PWH/PWL, apertura del dia (DO), true day open (TDO).
   var NML_TICKS = 100;                         // radio de "en un nivel", en ticks. Baja a 60-80 si queda muy laxo.
   function symTick(s){ s=(s||'NQ').toUpperCase();
-    return s==='GC'?0.10 : s==='CL'?0.01 : s==='SI'?0.005 : (s==='YM'||s==='DOW')?1 : 0.25; } // NQ/ES = 0.25
+    return s==='GC'?0.10 : s==='CL'?0.01 : s==='SI'?0.005 : (s==='YM'||s==='DOW')?1 : s==='ETHUSDT'?0.05 : s==='BTCUSDT'?1 : 0.25; } // NQ/ES = 0.25 · crypto: CC ticks sized so 100t ~ 0.1% of price
   function noMansLand(p){
     if(!p || p.price==null) return {far:false, n:0};
     var L=p.levels||{}, P=p.price;
@@ -1484,7 +1513,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if($('mock')) $('mock').style.display='none';
     var L=p.levels||{};
     // archiva el plan del día para poder cruzar fugas con el CSV del broker
-    try{ if(p.date){ var H=JSON.parse(localStorage.getItem('cc_plan_hist')||'{}')||{}; H[p.date]={ntz:(p.noTradeZone||null),vah:L.vah,poc:L.poc,val:L.val,pdh:L.pdh,pdl:L.pdl,pwh:L.pwh,pwl:L.pwl,dayOpen:L.dayOpen,tdo:L.tdo,sym:(p.sym||'NQ'),bias:(p.biasDir||null),weekly:(p.weeklyDir||null)}; localStorage.setItem('cc_plan_hist',JSON.stringify(H)); if(window.__refreshJournal) window.__refreshJournal(); } }catch(e){}
+    try{ if(p.date && (p.sym||'NQ')==='NQ'){ var H=JSON.parse(localStorage.getItem('cc_plan_hist')||'{}')||{}; H[p.date]={ntz:(p.noTradeZone||null),vah:L.vah,poc:L.poc,val:L.val,pdh:L.pdh,pdl:L.pdl,pwh:L.pwh,pwl:L.pwl,dayOpen:L.dayOpen,tdo:L.tdo,sym:(p.sym||'NQ'),bias:(p.biasDir||null),weekly:(p.weeklyDir||null)}; localStorage.setItem('cc_plan_hist',JSON.stringify(H)); if(window.__refreshJournal) window.__refreshJournal(); } }catch(e){}
     if(p.date){ var dt=new Date(p.date+'T00:00:00');
       var DIASL=T(DIAS,['SUN','MON','TUE','WED','THU','FRI','SAT']), MESL=T(MES,['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']);
       if($('ccDate')) $('ccDate').textContent=DIASL[dt.getDay()]+' · '+dt.getDate()+' '+MESL[dt.getMonth()]+' '+dt.getFullYear()+' · CT';
@@ -1712,11 +1741,13 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   var CC_API=/(^|\.)tradedadlog\.com$/i.test(location.hostname)?'':'https://tradedadlog.com';
   function syncPlan(){
     if(document.hidden) return;   // pestaña oculta: no gastes invocaciones de la funcion
-    fetch(CC_API+'/api/cc-plan',{cache:'no-store'})
+    var sym=window.__ccSym?window.__ccSym():'NQ';
+    fetch(CC_API+'/api/cc-plan'+(sym!=='NQ'?'?sym='+sym:''),{cache:'no-store'})
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(p){ if(p && p.date) applyRemote(p); })
       .catch(function(){});
   }
+  document.addEventListener('ccsymchange', syncPlan);
   syncPlan();
   setInterval(syncPlan, 240000);
   document.addEventListener('visibilitychange',function(){ if(!document.hidden) syncPlan(); });
@@ -1730,7 +1761,9 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   var scanEl=$('scan'), pickEl=$('scanPick'), confEl=$('scanConf');
   if(!scanEl) return;
   var CC_API=/(^|\.)tradedadlog\.com$/i.test(location.hostname)?'':'https://tradedadlog.com';
-  var ORDER=['NQ','ES','GC','CL','YM','SI'];
+  var ORDER=['NQ','ES','GC','CL','YM','SI','ETHUSDT','BTCUSDT'];
+  var CRYPTO={ETHUSDT:1,BTCUSDT:1};
+  function nm(s){ return window.__ccSymName?window.__ccSymName(s):s; }
   function today(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
   function colDir(x){return x==='SHORT'?'var(--red)':x==='LONG'?'var(--lime)':'var(--amber)';}
   function word(x){return x==='SHORT'?T('BAJISTA','BEARISH'):x==='LONG'?T('ALCISTA','BULLISH'):T('NEUTRAL','NEUTRAL');}
@@ -1777,7 +1810,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     });
     if(confEl){
       var nq=withData.filter(function(r){return r.sym==='NQ';})[0];
-      var others=withData.filter(function(r){return r.sym!=='NQ';});
+      var others=withData.filter(function(r){return r.sym!=='NQ' && !CRYPTO[r.sym];});
       if(!nq || nq.dir==='NEUTRAL' || others.length<2){
         confEl.className='scanconf';
         confEl.innerHTML='';
@@ -1792,10 +1825,10 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       }
     }
     scanEl.innerHTML=rows.map(function(r){
-      if(!r.has) return '<div class="scanrow empty"><span class="symc">'+r.sym+'</span><span class="dirc" style="color:var(--txt-faint)">'+T('sin datos','no data')+'</span><span class="sigc">'+T('falta indicador + alerta en este gráfico','needs indicator + alert on this chart')+'</span><span class="scorec">&#8212;</span></div>';
+      if(!r.has) return '<div class="scanrow empty"><span class="symc">'+nm(r.sym)+'</span><span class="dirc" style="color:var(--txt-faint)">'+T('sin datos','no data')+'</span><span class="sigc">'+T('falta indicador + alerta en este gráfico','needs indicator + alert on this chart')+'</span><span class="scorec">&#8212;</span></div>';
       var rtf=sigTf(r.raw), rl=levelName(r.raw);
       var sigTxt=sigWord(r.sig)+(rtf?(' '+rtf):'')+(r.act&&rl?(' &middot; '+rl):'')+(r.act?' &middot; '+T('activo','live'):'');
-      return '<div class="scanrow'+(ranked.length&&ranked[0]===r?' best':'')+'"><span class="symc">'+r.sym+'</span><span class="dirc" style="color:'+colDir(r.dir)+'">'+word(r.dir)+'</span><span class="sigc">'+sigTxt+'</span><span class="scorec" style="color:'+colDir(r.dir)+'">'+(r.score>0?'+':'')+r.score+'</span></div>';
+      return '<div class="scanrow'+(ranked.length&&ranked[0]===r?' best':'')+'"><span class="symc">'+nm(r.sym)+'</span><span class="dirc" style="color:'+colDir(r.dir)+'">'+word(r.dir)+'</span><span class="sigc">'+sigTxt+'</span><span class="scorec" style="color:'+colDir(r.dir)+'">'+(r.score>0?'+':'')+r.score+'</span></div>';
     }).join('');
     if(pickEl){
       if(withData.length<2){
@@ -1806,7 +1839,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
           var bp=best.raw||{};
           var bln=levelName(bp), blv=fmtNum(levelVal(bp)), btf=sigTf(bp), bpx=fmtNum(bp.price);
           var bst=(bp.struct && /BOS|CHoCH/i.test(bp.struct))?bp.struct:'';
-          var seg=[T('Más claro ahora: ','Clearest right now: ')+'<b style="color:'+colDir(best.dir)+'">'+best.sym+'</b> &middot; '+word(best.dir)+', '+sigWord(best.sig)+(btf?(' '+btf):'')];
+          var seg=[T('Más claro ahora: ','Clearest right now: ')+'<b style="color:'+colDir(best.dir)+'">'+nm(best.sym)+'</b> &middot; '+word(best.dir)+', '+sigWord(best.sig)+(btf?(' '+btf):'')];
           if(bln) seg.push(T('en ','at ')+bln+(blv?(' '+blv):''));
           if(bst) seg.push(bst);
           seg.push(T('fuerza','strength')+' '+best.mag);
@@ -1817,7 +1850,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
           pickEl.innerHTML=msg;
         } else if(best.mag>=55){
           pickEl.innerHTML=T('Ninguno tiene gatillo accionable. El que más se inclina: ','No actionable trigger. Strongest lean: ')+
-            '<b style="color:'+colDir(best.dir)+'">'+best.sym+'</b> '+word(best.dir)+' ('+T('fuerza','strength')+' '+best.mag+'), '+
+            '<b style="color:'+colDir(best.dir)+'">'+nm(best.sym)+'</b> '+word(best.dir)+' ('+T('fuerza','strength')+' '+best.mag+'), '+
             T('pero espera un nivel + tu gatillo.','but wait for a level + your trigger.');
         } else {
           pickEl.textContent=T('Ninguno tiene una señal clara ahora mismo. Paciencia.','None of them has a clear signal right now. Be patient.');
@@ -1846,7 +1879,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   var $=function(id){return document.getElementById(id);};
   var el=$('ccRegime'); if(!el) return;
   var CC_API=/(^|\.)tradedadlog\.com$/i.test(location.hostname)?'':'https://tradedadlog.com';
-  var SYM='NQ', STALE_MIN=40, last=null;
+  var SYM=window.__ccSym?window.__ccSym():'NQ', STALE_MIN=40, last=null;
   // el panel de salud lo lee para la fila "Operar el chop"
   window.__mrRegime=function(){
     if(!last) return null;
@@ -1861,7 +1894,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var cls=reg==='CHOP'?'chop':reg==='BULL'?'bull':reg==='BEAR'?'bear':'';
     var name={CHOP:T('CHOP · RANGO','CHOP · RANGE'),BULL:T('TENDENCIA ALCISTA','BULL TREND'),
               BEAR:T('TENDENCIA BAJISTA','BEAR TREND'),NEUTRAL:T('NEUTRAL','NEUTRAL')}[reg]||reg;
-    var parts=['Market Regime '+SYM+' · <b>'+name+'</b>'];
+    var parts=['Market Regime '+window.__ccSymName(SYM)+' · <b>'+name+'</b>'];
     if(r.score) parts.push('score '+r.score+'/5');
     if(reg==='CHOP'&&r.top&&r.bot) parts.push(T('caja ','box ')+px(r.bot)+'–'+px(r.top));
     if(r.sess) parts.push(r.sess);
@@ -1876,6 +1909,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   }
   function load(){
     if(document.hidden) return;   // pestaña oculta: no gastes invocaciones de la funcion
+    SYM=window.__ccSym?window.__ccSym():SYM;
     fetch(CC_API+'/api/cc-regime',{cache:'no-store'})
       .then(function(r){return r.ok?r.json():null;})
       .then(function(d){ if(d){ last=(d.symbols&&d.symbols[SYM])||null; render(); } })
@@ -1883,6 +1917,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   }
   load();
   setInterval(load, 120000);
+  document.addEventListener('ccsymchange',load);
   document.addEventListener('visibilitychange',function(){ if(!document.hidden) load(); });
   window.__i18nRefresh.push(render);
 })();
@@ -1893,7 +1928,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
 (function(){
   var el=document.getElementById('ccTrend'); if(!el) return;
   var CC_API=/(^|\.)tradedadlog\.com$/i.test(location.hostname)?'':'https://tradedadlog.com';
-  var SYM='NQ', STALE_MIN=75, last=null;   // heartbeat every 1H close
+  var SYM=window.__ccSym?window.__ccSym():'NQ', STALE_MIN=75, last=null;   // heartbeat every 1H close
   function px(v){ var n=parseFloat(v); return isFinite(n)?n.toLocaleString('en-US',{maximumFractionDigits:2}):''; }
   function vName(v){ v=Number(v);
     return v>=2?T('SOLO LARGOS · tamaño normal','LONGS ONLY · normal size'):v===1?T('SOLO LARGOS · tamaño reducido','LONGS ONLY · reduced size')
@@ -1909,7 +1944,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if(!st){ el.hidden=true; return; }
     var r=last, v=st.v;
     var cls=v>0?'bull':v<0?'bear':'chop';
-    var parts=['Trend Checklist '+SYM+' · <b>'+vName(v)+'</b>'];
+    var parts=['Trend Checklist '+window.__ccSymName(SYM)+' · <b>'+vName(v)+'</b>'];
     if(Number(r.vl)!==v) parts.push(T('vela abierta marca ','open candle shows ')+vName(r.vl));
     var flip = v<0 ? T('cambia si 1H cierra sobre ','flips if 1H closes above ')+px(r.flip)+T(' y rompe ',' and breaks ')+px(r.sh)
              : v>0 ? T('cambia si 1H cierra bajo ','flips if 1H closes below ')+px(r.flip)+T(' y rompe ',' and breaks ')+px(r.sl)
@@ -1923,6 +1958,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   }
   function load(){
     if(document.hidden) return;
+    SYM=window.__ccSym?window.__ccSym():SYM;
     fetch(CC_API+'/api/cc-trend',{cache:'no-store'})
       .then(function(r){return r.ok?r.json():null;})
       .then(function(d){ if(d){ last=(d.symbols&&d.symbols[SYM])||null; render(); } })
@@ -1930,6 +1966,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   }
   load();
   setInterval(load, 120000);
+  document.addEventListener('ccsymchange',load);
   document.addEventListener('visibilitychange',function(){ if(!document.hidden) load(); });
   window.__i18nRefresh.push(render);
 })();
@@ -2581,7 +2618,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   var onEl=$('nudgeOn'), rEl=$('nudgeR'), copyEl=$('nudgeCopy'), nearEl=$('nudgeNear');
   var LS_ON='cc_nudge_on', LS_R='cc_nudge_ticks';
   function fmt(n){ return n==null?'—':Number(n).toLocaleString('en-US',{maximumFractionDigits:(Math.abs(n%1)>1e-9?2:0)}); }
-  function symTick(s){ s=(s||'NQ').toUpperCase(); return s==='GC'?0.10:s==='CL'?0.01:s==='SI'?0.005:(s==='YM'||s==='DOW')?1:0.25; }
+  function symTick(s){ s=(s||'NQ').toUpperCase(); return s==='GC'?0.10:s==='CL'?0.01:s==='SI'?0.005:(s==='YM'||s==='DOW')?1:s==='ETHUSDT'?0.05:s==='BTCUSDT'?1:0.25; }
   var radius=20, on=true, armed=false;
   try{ var v=parseInt(localStorage.getItem(LS_R),10); if(v>0) radius=v; }catch(e){}
   try{ on=localStorage.getItem(LS_ON)!=='0'; }catch(e){}
