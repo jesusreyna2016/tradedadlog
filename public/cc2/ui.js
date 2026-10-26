@@ -1,7 +1,7 @@
 // Rendering. Every visible string goes through T() so the EN/ES toggle re-renders cleanly.
 import { T, L } from './i18n.js';
 import { store, SYMS, symName, ctParts, tickOf } from './api.js';
-import { fmt, levelList, NEAR_TICKS, coachFor } from './decision.js';
+import { fmt, levelList, NEAR_TICKS } from './decision.js';
 import * as gate from './gate.js';
 
 const $ = id => document.getElementById(id);
@@ -216,6 +216,7 @@ const dayType = s => { const p = DAYTYPE[s]; return p ? T(p[0], p[1]) : s || '-'
 export function renderDetails(sym, d) {
   const box = $('detailList');
   const items = [
+    ['proof', T('¿Esta tarjeta funciona?', 'Does this card actually work?'), proofSummary(sym), () => proofBody(sym)],
     ['plan', T('Plan de juego de hoy', "Today's game plan"), planSummary(d), () => planBody(d)],
     ['scan', T('Qué mercado está más fuerte', 'Which market is strongest'), scanSummary(), () => scanBody(sym)],
     ['weekly', T('Revisión semanal del coach', 'Weekly review from the coach'), T('cada sábado', 'every Saturday'), weeklyBody],
@@ -231,6 +232,30 @@ export function renderDetails(sym, d) {
     el.querySelector('.det-s').textContent = s;
     if (el.open || !el.dataset.filled) { el.querySelector('.det-b').innerHTML = body(); el.dataset.filled = '1'; }
   });
+}
+
+const PROOF_MIN = 20;   // graded answers before the numbers mean anything
+const CODE_NAMES = { go: ['"Adelante"', '"Go"'], wait: ['"Espera, solo un lado"', '"Wait, one side only"'], unclear: ['"Quédate fuera"', '"Sit out"'],
+  inair: ['"Nada cerca"', '"Nothing nearby"'], avoid: ['"Sáltalo"', '"Skip it"'], news: ['"Noticia fuerte"', '"Big news"'] };
+function proofStats(sym) { const s = store.decisions && store.decisions.symbols && store.decisions.symbols[sym]; return s || null; }
+function proofSummary(sym) {
+  const s = proofStats(sym); if (!s) return T('juntando datos', 'collecting data');
+  return s.graded < PROOF_MIN ? T(s.graded + ' de ' + PROOF_MIN + ' respuestas calificadas', s.graded + ' of ' + PROOF_MIN + ' answers graded') : T(s.graded + ' respuestas calificadas', s.graded + ' answers graded');
+}
+function proofBody(sym) {
+  const s = proofStats(sym);
+  const intro = T('Cada 15 minutos el servidor guarda lo que dice esta tarjeta y el precio. Una hora después revisa si el precio se movió hacia donde dijo. Así sabes si confiar en ella, con números y no con sensaciones.',
+    'Every 15 minutes the server saves what this card says and the price. One hour later it checks whether price moved the way it said. That way you know whether to trust it, with numbers instead of feelings.');
+  if (!s || !s.graded) return intro + '<br><br>' + T('Todavía no hay respuestas calificadas. Vuelve en unos días.', 'No graded answers yet. Check back in a few days.');
+  const rows = Object.keys(s.stats).sort((a, b) => s.stats[b].n - s.stats[a].n).map(k => {
+    const x = s.stats[k]; const nm = CODE_NAMES[k] ? T(CODE_NAMES[k][0], CODE_NAMES[k][1]) : k;
+    const res = x.rightPct != null
+      ? T('acertó la dirección ', 'right direction ') + '<b>' + x.rightPct + '%</b>' + T(' de las veces, promedio ', ' of the time, average ') + '<b>' + (x.avgPts >= 0 ? '+' : '') + x.avgPts + ' pts</b>'
+      : T('sin dirección; el precio se movió en promedio ', 'no direction; price moved on average ') + '<b>' + x.avgAbsPts + ' pts</b>' + T(' en una hora', ' in an hour');
+    return `<div style="padding:6px 0;border-top:1px solid var(--hair)"><b>${nm}</b> · ${x.n} ${T('veces', 'times')} · ${res}</div>`;
+  }).join('');
+  const warn = s.graded < PROOF_MIN ? `<div class="warnbox">${T('Muy pocos datos todavía (' + s.graded + ' de ' + PROOF_MIN + '). No saques conclusiones aún.', 'Too little data so far (' + s.graded + ' of ' + PROOF_MIN + '). Don\'t draw conclusions yet.')}</div>` : '';
+  return intro + warn + `<div style="margin-top:10px">${rows}</div><div class="panel-foot">${T('Últimos 14 días. Lo que importa: que "Adelante" acierte claramente más que "Espera", y que en "Quédate fuera" el precio se mueva poco.', 'Last 14 days. What matters: "Go" should be right clearly more often than "Wait", and during "Sit out" price should move little.')}</div>`;
 }
 
 function planSummary(d) {

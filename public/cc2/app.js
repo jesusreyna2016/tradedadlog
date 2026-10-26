@@ -1,13 +1,18 @@
 // Boot + wiring: polling, the symbol switch, the trade flow (enter -> exit -> pause) and the modals.
 import { T, initLangToggle } from './i18n.js';
 import { store, getSym, setSym, startPolling, symName, tickOf } from './api.js';
-import { decide, fmt, levelList, NEAR_TICKS } from './decision.js';
+import { decide as decideCore, fmt, levelList, NEAR_TICKS } from './decision.js';
 import * as gate from './gate.js';
 import * as ui from './ui.js';
 
 const $ = id => document.getElementById(id);
 let sym = getSym();
 let last = null;   // last decision, for the modals
+
+const decide = s => decideCore(s, {
+  plan: store.plan[s], trend: store.trend && store.trend[s], regime: store.regime && store.regime[s],
+  sa: store.sa, saCrypto: store.saCrypto, news: store.news,
+}, gate.gateState(), gate.MAX_TRADES);
 
 function render() {
   last = decide(sym);

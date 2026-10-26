@@ -39,6 +39,12 @@
   to = "/.netlify/functions/cc-trend"
   status = 200
 
+# Command Center v2 · decision card graded by the move 60 min later (log written by cc-decision-cron)
+[[redirects]]
+  from = "/api/cc-decisions"
+  to = "/.netlify/functions/cc-decisions"
+  status = 200
+
 # Session Analyst · ingesta de indicadores, feed unificado y plan de sesion
 [[redirects]]
   from = "/api/ind-ingest"

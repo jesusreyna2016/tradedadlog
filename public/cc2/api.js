@@ -5,11 +5,7 @@ export const CC_API = /(^|\.)tradedadlog\.com$/i.test(location.hostname) ? '' : 
 const BUS = 'https://raw.githubusercontent.com/jesusreyna2016/session-analyst-bus/main';
 
 export const SYMS = [['NQ', 'NQ'], ['ETHUSDT', 'ETH'], ['BTCUSDT', 'BTC']];
-export const symName = s => String(s || '').replace(/USDT$/, '');
-export const isCrypto = s => /USDT$/.test(s);
-
-// tick size per symbol (same table as v1)
-export const tickOf = s => ({ GC: .1, CL: .01, SI: .005, YM: 1, ETHUSDT: .02, BTCUSDT: 1 }[s] || .25);
+export { symName, isCrypto, tickOf } from './decision.js';
 
 export function ctParts(d = new Date()) {
   const p = {};
@@ -43,6 +39,7 @@ export const store = {
   saCrypto: null, // bus plans/crypto-latest.json (weekends only, 404 otherwise)
   health: null,   // bus live/health.json
   weekly: null,   // bus reviews/weekly-latest.md
+  decisions: null, // /api/cc-decisions, the decision card graded by the move 60 min later
   at: {},         // last successful fetch per feed (ms)
 };
 
@@ -64,6 +61,7 @@ const LOADERS = {
   async scan() { const d = await get(CC_API + '/api/cc-scan'); if (d) { store.scan = d.symbols || {}; return true; } },
   async regime() { const d = await get(CC_API + '/api/cc-regime'); if (d) { store.regime = d.symbols || {}; return true; } },
   async trend() { const d = await get(CC_API + '/api/cc-trend'); if (d) { store.trend = d.symbols || {}; return true; } },
+  async decisions() { const d = await get(CC_API + '/api/cc-decisions?days=14'); if (d && d.symbols) { store.decisions = d; return true; } },
   async news() { const d = await get(CC_API + '/api/cc-news'); if (d) { store.news = d.events || []; return true; } },
   async sa() {
     const [p, cp, h, w] = await Promise.all([
@@ -81,7 +79,7 @@ const LOADERS = {
 };
 
 // seconds between polls, matching v1
-const EVERY = { plan: 240, scan: 240, regime: 120, trend: 120, news: 900, sa: 300 };
+const EVERY = { plan: 240, scan: 240, regime: 120, trend: 120, news: 900, sa: 300, decisions: 1800 };
 
 export function startPolling(onData) {
   const run = async key => {

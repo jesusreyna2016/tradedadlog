@@ -1,8 +1,13 @@
 // The decision engine: folds the confirmed Trend Checklist verdict, Market Regime, the AI coach plan
 // and the gatekeeper into one plain-language answer to "can I trade this symbol right now?".
+// Pure: no DOM, no fetch, no storage, so the server can run the same engine to log and grade it
+// (netlify/functions/cc-decision-log.mjs).
 import { T, L } from './i18n.js';
-import { store, tickOf, symName, isCrypto } from './api.js';
-import { gateState, MAX_TRADES } from './gate.js';
+
+export const symName = s => String(s || '').replace(/USDT$/, '');
+export const isCrypto = s => /USDT$/.test(s);
+// tick size per symbol (same table as v1)
+export const tickOf = s => ({ GC: .1, CL: .01, SI: .005, YM: 1, ETHUSDT: .02, BTCUSDT: 1 }[s] || .25);
 
 const TREND_STALE_MIN = 75, REGIME_STALE_MIN = 40, PLAN_STALE_MIN = 360;
 const ACTIONABLE = ['A_FAVOR_BORDE', 'REVERSAL', 'REVERSAL_IFVG'];
@@ -33,16 +38,16 @@ export const LEVEL_NAMES = {
 const lname = k => T(LEVEL_NAMES[k][0], LEVEL_NAMES[k][1]);
 
 // the coach's instrument for this symbol (crypto comes from the weekend plan)
-export function coachFor(sym) {
+export function coachFor(sym, sa, saCrypto) {
   if (isCrypto(sym)) {
-    const ins = store.saCrypto && store.saCrypto.instruments;
+    const ins = saCrypto && saCrypto.instruments;
     return ins ? ins[sym] || ins[symName(sym)] || null : null;
   }
-  return store.sa && store.sa.instruments ? store.sa.instruments[sym] || null : null;
+  return sa && sa.instruments ? sa.instruments[sym] || null : null;
 }
 
-export function newsLock(now = Date.now()) {
-  const ev = (store.news || []).find(e => e.impact === 'high' && e.currency === 'USD' && Math.abs(e.ts - now) <= 15 * 60000);
+export function newsLock(events, now = Date.now()) {
+  const ev = (events || []).find(e => e.impact === 'high' && e.currency === 'USD' && Math.abs(e.ts - now) <= 15 * 60000);
   return ev || null;
 }
 
@@ -59,15 +64,16 @@ export function levelList(sym, p, tr) {
   return out;
 }
 
-export function decide(sym) {
-  const p0 = store.plan[sym];
+// data = { plan, trend, regime } for this symbol + { sa, saCrypto, news } shared;
+// gate = gateState() on the page, or a plain "open" gate on the server (market read only)
+export function decide(sym, data, gate, MAX_TRADES) {
+  const p0 = data.plan;
   const p = p0 && ageMin(p0.updatedAt) < PLAN_STALE_MIN ? p0 : null;
-  const tr0 = store.trend && store.trend[sym];
+  const tr0 = data.trend;
   const tr = tr0 && ageMin(tr0.receivedAt) < TREND_STALE_MIN ? tr0 : null;
-  const rg0 = store.regime && store.regime[sym];
+  const rg0 = data.regime;
   const rg = rg0 && ageMin(rg0.receivedAt) < REGIME_STALE_MIN ? rg0 : null;
-  const co = coachFor(sym);
-  const gate = gateState();
+  const co = coachFor(sym, data.sa, data.saCrypto);
   const price = p ? +p.price : rg ? parseFloat(rg.close) : tr ? parseFloat(tr.px) : null;
   const tick = tickOf(sym);
   const name = symName(sym);
@@ -178,7 +184,8 @@ export function decide(sym) {
       }
     }
   }
-  if (!trigger && store.sa && store.sa.focus && store.sa.focus.sym === sym) trigger = L(store.sa.focus.trigger);
+  const sa = data.sa;
+  if (!trigger && sa && sa.focus && sa.focus.sym === sym) trigger = L(sa.focus.trigger);
   if (!trigger) trigger = dir < 0 ? T('El precio entra a la zona, falla, y una vela de 5 min cierra de vuelta abajo.', 'Price pushes into the zone, fails, and a 5 min candle closes back below it.')
     : dir > 0 ? T('El precio baja a la zona, aguanta, y una vela de 5 min cierra de vuelta arriba.', 'Price dips into the zone, holds, and a 5 min candle closes back above it.')
     : T('El precio llega al nivel y reacciona claro hacia un lado.', 'Price reaches the level and reacts clearly one way.');
@@ -188,46 +195,46 @@ export function decide(sym) {
   const inAir = nearestAny != null && nearestAny > FAR_TICKS * tick;
 
   // ---- verdict
-  let verdict, why, tone, agreeSub;
-  const nl = newsLock();
+  let verdict, why, tone, agreeSub, code;
+  const nl = newsLock(data.news);
   const sig = p ? p.signal : null;
   if (gate.kind === 'pause') {
-    verdict = T('En pausa. Planea tu siguiente movimiento.', 'Paused. Plan your next move.'); tone = 'muted';
+    verdict = T('En pausa. Planea tu siguiente movimiento.', 'Paused. Plan your next move.'); code = 'pause'; tone = 'muted';
     why = T('El trading queda bloqueado hasta que acabe el tiempo y escribas tu siguiente trade. Todo lo de abajo se sigue actualizando: usa el tiempo para planear.',
       'Trading is locked until the timer ends and your next trade is written down. Everything below keeps updating, so use the time to plan.');
   } else if (nl) {
-    verdict = T('Noticia fuerte ahora. Manos fuera.', 'Big news now. Hands off.'); tone = 'neg';
+    verdict = T('Noticia fuerte ahora. Manos fuera.', 'Big news now. Hands off.'); code = 'news'; tone = 'neg';
     why = T('"' + nl.title + '" sale cerca de ahora. El precio puede saltar sin aviso. Espera 15 minutos después de la noticia.', '"' + nl.title + '" is out around now. Price can jump without warning. Wait 15 minutes after the release.');
   } else if (gate.kind === 'cap') {
-    verdict = T('Terminaste por hoy.', "You're done for today."); tone = 'muted';
+    verdict = T('Terminaste por hoy.', "You're done for today."); code = 'cap'; tone = 'muted';
     why = T('Usaste tus ' + MAX_TRADES + ' trades. El sexto no existe: cierra la plataforma y vuelve mañana.', 'You used all ' + MAX_TRADES + ' trades. There is no sixth one: close the platform and come back tomorrow.');
   } else if (gate.kind === 'ritual') {
-    verdict = T('Primero tu rutina.', 'Routine first.'); tone = 'wait';
+    verdict = T('Primero tu rutina.', 'Routine first.'); code = 'ritual'; tone = 'wait';
     why = T('Antes de abrir el gráfico, dos minutos en frío: tu plan, tu límite diario y tu tope de trades. Luego te digo si hay trade.', 'Before you open the chart, two cold minutes: your plan, your daily limit and your trade cap. Then I tell you if there is a trade.');
   } else if (gate.kind === 'inTrade') {
     const o = gate.open;
-    verdict = T('Estás dentro de un trade.', "You're in a trade."); tone = 'calm';
+    verdict = T('Estás dentro de un trade.', "You're in a trade."); code = 'inTrade'; tone = 'calm';
     why = T('Entraste ' + (o.dir === 'LONG' ? 'en largo' : 'en corto') + ' a las ' + o.t + '. Maneja el trade con tu plan, no con la emoción, y marca cómo terminó.',
       'You went ' + (o.dir === 'LONG' ? 'long' : 'short') + ' at ' + o.t + '. Manage it with your plan, not your feelings, and mark how it ended.');
   } else if (!p && !tr && !rg) {
-    verdict = T('Todavía sin datos.', 'No data yet.'); tone = 'muted';
+    verdict = T('Todavía sin datos.', 'No data yet.'); code = 'nodata'; tone = 'muted';
     why = T('Ningún indicador de ' + name + ' ha mandado datos recientes. Revisa que las alertas de TradingView estén corriendo.', 'None of the ' + name + ' indicators has sent fresh data. Check that the TradingView alerts are running.');
   } else if (!dir) {
-    verdict = T('No hay trade claro. Quédate fuera.', 'No clear trade. Sit out.'); tone = 'muted';
+    verdict = T('No hay trade claro. Quédate fuera.', 'No clear trade. Sit out.'); code = 'unclear'; tone = 'muted';
     why = conflict
       ? conflict + ' ' + T('Cuando las señales discuten entre sí, lo mejor es esperar a que gane un lado.', 'When the signals argue with each other, the best move is to wait until one side wins.')
       : T('Ninguna señal apunta a un lado todavía. Espera a que el precio elija uno en un nivel.', "None of the signals points to a side yet. Wait for price to pick one at a level.");
   } else if (coachSig === 'AVOID') {
-    verdict = T('Sáltalo hoy.', 'Skip it today.'); tone = 'neg';
+    verdict = T('Sáltalo hoy.', 'Skip it today.'); code = 'avoid'; tone = 'neg';
     why = T('El coach marcó ' + name + ' para evitar hoy. ', 'The coach flagged ' + name + ' to avoid today. ') + L(co.verdict.reason).split(/ -- |\. /)[0];
   } else if (sig === 'NOTRADE' && inAir) {
-    verdict = T('Nada cerca. Manos fuera.', 'Nothing nearby. Hands off.'); tone = 'muted';
+    verdict = T('Nada cerca. Manos fuera.', 'Nothing nearby. Hands off.'); code = 'inair'; tone = 'muted';
     why = T('El precio está en medio de la nada, lejos de cualquier nivel. Entrar aquí es adivinar. Espera a que llegue a un nivel.', 'Price is in the middle of nowhere, far from any level. Entering here is guessing. Wait for it to reach a level.');
   } else if (ACTIONABLE.includes(sig) && planDir === dir && agree >= 3) {
-    verdict = T('Adelante. Busca tu entrada.', 'Go. Look for your entry.'); tone = 'pos';
+    verdict = T('Adelante. Busca tu entrada.', 'Go. Look for your entry.'); code = 'go'; tone = 'pos';
     why = T('El precio está en un nivel a favor de la tendencia y casi todo coincide. Entra solo cuando veas tu gatillo, no antes.', 'Price is at a level with the trend and almost everything agrees. Enter only when you see your trigger, not before.');
   } else {
-    verdict = T('Espera. ', 'Wait. ') + onlyWord; tone = 'wait';
+    verdict = T('Espera. ', 'Wait. ') + onlyWord; code = 'wait'; tone = 'wait';
     const big = dir < 0 ? T('El panorama apunta hacia abajo', 'The bigger picture is pointing down') : T('El panorama apunta hacia arriba', 'The bigger picture is pointing up');
     const mid = rg && rg.regime === 'CHOP' ? T(', pero el precio sigue rebotando dentro de un rango.', ', but price is still bouncing inside a range.') : '.';
     const go = where ? T(' No lo persigas. Deja que llegue a la zona de ' + where + ' y te muestre la reacción.', " Don't chase it. Let it come to the " + where + ' area and show you the reaction.') : T(' No lo persigas: espera a que llegue a un nivel.', " Don't chase it: wait for it to reach a level.");
@@ -240,6 +247,6 @@ export function decide(sym) {
       : yes.length ? T('Dicen que sí: ', 'Saying yes: ') + yes.join(', ') + '.' : T('Nada coincide todavía.', 'Nothing agrees yet.');
   }
 
-  return { sym, name, price, dir, dirWord, dirSub: conflict || (dir ? T('Ir al otro lado hoy es pelear contra la tendencia.', 'Going the other way today means fighting the trend.') : T('Espera a que un lado gane.', 'Wait for one side to win.')),
+  return { sym, name, price, dir, code, dirWord, dirSub: conflict || (dir ? T('Ir al otro lado hoy es pelear contra la tendencia.', 'Going the other way today means fighting the trend.') : T('Espera a que un lado gane.', 'Wait for one side to win.')),
     where: where || '-', whereSub: whereSub || T('Todavía sin precio.', 'No price yet.'), trigger, verdict, why, tone, agree, agreeSub, inputs, gate, zoneHit, plan: p, trend: tr, regime: rg, coach: co, newsLock: nl };
 }
