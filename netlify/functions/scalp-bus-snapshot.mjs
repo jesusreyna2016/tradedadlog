@@ -82,6 +82,7 @@ export async function runSnapshot() {
   const out = [];
   const haveSig = new Set(); // sigIds con signal ya materializado
   const haveOut = new Set(); // sigIds con outcome ya materializado
+  const deadline = Date.now() + 18000; // leave room for the bus writes
 
   for (const day of daysToProcess()) {
     const known = await listSigIds(store, day);
@@ -97,21 +98,27 @@ export async function runSnapshot() {
     mergeExisting(existingSig?.content, sigMap);
     mergeExisting(existingOut?.content, outMap);
 
+    // Only fetch the blobs the bus does not have yet, in parallel: fetching every
+    // event one by one (2 gets x ~700 sigIds x 2 days) blew the 30s function limit
+    // from 2026-10-26 and nothing reached the bus. Stop early near the limit; the
+    // next run picks up whatever is left.
+    const todo = [];
     for (const sig of known) {
-      const base = `ev/${day}/${safeKey(sig)}`;
-      const s = await store.get(`${base}__signal`, { type: 'json' });
-      if (s) {
-        const id = idOf(s) || sig;
-        const prev = sigMap.get(id);
-        if (!prev || String(s.receivedAt || '') >= String(prev.receivedAt || '')) sigMap.set(id, s);
-      }
-      const o = await store.get(`${base}__outcome`, { type: 'json' });
-      if (o) {
-        const id = idOf(o) || sig;
-        const prev = outMap.get(id);
-        if (!prev || String(o.receivedAt || '') >= String(prev.receivedAt || '')) outMap.set(id, o);
-      }
+      if (!sigMap.has(sig)) todo.push([sig, 'signal', sigMap]);
+      if (!outMap.has(sig)) todo.push([sig, 'outcome', outMap]);
     }
+    let next = 0;
+    const worker = async () => {
+      while (next < todo.length && Date.now() < deadline) {
+        const [sig, evt, map] = todo[next++];
+        const r = await store.get(`ev/${day}/${safeKey(sig)}__${evt}`, { type: 'json' });
+        if (!r) continue;
+        const id = idOf(r) || sig;
+        const prev = map.get(id);
+        if (!prev || String(r.receivedAt || '') >= String(prev.receivedAt || '')) map.set(id, r);
+      }
+    };
+    await Promise.all(Array.from({ length: 24 }, worker));
 
     for (const id of sigMap.keys()) haveSig.add(id);
     for (const id of outMap.keys()) haveOut.add(id);
@@ -131,7 +138,7 @@ export async function runSnapshot() {
   // sondea hoy/ayer. Para los pocos sigIds con outcome pero sin signal, sondea
   // 3 dias mas atras y escribe el signal en el .jsonl de SU fecha de receivedAt.
   const orphans = [...haveOut].filter((id) => !haveSig.has(id) && !id.startsWith('TEST-'));
-  if (orphans.length) {
+  if (orphans.length && Date.now() < deadline) {
     const now = Date.now();
     const backDays = [2, 3, 4].map((k) => new Date(now - k * 864e5).toISOString().slice(0, 10));
     const recovered = {}; // day -> Map(sigId -> record)
