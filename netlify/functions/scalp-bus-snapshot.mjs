@@ -189,6 +189,9 @@ export async function runSnapshot() {
     } catch { /* aun no existe */ }
   }
 
+  // freshness marker read by session-feed -> live/market.json -> SA watchdog
+  try { await store.setJSON('meta:lastSnapshot', { at: new Date().toISOString(), wrote: out.filter((w) => !w.skipped).length }); } catch { /* best effort */ }
+
   return { ok: true, wrote: out, mirrored };
 }
 
