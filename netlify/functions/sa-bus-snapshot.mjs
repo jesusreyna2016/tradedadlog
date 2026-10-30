@@ -1,7 +1,9 @@
 // Snapshot the market state to the GitHub bus so the Session Analyst cloud
 // routines (no egress to tradedadlog.com) can read it from the repo checkout.
 //
-// Writes live/market.json = session-feed + cc-news, wrapped with a builtAt.
+// Writes live/market.json = session-feed + cc-news + cc-macro, wrapped with a builtAt.
+// `macro` (intermarket, data reactions, COT, flows) changes on every call, so it is
+// left out of the de-dupe key: it rides along whenever the feed or news change.
 //
 // De-dupe: builtAt (and feed.generatedAt / news.fetchedAt) change on every call,
 // which used to defeat busPut's skip-if-unchanged and produce a commit every 5
@@ -13,6 +15,7 @@
 // in sa-bus-cron.mjs and calls runSnapshot() here.
 import feedHandler from './session-feed.mjs';
 import newsHandler from './cc-news.mjs';
+import macroHandler from './cc-macro.mjs';
 import { busGet, busPut } from './_sa-bus.mjs';
 
 const readJson = async (handler) => {
@@ -49,7 +52,7 @@ export async function runSnapshot() {
   const now = new Date().toISOString();
   if (!token) return { ok: false, reason: 'SA_BUS_TOKEN no configurado', builtAt: now };
 
-  const [feed, news] = await Promise.all([readJson(feedHandler), readJson(newsHandler)]);
+  const [feed, news, macro] = await Promise.all([readJson(feedHandler), readJson(newsHandler), readJson(macroHandler)]);
 
   // Si el feed no trae symbols (handler cayo), NO escribas: dejarias el bus con un
   // blob de error en vez del ultimo market.json bueno.
@@ -77,7 +80,7 @@ export async function runSnapshot() {
       return { ok: true, unchanged: true, builtAt: prevBuiltAt || now };
     }
 
-    const body = JSON.stringify({ builtAt: now, feed, news }, null, 2) + '\n';
+    const body = JSON.stringify({ builtAt: now, feed, news, macro: macro || null }, null, 2) + '\n';
     // pasamos `cur` para que busPut no repita el GET
     const r = await busPut('live/market.json', body, `sa-bus: market snapshot ${now}`, { token, known: cur });
 
