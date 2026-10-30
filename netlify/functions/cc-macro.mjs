@@ -159,8 +159,12 @@ async function okxDeriv(ccy){
   const fundPct = f ? +f.fundingRate * 100 : null;
   return {
     fundingPct: r2(fundPct, 4),
-    // funding por 8 h: >= 0.03 % = largos pagando caro (apalancados de un lado), <= -0.01 % = cortos pagando
-    fundingState: fundPct == null ? null : fundPct >= 0.03 ? 'longs-crowded' : fundPct <= -0.01 ? 'shorts-crowded' : 'neutral',
+    // OKX topa el funding en +0.01 % por 8 h, asi que "alto" es lo normal en mercado alcista y
+    // no predice nada (backtest 30 oct: 54 % al alza en 24 h). Negativo (los cortos pagan) si:
+    // ETH subio 24 h despues el 66 % de las veces (5/5 en fin de semana, n chico).
+    // longs-crowded solo cuando ademas el OI sube fuerte (largos apalancados NUEVOS).
+    fundingState: fundPct == null ? null : fundPct < 0 ? 'shorts-crowded'
+      : (fundPct >= 0.01 && oiNow && oi24 && (oiNow / oi24 - 1) >= 0.05) ? 'longs-crowded' : 'neutral',
     oiUsd: oiNow ? Math.round(oiNow) : null,
     oiChg24hPct: oiNow && oi24 ? r2((oiNow / oi24 - 1) * 100) : null,
     longShortAccounts: l[0] ? +l[0][1] : null,
