@@ -42,7 +42,9 @@ export default async (req) => {
     weeklyDir: kv.weekly || null,
     price: num(kv.price),
     levels: {
+      // vah/poc/val = previous day profile (fixed) since TDL1 v10; dvah/dpoc/dval = developing
       vah: num(kv.vah), poc: num(kv.poc), val: num(kv.val),
+      dvah: num(kv.dvah), dpoc: num(kv.dpoc), dval: num(kv.dval),
       vwap: num(kv.vwap), pdh: num(kv.pdh), pdl: num(kv.pdl),
       dayOpen: num(kv.dayopen), orH: num(kv.orh), orL: num(kv.orl),
       pwh: num(kv.pwh), pwl: num(kv.pwl), tdo: num(kv.tdo),
