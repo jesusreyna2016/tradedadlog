@@ -172,6 +172,18 @@ async function okxDeriv(ccy){
   };
 }
 
+// fecha CT (YYYY-MM-DD) de un instante
+const ctDate = (t) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(new Date(t));
+
+// dia de trading del ultimo cierre diario CME (16:00 CT) ya ocurrido; sab/dom = el viernes
+function lastCmeClose(now){
+  const hourCT = +new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', hour: 'numeric', hourCycle: 'h23' }).format(new Date(now));
+  let d = new Date(ctDate(now) + 'T12:00:00Z');
+  if(hourCT < 16) d = new Date(d - 864e5);
+  while(d.getUTCDay() === 0 || d.getUTCDay() === 6) d = new Date(d - 864e5);
+  return d.toISOString().slice(0, 10);
+}
+
 async function cryptoBlock(){
   const out = {};
   const now = Date.now();
@@ -185,11 +197,14 @@ async function cryptoBlock(){
         out.dvol = { last: r2(last), chg24h: last && ago ? r2(last - ago) : null };
       }, (e) => { out.dvol = { error: String(e.message || e) }; }),
     chart('ETH=F', '1d', '10d').then(({ bars }) => {
-      // ultimo cierre diario CME completo antes de hoy; en fin de semana = el del viernes
-      const today = new Date(now).toISOString().slice(0, 10);
-      const done = bars.filter((b) => new Date(b.t).toISOString().slice(0, 10) < today);
+      // ultimo cierre diario CME completo por el reloj de Chicago (16:00 CT), no por la fecha UTC:
+      // con la fecha UTC, de vie 16:00 a 19:00 CT salia el cierre del jueves
+      const closed = lastCmeClose(now);
+      // Yahoo fecha la barra diaria a la medianoche del dia de trading (04:00-05:00 UTC)
+      const day = (b) => new Date(b.t).toISOString().slice(0, 10);
+      const done = bars.filter((b) => day(b) <= closed);
       const b = done[done.length - 1];
-      out.cmeGap = b ? { cmeClose: r2(b.c), cmeCloseDate: new Date(b.t).toISOString().slice(0, 10) } : null;
+      out.cmeGap = b ? { cmeClose: r2(b.c), cmeCloseDate: day(b) } : null;
     }, (e) => { out.cmeGap = { error: String(e.message || e) }; }),
     Promise.all([chart('ETH-USD', '1d', '10d'), chart('ETH-BTC', '1d', '10d')]).then(([eth, eb]) => {
       const spot = eth.meta.regularMarketPrice;
