@@ -100,7 +100,11 @@ async function fetchEarnings(){
 const HEADLINE_FEEDS = [
   'https://www.cnbc.com/id/100003114/device/rss/rss.html',   // CNBC top news
   'https://www.cnbc.com/id/20910258/device/rss/rss.html',    // CNBC economy
-  'https://news.google.com/rss/search?q=(stock+futures+OR+tariffs+OR+Trump+OR+war+OR+Fed+OR+oil)+when:1d&hl=en-US&gl=US&ceid=US:en'
+  'https://news.google.com/rss/search?q=(stock+futures+OR+tariffs+OR+Trump+OR+war+OR+Fed+OR+oil)+when:1d&hl=en-US&gl=US&ceid=US:en',
+  // cripto: ETH es lo que Jesus opera el fin de semana, cuando no hay calendario macro
+  'https://cointelegraph.com/rss',
+  'https://www.theblock.co/rss.xml',
+  'https://decrypt.co/feed'
 ];
 const THEMES = [
   ['geo',      /\b(war|missile|strike[sd]?|attack|invasion|troops|iran|israel|gaza|russia|ukraine|taiwan|north korea|ceasefire|sanction|hormuz)/i],
@@ -108,8 +112,17 @@ const THEMES = [
   ['fed',      /\b(fed|fomc|powell|warsh|rate (cut|hike)|treasury yield|inflation|cpi|jobs report|payrolls)/i],
   ['earnings', /\b(earnings|revenue|guidance|quarterly results|beats|misses)\b/i],
   ['oil',      /\b(oil|crude|opec|brent|hormuz|tankers?)\b/i],
-  ['crypto',   /\b(bitcoin|crypto|ether|binance)\b/i]
+  ['crypto',   /\b(bitcoin|btc|crypto|ether|ethereum|eth|binance|coinbase|stablecoins?|solana)\b/i],
+  // sub-temas cripto que mueven a ETH sin calendario
+  ['eth',      /\b(ether|ethereum|eth|vitalik|staking|layer[- ]?2|pectra|fusaka|glamsterdam)\b/i],
+  ['hack',     /\b(hack(ed|er|s)?|exploit(ed)?|drain(ed)?|stolen|breach)\b/i],
+  ['etf',      /\b(etfs?|inflows?|outflows?|blackrock|fidelity|grayscale)\b/i],
+  ['regulation', /\b(sec|cftc|regulat\w*|lawsuit|ban|senate|clarity act|genius act)\b/i],
+  ['liquidation', /\b(liquidat\w*|short squeeze|long squeeze)\b/i]
 ];
+
+const CRYPTO_HOSTS = ['cointelegraph.com', 'theblock.co', 'decrypt.co'];
+const CRYPTO_SUBTAGS = ['eth', 'hack', 'etf', 'regulation', 'liquidation'];
 
 function decodeXml(t){
   return String(t || '').replace(/<!\[CDATA\[|\]\]>/g, '')
@@ -129,9 +142,10 @@ async function fetchHeadlines(){
       const items = xml.split(/<item[\s>]/).slice(1);
       return items.map((it) => {
         const pick = (tag) => { const m = it.match(new RegExp('<' + tag + '[^>]*>([\\s\\S]*?)</' + tag + '>')); return m ? decodeXml(m[1]) : ''; };
-        const src = pick('source') || (u.includes('cnbc') ? 'CNBC' : '');
+        const host = new URL(u).hostname.replace(/^www\./, '');
+        const src = pick('source') || ({ 'cnbc.com': 'CNBC', 'cointelegraph.com': 'Cointelegraph', 'theblock.co': 'The Block', 'decrypt.co': 'Decrypt' }[host] || '');
         const title = pick('title').replace(/\s+-\s+[^-]+$/, (m) => (src && m.includes(src.split('.')[0]) ? '' : m));
-        return { title, ts: Date.parse(pick('pubDate')) || null, source: src };
+        return { title, ts: Date.parse(pick('pubDate')) || null, source: src, cryptoFeed: CRYPTO_HOSTS.includes(host) };
       });
     } catch(e){ return []; }
   }));
@@ -142,12 +156,18 @@ async function fetchHeadlines(){
     const k = h.title.toLowerCase().replace(/[^a-z0-9]+/g, ' ').slice(0, 60);
     if(seen.has(k)) continue;
     seen.add(k);
-    const tags = THEMES.filter(([, rx]) => rx.test(h.title)).map(([t]) => t);
-    out.push({ ...h, tags });
+    let tags = THEMES.filter(([, rx]) => rx.test(h.title)).map(([t]) => t);
+    // los sub-temas cripto (hack, etf, regulation...) solo valen en titulares cripto:
+    // "Senate lawsuit" en CNBC no es regulacion cripto
+    const isCrypto = h.cryptoFeed || tags.includes('crypto');
+    if(isCrypto && !tags.includes('crypto')) tags.unshift('crypto');
+    if(!isCrypto) tags = tags.filter((t) => !CRYPTO_SUBTAGS.includes(t));
+    const { cryptoFeed, ...rest } = h;
+    out.push({ ...rest, tags });
   }
   // primero lo etiquetado (es lo que mueve), luego lo mas reciente
   out.sort((a, b) => (b.tags.length > 0) - (a.tags.length > 0) || b.ts - a.ts);
-  return out.slice(0, 30);
+  return out.slice(0, 45);
 }
 
 async function fetchFF(){

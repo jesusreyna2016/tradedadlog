@@ -8,7 +8,10 @@
 //                  neto, cambio semanal y percentil de 3 anos.
 //   flows       -> calendario de flujos: OpEx mensual / triple witching, vencimiento VIX,
 //                  fin de mes y de trimestre.
-// Fuentes publicas sin clave (Yahoo chart API, CFTC Socrata). Cache en Netlify Blobs.
+//   crypto      -> contexto de ETH/BTC para la rutina crypto-weekend: funding, OI, long/short
+//                  (OKX), DVOL (Deribit), gap del CME, ETH/BTC, Fear & Greed.
+// Fuentes publicas sin clave (Yahoo chart API, CFTC Socrata, OKX, Deribit, alternative.me).
+// Cache en Netlify Blobs.
 import { getStore } from '@netlify/blobs';
 import newsHandler from './cc-news.mjs';
 
@@ -128,6 +131,79 @@ async function cot(){
   return out;
 }
 
+// --- cripto (ETH es lo que Jesus opera el fin de semana) ---
+//   derivatives -> OKX perps: funding actual, open interest y su cambio 24 h, ratio de cuentas long/short
+//   dvol        -> Deribit DVOL (volatilidad implicita de ETH a 30 d) y su cambio 24 h
+//   cmeGap      -> cierre del futuro CME de ETH del viernes vs spot: el gap del fin de semana es iman
+//   ethBtc      -> fuerza relativa ETH contra BTC
+//   fearGreed   -> sentimiento (alternative.me), hoy vs ayer
+async function getJson(u){
+  const r = await fetch(u, { headers: UA });
+  if(!r.ok) throw new Error(new URL(u).hostname + ' ' + r.status);
+  return r.json();
+}
+
+async function okxDeriv(ccy){
+  const inst = ccy + '-USDT-SWAP';
+  const [fr, oi, oiHist, lsr] = await Promise.all([
+    getJson('https://www.okx.com/api/v5/public/funding-rate?instId=' + inst),
+    getJson('https://www.okx.com/api/v5/public/open-interest?instType=SWAP&instId=' + inst),
+    getJson('https://www.okx.com/api/v5/rubik/stat/contracts/open-interest-volume?ccy=' + ccy + '&period=1H').catch(() => null),
+    getJson('https://www.okx.com/api/v5/rubik/stat/contracts/long-short-account-ratio?ccy=' + ccy + '&period=1H').catch(() => null)
+  ]);
+  const f = fr?.data?.[0], o = oi?.data?.[0];
+  // open-interest-volume: [ts, oiUsd, volUsd], el mas reciente primero
+  const h = oiHist?.data || [];
+  const oi24 = h[24] ? +h[24][1] : null, oiNow = h[0] ? +h[0][1] : (o ? +o.oiUsd : null);
+  const l = lsr?.data || [];
+  const fundPct = f ? +f.fundingRate * 100 : null;
+  return {
+    fundingPct: r2(fundPct, 4),
+    // funding por 8 h: >= 0.03 % = largos pagando caro (apalancados de un lado), <= -0.01 % = cortos pagando
+    fundingState: fundPct == null ? null : fundPct >= 0.03 ? 'longs-crowded' : fundPct <= -0.01 ? 'shorts-crowded' : 'neutral',
+    oiUsd: oiNow ? Math.round(oiNow) : null,
+    oiChg24hPct: oiNow && oi24 ? r2((oiNow / oi24 - 1) * 100) : null,
+    longShortAccounts: l[0] ? +l[0][1] : null,
+    longShortChg24h: l[0] && l[24] ? r2(+l[0][1] - +l[24][1]) : null
+  };
+}
+
+async function cryptoBlock(){
+  const out = {};
+  const now = Date.now();
+  await Promise.all([
+    okxDeriv('ETH').then((d) => { out.ethDeriv = d; }, (e) => { out.ethDeriv = { error: String(e.message || e) }; }),
+    okxDeriv('BTC').then((d) => { out.btcDeriv = d; }, (e) => { out.btcDeriv = { error: String(e.message || e) }; }),
+    getJson('https://www.deribit.com/api/v2/public/get_volatility_index_data?currency=ETH&resolution=3600&start_timestamp=' + (now - 26 * 3600e3) + '&end_timestamp=' + now)
+      .then((j) => {
+        const d = j?.result?.data || [];
+        const last = d[d.length - 1]?.[4], ago = d.find((x) => x[0] >= now - 24 * 3600e3)?.[4];
+        out.dvol = { last: r2(last), chg24h: last && ago ? r2(last - ago) : null };
+      }, (e) => { out.dvol = { error: String(e.message || e) }; }),
+    chart('ETH=F', '1d', '10d').then(({ bars }) => {
+      // ultimo cierre diario CME completo antes de hoy; en fin de semana = el del viernes
+      const today = new Date(now).toISOString().slice(0, 10);
+      const done = bars.filter((b) => new Date(b.t).toISOString().slice(0, 10) < today);
+      const b = done[done.length - 1];
+      out.cmeGap = b ? { cmeClose: r2(b.c), cmeCloseDate: new Date(b.t).toISOString().slice(0, 10) } : null;
+    }, (e) => { out.cmeGap = { error: String(e.message || e) }; }),
+    Promise.all([chart('ETH-USD', '1d', '10d'), chart('ETH-BTC', '1d', '10d')]).then(([eth, eb]) => {
+      const spot = eth.meta.regularMarketPrice;
+      out.ethSpot = r2(spot);
+      const ebNow = eb.meta.regularMarketPrice, eb1 = eb.bars[eb.bars.length - 2]?.c, eb7 = eb.bars[eb.bars.length - 8]?.c;
+      out.ethBtc = { last: r2(ebNow, 5), chg24hPct: eb1 ? r2((ebNow / eb1 - 1) * 100) : null, chg7dPct: eb7 ? r2((ebNow / eb7 - 1) * 100) : null };
+    }, (e) => { out.ethBtc = { error: String(e.message || e) }; }),
+    getJson('https://api.alternative.me/fng/?limit=2').then((j) => {
+      const d = j?.data || [];
+      out.fearGreed = d[0] ? { value: +d[0].value, label: d[0].value_classification, prev: d[1] ? +d[1].value : null } : null;
+    }, (e) => { out.fearGreed = { error: String(e.message || e) }; })
+  ]);
+  if(out.cmeGap && out.cmeGap.cmeClose && out.ethSpot){
+    out.cmeGap.gapPct = r2((out.ethSpot / out.cmeGap.cmeClose - 1) * 100);
+  }
+  return out;
+}
+
 // --- calendario de flujos (calculado, sin fuente externa) ---
 const HOLIDAYS = new Set([
   '2026-01-01', '2026-01-19', '2026-02-16', '2026-04-03', '2026-05-25', '2026-06-19', '2026-07-03', '2026-09-07', '2026-11-26', '2026-12-25',
@@ -184,16 +260,18 @@ async function cached(store, key, ttl, fn){
 export default async () => {
   let store = null;
   try { store = getStore('cc'); } catch(e){ store = null; }
-  const [im, react, cotData] = await Promise.all([
+  const [im, react, cotData, cryptoData] = await Promise.all([
     cached(store, 'macro:im', IM_TTL, intermarket),
     cached(store, 'macro:react', IM_TTL, async () => ({ list: await reactions() })),
-    cached(store, 'macro:cot', COT_TTL, cot)
+    cached(store, 'macro:cot', COT_TTL, cot),
+    cached(store, 'macro:crypto', IM_TTL, cryptoBlock)
   ]);
   const payload = {
     generatedAt: new Date().toISOString(),
     intermarket: im,
     reactions: (react && react.list) || [],
     cot: cotData,
+    crypto: cryptoData,
     flows: flows()
   };
   return new Response(JSON.stringify(payload), {
