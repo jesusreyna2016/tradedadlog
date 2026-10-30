@@ -55,8 +55,21 @@ function cleanDay(d) {
     partials: int(d.partials),
     scratches: int(d.scratches),
     fullStops: int(d.fullStops),
-    wlPtsRatio: num(d.wlPtsRatio)
+    wlPtsRatio: num(d.wlPtsRatio),
+    // per-position prices in points (plan vs execution); still no money and no size
+    fills: cleanFills(d.fills)
   };
+}
+
+function cleanFills(list) {
+  if (!Array.isArray(list)) return [];
+  return list.slice(0, 80).map((f) => {
+    if (!f || typeof f !== 'object' || typeof f.t !== 'string' || !/^\d{4}-\d{2}-\d{2}T/.test(f.t)) return null;
+    const side = f.side === 'long' || f.side === 'short' ? f.side : null;
+    const sym = typeof f.sym === 'string' ? f.sym.replace(/[^A-Za-z0-9!._-]/g, '').slice(0, 16) : null;
+    if (!side || !sym) return null;
+    return { t: f.t.slice(0, 25), sym, side, entry: num(f.entry), exit: num(f.exit), pts: num(f.pts), durMin: int(f.durMin) };
+  }).filter(Boolean);
 }
 
 function recomputeRollup(byDay) {
