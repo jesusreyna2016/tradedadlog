@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System Health · TradeDadLog</title>
+<meta name="theme-color" content="#0a0d11">
+<link rel="icon" href="td-logo.jpg">
+<script>
+/* language before first paint, shared with the Command Center (key cc_lang, English by default) */
+window.CC_LANG = (function(){ try{ return localStorage.getItem('cc_lang')==='es'?'es':'en'; }catch(e){ return 'en'; } })();
+document.documentElement.lang = window.CC_LANG;
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Chakra+Petch:wght@600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* same dark-gold tokens as the Command Center */
+:root{
+  --bg:#0a0d11; --panel:#11161c; --panel-2:#161e26;
+  --border:rgba(233,238,243,0.12); --border-hot:rgba(199,146,53,0.35);
+  --txt:#e9eef3; --txt-dim:#93a1b3; --txt-faint:#5b6675;
+  --cyan:#c79235; --lime:#34c98a; --amber:#e8933a; --red:#ef5f6b; --violet:#9d8cff;
+  --grid:rgba(233,238,243,0.045);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(1100px 520px at 82% -12%,rgba(199,146,53,0.06),transparent 60%),var(--bg);color:var(--txt);
+  font-family:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace;padding:12px;min-height:100vh;overflow-x:hidden}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.topbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:10px 18px;border:1px solid var(--border);border-radius:14px;background:var(--panel)}
+.brand{font-family:"Orbitron",monospace;font-weight:900;letter-spacing:3px;font-size:14px}
+.brand small{display:block;font-family:"JetBrains Mono",monospace;font-weight:500;font-size:9px;letter-spacing:2px;color:var(--txt-faint);margin-top:3px}
+.grow{flex:1}
+.overall{display:flex;align-items:center;gap:8px;font-family:"Chakra Petch",monospace;font-weight:700;letter-spacing:1.5px;font-size:13px;padding:6px 12px;border-radius:10px;border:1px solid var(--border)}
+.overall.ok{color:var(--lime);border-color:rgba(52,201,138,0.4)} .overall.warn{color:var(--amber);border-color:rgba(232,147,58,0.45)} .overall.bad{color:var(--red);border-color:rgba(239,95,107,0.45)}
+.btn,.lang button{background:var(--panel-2);border:1px solid var(--border);color:var(--txt-dim);font-family:inherit;font-size:10px;letter-spacing:1px;padding:6px 10px;border-radius:8px;cursor:pointer;text-decoration:none}
+.btn:hover,.lang button:hover{border-color:var(--cyan);color:var(--txt)}
+.lang{display:flex;gap:4px}.lang button[aria-pressed="true"]{color:var(--cyan);border-color:var(--border-hot)}
+.panel{border:1px solid var(--border);border-radius:14px;background:var(--panel);padding:14px 16px}
+.phead{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.phead h2{font-family:"Chakra Petch",monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase}
+.phead .tag{margin-left:auto;font-size:8.5px;letter-spacing:1px;color:var(--txt-faint)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);flex-shrink:0}
+.sub{font-size:9.5px;color:var(--txt-faint);line-height:1.5;margin-top:8px}
+table{width:100%;border-collapse:separate;border-spacing:0 4px;font-size:11px}
+th{font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-transform:uppercase;text-align:left;font-weight:500;padding:0 8px}
+td{background:var(--panel-2);padding:7px 8px;font-variant-numeric:tabular-nums}
+td:first-child{border-radius:8px 0 0 8px;font-weight:700} td:last-child{border-radius:0 8px 8px 0}
+.scroll{overflow-x:auto}
+.st{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.st i{width:7px;height:7px;border-radius:50%;background:var(--txt-faint)}
+.st.ok i{background:var(--lime)} .st.warn i{background:var(--amber)} .st.bad i{background:var(--red)} .st.off{color:var(--txt-faint)}
+.st.bad{color:var(--red)} .st.warn{color:var(--amber)}
+.rows{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+@media(max-width:760px){.rows{grid-template-columns:1fr}}
+.row{display:flex;gap:10px;align-items:flex-start;padding:8px 11px;border-radius:9px;background:var(--panel-2);border:1px solid transparent;min-width:0}
+.row.bad{border-color:rgba(239,95,107,0.45)} .row.warn{border-color:rgba(232,147,58,0.45)}
+.row .k{font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-transform:uppercase}
+.row .v{font-size:12.5px;font-weight:700;margin-top:2px}
+.row .s{font-size:9.5px;color:var(--txt-dim);margin-top:2px;line-height:1.4;overflow-wrap:anywhere}
+.row .st{margin-left:auto;font-size:10px}
+.foot{text-align:center;font-size:8.5px;letter-spacing:2px;color:var(--txt-faint);padding:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="topbar">
+    <div class="brand">SYSTEM HEALTH<small id="sub">TRADEDADLOG</small></div>
+    <div class="grow"></div>
+    <div class="overall" id="overall">·</div>
+    <a class="btn" href="command-center.html" id="ccLink">Command Center</a>
+    <button type="button" class="btn" id="refresh">Refresh</button>
+    <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en">EN</button><button type="button" data-lang="es">ES</button></div>
+  </header>
+
+  <section class="panel">
+    <div class="phead"><span class="dot"></span><h2 id="hFeeds">Indicator feeds</h2><span class="tag" id="tFeeds">/api/session-feed</span></div>
+    <div class="scroll"><table><thead><tr id="feedHead"></tr></thead><tbody id="feeds"></tbody></table></div>
+    <div class="sub" id="sFeeds"></div>
+  </section>
+
+  <section class="panel">
+    <div class="phead"><span class="dot" style="background:var(--violet)"></span><h2 id="hBus">Session Analyst bus</h2><span class="tag">session-analyst-bus</span></div>
+    <div class="rows" id="bus"></div>
+  </section>
+
+  <section class="panel">
+    <div class="phead"><span class="dot" style="background:var(--amber)"></span><h2 id="hRoutines">Routines · latest output</h2><span class="tag" id="tRoutines"></span></div>
+    <div class="rows" id="routines"></div>
+  </section>
+
+  <section class="panel">
+    <div class="phead"><span class="dot" style="background:var(--lime)"></span><h2>Scalp CC</h2><span class="tag">webhook · scalp-cc-bus</span></div>
+    <div class="rows" id="scalp"></div>
+  </section>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(es,en){ return window.CC_LANG==='en'?en:es; };
+  var CC_API=/(^|\.)tradedadlog\.com$/i.test(location.hostname)?'':'https://tradedadlog.com';
+  var BUS='https://raw.githubusercontent.com/jesusreyna2016/session-analyst-bus/main';
+  var SCALP='https://raw.githubusercontent.com/jesusreyna2016/scalp-cc-bus/main';
+  var FUT=['NQ','ES','GC','YM','CL'], CRYPTO=['ETHUSDT','BTCUSDT'];
+  // fresh / stale cut-offs in minutes, same as method/instructions.md section 2
+  var CUT={ feed:[25,90], orb:[25,90], regime:[45,120], trendcl:[75,150] };
+  var D={};   // last data per source
+  function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function ageMin(x){ var t=typeof x==='number'?x:Date.parse(x); return isFinite(t)?(Date.now()-t)/60000:null; }
+  function ageTxt(m){
+    if(m==null) return '·';
+    if(m<1) return T('ahora','now');
+    if(m<90) return Math.round(m)+' min';
+    if(m<48*60) return (m/60).toFixed(m<600?1:0)+' h';
+    return Math.round(m/1440)+T(' días',' days');
+  }
+  function ctNow(){
+    var p={}; new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',weekday:'short',hour:'numeric',minute:'numeric',hourCycle:'h23'})
+      .formatToParts(new Date()).forEach(function(x){p[x.type]=x.value;});
+    return { wd:p.weekday, h:+p.hour, m:+p.minute };
+  }
+  // CME futures: closed Fri 16:00 to Sun 17:00 CT and in the daily 16:00-17:00 CT halt
+  function futuresClosed(){ var c=ctNow(); return c.wd==='Sat'||(c.wd==='Fri'&&c.h>=16)||(c.wd==='Sun'&&c.h<17)||c.h===16; }
+  function cryptoWindow(){ var c=ctNow(); return (c.wd==='Fri'&&c.h>=16)||c.wd==='Sat'||(c.wd==='Sun'&&c.h<17); }
+  function state(m,cut,closed){
+    if(m==null) return closed?'off':'bad';
+    if(m<cut[0]) return 'ok';
+    if(closed) return 'off';
+    return m<cut[1]?'warn':'bad';
+  }
+  var WORD={ ok:['al día','fresh'], warn:['viejo','stale'], bad:['caído','down'], off:['cerrado','closed'] };
+  function st(s,txt){ return '<span class="st '+s+'"><i></i>'+esc(txt)+'</span>'; }
+  function row(k,v,sub,s,stTxt){ return '<div class="row '+(s==='bad'||s==='warn'?s:'')+'"><div style="min-width:0"><div class="k">'+k+'</div><div class="v">'+v+'</div><div class="s">'+(sub||'')+'</div></div>'+st(s,stTxt||T(WORD[s][0],WORD[s][1]))+'</div>'; }
+  var worst='ok';
+  function note(s){ if(s==='bad') worst='bad'; else if(s==='warn'&&worst==='ok') worst='warn'; }
+
+  function renderFeeds(){
+    var srcs=['feed','orb','regime','trendcl'];
+    $('feedHead').innerHTML='<th>'+T('Símbolo','Symbol')+'</th>'+srcs.map(function(s){return '<th>'+s+'</th>';}).join('');
+    var f=D.feed;
+    if(!f){ $('feeds').innerHTML='<tr><td colspan="5">'+(D.feedErr?T('No se pudo leer /api/session-feed.','Could not read /api/session-feed.'):T('Cargando…','Loading…'))+'</td></tr>'; if(D.feedErr) note('bad'); return; }
+    var closed=futuresClosed();
+    $('feeds').innerHTML=FUT.concat(CRYPTO).map(function(sym){
+      var crypto=/USDT$/.test(sym), e=((crypto?f.crypto:f.symbols)||{})[sym]||{};
+      return '<tr><td>'+sym.replace(/USDT$/,'')+'</td>'+srcs.map(function(src){
+        var r=e[src], m=r?ageMin(r.receivedAt||r.updatedAt):null, s=state(m,CUT[src],!crypto&&closed);
+        if(!(!crypto&&closed)) note(s);
+        return '<td>'+st(s, m==null?T('sin datos','no data'):ageTxt(m))+'</td>';
+      }).join('')+'</tr>';
+    }).join('');
+    $('sFeeds').textContent=T('Edad = última alerta recibida. feed y orb: al día < 25 min, caído > 90. regime < 45 / 120. trendcl < 75 / 150. ','Age = last alert received. feed and orb: fresh < 25 min, down > 90. regime < 45 / 120. trendcl < 75 / 150. ')+
+      (closed?T('Futuros cerrados ahora: sus filas no cuentan como caída.','Futures are closed now: their rows do not count as down.'):'');
+  }
+
+  function renderBus(){
+    var out=[], m=D.market?ageMin(D.market.builtAt):null;
+    var s=m==null?'bad':m<20?'ok':m<90?'warn':'bad'; note(s);
+    out.push(row(T('Snapshot del mercado','Market snapshot'),ageTxt(m),'live/market.json · '+T('Netlify lo escribe cada 5 min','Netlify writes it every 5 min'),s));
+    var nw=D.market&&D.market.news, nm=nw?ageMin(nw.fetchedAt):null;
+    if(D.market){ var ns=nm==null?'warn':nm<90?'ok':nm<6*60?'warn':'bad'; note(ns);
+      out.push(row(T('Noticias','News'),ageTxt(nm),(nw&&nw.events?nw.events.length+T(' eventos',' events'):'')+(nw&&nw.headlines?' · '+nw.headlines.length+T(' titulares',' headlines'):''),ns)); }
+    var h=D.health, hm=h?ageMin(h.checkedAt):null;
+    var hs=!h?'bad':hm>8*60?'warn':h.status==='down'?'bad':h.status==='warn'?'warn':'ok'; note(hs);
+    out.push(row('Watchdog',h?String(h.status||'·').toUpperCase():'·',
+      (h?T('revisó hace ','checked ')+ageTxt(hm)+T('',' ago')+((h.issues||[]).length?' · '+esc((h.issues||[]).slice(0,2).join(' · ')):''):'live/health.json'),hs));
+    var sh=D.shock, act=sh&&Array.isArray(sh.active)?sh.active:[];
+    out.push(row(T('Shock entre corridas','Between-run shock'),act.length?esc(act[0].msg||act[0].kind||'shock'):T('Ninguno','None'),'live/shock.json',act.length?'warn':'ok',act.length?T('activo','active'):T('tranquilo','quiet')));
+    $('bus').innerHTML=out.join('');
+  }
+
+  // newest plan of a futures run: pre-asia files carry the next trade day, the others today (CT)
+  function ctDate(offset){ var d=new Date(Date.now()+offset*864e5); return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Chicago'}).format(d); }
+  function futMax(){ var c=ctNow(); return (c.wd==='Sat'||c.wd==='Sun'||c.wd==='Mon')?74*60:26*60; }
+  function renderRoutines(){
+    var out=[], c=ctNow();
+    ['pre-asia','pre-london','pre-ny'].forEach(function(rt){
+      var p=D.plans&&D.plans[rt], m=p?ageMin(p.generatedAt||p.builtAt):null;
+      var s=m==null?(D.plans?'bad':'off'):m<futMax()?'ok':'bad'; if(D.plans) note(s);
+      out.push(row(rt,p?esc(p.date||'')+' · '+ageTxt(m)+T('',' ago'):(D.plans?T('sin plan en 5 días','no plan in 5 days'):T('Cargando…','Loading…')),
+        'plans/'+(p?esc(p.date):'&lt;date&gt;')+'-'+rt+'.json',s));
+    });
+    var cp=D.crypto, cm=cp?ageMin(cp.builtAt):null, inW=cryptoWindow();
+    var cs=!inW?'off':cm==null?'bad':cm<14*60?'ok':'bad'; if(inW) note(cs);
+    out.push(row('crypto-weekend',cp?esc(cp.date+' '+cp.slot)+' · '+ageTxt(cm)+T('',' ago'):T('Sin plan todavía','No plan yet'),
+      inW?T('vie 16:00 a dom 17:00 CT, cada ~3 a 13 h','Fri 16:00 to Sun 17:00 CT, every ~3 to 13 h'):T('fuera de la ventana cripto','outside the crypto window'),cs,!inW?T('fuera de ventana','off window'):null));
+    var w=D.weekly, wd=w&&w.match(/(\d{4}-\d{2}-\d{2})\s+a\s+(\d{4}-\d{2}-\d{2})/), wm=wd?ageMin(wd[2]+'T15:00:00Z')-24*60:null;
+    var ws=wm==null?'warn':wm<8*1440?'ok':'bad'; note(ws);
+    out.push(row(T('weekly (sábado)','weekly (Saturday)'),wd?wd[1]+' → '+wd[2]:'·','reviews/weekly-latest.md',ws));
+    var hb=D.heartbeat, hm=hb?ageMin(hb.lastRun):null;
+    out.push(row(T('Última corrida de futuros','Last futures run'),hb?esc(hb.runType)+' · '+ageTxt(hm)+T('',' ago'):'·',hb?esc(String(hb.note||'').slice(0,160)):'live/heartbeat.json',hb&&hb.ok===false?'bad':hb?'ok':'warn',hb&&hb.ok===false?T('con error','failed'):'ok'));
+    $('routines').innerHTML=out.join('');
+    $('tRoutines').textContent=c.wd+' '+String(c.h).padStart(2,'0')+':'+String(c.m).padStart(2,'0')+' CT';
+  }
+
+  function renderScalp(){
+    var out=[], sc=D.feed&&D.feed.scalp;
+    var im=sc?ageMin(sc.lastIngestAt):null, sm=sc?ageMin(sc.lastSnapshotAt):null;
+    // thresholds from method/watchdog.md: stuck = snapshot > 90 min while signals keep arriving, silent = no alert in 6 h
+    var stuck=sm!=null&&sm>90&&im!=null&&im<sm;
+    var is=!sc?'warn':im==null?'warn':im>360?'warn':'ok';
+    var ss=!sc?'warn':sm==null?'warn':stuck?'bad':sm>90?'warn':'ok';
+    note(is); note(ss);
+    out.push(row(T('Último webhook','Last webhook'),ageTxt(im),T('silencioso si pasan 6 h sin alertas (cripto dispara 24/7)','silent after 6 h with no alerts (crypto fires 24/7)'),is,im>360?T('silencioso','silent'):null));
+    out.push(row(T('Copia al bus','Copy to the bus'),ageTxt(sm),T('scalp-bus-snapshot cada 30 min','scalp-bus-snapshot every 30 min'),ss,stuck?T('atascado','stuck'):null));
+    var r=D.scalpReport, rm=r?ageMin(r.generatedAt):null;
+    var rs=!r?'off':rm<30*60?'ok':'warn'; if(r) note(rs);
+    out.push(row(T('Agente de aprendizaje','Learning agent'),r?ageTxt(rm)+T('',' ago'):'·',r?T('report.json, corre a diario 20:13 CT','report.json, runs daily 20:13 CT'):T('report.json no disponible','report.json not available'),rs,!r?T('sin acceso','no access'):null));
+    $('scalp').innerHTML=out.join('');
+  }
+
+  function render(){
+    worst='ok';
+    document.documentElement.lang=window.CC_LANG;
+    document.title=T('Salud del sistema','System Health')+' · TradeDadLog';
+    $('hFeeds').textContent=T('Feeds de indicadores','Indicator feeds');
+    $('hBus').textContent=T('Bus del Session Analyst','Session Analyst bus');
+    $('hRoutines').textContent=T('Rutinas · última salida','Routines · latest output');
+    $('refresh').textContent=T('Actualizar','Refresh');
+    renderFeeds(); renderBus(); renderRoutines(); renderScalp();
+    var o=$('overall'); o.className='overall '+worst;
+    o.textContent=worst==='ok'?T('TODO EN ORDEN','ALL GOOD'):worst==='warn'?T('REVISAR','CHECK'):T('ALGO CAÍDO','SOMETHING DOWN');
+    $('foot').textContent=T('Se actualiza cada 2 min · ','Refreshes every 2 min · ')+new Intl.DateTimeFormat(T('es-MX','en-US'),{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date())+' CT';
+    [].forEach.call(document.querySelectorAll('.lang button'),function(b){ b.setAttribute('aria-pressed',String(b.getAttribute('data-lang')===window.CC_LANG)); });
+  }
+
+  function get(u,kind){ return fetch(u+(u.indexOf('?')<0?'?':'&')+'t='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok?(kind==='text'?r.text():r.json()):null; }).catch(function(){ return null; }); }
+  function findPlan(rt){
+    // newest first: pre-asia is named after the next trade day
+    var offs=rt==='pre-asia'?[1,0,-1,-2,-3,-4]:[0,-1,-2,-3,-4];
+    var i=0;
+    function next(){ if(i>=offs.length) return Promise.resolve(null);
+      var d=ctDate(offs[i++]);
+      return get(BUS+'/plans/'+d+'-'+rt+'.json').then(function(p){ return p?{date:d,generatedAt:p.generatedAt,builtAt:p.builtAt}:next(); }); }
+    return next();
+  }
+  var slow=0;
+  function load(){
+    if(document.hidden) return;
+    var jobs=[
+      get(CC_API+'/api/session-feed').then(function(d){ D.feed=d; D.feedErr=!d; }),
+      get(BUS+'/live/market.json').then(function(d){ D.market=d; }),
+      get(BUS+'/live/health.json').then(function(d){ D.health=d; }),
+      get(BUS+'/live/shock.json').then(function(d){ D.shock=d; }),
+      get(BUS+'/live/heartbeat.json').then(function(d){ D.heartbeat=d; }),
+      get(BUS+'/plans/crypto-latest.json').then(function(d){ D.crypto=d&&d.builtAt?d:null; }),
+    ];
+    // plans, weekly and the scalp report move slowly: every 10 min
+    if(slow++%5===0) jobs.push(
+      Promise.all(['pre-asia','pre-london','pre-ny'].map(findPlan)).then(function(a){ D.plans={'pre-asia':a[0],'pre-london':a[1],'pre-ny':a[2]}; }),
+      get(BUS+'/reviews/weekly-latest.md','text').then(function(t){ D.weekly=t; }),
+      get(SCALP+'/report.json').then(function(d){ D.scalpReport=d&&d.generatedAt?d:null; })
+    );
+    jobs.forEach(function(j){ j.then(render); });
+  }
+  [].forEach.call(document.querySelectorAll('.lang button'),function(b){
+    b.addEventListener('click',function(){ window.CC_LANG=b.getAttribute('data-lang'); try{ localStorage.setItem('cc_lang',window.CC_LANG); }catch(e){} render(); });
+  });
+  $('refresh').addEventListener('click',function(){ slow=0; load(); });
+  render(); load();
+  setInterval(load,2*60000);
+  setInterval(render,30000);
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden) load(); });
+})();
+</script>
+</body>
+</html>
