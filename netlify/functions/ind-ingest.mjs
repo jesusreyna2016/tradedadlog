@@ -10,7 +10,7 @@ import { getStore } from '@netlify/blobs';
 
 const PREFIX_SRC = {
   R3R1: '3reads', DRB1: 'drbias', SRZ1: 'srzones', HCZ1: 'htfzones', TDL1: 'orb',
-  CMDC1: 'command', RGM1: 'regime', TCL1: 'trendcl'
+  CMDC1: 'command', RGM1: 'regime', TCL1: 'trendcl', FEED1: 'feed'
 };
 
 // Market Regime keeps a per-day log of changes and events (not heartbeats) so a

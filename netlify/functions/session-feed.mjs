@@ -17,7 +17,9 @@ import { getStore } from '@netlify/blobs';
 
 const SYMBOLS = ['NQ', 'ES', 'GC', 'YM', 'CL'];
 const CRYPTO = ['ETHUSDT', 'BTCUSDT'];
-const SOURCES = ['3reads', 'drbias', 'srzones', 'htfzones', 'command', 'regime', 'trendcl'];
+// 'feed' = TDL Feed (FEED1), replaces 3reads/drbias/srzones/htfzones/command; the old ones stay
+// listed until their alerts are deleted.
+const SOURCES = ['feed', '3reads', 'drbias', 'srzones', 'htfzones', 'command', 'regime', 'trendcl'];
 
 export default async () => {
   const store = getStore('cc');
