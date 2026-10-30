@@ -326,6 +326,17 @@ body::before{
 .rvlegend{display:flex;justify-content:space-between;font-size:9px;letter-spacing:.5px;color:var(--txt-faint)}
 .rvlegend b{font-style:normal}
 
+/* ---------- CONTEXTO FUERA DEL GRAFICO ---------- */
+.ctx{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+@media(max-width:760px){.ctx{grid-template-columns:repeat(2,1fr)}}
+.ctile{padding:7px 10px;border-radius:9px;background:var(--panel-2);border:1px solid transparent;min-width:0}
+.ctile .k{font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-transform:uppercase}
+.ctile .v{font-size:13px;font-weight:700;color:var(--txt);font-variant-numeric:tabular-nums;margin-top:2px}
+.ctile .s{font-size:9.5px;color:var(--txt-dim);margin-top:1px;line-height:1.35}
+.ctile.bad{border-color:rgba(255,77,94,0.45)} .ctile.bad .v{color:var(--red)}
+.ctile.good{border-color:rgba(163,230,53,0.4)} .ctile.good .v{color:var(--lime)}
+.ctile.warn{border-color:rgba(245,185,68,0.45)} .ctile.warn .v{color:var(--amber)}
+
 /* ---------- NOTICIAS ---------- */
 .news{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
 @media(max-width:760px){.news{grid-template-columns:1fr}}
@@ -825,6 +836,13 @@ body::before{
         <div class="nrow"><span class="ev" data-i18n-es="Cargando calendario&hellip;" data-i18n-en="Loading calendar&hellip;">Loading calendar…</span></div>
       </div>
       <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center" data-i18n-es="Tres barras rojas es alto impacto. No te hagas el h&eacute;roe 15 min antes ni despu&eacute;s." data-i18n-en="Three red bars is high impact. Don't be a hero 15 min before or after.">Three red bars is high impact. Don't be a hero 15 min before or after.</div>
+    </div>
+
+    <!-- 4b. CONTEXTO FUERA DEL GRAFICO (cc-macro) -->
+    <div class="panel full">
+      <div class="phead"><span class="dot" style="background:var(--amber);box-shadow:0 0 8px var(--amber)"></span><h2 data-i18n-es="Contexto fuera del gr&aacute;fico" data-i18n-en="Off-chart context">Off-chart context</h2><span class="tag" id="ctxTag">&middot;</span></div>
+      <div class="ctx" id="ctxGrid"><div class="ctile"><div class="s" data-i18n-es="Cargando&hellip;" data-i18n-en="Loading&hellip;">Loading&hellip;</div></div></div>
+      <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center" id="ctxFoot"></div>
     </div>
 
     <!-- 5. REGLAS Y DISCIPLINA -->
@@ -2205,6 +2223,79 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   document.addEventListener('visibilitychange',function(){ if(!document.hidden) load(); });
   setInterval(render, 30000);    // countdown/candado cada 30 s
   window.__i18nRefresh.push(render);
+})();
+</script>
+
+<!-- ===================== CONTEXTO FUERA DEL GRAFICO ===================== -->
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var CC_API=/(^|\.)tradedadlog\.com$/i.test(location.hostname)?'':'https://tradedadlog.com';
+  var data=null;
+  function f(x,d){ return (x==null||!isFinite(x))?'·':(+x).toFixed(d==null?2:d); }
+  function sg(x,d){ return (x==null||!isFinite(x))?'·':((x>0?'+':'')+(+x).toFixed(d==null?2:d)); }
+  function esc(t){ return String(t==null?'':t).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+  function tile(k,v,sub,cls){ return '<div class="ctile '+(cls||'')+'"><div class="k">'+k+'</div><div class="v">'+v+'</div><div class="s">'+(sub||'')+'</div></div>'; }
+  function render(){
+    var box=$('ctxGrid'); if(!box||!data) return;
+    var sym=window.__ccSym?window.__ccSym():'NQ', crypto=/USDT$/.test(sym), out=[];
+    if(crypto){
+      var c=data.crypto||{}, d=(sym==='BTCUSDT'?c.btcDeriv:c.ethDeriv)||{};
+      var fs=d.fundingState;
+      out.push(tile('Funding', sg(d.fundingPct,4)+'%',
+        fs==='shorts-crowded'?T('los cortos pagan: combustible de squeeze','shorts paying: squeeze fuel'):fs==='longs-crowded'?T('largos apalancados nuevos','fresh leveraged longs'):T('normal','normal'),
+        fs==='shorts-crowded'?'good':fs==='longs-crowded'?'warn':''));
+      out.push(tile('Open interest 24h', sg(d.oiChg24hPct,1)+'%',
+        d.oiChg24hPct!=null&&d.oiChg24hPct<=-3?T('cierres: el movimiento pierde gasolina','closing: the move is running out of fuel'):d.oiChg24hPct>=5?T('posiciones nuevas','new positions'):'',
+        d.oiChg24hPct>=5?'warn':''));
+      if(sym==='ETHUSDT'){
+        var dv=c.dvol||{};
+        out.push(tile('DVOL ETH', f(dv.last,1), sg(dv.chg24h,1)+' 24h'+(dv.chg24h>=5?T(' · espera movimiento',' · expects a move'):''), dv.chg24h>=5?'bad':''));
+        var g=c.cmeGap||{}, big=g.gapPct!=null&&Math.abs(g.gapPct)>=1.5;
+        out.push(tile(T('Gap CME','CME gap'), f(g.cmeClose,1), sg(g.gapPct,2)+'% vs spot'+(big?T(' · imán',' · magnet'):''), big?'warn':''));
+        var eb=c.ethBtc||{};
+        out.push(tile('ETH/BTC 24h', sg(eb.chg24hPct,2)+'%', '7d '+sg(eb.chg7dPct,2)+'%', eb.chg24hPct<=-1?'bad':eb.chg24hPct>=1?'good':''));
+      }
+      var fg=c.fearGreed||{};
+      out.push(tile('Fear & Greed', fg.value==null?'·':fg.value, esc(fg.label||'')+(fg.prev!=null?' · '+T('ayer ','yday ')+fg.prev:''), (fg.value<=20||fg.value>=80)?'warn':''));
+    } else {
+      var im=data.intermarket||{}, v=im.VIX||{}, cv=im.vixCurve||{};
+      var vixBad=(v.chgPct>=8)||v.brokePrevHigh||(cv.state&&cv.state!=='contango');
+      out.push(tile('VIX', f(v.last,2), sg(v.chgPct,1)+'% · '+(cv.state||'·'), vixBad?'bad':''));
+      var y=im.US10Y||{}, zn=im.ZN||{};
+      out.push(tile(T('Bono 10Y','10Y yield'), f(y.last,3)+'%', sg(y.chgPct,2)+'% · ZN '+sg(zn.chgPct,2)+'%', ''));
+      var dx=im.DXY||{};
+      out.push(tile('DXY', f(dx.last,2), sg(dx.chgPct,2)+'%'+(dx.brokePrevHigh?T(' · rompe máx. de ayer',' · through yday high'):dx.brokePrevLow?T(' · rompe mín. de ayer',' · through yday low'):''), ''));
+      var cot=(data.cot||{})[sym]||null;
+      if(cot) out.push(tile('COT '+sym, 'p'+cot.pct3y,
+        (cot.extreme==='crowded-long'?T('especuladores muy largos','specs crowded long'):cot.extreme==='crowded-short'?T('especuladores muy cortos','specs crowded short'):T('sin extremo','no extreme'))+' · '+cot.date,
+        cot.extreme?'warn':''));
+      var r=(data.reactions||[])[0];
+      if(r){
+        var m=(r.moves||{})[sym]||(r.moves||{}).NQ||{};
+        var acc=m.pct60!=null&&m.pct15!=null&&(m.pct60>0)===(m.pct15>0)&&Math.abs(m.pct60)>Math.abs(m.pct15);
+        out.push(tile(T('Reacción al dato','Data reaction'), sg(m.pct60!=null?m.pct60:m.pct15,2)+'%',
+          esc(r.title)+' · '+(m.pct60==null?'15 min':acc?T('aceptado','accepted'):T('rechazado','faded')), ''));
+      }
+    }
+    var fl=(data.flows||[])[0];
+    if(fl) out.push(tile(T('Flujos','Flows'), fl.inDays===0?T('HOY','TODAY'):T('en ','in ')+fl.inDays+'d', fl.type+' · '+fl.date, fl.inDays<=1?'warn':''));
+    box.innerHTML=out.join('');
+    var tag=$('ctxTag'); if(tag) tag.textContent=crypto?'OKX · DERIBIT · CME':'VIX · 10Y · DXY · COT';
+    var foot=$('ctxFoot'); if(foot) foot.textContent=T('Modula la convicción, no crea setups. Tu edge sigue siendo el nivel.','It shapes conviction, it does not create setups. Your edge is still the level.');
+  }
+  function load(){
+    if(document.hidden) return;
+    fetch(CC_API+'/api/cc-macro',{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){ if(d){ data=d; render(); } })
+      .catch(function(){});
+  }
+  load();
+  setInterval(load, 10*60000);
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden) load(); });
+  document.addEventListener('ccsymchange',render);
+  if(window.__i18nRefresh) window.__i18nRefresh.push(render);
 })();
 </script>
 
