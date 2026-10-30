@@ -42,7 +42,7 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Command Center v2 modules are NOT hashed: network-first so an update shows on the next load,
+  // Command Center modules (decision engine) are NOT hashed: network-first so an update shows on the next load,
   // cached copy only as the offline fallback.
   if (url.pathname.startsWith('/cc2/')) {
     e.respondWith(

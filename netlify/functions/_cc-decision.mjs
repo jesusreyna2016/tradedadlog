@@ -1,4 +1,4 @@
-// Decision-card log + grading for Command Center v2.
+// Decision-card log + grading for the Command Center decision card.
 // Every 15 min the cron runs the SAME engine the page uses (public/cc2/decision.js) on the stored
 // feeds, market read only (gatekeeper treated as open), and appends the answer to dlog:<SYM>:<UTC day>.
 // /api/cc-decisions grades each logged answer by where price was 60 min later.
