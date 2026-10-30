@@ -25,6 +25,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/cc-macro"
+  to = "/.netlify/functions/cc-macro"
+  status = 200
+
+[[redirects]]
   from = "/api/cc-scan"
   to = "/.netlify/functions/cc-scan"
   status = 200
