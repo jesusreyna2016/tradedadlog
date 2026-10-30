@@ -552,6 +552,7 @@ body::before{
 
   <!-- BANNER VENTANA DE NOTICIA -->
   <div class="newsbanner" id="newsBanner" style="display:none"></div>
+  <div class="newsbanner" id="shockBanner" style="display:none"></div>
 
   <!-- HERO · PUESTO DE MANDO -->
   <div class="hero">
@@ -2293,6 +2294,49 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   }
   load();
   setInterval(load, 10*60000);
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden) load(); });
+  document.addEventListener('ccsymchange',render);
+  if(window.__i18nRefresh) window.__i18nRefresh.push(render);
+})();
+</script>
+
+<!-- ===================== SHOCK ENTRE CORRIDAS (cc-shock) ===================== -->
+<script>
+(function(){
+  var el=document.getElementById('shockBanner'); if(!el) return;
+  var CC_API=/(^|\.)tradedadlog\.com$/i.test(location.hostname)?'':'https://tradedadlog.com';
+  var active=[], seen={}, armed=false; setTimeout(function(){armed=true;},4000);
+  function esc(t){ return String(t==null?'':t).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+  function applies(x,sym){
+    var crypto=/USDT$/.test(sym);
+    if(x.sym==='ALL') return true;
+    if(x.sym==='CRYPTO') return crypto;
+    return x.sym===sym || (!crypto && !/USDT$/.test(x.sym) && x.kind!=='price');
+  }
+  function render(){
+    var sym=window.__ccSym?window.__ccSym():'NQ';
+    var list=active.filter(function(x){return applies(x,sym);});
+    if(!list.length){ el.style.display='none'; return; }
+    var mins=Math.round((Date.now()-list[0].seenAt)/60000);
+    el.style.display='flex'; el.className='newsbanner';
+    el.innerHTML='<span class="tg">'+T('PLAN EN PAUSA','PLAN ON HOLD')+'</span><span><b>'+esc(list[0].msg)+'</b>'+(list[0].source?' ('+esc(list[0].source)+')':'')+
+      ' · '+T('hace ','')+mins+T(' min',' min ago')+(list.length>1?' · +'+(list.length-1):'')+
+      T('. El plan se armó antes de esto: espera a que asiente, no operes el tirón.','. The plan was built before this: let it settle, don\'t trade the spike.')+'</span>';
+    var fresh=list.filter(function(x){return !seen[x.key];});
+    list.forEach(function(x){seen[x.key]=1;});
+    if(armed && fresh.length){
+      try{ if(typeof beep==='function'&&typeof actx==='function'){ var c=actx(); if(c&&c.state==='suspended')c.resume(); var t=c?c.currentTime:0; beep(300,0.16,'square',0.045,t); beep(220,0.18,'square',0.045,t+0.18); } }catch(e){}
+      try{ if(window.Notification&&Notification.permission==='granted') new Notification(T('Plan en pausa','Plan on hold'),{body:fresh[0].msg,silent:true}); }catch(e){}
+    }
+  }
+  function load(){
+    if(document.hidden) return;
+    fetch(CC_API+'/api/cc-shock',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;})
+      .then(function(d){ if(d&&Array.isArray(d.active)){ active=d.active; render(); } }).catch(function(){});
+  }
+  load();
+  setInterval(load, 2*60000);
+  setInterval(render, 60000);
   document.addEventListener('visibilitychange',function(){ if(!document.hidden) load(); });
   document.addEventListener('ccsymchange',render);
   if(window.__i18nRefresh) window.__i18nRefresh.push(render);

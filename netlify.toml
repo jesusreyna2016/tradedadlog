@@ -30,6 +30,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/cc-shock"
+  to = "/.netlify/functions/cc-shock"
+  status = 200
+
+[[redirects]]
   from = "/api/cc-scan"
   to = "/.netlify/functions/cc-scan"
   status = 200
