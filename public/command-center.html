@@ -2123,7 +2123,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   // usa la API absoluta salvo cuando el propio Center está servido desde tradedadlog.com
   var CC_API=/(^|\.)tradedadlog\.com$/i.test(location.hostname)?'':'https://tradedadlog.com';
   var BEFORE=15, AFTER=10;   // minutos de ventana de peligro (alto impacto USD)
-  var events=[];
+  var events=[], heads=[];
   function p2(x){return ('0'+x).slice(-2);}
   function hm(ts){var d=new Date(ts);return p2(d.getHours())+':'+p2(d.getMinutes());}
 
@@ -2151,6 +2151,14 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
         return '<div class="nrow '+cls+'"><span class="time">'+dow(e.ts)+hm(e.ts)+'</span><span class="cur">'+e.currency+'</span>'+
           '<span class="imp '+impc+'"><i></i><i></i><i></i></span><span class="ev">'+e.title+'</span>'+
           '<span class="fc">'+fc.join(' · ')+'</span>'+cd+'</div>';
+      }).join('');
+    }
+    // titulares de contexto (guerra, Trump, Fed, crudo): lo que el grafico no ve
+    if(box && heads.length){
+      box.innerHTML+=heads.map(function(h){
+        var esc=String(h.title).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});
+        return '<div class="nrow"><span class="time">'+dow(h.ts)+hm(h.ts)+'</span><span class="cur">'+h.tags[0].toUpperCase()+'</span>'+
+          '<span class="imp h2"><i></i><i></i><i></i></span><span class="ev">'+esc+'</span><span class="fc">'+(h.source||'')+'</span></div>';
       }).join('');
     }
     // candado: alto impacto USD dentro de la ventana
@@ -2183,7 +2191,13 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if(document.hidden) return;   // pestaña oculta: no gastes invocaciones de la funcion
     fetch(CC_API+'/api/cc-news',{cache:'no-store'})
       .then(function(r){return r.ok?r.json():null;})
-      .then(function(d){ if(d&&Array.isArray(d.events)){ events=d.events; render(); } })
+      .then(function(d){ if(d&&Array.isArray(d.events)){
+        // earnings de megacaps NQ como filas propias (cur EARN: no activan el candado, que es USD alto impacto)
+        var earn=(d.earnings||[]).map(function(x){ return { title:x.symbol+' earnings '+(x.when==='bmo'?T('(antes de la apertura)','(pre-market)'):x.when==='amc'?T('(tras el cierre)','(after close)'):T('(hora sin confirmar)','(time TBD)')),
+          currency:'EARN', impact:'high', ts:x.ts, forecast:x.epsForecast?('EPS '+x.epsForecast):null, previous:null }; });
+        events=d.events.concat(earn).sort(function(a,b){return a.ts-b.ts;});
+        heads=(d.headlines||[]).filter(function(h){ return h.tags && h.tags.some(function(t){return /geo|trump|fed|oil/.test(t);}); }).slice(0,4);
+        render(); } })
       .catch(function(){});
   }
   load();

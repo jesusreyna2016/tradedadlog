@@ -40,7 +40,7 @@ function stableStringify(v) {
 // calendar scrape changes, so this flips exactly when there is real new data.
 function stableKey(feed, news) {
   const f = (feed && feed.symbols) ? { symbols: feed.symbols, crypto: feed.crypto || null } : (feed || null);
-  const n = (news && news.events) ? { source: news.source, events: news.events } : (news || null);
+  const n = (news && news.events) ? { source: news.source, events: news.events, earnings: news.earnings || [] } : (news || null);
   try { return stableStringify({ f, n }); } catch (e) { return null; }
 }
 
