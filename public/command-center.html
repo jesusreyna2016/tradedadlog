@@ -681,6 +681,12 @@ body::before{
     .sanews{margin-top:8px;padding:6px 9px;border-radius:7px;font-size:10.5px;font-weight:700;line-height:1.45}
     .sanews.med{background:rgba(245,197,66,.12);color:var(--amber)} .sanews.high{background:rgba(255,92,108,.12);color:var(--red)}
     .sanews::before{content:"\26A0  "}
+    .satv{margin-top:8px;padding:8px 9px;border-radius:8px;border:1px solid var(--border-hot);background:var(--panel-2)}
+    .satv-h{display:flex;align-items:center;gap:8px;font-size:9.5px;letter-spacing:.6px;color:var(--txt-dim);text-transform:uppercase}
+    .satv-h b{color:var(--cyan)}
+    .satv-btn{margin-left:auto;font:inherit;font-size:10px;font-weight:700;letter-spacing:.5px;padding:4px 10px;border-radius:6px;border:1px solid var(--cyan);background:var(--cyan-dim);color:var(--cyan);cursor:pointer;text-transform:none}
+    .satv-t{display:block;width:100%;margin-top:6px;resize:vertical;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:6px;color:var(--txt);font:10.5px/1.45 "JetBrains Mono",ui-monospace,monospace;padding:6px 8px;word-break:break-all}
+    .satv-n{font-size:9px;color:var(--txt-faint);margin-top:5px;line-height:1.4}
     /* salud del feed (watchdog) + meta-review semanal, del bus */
     .sahealth{margin:8px 0 0;padding:6px 10px;border-radius:8px;font-size:10.5px;font-weight:700;line-height:1.45}
     .sahealth.warn{background:rgba(245,197,66,.12);color:var(--amber)}
@@ -2515,6 +2521,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   var strip=document.getElementById('saStrip');
   var execData=null;   // rollup de ejecucion (del journal, de-identificado)
   var lastPlan=null;   // ultimo plan cargado, para el boton "copiar a TradingView"
+  var stripPlan=null;  // el plan que muestra la tira (futuros o el cripto con ETH/BTC): de ahi sale el payload
   // payload compacto para el indicador Pine "SA Plan Overlay" (una linea por simbolo).
   // el indicador lo parsea: SYM/SESS/GEN/BIAS/DIR/ZT/SIG/TRG/SLW/T1L/T2L/Z2*/AZ/BZ/INVAL/T1/T2/NT/FVG/EM. Todo sale del plan del bus.
   function saNum(x){ return (x==null||isNaN(+x))?null:(+x); }
@@ -2568,9 +2575,10 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   function buildPayload(sym,d,plan){
     if(!d) return '';
     var z=(d.zones&&d.zones[0])||null;
-    var parts=['SYM='+sym,'SESS='+((plan&&plan.session)||'')];
+    var crypto=/USDT$/.test(sym), pl=z&&z.play||{};
+    var parts=['SYM='+sym,'SESS='+((plan&&(plan.session||plan.slot))||'')];
     // plan timestamp (epoch ms): the overlay only runs the zone lifecycle from here on and expires it after the window
-    var gen=plan&&plan.generatedAt?Date.parse(plan.generatedAt):NaN; if(!isNaN(gen)) parts.push('GEN='+gen);
+    var gen=plan&&(plan.generatedAt||plan.builtAt)?Date.parse(plan.generatedAt||plan.builtAt):NaN; if(!isNaN(gen)) parts.push('GEN='+gen);
     var bias=String(d.biasSession||'').toUpperCase(); if(bias) parts.push('BIAS='+bias);
     // the A+ zone can go AGAINST the session bias (e.g. a VAL bounce LONG on a SHORT day): send its own
     // direction so the overlay judges SL/targets by the trade side, not by the bias
@@ -2581,12 +2589,13 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var az=z&&saRange(z.range); if(az) parts.push('AZ='+az);
     var bz=saGolden(d,az); if(bz) parts.push('BZ='+bz);
     var inval=saNum(d.invalidation&&d.invalidation.level); if(inval!=null) parts.push('INVAL='+inval);
-    var t1=saNum(d.scenarioA&&d.scenarioA.target); if(t1!=null) parts.push('T1='+t1);
-    var t2=saT2(d,t1,side); if(t2!=null) parts.push('T2='+t2);
+    // the crypto plan has no scenarioA: its targets and stop are numbers in the zone's play
+    var t1=saNum(d.scenarioA&&d.scenarioA.target); if(t1==null&&crypto) t1=saNum(pl.tp1); if(t1!=null) parts.push('T1='+t1);
+    var t2=saT2(d,t1,side); if(t2==null&&crypto) t2=saNum(pl.tp2); if(t2!=null) parts.push('T2='+t2);
     var t1l=saLvlTag(z,1,t1); if(t1l) parts.push('T1L='+t1l);
     var t2l=saLvlTag(z,2,t2); if(t2l) parts.push('T2L='+t2l);
     var rr=saNum(z&&z.risk&&z.risk.rr); if(rr!=null) parts.push('RR='+rr);
-    var stop=saStop(z); if(stop!=null) parts.push('STOP='+stop);
+    var stop=saStop(z); if(stop==null&&crypto) stop=saNum(pl.stop); if(stop!=null) parts.push('STOP='+stop);
     var win=saWin(z); if(win) parts.push('WIN='+win);
     var trg=saTrig(z); if(trg!=null) parts.push('TRG='+trg);
     var slw=saSlow(z); if(slw!=null) parts.push('SLW='+slw);
@@ -2598,7 +2607,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       var z2d=String(z2.dir||'').toUpperCase(); if(z2d==='LONG'||z2d==='SHORT') parts.push('Z2D='+z2d);
       if(z2.type) parts.push('Z2T='+String(z2.type).replace(/[;=\s]/g,'_'));
       var z2rr=saNum(z2.risk&&z2.risk.rr); if(z2rr!=null) parts.push('Z2RR='+z2rr);
-      var z2s=saStop(z2); if(z2s!=null) parts.push('Z2S='+z2s);
+      var z2s=saStop(z2); if(z2s==null&&crypto) z2s=saNum(z2.play&&z2.play.stop); if(z2s!=null) parts.push('Z2S='+z2s);
       var z2t=saTrig(z2); if(z2t!=null) parts.push('Z2TRG='+z2t);
     }
     // guarda de coherencia: si un plan viejo/con bug trae un noTradeZone que se come la entrada
@@ -2626,13 +2635,14 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     saCopyFallback(txt,ok);
   }
   function saCopyFallback(txt,ok){ try{ var ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); ok&&ok(); }catch(e){} }
-  if(strip){ strip.addEventListener('click',function(e){ var b=e.target.closest&&e.target.closest('.sav-copy'); if(!b) return; e.stopPropagation(); var sym=b.getAttribute('data-sym'); var d=lastPlan&&lastPlan.instruments&&lastPlan.instruments[sym]; var p=buildPayload(sym,d,lastPlan); if(p) saCopy(p,b); }); }
+  if(strip){ strip.addEventListener('focusin',function(e){ if(e.target.classList&&e.target.classList.contains('satv-t')) e.target.select(); }); }
+  if(strip){ strip.addEventListener('click',function(e){ var b=e.target.closest&&e.target.closest('.sav-copy'); if(!b) return; e.stopPropagation(); var sym=b.getAttribute('data-sym'); var d=stripPlan&&stripPlan.instruments&&stripPlan.instruments[sym]; var p=buildPayload(sym,d,stripPlan); if(p) saCopy(p,b); }); }
   // tira "El agente hoy": los verdicts NQ/ES/GC/YM/CL + la lectura de noticias del agente, en la
   // pantalla de operar (antes solo vivian en session-plan.html). El foco es UN instrumento; esto
   // te da todos y ancla el CC al cerebro del agente. YM/CL solo salen si el agente los incluyo.
   function renderStrip(plan){
     if(!strip) return;
-    lastPlan=plan;
+    lastPlan=plan; stripPlan=plan;
     if(!plan || !plan.instruments){ strip.style.display='none'; return; }
     var rows=['NQ','ES','GC','YM','CL','ETHUSDT','BTCUSDT'].map(function(sym){
       var d=plan.instruments[sym]; if(!d) return '';
@@ -2656,7 +2666,15 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
       newsHtml='<div class="sanews '+(lvl==='ALTA'?'high':'med')+'">'+T('Noticias','News')+' '+esc(lvl)+
         (ev?' · '+esc(ev):'')+(L(nr.note)?' · '+esc(L(nr.note)):'')+'</div>';
     }
-    strip.innerHTML='<div class="sav-head">'+T('El agente hoy','The agent today')+'</div>'+rows.join('')+newsHtml;
+    // the line to paste in the "SA Plan Overlay" indicator, for the symbol picked in the bar
+    var cur=window.__ccSym?window.__ccSym():'NQ', curD=plan.instruments[cur], tvHtml='';
+    var tvSym=curD?cur:(['NQ','ES','GC','YM','CL','ETHUSDT','BTCUSDT'].filter(function(s){return plan.instruments[s];})[0]);
+    var tvPay=tvSym?buildPayload(tvSym,plan.instruments[tvSym],plan):'';
+    if(tvPay) tvHtml='<div class="satv"><div class="satv-h"><span>'+T('Pegar en TradingView · SA Plan Overlay','Paste in TradingView · SA Plan Overlay')+' · <b>'+esc(window.__ccSymName?window.__ccSymName(tvSym):tvSym)+'</b></span>'+
+      '<button class="sav-copy satv-btn" data-sym="'+tvSym+'">'+T('Copiar','Copy')+'</button></div>'+
+      '<textarea class="satv-t" readonly rows="2" spellcheck="false" aria-label="SA Plan Overlay payload">'+esc(tvPay)+'</textarea>'+
+      '<div class="satv-n">'+T('En el indicador: Ajustes · "Plan payload". Recópialo con cada plan nuevo. TV en cada fila copia la de ese símbolo.','In the indicator: Settings · "Plan payload". Copy it again with each new plan. TV on each row copies that symbol.')+'</div></div>';
+    strip.innerHTML='<div class="sav-head">'+T('El agente hoy','The agent today')+'</div>'+rows.join('')+newsHtml+tvHtml;
     strip.style.display='';
   }
   // readout de ejecucion: tu patron real (disciplina, contra-sesgo, fuera de zona) en la pantalla de operar
