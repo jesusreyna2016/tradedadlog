@@ -73,6 +73,7 @@ body::before{
 .mktstat.open{border-color:rgba(95,224,138,.4);color:var(--lime)}
 .mktstat.halt{border-color:rgba(245,185,68,.5);background:rgba(245,185,68,.08);color:var(--amber)}
 .mktstat.closed{border-color:rgba(255,95,116,.4);background:rgba(255,95,116,.06);color:var(--red)}
+.mktstat.crypto{border-color:rgba(245,185,68,.5);background:rgba(245,185,68,.07);color:var(--amber)}
 .sess{padding:6px 11px;border-radius:9px;border:1px solid var(--border);font-size:8.5px;letter-spacing:1.5px;text-align:center;line-height:1.6;color:var(--txt-dim)}
 .sess b{display:block;font-size:10px;letter-spacing:1px}
 .sess.live{border-color:var(--cyan);background:var(--cyan-dim);color:var(--cyan)}
@@ -447,6 +448,60 @@ body::before{
 .wrap.lit .dash .panel:nth-child(5){animation-delay:.52s}.wrap.lit .dash .panel:nth-child(6){animation-delay:.58s}
 .wrap.lit .dash .panel:nth-child(7){animation-delay:.64s}.wrap.lit .north{animation-delay:.7s}.wrap.lit .foot{animation-delay:.76s}
 
+
+/* ---------- TABS (31 oct 2026 restructure) ---------- */
+.tabs{position:sticky;top:0;z-index:30;display:flex;gap:6px;padding:6px;border-radius:14px;
+  background:rgba(17,22,28,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1 0 auto;display:flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:0 16px;
+  border-radius:10px;border:1px solid transparent;background:transparent;color:var(--txt-dim);cursor:pointer;
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:13px;font-weight:700;letter-spacing:.4px;
+  transition:background .15s,color .15s,border-color .15s;white-space:nowrap}
+.tab:hover{color:var(--txt);background:rgba(255,255,255,.03)}
+.tab:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.tab[aria-selected="true"]{background:var(--panel-2);border-color:var(--border-hot);color:var(--txt);box-shadow:inset 0 -2px 0 var(--gold,#c79235)}
+.tab .tn{display:grid;place-items:center;width:20px;height:20px;border-radius:6px;font-size:10.5px;
+  background:rgba(255,255,255,.06);color:var(--txt-faint)}
+.tab[aria-selected="true"] .tn{background:var(--cyan-dim);color:var(--cyan)}
+.tab .tdot{width:8px;height:8px;border-radius:50%;background:var(--txt-faint);display:none}
+.tab .tdot.go{display:block;background:var(--lime);box-shadow:0 0 8px var(--lime)}
+.tab .tdot.wait{display:block;background:var(--amber)}
+.tab .tdot.avoid{display:block;background:var(--red)}
+.tabpane{display:flex;flex-direction:column;gap:12px}
+.tabpane[hidden]{display:none}
+.tabintro{padding:13px 16px;border-radius:12px;background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--gold,#c79235)}
+.tabintro h2{margin:0;font-size:16px;font-weight:800;letter-spacing:.3px;color:var(--txt)}
+.tabintro p{margin:6px 0 0;font-size:13px;line-height:1.6;color:var(--txt-dim);max-width:900px}
+.phelp{font-size:12px;line-height:1.55;color:var(--txt-dim);margin-top:-4px}
+.dash.two{grid-template-columns:repeat(2,1fr)}
+.dash.two .full{grid-column:1/-1}
+@media(max-width:860px){.dash.two{grid-template-columns:1fr}.dash.two .full{grid-column:auto}}
+@media(max-width:600px){
+  .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px}
+  .tab{flex-direction:column;gap:4px;padding:6px 2px;min-height:54px;font-size:10.5px;letter-spacing:.2px;
+    white-space:normal;text-align:center;line-height:1.2}
+  .tabintro p{font-size:12.5px}
+  /* the link chips scroll sideways instead of stacking half a screen above the tabs */
+  .status{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;width:100%;padding-bottom:2px}
+  .status::-webkit-scrollbar{display:none}
+  .status>*{flex:none}
+}
+/* readability: the old 8-9px labels were the hardest part to read */
+.tabpane .phead h2{font-size:12px}
+.tabpane .tag{font-size:10px}
+.tabpane .hlabel{font-size:11px}
+.tabpane .check li{font-size:12.5px;line-height:1.5}
+.tabpane .check li small{font-size:9.5px}
+.tabpane .sav-z,.tabpane .fb-sub,.tabpane .fb-exec{font-size:12px}
+.tabpane .fb-main{font-size:14.5px}
+.tabpane .sav-sym{font-size:13px}
+.tabpane .sav-v{font-size:10px}
+.tabpane .sav-bias{font-size:10.5px}
+.tabpane .sav-head{font-size:10.5px}
+.tabpane .sysrow .leak{font-size:12px}
+.tabpane .sysrow .leak small{font-size:10px}
+.tabpane .sysrow .badge{font-size:9.5px}
 @media(prefers-reduced-motion:reduce){.overlay.show{animation:none!important}#boot{display:none}.wrap.lit *{animation:none!important}}
 </style>
 </head>
@@ -575,6 +630,19 @@ body::before{
   <div class="newsbanner" id="newsBanner" style="display:none"></div>
   <div class="newsbanner" id="shockBanner" style="display:none"></div>
 
+  <!-- TABS · one question per tab, in the order you use them -->
+  <nav class="tabs" role="tablist" aria-label="Command Center">
+    <button class="tab" role="tab" id="tb-now" data-tab="now" aria-controls="tab-now" aria-selected="true"><span class="tn">1</span><span data-i18n-es="Ahora" data-i18n-en="Now">Now</span><i class="tdot" id="tdNow"></i></button>
+    <button class="tab" role="tab" id="tb-plan" data-tab="plan" aria-controls="tab-plan" aria-selected="false" tabindex="-1"><span class="tn">2</span><span data-i18n-es="Plan del d&iacute;a" data-i18n-en="Today's plan">Today's plan</span></button>
+    <button class="tab" role="tab" id="tb-gate" data-tab="gate" aria-controls="tab-gate" aria-selected="false" tabindex="-1"><span class="tn">3</span><span data-i18n-es="Antes de entrar" data-i18n-en="Before you enter">Before you enter</span></button>
+    <button class="tab" role="tab" id="tb-me" data-tab="me" aria-controls="tab-me" aria-selected="false" tabindex="-1"><span class="tn">4</span><span data-i18n-es="Mi disciplina" data-i18n-en="My discipline">My discipline</span></button>
+  </nav>
+
+  <section class="tabpane" id="tab-now" role="tabpanel" aria-labelledby="tb-now">
+  <div class="tabintro">
+    <h2 data-i18n-es="&iquest;Puedo operar ahora?" data-i18n-en="Can I trade right now?">Can I trade right now?</h2>
+    <p data-i18n-es="Lee de arriba hacia abajo. 1) El portero: cu&aacute;ntos trades te quedan hoy. 2) La se&ntilde;al en vivo del s&iacute;mbolo. 3) Lo que dice el Session Analyst. 4) La tarjeta de decisi&oacute;n con la zona y el disparo. Si aqu&iacute; algo dice ESPERAR, no busques en las otras pesta&ntilde;as una raz&oacute;n para entrar." data-i18n-en="Read top to bottom. 1) The gatekeeper: how many trades you have left today. 2) The live signal for the symbol. 3) What the Session Analyst says. 4) The decision card with the zone and the trigger. If anything here says WAIT, don't go looking in the other tabs for a reason to enter.">Read top to bottom. 1) The gatekeeper: how many trades you have left today. 2) The live signal for the symbol. 3) What the Session Analyst says. 4) The decision card with the zone and the trigger. If anything here says WAIT, don't go looking in the other tabs for a reason to enter.</p>
+  </div>
   <!-- HERO · PUESTO DE MANDO -->
   <div class="hero">
     <!-- ¿PUEDO OPERAR? -->
@@ -704,16 +772,10 @@ body::before{
     .saweekly .wk-body strong{color:var(--txt)}
   </style>
   <div class="focusbar" id="focusBar" style="display:none"></div>
-  <div class="sastrip" id="saStrip" style="display:none"></div>
-  <div id="saHealth" style="display:none"></div>
-  <details class="saweekly" id="saWeekly" style="display:none">
-    <summary data-i18n-es="Meta-review semanal" data-i18n-en="Weekly meta-review">Weekly meta-review</summary>
-    <div class="wk-body" id="saWeeklyBody"></div>
-  </details>
-
   <!-- DECISION · la respuesta de la v2 a "¿puedo operar ahora?", lectura de mercado; el portero de abajo sigue mandando -->
   <div class="panel decard" id="decCard">
     <div class="phead"><span class="dot"></span><h2 id="decTitle">Can I trade?</h2><span class="tag" id="decTag">&middot;</span></div>
+      <div class="phelp" data-i18n-es="La lectura del mercado ahora mismo para el s&iacute;mbolo que elegiste arriba: hacia d&oacute;nde, d&oacute;nde buscar la entrada y qu&eacute; tiene que pasar antes. El portero sigue mandando." data-i18n-en="The market read right now for the symbol you picked above: which way, where to look for the entry and what has to happen first. The gatekeeper still has the last word.">The market read right now for the symbol you picked above: which way, where to look for the entry and what has to happen first. The gatekeeper still has the last word.</div>
     <div class="dverdict" id="decVerdict">&middot;</div>
     <div class="dwhy" id="decWhy"></div>
     <div class="dgrid">
@@ -726,29 +788,20 @@ body::before{
     <details class="dproof" id="decProof"><summary id="decProofSum">Does this card work?</summary><div id="decProofBody"></div></details>
   </div>
 
-  <!-- DASH · orden por importancia: 1) contexto del día 2) gate de entrada 3) sesgo/niveles
-       4) noticias 5) reglas/disciplina 6) rendimiento -->
-  <div class="dash">
+  </section>
 
-    <!-- 1. FILA CONTEXTO -->
-    <div class="panel">
-      <div class="phead"><span class="dot" style="background:var(--amber);box-shadow:0 0 8px var(--amber)"></span><h2 data-i18n-es="El plan de hoy" data-i18n-en="Today's plan">Today's plan</h2><span class="pheadR"><span class="tag" id="planTag">NO PLAN YET</span><button class="editbtn" id="editPlan" data-title-es="Editar plan del d&iacute;a" data-title-en="Edit today's plan" title="Edit today's plan" data-i18n-html-es="&#9998;" data-i18n-html-en="&#9998;">&#9998;</button></span></div>
-      <div class="planchips" id="planchips">
-        <div class="pchip"><div class="l" data-i18n-es="Tipo de d&iacute;a" data-i18n-en="Day type">Day type</div><div class="v" style="font-size:14px">&middot;</div><div class="s" data-i18n-es="pega tu plan del indicador" data-i18n-en="paste your plan from the indicator">paste your plan from the indicator</div></div>
-        <div class="pchip danger"><div class="l" data-i18n-es="Zona de no-trade" data-i18n-en="No-trade zone">No-trade zone</div><div class="v">&middot;</div><div class="s" data-i18n-es="tierra de nadie" data-i18n-en="no man's land">no man's land</div></div>
-        <div class="pchip line"><div class="l" data-i18n-es="&Aacute;rea de valor" data-i18n-en="Value area">Value area</div><div class="v">&middot;</div><div class="s" data-i18n-es="zona de confluencia" data-i18n-en="confluence zone">confluence zone</div></div>
-      </div>
-      <div class="triggers" id="triggers">
-        <div class="trig long"><b>LONG</b> &nbsp;with the trend, on a level + your trigger: bounce/reclaim (VAL, VWAP, OR, PDH) with FVG or structure shift. Never in the air.</div>
-        <div class="trig short"><b>SHORT</b> &nbsp;with the trend, on a level + your trigger: rejection/loss (VAH, VWAP, OR, PDL) with FVG or structure shift. Target, the next magnet.</div>
-      </div>
-      <div class="watchhead" data-i18n-es="Qu&eacute; mirar hoy" data-i18n-en="What to watch today">What to watch today</div>
-      <div class="watch" id="ccWatch"><div class="wl">Paste your plan from the indicator to load the context.</div></div>
-    </div>
-
+  <section class="tabpane" id="tab-plan" role="tabpanel" aria-labelledby="tb-plan" hidden>
+  <div class="tabintro">
+    <h2 data-i18n-es="El plan de hoy" data-i18n-en="Today's plan">Today's plan</h2>
+    <p data-i18n-es="Lo que el Session Analyst decidi&oacute; para cada instrumento (GO, ESPERAR o EVITAR, con su zona), tus niveles y sesgo, las noticias y el contexto fuera del gr&aacute;fico. L&eacute;elo completo antes de que abra la sesi&oacute;n." data-i18n-en="What the Session Analyst decided for each instrument (GO, WAIT or AVOID, with its zone), your levels and bias, the news and the off-chart context. Read it all before the session opens.">What the Session Analyst decided for each instrument (GO, WAIT or AVOID, with its zone), your levels and bias, the news and the off-chart context. Read it all before the session opens.</p>
+  </div>
+  <div class="sastrip" id="saStrip" style="display:none"></div>
+  <div id="saHealth" style="display:none"></div>
+  <div class="dash two">
     <!-- 3. SESGO Y NIVELES -->
     <div class="panel">
       <div class="phead"><span class="dot"></span><h2 data-i18n-es="Sesgo &amp; Niveles" data-i18n-en="Bias &amp; Levels">Bias &amp; Levels</h2><span class="tag">NQ 1!</span></div>
+      <div class="phelp" data-i18n-es="Sesgo del d&iacute;a (marco mayor) y de la sesi&oacute;n, y d&oacute;nde est&aacute; el precio contra tus niveles. El aviso de nivel suena cuando el precio entra en el radio que elijas." data-i18n-en="Day bias (bigger frame) and session bias, and where price sits against your levels. The level alert fires when price enters the radius you pick.">Day bias (bigger frame) and session bias, and where price sits against your levels. The level alert fires when price enters the radius you pick.</div>
       <div style="display:flex;gap:9px" id="biasBoxes">
         <div style="flex:1;padding:9px 11px;border-radius:10px;background:var(--panel-2);border:1px solid var(--border)">
           <div class="l" style="font-size:8px;letter-spacing:1.5px;color:var(--txt-faint);text-transform:uppercase">Day bias</div>
@@ -791,6 +844,164 @@ body::before{
       </div>
     </div>
 
+    <div class="panel">
+      <div class="phead"><span class="dot" style="background:var(--violet);box-shadow:0 0 8px var(--violet)"></span><h2 data-i18n-es="Mapa de niveles" data-i18n-en="Level map">Level map</h2><span class="tag" data-i18n-es="TODOS &middot; DIST. AL PRECIO" data-i18n-en="ALL · DIST. TO PRICE">ALL · DIST. TO PRICE</span></div>
+      <div class="phelp" data-i18n-es="Todos los niveles de hoy ordenados por precio, con la distancia al precio actual. Los m&aacute;s cercanos son los que importan ahora." data-i18n-en="Every level for today sorted by price, with the distance to the current price. The closest ones are the ones that matter now.">Every level for today sorted by price, with the distance to the current price. The closest ones are the ones that matter now.</div>
+      <div class="lad" id="lad">
+        <div class="lrow"><span class="dot2"></span><span class="pr">&middot;</span><span class="lbl">Paste your plan</span></div>
+      </div>
+    </div>
+
+    <!-- 4. NOTICIAS · puede cerrar la ventana de entrada -->
+    <div class="panel full">
+      <div class="phead"><span class="dot" style="background:var(--red);box-shadow:0 0 8px var(--red)"></span><h2 data-i18n-es="Noticias de alto impacto" data-i18n-en="High-impact news">High-impact news</h2><span class="tag" data-i18n-es="FOREXFACTORY &middot; PR&Oacute;XIMAS" data-i18n-en="FOREXFACTORY · NEXT">FOREXFACTORY · NEXT</span></div>
+      <div class="phelp" data-i18n-es="Eventos de alto impacto de hoy. Si falta poco para uno, no abras posici&oacute;n: espera 15 min despu&eacute;s." data-i18n-en="Today's high-impact events. If one is close, don't open a position: wait 15 min after it.">Today's high-impact events. If one is close, don't open a position: wait 15 min after it.</div>
+      <div class="news" id="newsList">
+        <div class="nrow"><span class="ev" data-i18n-es="Cargando calendario&hellip;" data-i18n-en="Loading calendar&hellip;">Loading calendar…</span></div>
+      </div>
+      <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center" data-i18n-es="Tres barras rojas es alto impacto. No te hagas el h&eacute;roe 15 min antes ni despu&eacute;s." data-i18n-en="Three red bars is high impact. Don't be a hero 15 min before or after.">Three red bars is high impact. Don't be a hero 15 min before or after.</div>
+    </div>
+
+    <!-- 4b. CONTEXTO FUERA DEL GRAFICO (cc-macro) -->
+    <div class="panel full">
+      <div class="phead"><span class="dot" style="background:var(--amber);box-shadow:0 0 8px var(--amber)"></span><h2 data-i18n-es="Contexto fuera del gr&aacute;fico" data-i18n-en="Off-chart context">Off-chart context</h2><span class="tag" id="ctxTag">&middot;</span></div>
+      <div class="phelp" data-i18n-es="Lo que mueve el mercado fuera de tu gr&aacute;fico: bonos, d&oacute;lar, VIX, flujos y lo que mandan tus indicadores. Es contexto medido, no un freno por s&iacute; solo." data-i18n-en="What moves the market outside your chart: bonds, dollar, VIX, flows and what your indicators send. It's measured context, not a brake on its own.">What moves the market outside your chart: bonds, dollar, VIX, flows and what your indicators send. It's measured context, not a brake on its own.</div>
+      <div class="ctxlabel" id="ctxFeedLabel"></div>
+      <div class="ctx" id="ctxFeed" style="margin-bottom:8px"></div>
+      <div class="ctxlabel" id="ctxMacroLabel"></div>
+      <div class="ctx" id="ctxGrid"><div class="ctile"><div class="s" data-i18n-es="Cargando&hellip;" data-i18n-en="Loading&hellip;">Loading&hellip;</div></div></div>
+      <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center" id="ctxFoot"></div>
+    </div>
+
+  </div>
+  <details class="saweekly" id="saWeekly" style="display:none">
+    <summary data-i18n-es="Meta-review semanal" data-i18n-en="Weekly meta-review">Weekly meta-review</summary>
+    <div class="wk-body" id="saWeeklyBody"></div>
+  </details>
+
+  </section>
+
+  <section class="tabpane" id="tab-gate" role="tabpanel" aria-labelledby="tb-gate" hidden>
+  <div class="tabintro">
+    <h2 data-i18n-es="Antes de entrar" data-i18n-en="Before you enter">Before you enter</h2>
+    <p data-i18n-es="El checklist de cada entrada y las barreras contra tus fugas. &Aacute;brelo justo antes de apretar el gatillo, no despu&eacute;s." data-i18n-en="The checklist for every entry and the barriers against your leaks. Open it right before you pull the trigger, not after.">The checklist for every entry and the barriers against your leaks. Open it right before you pull the trigger, not after.</p>
+  </div>
+  <div class="dash two">
+    <!-- 2. GATE DE ENTRADA · lo que decide si aprietas el gatillo -->
+    <div class="panel">
+      <div class="phead"><span class="dot"></span><h2 data-i18n-es="Antes de apretar el gatillo" data-i18n-en="Before you pull the trigger">Before you pull the trigger</h2><span class="tag" id="ckTag">0 / 7</span></div>
+      <div class="phelp" data-i18n-es="Declara la direcci&oacute;n y marca cada punto. Si falta uno solo, no es tu trade. Si vas contra el sesgo en vivo, te aviso." data-i18n-en="Declare the direction and tick every point. If even one is missing, it's not your trade. If you go against the live bias, I'll flag it.">Declare the direction and tick every point. If even one is missing, it's not your trade. If you go against the live bias, I'll flag it.</div>
+      <div class="gate" id="gate">
+        <div class="grow"><span class="gl" data-i18n-es="Direcci&oacute;n de esta entrada" data-i18n-en="Direction of this entry">Direction of this entry</span>
+          <div class="gbtns"><button class="gb long" data-dir="LONG" data-i18n-es="LARGO" data-i18n-en="LONG">LONG</button><button class="gb short" data-dir="SHORT" data-i18n-es="CORTO" data-i18n-en="SHORT">SHORT</button></div>
+        </div>
+        <label class="gborde"><input type="checkbox" id="gBorde"><span data-i18n-es="Es un borde a favor (rebote VAL / rechazo VAH), no fadeo la tendencia" data-i18n-en="It's an edge with the trend (VAL bounce / VAH rejection), not fading the trend">It's an edge with the trend (VAL bounce / VAH rejection), not fading the trend</span></label>
+        <div class="gmsg" id="gMsg">Declare your direction. I'll flag it if you go against the live bias.</div>
+      </div>
+      <ul class="check" id="ckList">
+        <li data-ck><span class="box"></span><span data-i18n-es="Precio en un nivel de inter&eacute;s: perfil &middot; VWAP &middot; OR &middot; PDH/PDL &middot; FVG" data-i18n-en="Price at a level of interest: profile &middot; VWAP &middot; OR &middot; PDH/PDL &middot; FVG">Price at a level of interest: profile &middot; VWAP &middot; OR &middot; PDH/PDL &middot; FVG</span> <small data-i18n-es="NO EN EL AIRE" data-i18n-en="NOT IN THE AIR">NOT IN THE AIR</small></li>
+        <li data-ck><span class="box"></span><span data-i18n-es="Tengo un gatillo: FVG/iFVG &middot; reclaim &middot; rechazo &middot; cambio de estructura" data-i18n-en="I have a trigger: FVG/iFVG &middot; reclaim &middot; rejection &middot; structure shift">I have a trigger: FVG/iFVG &middot; reclaim &middot; rejection &middot; structure shift</span> <small data-i18n-es="GATILLO" data-i18n-en="TRIGGER">TRIGGER</small></li>
+        <li data-ck><span class="box"></span><span data-i18n-es="El sesgo de Asia / del d&iacute;a apoya la direcci&oacute;n" data-i18n-en="The Asia / day bias supports the direction">The Asia / day bias supports the direction</span> <small data-i18n-es="A FAVOR" data-i18n-en="WITH THE BIAS">WITH THE BIAS</small></li>
+        <li data-ck><span class="box"></span><span data-i18n-es="Confluencia extra: EMA 20/50 &middot; VWAP &middot; SMT" data-i18n-en="Extra confluence: EMA 20/50 &middot; VWAP &middot; SMT">Extra confluence: EMA 20/50 &middot; VWAP &middot; SMT</span> <small data-i18n-es="CONFIRMA" data-i18n-en="CONFIRMS">CONFIRMS</small></li>
+        <li data-ck><span class="box"></span><span data-i18n-es="No es un largo forzado contra tu sesgo" data-i18n-en="It's not a long forced against your bias">It's not a long forced against your bias</span> <small data-i18n-es="FUGA #1" data-i18n-en="LEAK #1">LEAK #1</small></li>
+        <li data-ck><span class="box"></span><span data-i18n-es="Stop, invalidaci&oacute;n y tama&ntilde;o m&iacute;nimo definidos" data-i18n-en="Stop, invalidation and minimum size defined">Stop, invalidation and minimum size defined</span> <small data-i18n-es="ANTES" data-i18n-en="BEFORE">BEFORE</small></li>
+        <li data-ck><span class="box"></span><span data-i18n-es="Tranquilo, no vengo a recuperar" data-i18n-en="Calm, I'm not here to recover losses">Calm, I'm not here to recover losses</span> <small data-i18n-es="HONESTO" data-i18n-en="HONEST">HONEST</small></li>
+      </ul>
+      <button class="pbtn loss" id="pBroke" style="width:100%;flex:none" data-i18n-es="Romp&iacute; una regla hoy &middot; reinicia la racha" data-i18n-en="I broke a rule today · reset the streak">I broke a rule today · reset the streak</button>
+    </div>
+
+    <!-- 5. REGLAS Y DISCIPLINA -->
+    <div class="panel">
+      <div class="phead"><span class="dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan)"></span><h2 data-i18n-es="Salud del sistema" data-i18n-en="System health">System health</h2><span class="tag" id="sysTag" data-i18n-es="FUGA &middot; BARRERA &middot; ESTADO" data-i18n-en="LEAK · BARRIER · STATUS">LEAK · BARRIER · STATUS</span></div>
+      <div class="phelp" data-i18n-es="Cada fuga tuya y la barrera que la frena. Verde = armada, amarillo = te toca confirmarla, rojo = rota hoy." data-i18n-en="Each of your leaks and the barrier that stops it. Green = armed, amber = you need to confirm it, red = broken today.">Each of your leaks and the barrier that stops it. Green = armed, amber = you need to confirm it, red = broken today.</div>
+      <div class="sys" id="sys"></div>
+      <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center;margin-top:2px" data-i18n-es="Cada fuga tuya tiene una barrera que la ejecuta, no tu criterio en caliente." data-i18n-en="Every leak of yours has a barrier that enforces it, not your judgment in the heat of the moment.">Every leak of yours has a barrier that enforces it, not your judgment in the heat of the moment.</div>
+    </div>
+
+  </div>
+  </section>
+
+  <section class="tabpane" id="tab-me" role="tabpanel" aria-labelledby="tb-me" hidden>
+  <div class="tabintro">
+    <h2 data-i18n-es="Mi disciplina" data-i18n-en="My discipline">My discipline</h2>
+    <p data-i18n-es="Tu racha real, lo que hiciste hoy y por qu&eacute; operas. Esto no mide dinero: mide si cumpliste." data-i18n-en="Your real streak, what you did today and why you trade. This doesn't measure money: it measures whether you kept your word.">Your real streak, what you did today and why you trade. This doesn't measure money: it measures whether you kept your word.</p>
+  </div>
+  <div class="dash two">
+    <div class="panel">
+      <div class="phead"><span class="dot"></span><h2 data-i18n-es="Disciplina &middot; 30 d&iacute;as" data-i18n-en="Discipline · 30 days">Discipline · 30 days</h2><span class="tag" data-i18n-es="SIN MENTIRAS" data-i18n-en="NO LIES">NO LIES</span></div>
+      <div class="phelp" data-i18n-es="D&iacute;as que seguiste el plan contra los que lo rompiste. Se llena con lo que marcas en el portero de la pesta&ntilde;a Ahora." data-i18n-en="Days you followed the plan versus the days you broke it. It fills from what you mark in the gatekeeper on the Now tab.">Days you followed the plan versus the days you broke it. It fills from what you mark in the gatekeeper on the Now tab.</div>
+      <div class="dstats">
+        <div class="dstat"><div class="n c-lime" id="discStreak">0</div><div class="l" data-i18n-es="Racha fiel" data-i18n-en="Faithful streak">Faithful streak</div></div>
+        <div class="dstat"><div class="n c-cyan" id="discClean">0/0</div><div class="l" data-i18n-es="Limpios / operados" data-i18n-en="Clean / traded">Clean / traded</div></div>
+        <div class="dstat"><div class="n c-amber" id="discPct">&middot;</div><div class="l" data-i18n-es="% disciplina" data-i18n-en="% discipline">% discipline</div></div>
+      </div>
+      <div class="dbar"><i id="discBar" style="width:0%"></i></div>
+      <div class="heat" id="discHeat"></div>
+      <div class="dlegend"><span><i style="background:var(--lime)"></i><span data-i18n-es="Fiel al plan" data-i18n-en="Followed the plan">Followed the plan</span></span><span><i style="background:var(--red)"></i><span data-i18n-es="Traicionaste" data-i18n-en="You broke it">You broke it</span></span><span><i style="background:rgba(255,255,255,0.08)"></i><span data-i18n-es="Sin operar" data-i18n-en="No trades">No trades</span></span></div>
+      <div class="dnote" id="discNote">Mark each day in the gatekeeper and here you'll see your real consistency, not phantom money.</div>
+    </div>
+
+    <div class="panel">
+      <div class="phead"><span class="dot"></span><h2 data-i18n-es="Bit&aacute;cora de hoy" data-i18n-en="Today's log">Today's log</h2><span class="tag" id="feedTag">0 MOVES</span></div>
+      <div class="phelp" data-i18n-es="Cada trade que marcas como ganado o perdido, en orden." data-i18n-en="Every trade you mark as a win or a loss, in order.">Every trade you mark as a win or a loss, in order.</div>
+      <div class="feed" id="feed">
+        <div class="empty">No moves today.<br>Every trade you mark in the gatekeeper (win / loss) gets logged here.</div>
+      </div>
+    </div>
+
+  </div>
+  <!-- NORTH STAR -->
+  <div class="north">
+    <div class="why">
+      <h3><span data-i18n-es="PARA ESTO OPERAS" data-i18n-en="THIS IS WHY YOU TRADE">THIS IS WHY YOU TRADE</span> <button class="editbtn" id="editNorth" data-title-es="Editar tu norte" data-title-en="Edit your north star" title="Edit your north star">&#9998;</button></h3>
+      <p id="nsWhy">"My biggest enemy is myself. I trade for Liam and to get out of debt, not for the adrenaline."</p>
+    </div>
+    <div class="debt">
+      <div class="dh"><span data-i18n-es="CAMINO A SALIR DE DEUDAS" data-i18n-en="PATH OUT OF DEBT">PATH OUT OF DEBT</span><span id="nsDebtHead"><b>$18,400</b> / $30,000 paid</span></div>
+      <div class="track"><div class="fill" id="nsFill"></div></div>
+      <div class="sub" id="nsSub">$11,600 left to pay. Every day of discipline gets you closer.</div>
+    </div>
+    <div class="goals">
+      <div class="goal"><div class="n" id="nsDays">0</div><div class="l" data-i18n-es="D&iacute;as limpio" data-i18n-en="Clean days">Clean days</div></div>
+      <div class="goal"><div class="n" id="nsWho">Liam</div><div class="l" data-i18n-es="El porqu&eacute;" data-i18n-en="The why">The why</div></div>
+    </div>
+  </div>
+
+  <!-- RUTINA HOLÍSTICA · el trader se construye lejos del gráfico -->
+  <div class="north" style="margin-top:12px">
+    <div class="why" style="flex:1;min-width:220px">
+      <h3 style="color:var(--lime)" data-i18n-es="EL TRADER SE CONSTRUYE LEJOS DEL GR&Aacute;FICO" data-i18n-en="THE TRADER IS BUILT AWAY FROM THE CHART">THE TRADER IS BUILT AWAY FROM THE CHART</h3>
+      <p style="font-style:normal;font-size:11px;color:var(--txt-dim);line-height:1.5" data-i18n-es="Sue&ntilde;o, cuerpo y familia son infraestructura de tu ingreso, no un lujo. Marca lo de hoy." data-i18n-en="Sleep, body and family are the infrastructure of your income, not a luxury. Check off today's.">Sleep, body and family are the infrastructure of your income, not a luxury. Check off today's.</p>
+    </div>
+    <ul class="rutina" id="rutina" style="flex:2;min-width:260px">
+      <li data-rt="sueno"><span class="rb"></span><span data-i18n-es="Dorm&iacute; bien, mente descansada" data-i18n-en="Slept well, mind rested">Slept well, mind rested</span> <small data-i18n-es="PACIENCIA" data-i18n-en="PATIENCE">PATIENCE</small></li>
+      <li data-rt="ejercicio"><span class="rb"></span><span data-i18n-es="Bloque de ejercicio o movimiento" data-i18n-en="Exercise or movement block">Exercise or movement block</span> <small data-i18n-es="V&Aacute;LVULA" data-i18n-en="RELEASE VALVE">RELEASE VALVE</small></li>
+      <li data-rt="familia"><span class="rb"></span><span data-i18n-es="Bloque con Liam y esposa, sin pantalla" data-i18n-en="Time with Liam and wife, no screens">Time with Liam and wife, no screens</span> <small data-i18n-es="SAGRADO" data-i18n-en="SACRED">SACRED</small></li>
+      <li data-rt="cierre"><span class="rb"></span><span data-i18n-es="Cerr&eacute; la plataforma fuera de sesi&oacute;n" data-i18n-en="Closed the platform outside of session">Closed the platform outside of session</span> <small data-i18n-es="ANTI-FUGA" data-i18n-en="ANTI-LEAK">ANTI-LEAK</small></li>
+    </ul>
+  </div>
+
+  </section>
+
+  <!-- RETIRED · hidden on purpose: manual plan paste, relative strength and the broker CSV
+       (the journal owns performance now). Kept in the DOM so their scripts keep working. -->
+  <div id="retired" hidden aria-hidden="true"><div class="dash">
+    <!-- 1. FILA CONTEXTO -->
+    <div class="panel">
+      <div class="phead"><span class="dot" style="background:var(--amber);box-shadow:0 0 8px var(--amber)"></span><h2 data-i18n-es="El plan de hoy" data-i18n-en="Today's plan">Today's plan</h2><span class="pheadR"><span class="tag" id="planTag">NO PLAN YET</span><button class="editbtn" id="editPlan" data-title-es="Editar plan del d&iacute;a" data-title-en="Edit today's plan" title="Edit today's plan" data-i18n-html-es="&#9998;" data-i18n-html-en="&#9998;">&#9998;</button></span></div>
+      <div class="planchips" id="planchips">
+        <div class="pchip"><div class="l" data-i18n-es="Tipo de d&iacute;a" data-i18n-en="Day type">Day type</div><div class="v" style="font-size:14px">&middot;</div><div class="s" data-i18n-es="pega tu plan del indicador" data-i18n-en="paste your plan from the indicator">paste your plan from the indicator</div></div>
+        <div class="pchip danger"><div class="l" data-i18n-es="Zona de no-trade" data-i18n-en="No-trade zone">No-trade zone</div><div class="v">&middot;</div><div class="s" data-i18n-es="tierra de nadie" data-i18n-en="no man's land">no man's land</div></div>
+        <div class="pchip line"><div class="l" data-i18n-es="&Aacute;rea de valor" data-i18n-en="Value area">Value area</div><div class="v">&middot;</div><div class="s" data-i18n-es="zona de confluencia" data-i18n-en="confluence zone">confluence zone</div></div>
+      </div>
+      <div class="triggers" id="triggers">
+        <div class="trig long"><b>LONG</b> &nbsp;with the trend, on a level + your trigger: bounce/reclaim (VAL, VWAP, OR, PDH) with FVG or structure shift. Never in the air.</div>
+        <div class="trig short"><b>SHORT</b> &nbsp;with the trend, on a level + your trigger: rejection/loss (VAH, VWAP, OR, PDL) with FVG or structure shift. Target, the next magnet.</div>
+      </div>
+      <div class="watchhead" data-i18n-es="Qu&eacute; mirar hoy" data-i18n-en="What to watch today">What to watch today</div>
+      <div class="watch" id="ccWatch"><div class="wl">Paste your plan from the indicator to load the context.</div></div>
+    </div>
+
     <!-- 3.5 FUERZA RELATIVA · escanea NQ/ES/GC/CL/YM/SI y sugiere el mas claro -->
     <style>
       .scan{display:flex;flex-direction:column;gap:6px}
@@ -823,81 +1034,6 @@ body::before{
       <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center" data-i18n-es="Cada s&iacute;mbolo necesita el indicador + alerta corriendo en su propio gr&aacute;fico en TradingView." data-i18n-en="Each symbol needs the indicator + alert running on its own TradingView chart.">Each symbol needs the indicator + alert running on its own TradingView chart.</div>
     </div>
 
-    <div class="panel">
-      <div class="phead"><span class="dot" style="background:var(--violet);box-shadow:0 0 8px var(--violet)"></span><h2 data-i18n-es="Mapa de niveles" data-i18n-en="Level map">Level map</h2><span class="tag" data-i18n-es="TODOS &middot; DIST. AL PRECIO" data-i18n-en="ALL · DIST. TO PRICE">ALL · DIST. TO PRICE</span></div>
-      <div class="lad" id="lad">
-        <div class="lrow"><span class="dot2"></span><span class="pr">&middot;</span><span class="lbl">Paste your plan</span></div>
-      </div>
-    </div>
-
-    <!-- 2. GATE DE ENTRADA · lo que decide si aprietas el gatillo -->
-    <div class="panel">
-      <div class="phead"><span class="dot"></span><h2 data-i18n-es="Antes de apretar el gatillo" data-i18n-en="Before you pull the trigger">Before you pull the trigger</h2><span class="tag" id="ckTag">0 / 7</span></div>
-      <div class="gate" id="gate">
-        <div class="grow"><span class="gl" data-i18n-es="Direcci&oacute;n de esta entrada" data-i18n-en="Direction of this entry">Direction of this entry</span>
-          <div class="gbtns"><button class="gb long" data-dir="LONG" data-i18n-es="LARGO" data-i18n-en="LONG">LONG</button><button class="gb short" data-dir="SHORT" data-i18n-es="CORTO" data-i18n-en="SHORT">SHORT</button></div>
-        </div>
-        <label class="gborde"><input type="checkbox" id="gBorde"><span data-i18n-es="Es un borde a favor (rebote VAL / rechazo VAH), no fadeo la tendencia" data-i18n-en="It's an edge with the trend (VAL bounce / VAH rejection), not fading the trend">It's an edge with the trend (VAL bounce / VAH rejection), not fading the trend</span></label>
-        <div class="gmsg" id="gMsg">Declare your direction. I'll flag it if you go against the live bias.</div>
-      </div>
-      <ul class="check" id="ckList">
-        <li data-ck><span class="box"></span><span data-i18n-es="Precio en un nivel de inter&eacute;s: perfil &middot; VWAP &middot; OR &middot; PDH/PDL &middot; FVG" data-i18n-en="Price at a level of interest: profile &middot; VWAP &middot; OR &middot; PDH/PDL &middot; FVG">Price at a level of interest: profile &middot; VWAP &middot; OR &middot; PDH/PDL &middot; FVG</span> <small data-i18n-es="NO EN EL AIRE" data-i18n-en="NOT IN THE AIR">NOT IN THE AIR</small></li>
-        <li data-ck><span class="box"></span><span data-i18n-es="Tengo un gatillo: FVG/iFVG &middot; reclaim &middot; rechazo &middot; cambio de estructura" data-i18n-en="I have a trigger: FVG/iFVG &middot; reclaim &middot; rejection &middot; structure shift">I have a trigger: FVG/iFVG &middot; reclaim &middot; rejection &middot; structure shift</span> <small data-i18n-es="GATILLO" data-i18n-en="TRIGGER">TRIGGER</small></li>
-        <li data-ck><span class="box"></span><span data-i18n-es="El sesgo de Asia / del d&iacute;a apoya la direcci&oacute;n" data-i18n-en="The Asia / day bias supports the direction">The Asia / day bias supports the direction</span> <small data-i18n-es="A FAVOR" data-i18n-en="WITH THE BIAS">WITH THE BIAS</small></li>
-        <li data-ck><span class="box"></span><span data-i18n-es="Confluencia extra: EMA 20/50 &middot; VWAP &middot; SMT" data-i18n-en="Extra confluence: EMA 20/50 &middot; VWAP &middot; SMT">Extra confluence: EMA 20/50 &middot; VWAP &middot; SMT</span> <small data-i18n-es="CONFIRMA" data-i18n-en="CONFIRMS">CONFIRMS</small></li>
-        <li data-ck><span class="box"></span><span data-i18n-es="No es un largo forzado contra tu sesgo" data-i18n-en="It's not a long forced against your bias">It's not a long forced against your bias</span> <small data-i18n-es="FUGA #1" data-i18n-en="LEAK #1">LEAK #1</small></li>
-        <li data-ck><span class="box"></span><span data-i18n-es="Stop, invalidaci&oacute;n y tama&ntilde;o m&iacute;nimo definidos" data-i18n-en="Stop, invalidation and minimum size defined">Stop, invalidation and minimum size defined</span> <small data-i18n-es="ANTES" data-i18n-en="BEFORE">BEFORE</small></li>
-        <li data-ck><span class="box"></span><span data-i18n-es="Tranquilo, no vengo a recuperar" data-i18n-en="Calm, I'm not here to recover losses">Calm, I'm not here to recover losses</span> <small data-i18n-es="HONESTO" data-i18n-en="HONEST">HONEST</small></li>
-      </ul>
-      <button class="pbtn loss" id="pBroke" style="width:100%;flex:none" data-i18n-es="Romp&iacute; una regla hoy &middot; reinicia la racha" data-i18n-en="I broke a rule today · reset the streak">I broke a rule today · reset the streak</button>
-    </div>
-
-    <div class="panel">
-      <div class="phead"><span class="dot"></span><h2 data-i18n-es="Disciplina &middot; 30 d&iacute;as" data-i18n-en="Discipline · 30 days">Discipline · 30 days</h2><span class="tag" data-i18n-es="SIN MENTIRAS" data-i18n-en="NO LIES">NO LIES</span></div>
-      <div class="dstats">
-        <div class="dstat"><div class="n c-lime" id="discStreak">0</div><div class="l" data-i18n-es="Racha fiel" data-i18n-en="Faithful streak">Faithful streak</div></div>
-        <div class="dstat"><div class="n c-cyan" id="discClean">0/0</div><div class="l" data-i18n-es="Limpios / operados" data-i18n-en="Clean / traded">Clean / traded</div></div>
-        <div class="dstat"><div class="n c-amber" id="discPct">&middot;</div><div class="l" data-i18n-es="% disciplina" data-i18n-en="% discipline">% discipline</div></div>
-      </div>
-      <div class="dbar"><i id="discBar" style="width:0%"></i></div>
-      <div class="heat" id="discHeat"></div>
-      <div class="dlegend"><span><i style="background:var(--lime)"></i><span data-i18n-es="Fiel al plan" data-i18n-en="Followed the plan">Followed the plan</span></span><span><i style="background:var(--red)"></i><span data-i18n-es="Traicionaste" data-i18n-en="You broke it">You broke it</span></span><span><i style="background:rgba(255,255,255,0.08)"></i><span data-i18n-es="Sin operar" data-i18n-en="No trades">No trades</span></span></div>
-      <div class="dnote" id="discNote">Mark each day in the gatekeeper and here you'll see your real consistency, not phantom money.</div>
-    </div>
-
-    <div class="panel full">
-      <div class="phead"><span class="dot"></span><h2 data-i18n-es="Bit&aacute;cora de hoy" data-i18n-en="Today's log">Today's log</h2><span class="tag" id="feedTag">0 MOVES</span></div>
-      <div class="feed" id="feed">
-        <div class="empty">No moves today.<br>Every trade you mark in the gatekeeper (win / loss) gets logged here.</div>
-      </div>
-    </div>
-
-    <!-- 4. NOTICIAS · puede cerrar la ventana de entrada -->
-    <div class="panel full">
-      <div class="phead"><span class="dot" style="background:var(--red);box-shadow:0 0 8px var(--red)"></span><h2 data-i18n-es="Noticias de alto impacto" data-i18n-en="High-impact news">High-impact news</h2><span class="tag" data-i18n-es="FOREXFACTORY &middot; PR&Oacute;XIMAS" data-i18n-en="FOREXFACTORY · NEXT">FOREXFACTORY · NEXT</span></div>
-      <div class="news" id="newsList">
-        <div class="nrow"><span class="ev" data-i18n-es="Cargando calendario&hellip;" data-i18n-en="Loading calendar&hellip;">Loading calendar…</span></div>
-      </div>
-      <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center" data-i18n-es="Tres barras rojas es alto impacto. No te hagas el h&eacute;roe 15 min antes ni despu&eacute;s." data-i18n-en="Three red bars is high impact. Don't be a hero 15 min before or after.">Three red bars is high impact. Don't be a hero 15 min before or after.</div>
-    </div>
-
-    <!-- 4b. CONTEXTO FUERA DEL GRAFICO (cc-macro) -->
-    <div class="panel full">
-      <div class="phead"><span class="dot" style="background:var(--amber);box-shadow:0 0 8px var(--amber)"></span><h2 data-i18n-es="Contexto fuera del gr&aacute;fico" data-i18n-en="Off-chart context">Off-chart context</h2><span class="tag" id="ctxTag">&middot;</span></div>
-      <div class="ctxlabel" id="ctxFeedLabel"></div>
-      <div class="ctx" id="ctxFeed" style="margin-bottom:8px"></div>
-      <div class="ctxlabel" id="ctxMacroLabel"></div>
-      <div class="ctx" id="ctxGrid"><div class="ctile"><div class="s" data-i18n-es="Cargando&hellip;" data-i18n-en="Loading&hellip;">Loading&hellip;</div></div></div>
-      <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center" id="ctxFoot"></div>
-    </div>
-
-    <!-- 5. REGLAS Y DISCIPLINA -->
-    <div class="panel full">
-      <div class="phead"><span class="dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan)"></span><h2 data-i18n-es="Salud del sistema" data-i18n-en="System health">System health</h2><span class="tag" id="sysTag" data-i18n-es="FUGA &middot; BARRERA &middot; ESTADO" data-i18n-en="LEAK · BARRIER · STATUS">LEAK · BARRIER · STATUS</span></div>
-      <div class="sys" id="sys"></div>
-      <div style="font-size:8.5px;letter-spacing:1px;color:var(--txt-faint);text-align:center;margin-top:2px" data-i18n-es="Cada fuga tuya tiene una barrera que la ejecuta, no tu criterio en caliente." data-i18n-en="Every leak of yours has a barrier that enforces it, not your judgment in the heat of the moment.">Every leak of yours has a barrier that enforces it, not your judgment in the heat of the moment.</div>
-    </div>
-
     <!-- 6. RENDIMIENTO (CSV real del broker) -->
     <div class="panel full">
       <div class="phead"><span class="dot" style="background:var(--lime);box-shadow:0 0 8px var(--lime)"></span><h2 data-i18n-es="Rendimiento &middot; tu CSV de Tradovate" data-i18n-en="Performance · your Tradovate CSV">Performance · your Tradovate CSV</h2><span class="pheadR"><span class="tag" id="rvTag">NO DATA</span><button class="editbtn" id="rvImport" data-title-es="Importar Performance.csv de Tradovate" data-title-en="Import Performance.csv from Tradovate" title="Import Performance.csv from Tradovate" data-i18n-es="Importar CSV" data-i18n-en="Import CSV">Import CSV</button></span></div>
@@ -922,38 +1058,7 @@ body::before{
       </div>
     </div>
 
-  </div><!-- /dash -->
-
-  <!-- NORTH STAR -->
-  <div class="north">
-    <div class="why">
-      <h3><span data-i18n-es="PARA ESTO OPERAS" data-i18n-en="THIS IS WHY YOU TRADE">THIS IS WHY YOU TRADE</span> <button class="editbtn" id="editNorth" data-title-es="Editar tu norte" data-title-en="Edit your north star" title="Edit your north star">&#9998;</button></h3>
-      <p id="nsWhy">"My biggest enemy is myself. I trade for Liam and to get out of debt, not for the adrenaline."</p>
-    </div>
-    <div class="debt">
-      <div class="dh"><span data-i18n-es="CAMINO A SALIR DE DEUDAS" data-i18n-en="PATH OUT OF DEBT">PATH OUT OF DEBT</span><span id="nsDebtHead"><b>$18,400</b> / $30,000 paid</span></div>
-      <div class="track"><div class="fill" id="nsFill"></div></div>
-      <div class="sub" id="nsSub">$11,600 left to pay. Every day of discipline gets you closer.</div>
-    </div>
-    <div class="goals">
-      <div class="goal"><div class="n" id="nsDays">0</div><div class="l" data-i18n-es="D&iacute;as limpio" data-i18n-en="Clean days">Clean days</div></div>
-      <div class="goal"><div class="n" id="nsWho">Liam</div><div class="l" data-i18n-es="El porqu&eacute;" data-i18n-en="The why">The why</div></div>
-    </div>
-  </div>
-
-  <!-- RUTINA HOLÍSTICA · el trader se construye lejos del gráfico -->
-  <div class="north" style="margin-top:12px">
-    <div class="why" style="flex:1;min-width:220px">
-      <h3 style="color:var(--lime)" data-i18n-es="EL TRADER SE CONSTRUYE LEJOS DEL GR&Aacute;FICO" data-i18n-en="THE TRADER IS BUILT AWAY FROM THE CHART">THE TRADER IS BUILT AWAY FROM THE CHART</h3>
-      <p style="font-style:normal;font-size:11px;color:var(--txt-dim);line-height:1.5" data-i18n-es="Sue&ntilde;o, cuerpo y familia son infraestructura de tu ingreso, no un lujo. Marca lo de hoy." data-i18n-en="Sleep, body and family are the infrastructure of your income, not a luxury. Check off today's.">Sleep, body and family are the infrastructure of your income, not a luxury. Check off today's.</p>
-    </div>
-    <ul class="rutina" id="rutina" style="flex:2;min-width:260px">
-      <li data-rt="sueno"><span class="rb"></span><span data-i18n-es="Dorm&iacute; bien, mente descansada" data-i18n-en="Slept well, mind rested">Slept well, mind rested</span> <small data-i18n-es="PACIENCIA" data-i18n-en="PATIENCE">PATIENCE</small></li>
-      <li data-rt="ejercicio"><span class="rb"></span><span data-i18n-es="Bloque de ejercicio o movimiento" data-i18n-en="Exercise or movement block">Exercise or movement block</span> <small data-i18n-es="V&Aacute;LVULA" data-i18n-en="RELEASE VALVE">RELEASE VALVE</small></li>
-      <li data-rt="familia"><span class="rb"></span><span data-i18n-es="Bloque con Liam y esposa, sin pantalla" data-i18n-en="Time with Liam and wife, no screens">Time with Liam and wife, no screens</span> <small data-i18n-es="SAGRADO" data-i18n-en="SACRED">SACRED</small></li>
-      <li data-rt="cierre"><span class="rb"></span><span data-i18n-es="Cerr&eacute; la plataforma fuera de sesi&oacute;n" data-i18n-en="Closed the platform outside of session">Closed the platform outside of session</span> <small data-i18n-es="ANTI-FUGA" data-i18n-en="ANTI-LEAK">ANTI-LEAK</small></li>
-    </ul>
-  </div>
+  </div></div>
 
   <div class="foot" id="foot" data-i18n-es='TRADEDADLOG COMMAND CENTER &middot; v0.9 &middot; "EL PLAN SOBRE EL IMPULSO"' data-i18n-en='TRADEDADLOG COMMAND CENTER · v0.9 · "THE PLAN OVER THE IMPULSE"'>TRADEDADLOG COMMAND CENTER · v0.9 · "THE PLAN OVER THE IMPULSE"</div>
 </div>
@@ -3026,17 +3131,18 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     var d=new Date(), day=d.getDay(), h=d.getHours()+d.getMinutes()/60;
     if(day===6 || (day===5 && h>=16) || (day===0 && h<17)){
       var sun = day===0;
-      return {code:'closed',
-        es:['MERCADO CERRADO', sun?'abre hoy 17:00 CT':'abre dom 17:00 CT'],
-        en:['MARKET CLOSED',   sun?'opens today 17:00 CT':'opens Sun 17:00 CT']};
+      // only CME futures close on the weekend: crypto (ETH/BTC) keeps trading 24/7
+      return {code:'crypto',
+        es:['CRIPTO ABIERTO · FUTUROS CERRADOS', sun?'futuros abren hoy 17:00 CT':'futuros abren dom 17:00 CT'],
+        en:['CRYPTO OPEN · FUTURES CLOSED',      sun?'futures open today 17:00 CT':'futures open Sun 17:00 CT']};
     }
     if(h>=16 && h<17){
       var mins=Math.max(1,Math.round((17-h)*60));
       return {code:'halt',
-        es:['MERCADO EN PAUSA','reabre 17:00 CT · '+mins+' min'],
-        en:['MARKET HALT','reopens 17:00 CT · '+mins+' min']};
+        es:['FUTUROS EN PAUSA · CRIPTO ABIERTO','futuros reabren 17:00 CT · '+mins+' min'],
+        en:['FUTURES HALT · CRYPTO OPEN','futures reopen 17:00 CT · '+mins+' min']};
     }
-    return {code:'open', es:['MERCADO ABIERTO','futuros NQ/ES/GC'], en:['MARKET OPEN','NQ/ES/GC futures']};
+    return {code:'open', es:['FUTUROS Y CRIPTO ABIERTOS','NQ/ES/GC · ETH/BTC 24/7'], en:['FUTURES AND CRYPTO OPEN','NQ/ES/GC · ETH/BTC 24/7']};
   }
   function renderMkt(){
     var el=$('mktStat'); if(!el) return;
@@ -3118,9 +3224,8 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if(window.__refreshPortero) window.__refreshPortero();
     if(window.__refreshHealth) window.__refreshHealth();
   });
-  // aplica la línea guardada al arrancar; abre el ritual si falta hoy
-  (function(){ try{ var ln=localStorage.getItem('cc_ritual_line'); if(ln&&$('ruleToday')) $('ruleToday').textContent='"'+ln+'"'; }catch(e){}
-    if(!ritualDoneToday()) setTimeout(openRitual, 900); })();
+  // aplica la línea guardada al arrancar; el ritual ya no se abre solo: se abre tocando "RITUAL PENDIENTE"
+  (function(){ try{ var ln=localStorage.getItem('cc_ritual_line'); if(ln&&$('ruleToday')) $('ruleToday').textContent='"'+ln+'"'; }catch(e){} })();
 
   /* ---------- SALUD DEL SISTEMA ---------- */
   var sysEl=$('sys');
@@ -3246,5 +3351,52 @@ setInterval(loadDecisions, 30 * 60000);
 setInterval(render, 60000);   // stale cut-offs move with the clock
 </script>
 <script src="update-check.js" defer></script>
+
+<script>
+/* ================= TABS · Now / Today's plan / Before you enter / My discipline ================= */
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.tabs .tab'));
+  if(!tabs.length) return;
+  var keys=tabs.map(function(t){ return t.getAttribute('data-tab'); });
+  function show(k, focus){
+    if(keys.indexOf(k)<0) k='now';
+    tabs.forEach(function(t){
+      var on=t.getAttribute('data-tab')===k;
+      t.setAttribute('aria-selected', on?'true':'false');
+      t.tabIndex=on?0:-1;
+      document.getElementById('tab-'+t.getAttribute('data-tab')).hidden=!on;
+      if(on&&focus) t.focus();
+    });
+    try{ localStorage.setItem('cc_tab',k); }catch(e){}
+    if(location.hash!=='#'+k){ try{ history.replaceState(null,'','#'+k); }catch(e){} }
+    /* keep the tab bar in view: only scroll up when the reader is below it */
+    var bar=document.querySelector('.tabs'), y=bar?bar.offsetTop:0;
+    if(window.scrollY>y) window.scrollTo({top:y});
+    window.dispatchEvent(new Event('resize'));
+  }
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){ show(t.getAttribute('data-tab')); });
+    t.addEventListener('keydown',function(e){
+      var d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;
+      if(d){ e.preventDefault(); show(keys[(i+d+keys.length)%keys.length], true); }
+    });
+  });
+  document.addEventListener('keydown',function(e){
+    var el=e.target, tag=(el&&el.tagName)||'';
+    if(e.ctrlKey||e.metaKey||e.altKey||/INPUT|TEXTAREA|SELECT/.test(tag)||(el&&el.isContentEditable)) return;
+    var n=parseInt(e.key,10); if(n>=1&&n<=keys.length) show(keys[n-1]);
+  });
+  window.addEventListener('hashchange',function(){ show(location.hash.slice(1)); });
+  var start=location.hash.slice(1);
+  if(keys.indexOf(start)<0){ try{ start=localStorage.getItem('cc_tab')||'now'; }catch(e){ start='now'; } }
+  show(start);
+  /* the Now tab carries the Session Analyst verdict colour so it reads from any tab */
+  var fb=document.getElementById('focusBar'), dot=document.getElementById('tdNow');
+  function paintDot(){ if(!fb||!dot) return; var c=fb.style.display==='none'?'':(fb.classList.contains('go')?'go':fb.classList.contains('avoid')?'avoid':fb.classList.contains('wait')?'wait':'');
+    dot.className='tdot'+(c?' '+c:''); }
+  if(fb&&window.MutationObserver){ new MutationObserver(paintDot).observe(fb,{attributes:true,attributeFilter:['class','style']}); }
+  paintDot();
+})();
+</script>
 </body>
 </html>
