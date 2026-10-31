@@ -1,27 +1,32 @@
-# X Snapshot, captured 2026-10-26 (cycle #16, interactive, logged in)
+# X Snapshot, captured 2026-10-31 (cycle #17, interactive, logged in)
 
-Account: @TradeDadLog, 887 followers (-18 since Oct 20), 972 posts.
+Account: @TradeDadLog, 864 followers (887 on Oct 26, 905 on Oct 20), 1,024 posts, following 732. Active followers 719/864 (83%) in 24h, 218 verified. 7D: impressions 12.4K (-29%), engagement rate 3.4% (+73%).
+
+## Follower drop (tested)
+Oct 21-31: new follows 16, unfollows 17 (net -1), count fell -41. About 40 silent removals by X (bots, dead accounts). Daily follows/unfollows Oct 16-31: 4/0, 3/0, 4/1, 3/0, 4/0, 0/2, 1/5, 0/2, 4/1, 1/1, 2/1, 3/2, 1/1, 1/1, 2/1, 1/0. Vest spike Oct 13: ~35 new follows in a day, 12-17/day through Oct 16.
 
 ## Real posts this window (X Analytics 2W, logged in)
-1. Oct 25, id 2114322766820155870, "Payout locked in: $1,929.77 on @MyFundedPerps... Still making mistakes with position sizing and greed": 840 views, 27 likes, 6 replies.
-2. Oct 23, id 2113767015513297176, "The wick literally TOUCHED my Pass Target on ETH, but no fill and no pass on @MyFundedPerps... Slippage / spread really said not today bro": 7.3K views, 33 likes, 13 replies, 1 repost.
-3. Oct 21, id 2112914159470023086, "NY open was pure garbage today!... How did your open go?": 1.5K views, 22 likes, 15 replies.
-4. Oct 14, id 2110338818066800845, quote of @capital_jn's free-eval offer: 5.2K views, 20 likes, 3 replies.
-Matured: Oct 20 526 · Oct 19 637 · Oct 18 "Fly $NQ" 2.7K · Oct 18 640 · Oct 17 ETH question 3.6K · Oct 16 payout 1.3K · Oct 15 -$242 1.2K · Oct 15 Vest loss 3.9K.
+1. Oct 30 "Time to step away from the charts..." 393 views, 12 likes, 1 reply.
+2. Oct 30 "Started the week on top of the world... giving almost all of it right back buying and blowing evals. Position sizing is killing me." 716 / 22 / 10.
+3. Oct 29 "3 hours and 31 minutes in the trenches on $NQ..." 616 / 15 / 3.
+4. Oct 29 "$NQ absolutely beat me up today... How did $NQ treat you today?" 1.6K / 25 / 15.
+5. Oct 28 "How are you handling the charts today?" 645 / 9 / 8.
+6. Oct 28 "The market doesn't just test your technical skills, it tests your character!" 350 / 11 / 0.
+7. Oct 27 MFP thread, hook tweet (id 2115183817183088849): 1.8K / 14 / 11. Later tweets 85-205 views.
+8. Oct 27 "Stacked some new funded accounts on @MyFundedPerps... lost a couple during the opening bell chop" 921 / 18 / 0.
+9. Oct 27 "Every new account starts with the same promise. Most of them end with the same excuse." 662 / 12 / 6.
+10. Oct 26 "Had some clean entries today. Problem is they were all on evaluations... Didn't lock anything." 570 / 14 / 4.
+11. Oct 26 "Most of my losses don't come from bad setups..." 710 / 22 / 6.
+Matured: Oct 25 payout 963 · Oct 23 wick complaint 7.4K · Oct 21 1.5K.
 
 ## Top comments
-- @dctrades22 (Oct 25, unanswered): "What rule are you tightening first to make that harder to repeat next week?"
-- @0xDevin_ (Oct 23, unanswered): a wick is just the highest or lowest trade that printed, a single trade can print a wick without the book getting there.
-- @dd_degens (Oct 23): the body of the candle has to fully touch before it triggers.
-- @Yeahsowhat2 (Oct 23): "Is this from your phone? Could you have manually closed it?"
-- @RichBroker101 (Oct 21): too easily satisfied once he passed $100, could have held for more. @R3G5B7 (Oct 21): up 110 on a fresh 5k, should have been 200, got nervous.
-- @GammaSqueezer (Oct 21): worst trading of his life this week, need to reset. @thehenryfam: blew two accounts in the first 30 minutes.
-- Jesus replied only to payout-post questions (Rise for payout, thanks).
-
-## Peers (@RealizedTrader, Oct 22-23)
-- A red day keeps running in the body after you close the platform (240 likes). Around 11 you take the trade you swore you were done with (189). Dad post, surprising his son at a school award (293).
+- @RealizedTrader (Oct 30, unanswered): "It kicked off after the payouts though... not after a loss... it feels like confidence... Plan the access, not just the rules."
+- @AD_770404 (Oct 29): "My direction read was A+ but execution on entries F."
+- @robthamarkets (Oct 30): passed a daily payout, up $3,680 in 20 min, wanted $400 more, blew it, "taking a break".
+- @TraderVRQ (Oct 29): when NQ won't pick a side he trades ES. @SteveTheobald70: stops around 10:30-11 ET. @rhode_trader: "I trade super well but size poorly."
+- @SirTomasRosicky (Oct 29-30): "It always does for you man", "No one cares" (repeat troll).
+- MFP thread replies: @drippy_eth "Thanks! Love the feedback", @rotrade93 "GOAT firm", two Hola Prime promo replies.
 
 ## Flags
-- Sep 28 "Maxed was 4" still uncorrected vs the 10-lot and 7-lot screenshots.
-- Two @MyFundedPerps payout posts with a certificate link in 10 days, disclosure question open.
-- Outside-blame post (Oct 23) drew corrections, followers dipped 18 in the window.
+- Replies and Oct 28-30 posts read like a motivational template, not the account's voice.
+- Sep 28 "Maxed was 4" still uncorrected. Two @MyFundedPerps payout posts with a certificate link.

@@ -177,3 +177,12 @@ sharper over time instead of starting cold each week. Keep it factual and dated.
 - A quote of a bigger account's offer (Oct 14, @capital_jn) got 5.2K on 20 likes: reach came from the quoted account.
 - Jesus has not replied this window to @dctrades22 (repeat engager, 3 substantive replies in 2 weeks), @0xDevin_ or @yoshiretails. Two payout certificates with a firm link in 10 days: disclosure question still open. No answer on the platform lockout rule.
 - `marked-posted.json` still empty after 16 cycles.
+
+## Cycle #17 observations (2026-10-31, interactive, logged in, triggered manually by Jesus)
+- **Follower drop tested with X's own chart.** Oct 21-31: new follows 16, unfollows 17 (net -1), but the follower count fell 905 -> 864 (-41). About 40 followers disappeared without an unfollow event: accounts removed by X (bots, suspended, dead). 83% of remaining followers active in 24h (719/864), 218 verified, 7D engagement rate 3.4% (+73%). Jesus's bot-purge hypothesis is most likely right. **Correction to cycle #16:** the -18 dip that week was mostly silent removals (-4 net from the chart), I over-attributed it to the Oct 23 blame post. The Oct 23 blame post still drew corrections, that part stands.
+- **The real issue is growth, not retention.** After the Vest spike (35 new follows Oct 13, 12-17/day through Oct 16) new follows fell to 0-4 a day. Judge by active followers and engagement rate, not the raw count.
+- **Volume 4x, reach flat:** 11 posts in 5 days, median 662 views. Generic bait ("How are you handling the charts today?", "tests your character") 350-645. Best: NQ shared-pain question 1.6K/15 replies and the MFP hook 1.8K.
+- **MFP thread (Oct 27):** hook 1.8K, later tweets 85-205 views each (steep drop after tweet 1), replies mostly firm-adjacent or promo spam, no real user experiences, no visible follow bump. As published the numbering skipped 5/ and the "I've still lost accounts here" line was cut.
+- **Voice drift:** Oct 28-30 posts and Jesus's replies read like a motivational template ("Let's crush the rest of the week!", "top tier risk management"). A repeat troll (@SirTomasRosicky) picked it up ("It always does for you man", "No one cares").
+- Best real material: @RealizedTrader, "it kicked off after the payouts, not after a loss, it feels like confidence... plan the access, not just the rules" (unanswered). The leak is a payout-confidence leak. Same leak shown by @robthamarkets.
+- `marked-posted.json` still empty after 17 cycles.

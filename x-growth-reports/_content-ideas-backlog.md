@@ -81,6 +81,16 @@ Running list of post ideas sourced from real audience comments and trend scans. 
 
 - **Rule (26 oct 2026)** — wins are the weakest framing every time (840, 1.3K, 722); shared-pain question or honest loss carries reach. Outside blame draws corrections and a follower dip.
 
+- **The leak starts after a payout, not after a loss, source: Jesus's Oct 30 post + @RealizedTrader's reply ("it feels like confidence")** `[USED 2026-10-31 as confession draft 1, cycle #17]`
+
+- **"Direction read A+, execution on entries F", source: @AD_770404 on the Oct 29 NQ post** `[USED 2026-10-31 as complaint+question draft 2, cycle #17]`
+
+- **The rule lives in the platform, not in a doc, source: Jesus's Oct 30 "rewriting my framework" post + @RealizedTrader ("plan the access, not just the rules") + @drippy_eth's lockout tip** `[USED 2026-10-31 as truth-bomb draft 3, cycle #17, bracketed]`
+
+- **Same leak, someone else: @robthamarkets passed a daily payout, was up $3,680 in 20 minutes, wanted $400 more for a credit card, blew it (Oct 30).** Open, not drafted.
+
+- **Rule (31 oct 2026)** — 11 posts in 5 days did not raise reach (median 662). Generic bait and the motivational template voice sit at 350 to 645. Max 2 a day, one real detail each.
+
 ## Used ideas
 - **Mine the viral pair's comments, source: own account, Sep 2-3** — `[USED 2026-09-04 — mined the 15K/10K posts' replies interactively, yielded the need-vs-want, payout-maxxing, physical-ritual and emotional-neutrality ideas above]`
 - **Aphorism riff, @RealizedTrader comment (27 ago 2026)** — "Knowing the rule was never the problem. Breaking it anyway is." `[USED 2026-08-31 — posted as the Aug 31 aphorism, status 2094580592495002023]`
