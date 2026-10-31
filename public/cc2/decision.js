@@ -37,7 +37,7 @@ export const LEVEL_NAMES = {
 };
 const lname = k => T(LEVEL_NAMES[k][0], LEVEL_NAMES[k][1]);
 
-// the coach's instrument for this symbol (crypto comes from the weekend plan)
+// the coach's instrument for this symbol (crypto comes from the daily crypto plan)
 export function coachFor(sym, sa, saCrypto) {
   if (isCrypto(sym)) {
     const ins = saCrypto && saCrypto.instruments;
@@ -147,7 +147,7 @@ export function decide(sym, data, gate, MAX_TRADES) {
   } else {
     inputs.push({ key: 'coach', k: T('Plan del coach IA', 'AI coach plan'), src: 'Session Analyst',
       v: isCrypto(sym) ? T('Hoy no hay plan cripto', 'No crypto plan today') : T('Todavía sin plan', 'No plan yet'),
-      s: isCrypto(sym) ? T('El coach escribe el plan cripto los fines de semana.', 'The coach writes a crypto plan on weekends.') : T('El coach publica antes de cada sesión.', 'The coach publishes before each session.'),
+      s: isCrypto(sym) ? T('El coach escribe el plan cripto al cierre diario (00:00 UTC) y lo actualiza a las 08:45 CT.', 'The coach writes the crypto plan at the daily close (00:00 UTC) and updates it at 08:45 CT.') : T('El coach publica antes de cada sesión.', 'The coach publishes before each session.'),
       tone: 'muted', agrees: false });
   }
   const used = gate.used || 0;

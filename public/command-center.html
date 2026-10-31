@@ -2871,7 +2871,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     fetch(WEEKLY_URL+'?t='+Date.now(),{cache:'no-store'})
       .then(function(r){ return r.ok?r.text():null; }).then(renderWeekly).catch(function(){});
   }
-  // ETH/BTC picked in the symbol bar: the "agent today" strip shows the crypto-weekend plan instead
+  // ETH/BTC picked in the symbol bar: the "agent today" strip shows the daily crypto plan instead
   function loadCrypto(){
     var s=window.__ccSym?window.__ccSym():'NQ'; if(s!=='ETHUSDT'&&s!=='BTCUSDT') return;
     fetch(SA_URL.replace('/latest.json','/crypto-latest.json')+'?t='+Date.now(),{cache:'no-store'})

@@ -124,7 +124,6 @@ td:first-child{border-radius:8px 0 0 8px;font-weight:700} td:last-child{border-r
   }
   // CME futures: closed Fri 16:00 to Sun 17:00 CT and in the daily 16:00-17:00 CT halt
   function futuresClosed(){ var c=ctNow(); return c.wd==='Sat'||(c.wd==='Fri'&&c.h>=16)||(c.wd==='Sun'&&c.h<17)||c.h===16; }
-  function cryptoWindow(){ var c=ctNow(); return (c.wd==='Fri'&&c.h>=16)||c.wd==='Sat'||(c.wd==='Sun'&&c.h<17); }
   function state(m,cut,closed){
     if(m==null) return closed?'off':'bad';
     if(m<cut[0]) return 'ok';
@@ -182,10 +181,11 @@ td:first-child{border-radius:8px 0 0 8px;font-weight:700} td:last-child{border-r
       out.push(row(rt,p?esc(p.date||'')+' · '+ageTxt(m)+T('',' ago'):(D.plans?T('sin plan en 5 días','no plan in 5 days'):T('Cargando…','Loading…')),
         'plans/'+(p?esc(p.date):'&lt;date&gt;')+'-'+rt+'.json',s));
     });
-    var cp=D.crypto, cm=cp?ageMin(cp.builtAt):null, inW=cryptoWindow();
-    var cs=!inW?'off':cm==null?'bad':cm<14*60?'ok':'bad'; if(inW) note(cs);
-    out.push(row('crypto-weekend',cp?esc(cp.date+' '+cp.slot)+' · '+ageTxt(cm)+T('',' ago'):T('Sin plan todavía','No plan yet'),
-      inW?T('vie 16:00 a dom 17:00 CT, cada ~3 a 13 h','Fri 16:00 to Sun 17:00 CT, every ~3 to 13 h'):T('fuera de la ventana cripto','outside the crypto window'),cs,!inW?T('fuera de ventana','off window'):null));
+    // crypto runs daily: crypto-close at 00:15 UTC and crypto-ny at 08:45 CT, longest gap ~14.5 h
+    var cp=D.crypto, cm=cp?ageMin(cp.builtAt):null;
+    var cs=cm==null?'bad':cm<16*60?'ok':'bad'; note(cs);
+    out.push(row(T('cripto (diario)','crypto (daily)'),cp?esc((cp.runType||'')+' · '+cp.date)+' · '+ageTxt(cm)+T('',' ago'):T('Sin plan todavía','No plan yet'),
+      T('cierre 00:15 UTC y apertura NY 08:45 CT','close 00:15 UTC and NY open 08:45 CT'),cs));
     var w=D.weekly, wd=w&&w.match(/(\d{4}-\d{2}-\d{2})\s+a\s+(\d{4}-\d{2}-\d{2})/), wm=wd?ageMin(wd[2]+'T15:00:00Z')-24*60:null;
     var ws=wm==null?'warn':wm<8*1440?'ok':'bad'; note(ws);
     out.push(row(T('weekly (sábado)','weekly (Saturday)'),wd?wd[1]+' → '+wd[2]:'·','reviews/weekly-latest.md',ws));
