@@ -45,6 +45,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/cc-symbols"
+  to = "/.netlify/functions/cc-symbols"
+  status = 200
+
+[[redirects]]
   from = "/api/cc-trend"
   to = "/.netlify/functions/cc-trend"
   status = 200
