@@ -1,8 +1,10 @@
 // TradeDadLog service worker: makes the hub installable and work offline.
-// Network-first for navigations (fresh pages), cache-first for static assets,
-// NETWORK-ONLY for live data (/api/*, functions) so the Command Center never
-// shows stale plan/scan/news. Never intercepts other origins (fonts, analytics, TV).
-const CACHE = 'tdl-v2';
+// Network-first (revalidated against the server) for pages and every file without a content
+// hash, so a deploy shows on the next load with no hard refresh. Cache-first ONLY for Vite's
+// hashed files under /assets/ (a new build gets new names). NETWORK-ONLY for live data
+// (/api/*, functions). Never intercepts other origins (fonts, analytics, TV).
+// Bump CACHE when this file changes: activate deletes every older cache.
+const CACHE = 'tdl-v3';
 const SHELL = ['/', '/index.html', '/indicators.html', '/manifest.webmanifest'];
 
 // Live endpoints: must always hit the network, never be served from Cache Storage.
@@ -33,30 +35,25 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Page loads: network-first, cache a copy for offline fallback.
-  if (req.mode === 'navigate') {
+  // Hashed build files never change under the same name: cache-first is safe.
+  if (url.pathname.startsWith('/assets/')) {
     e.respondWith(
-      fetch(req).then((r) => { const cp = r.clone(); caches.open(CACHE).then((c) => c.put(req, cp)); return r; })
-                .catch(() => caches.match(req).then((m) => m || caches.match('/index.html')))
+      caches.match(req).then((c) => c || fetch(req).then((r) => {
+        if (r && r.status === 200) { const cp = r.clone(); caches.open(CACHE).then((ca) => ca.put(req, cp)); }
+        return r;
+      }))
     );
     return;
   }
 
-  // Command Center modules (decision engine) are NOT hashed: network-first so an update shows on the next load,
-  // cached copy only as the offline fallback.
-  if (url.pathname.startsWith('/cc2/')) {
-    e.respondWith(
-      fetch(req).then((r) => { if (r && r.status === 200) { const cp = r.clone(); caches.open(CACHE).then((c) => c.put(req, cp)); } return r; })
-                .catch(() => caches.match(req))
-    );
-    return;
-  }
-
-  // Static assets (hashed JS/CSS/img, fonts stylesheet): cache-first.
+  // Pages and every unhashed file (command-center.html, /cc2/*.js, json, images): ask the server
+  // first, revalidating past the HTTP cache, and keep a copy only as the offline fallback.
+  // (navigations keep the original request so redirects still work; the HTML is served
+  // no-cache by netlify.toml, so the browser revalidates it anyway)
+  const nav = req.mode === 'navigate';
   e.respondWith(
-    caches.match(req).then((c) => c || fetch(req).then((r) => {
-      if (r && r.status === 200) { const cp = r.clone(); caches.open(CACHE).then((ca) => ca.put(req, cp)); }
-      return r;
-    }))
+    (nav ? fetch(req) : fetch(req, { cache: 'no-cache' }))
+      .then((r) => { if (r && r.status === 200) { const cp = r.clone(); caches.open(CACHE).then((c) => c.put(req, cp)); } return r; })
+      .catch(() => caches.match(req).then((m) => m || (nav ? caches.match('/index.html') : Response.error())))
   );
 });

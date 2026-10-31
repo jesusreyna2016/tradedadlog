@@ -134,3 +134,20 @@
   from = "/api/plan-coach-state"
   to = "/.netlify/functions/plan-coach-state"
   status = 200
+
+# Caching: pages, the service worker and every unhashed file must be revalidated on each load,
+# so a deploy shows up without a hard refresh. Only Vite's hashed /assets/* are immutable.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
