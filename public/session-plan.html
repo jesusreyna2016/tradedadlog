@@ -45,6 +45,11 @@
   .clean b{color:var(--gold)}
 
   .summary{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:16px}
+  /* section headers: futures and the daily crypto plan */
+  .sect-h{font-size:15px;font-weight:800;letter-spacing:.4px;color:var(--txt);margin:26px 0 4px;padding-top:14px;border-top:1px solid var(--line)}
+  #content>.sect-h:first-child{margin-top:4px;padding-top:0;border-top:0}
+  .sect-sub{font-size:12.5px;color:var(--dim);margin-bottom:8px}
+  .sect-h + .meta, .sect-sub + .meta{margin:0 0 12px}
   .summary h2,.thesis h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin:0 0 8px}
   .summary ul{margin:0;padding-left:18px}
   .summary li{margin:5px 0;color:var(--txt)}
@@ -199,7 +204,10 @@
   var HB_URL   = "https://raw.githubusercontent.com/jesusreyna2016/session-analyst-bus/main/live/heartbeat.json";
   var REVIEW_BASE = "https://github.com/jesusreyna2016/session-analyst-bus/blob/main/reviews/";
   var SYMS = ["NQ","ES","GC","YM","CL"];   // YM/CL solo se pintan si el plan los trae
-  var lastHb = null;
+  // daily crypto plan (crypto-close 00:15 UTC + crypto-ny 08:45 CT), its own schema
+  var CRYPTO_URL = "https://raw.githubusercontent.com/jesusreyna2016/session-analyst-bus/main/plans/crypto-latest.json";
+  var CSYMS = ["ETHUSDT","BTCUSDT"];
+  var lastHb = null, lastCrypto = null;
 
   var T = {
     en:{
@@ -232,7 +240,11 @@
       news:"News risk", calendar:"Calendar", newsLvl:{NINGUNA:"none",MEDIA:"medium",ALTA:"high"},
       copyTv:"Copy TV alerts", copied:"copied",
       tvHead:"Session Analyst alerts", tvHint:"TV: new alert > Crossing > paste the price; use the label as the name.",
-      hbFail:"Last run failed", hbStale:"Agent silent", hbAgo:"ago", hbRun:"last run"
+      hbFail:"Last run failed", hbStale:"Agent silent", hbAgo:"ago", hbRun:"last run",
+      crypto:"Crypto · ETH and BTC", cryptoSub:"Daily plan: written at the crypto close (00:00 UTC) and updated at 08:45 CT.",
+      cryptoNone:"No crypto plan yet. It is written at the daily close (00:15 UTC).",
+      validUntil:"valid until", risk:"News risk", deriv:"Derivatives", why:"Why", move24h:"24h",
+      grade:"Grade", futures:"Futures · NQ ES GC YM CL", cryptoUpdated:"Latest update"
     },
     es:{
       loading:"Cargando plan…", err:"No se pudo cargar el plan. ",
@@ -264,7 +276,11 @@
       news:"Riesgo de noticias", calendar:"Calendario", newsLvl:{NINGUNA:"ninguna",MEDIA:"media",ALTA:"alta"},
       copyTv:"Copiar alertas TV", copied:"copiado",
       tvHead:"Avisos Session Analyst", tvHint:"TV: nuevo aviso > Cruzando > pega el precio; usa la etiqueta como nombre.",
-      hbFail:"Última corrida falló", hbStale:"Agente en silencio", hbAgo:"hace", hbRun:"últ. corrida"
+      hbFail:"Última corrida falló", hbStale:"Agente en silencio", hbAgo:"hace", hbRun:"últ. corrida",
+      crypto:"Cripto · ETH y BTC", cryptoSub:"Plan diario: se escribe al cierre cripto (00:00 UTC) y se actualiza a las 08:45 CT.",
+      cryptoNone:"Aún no hay plan cripto. Se escribe al cierre diario (00:15 UTC).",
+      validUntil:"válido hasta", risk:"Riesgo de noticias", deriv:"Derivados", why:"Por qué", move24h:"24 h",
+      grade:"Grado", futures:"Futuros · NQ ES GC YM CL", cryptoUpdated:"Última actualización"
     }
   };
 
@@ -311,7 +327,7 @@
 
     if(!plan || Object.keys(plan).length===0 || !plan.instruments){
       meta.innerHTML="";
-      content.innerHTML='<div class="error">'+esc(t.empty)+'</div>';
+      content.innerHTML='<div class="error">'+esc(t.empty)+'</div>'+cryptoSection(lastCrypto,t);
       document.getElementById("foot").innerHTML=footHTML(plan);
       return;
     }
@@ -406,8 +422,64 @@
       html+='</div>';
     }
 
-    content.innerHTML=html;
+    // crypto goes first while CME futures are closed (Fri 16:00 to Sun 17:00 CT), after them otherwise
+    var cry=cryptoSection(lastCrypto,t);
+    var fut=(cry?'<h2 class="sect-h">'+esc(t.futures)+'</h2>':'')+html;
+    content.innerHTML = futuresClosed() ? cry+fut : fut+cry;
     document.getElementById("foot").innerHTML=footHTML(plan);
+  }
+
+  function futuresClosed(){
+    var p={}; new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',weekday:'short',hour:'numeric',hourCycle:'h23'})
+      .formatToParts(new Date()).forEach(function(x){ p[x.type]=x.value; });
+    var h=+p.hour; return p.weekday==='Sat'||(p.weekday==='Fri'&&h>=16)||(p.weekday==='Sun'&&h<17);
+  }
+
+  // crypto instrument -> the shape card() reads: $ distances, levels dict -> keyLevels list
+  function cryptoInst(d){
+    var px=+d.price, o={}; for(var k in d) o[k]=d[k];
+    o.__crypto=true;
+    o.keyLevels=Object.keys(d.levels||{}).filter(function(k){ return d.levels[k]!=null; }).map(function(k){
+      var v=+d.levels[k]; return {name:k.toUpperCase(), price:v, distPts:px?v-px:null}; })
+      .sort(function(a,b){ return b.price-a.price; });
+    o.zones=(d.zones||[]).map(function(z){
+      var c={}; for(var k in z) c[k]=z[k];
+      if(px && z.range && z.range.length===2){ var lo=Math.min(z.range[0],z.range[1]), hi=Math.max(z.range[0],z.range[1]);
+        c.distPts = px>hi ? hi-px : (px<lo ? lo-px : 0); }
+      return c; });
+    return o;
+  }
+  function cryptoSection(cp,t){
+    if(!cp || !cp.instruments) return '<h2 class="sect-h">'+esc(t.crypto)+'</h2><div class="error">'+esc(t.cryptoNone)+'</div>';
+    var h='<h2 class="sect-h">'+esc(t.crypto)+'</h2><div class="sect-sub">'+esc(t.cryptoSub)+'</div>';
+    h+='<div class="meta">'+
+      '<span class="pill">'+esc(String(cp.slot||cp.runType||"").toUpperCase())+' · '+esc(cp.date||"")+'</span>'+
+      '<span class="state"><span class="dot '+(ageHours(cp.builtAt)>14?'old':'ok')+'"></span>'+t.generated+' '+fmtWhen(cp.builtAt,t)+'</span>'+
+      (cp.validUntil?'<span class="pill">'+t.validUntil+' '+fmtWhen(cp.validUntil,t)+'</span>':'')+
+      dhPill(cp.dataHealth&&{snapshot:'OK',stale:cp.dataHealth.stale,missing:cp.dataHealth.missing,notes:cp.dataHealth.notes},t)+'</div>';
+    var f=cp.focus;
+    if(f && f.sym){
+      var fd=cp.instruments[f.sym]||{}, fv=String((fd.verdict&&fd.verdict.signal)||f.verdict||"WAIT").toUpperCase();
+      h+='<div class="focusbox '+esc(fv)+'"><div class="fx-top"><span class="fx-tag">'+t.focus+' · '+esc(fv)+'</span>'+
+        '<span class="fx-main">'+esc(String(f.sym).replace(/USDT$/,''))+'</span></div>'+
+        (L(f.setup)?'<div class="fx-sub">'+esc(L(f.setup))+'</div>':'')+'</div>';
+    }
+    var cc=cp.cryptoContext;
+    if(cc && (cc.risk || L(cc.deriv))){
+      var rl=String(cc.risk||"").toUpperCase(), cls=rl==="ALTO"?"high":(rl==="MEDIO"?"med":"");
+      h+='<div class="newsband '+cls+'"><div class="nb-top"><span class="nb-tag">'+esc(t.risk.toUpperCase())+(rl?' · '+esc(rl):'')+'</span></div>'+
+        (L(cc.deriv)?'<div class="nb-note"><b>'+esc(t.deriv)+':</b> '+esc(L(cc.deriv))+'</div>':'')+'</div>';
+    }
+    var sum=Larr(cp.summary);
+    if(sum.length){
+      h+='<div class="summary"><h2>'+t.summary+'</h2><ul>';
+      sum.forEach(function(s){ h+='<li>'+esc(L(s))+'</li>'; });
+      h+='</ul></div>';
+    }
+    if(cp.personal && L(cp.personal.capLine)) h+='<div class="clean">'+esc(L(cp.personal.capLine))+'</div>';
+    h+='<div class="cards">';
+    CSYMS.forEach(function(sy){ var d=cp.instruments[sy]; if(d) h+=card(sy.replace(/USDT$/,''),cryptoInst(d),t,cp); });
+    return h+'</div>';
   }
 
   function dhPill(dh,t){
@@ -537,6 +609,7 @@
     var strip=[];
     if(d.prevDay && (L(d.prevDay.type)||L(d.prevDay.prior))) strip.push('<b>'+t.prevDay+':</b> '+esc(L(d.prevDay.type))+(L(d.prevDay.prior)?' → '+esc(L(d.prevDay.prior)):''));
     if(d.gap && d.gap.pts!=null) strip.push('<b>'+t.gap+':</b> '+n(d.gap.pts)+' '+t.pts+' ('+esc(L(d.gap.size))+(d.gap.filled?', filled':'')+')');
+    if(d.move24h && d.move24h.pct!=null) strip.push('<b>'+t.move24h+':</b> <span class="z-dir '+biasClass(d.move24h.dir)+'">'+esc(d.move24h.dir||'')+'</span> '+n(d.move24h.pct,2)+'%'+(d.regime?' · '+esc(d.regime):''));
     if(d.smt && d.smt.state && d.smt.state!=="ninguna") strip.push('<b>'+t.smt+':</b> '+esc(d.smt.state)+(L(d.smt.note)?' · '+esc(L(d.smt.note)):''));
     if(strip.length) h+='<div class="strip">'+strip.join(' &nbsp;·&nbsp; ')+'</div>';
 
@@ -594,7 +667,11 @@
            '<td class="z-dir '+biasClass(z.dir)+'">'+esc(z.dir||"")+'</td>'+
            '<td>'+esc(ztLabel(z.type))+'</td>'+
            '<td><span class="conf">'+n(z.confluence)+'</span></td>'+
-           '<td class="num">'+n(z.distPts)+' '+t.pts+' / '+n(z.distTicks)+t.tk+'</td></tr>';
+           '<td class="num">'+(d.__crypto?cdist(z.distPts,d):n(z.distPts)+' '+t.pts+' / '+n(z.distTicks)+t.tk)+'</td></tr>';
+        if(d.__crypto && (z.grade || L(z.why))){
+          h+='<tr class="zplay"><td colspan="5">'+(z.grade?'<b>'+t.grade+'</b> '+esc(z.grade)+' &nbsp;·&nbsp; ':'')+
+             (L(z.why)?'<b>'+t.why+'</b> '+esc(L(z.why)):'')+'</td></tr>';
+        }
         var pl=z.play||{};
         if(pl.trigger||rk.rr!=null){
           h+='<tr class="zplay"><td colspan="5">'+
@@ -614,7 +691,7 @@
          '<thead><tr><th>'+t.lvl+'</th><th class="num">'+t.price+'</th><th class="num">'+t.dist+'</th></tr></thead><tbody>';
       d.keyLevels.forEach(function(k){
         h+='<tr><td>'+esc(L(k.name))+'</td><td class="num">'+n(k.price)+'</td>'+
-           '<td class="num">'+n(k.distPts)+' '+t.pts+' / '+n(k.distTicks)+t.tk+'</td></tr>';
+           '<td class="num">'+(d.__crypto?cdist(k.distPts,d):n(k.distPts)+' '+t.pts+' / '+n(k.distTicks)+t.tk)+'</td></tr>';
       });
       h+='</tbody></table></div></div>';
     }
@@ -623,6 +700,12 @@
     return h;
   }
 
+  // crypto distance: signed $ and % of price ("0" = price is inside the zone)
+  function cdist(v,d){
+    if(v==null||isNaN(v)) return "—"; if(v===0) return "0";
+    var px=+d.price, pct=px?Math.abs(v)/px*100:null;
+    return (v>0?"+":"−")+"$"+Math.abs(v).toLocaleString("en-US",{maximumFractionDigits:2})+(pct!=null?" ("+pct.toFixed(2)+"%)":"");
+  }
   function scen(letter,label,s,t,isB){
     var h='<div class="scen'+(isB?' b':'')+'"><span class="tag">'+label+'</span>';
     if(L(s.text)) h+='<p>'+esc(L(s.text))+'</p>';
@@ -653,6 +736,10 @@
     fetch(HB_URL+"?t="+Date.now(),{cache:"no-store"})
       .then(function(r){ return r.ok?r.json():null; })
       .then(function(hb){ lastHb=hb; if(lastPlan) render(lastPlan); })
+      .catch(function(){});
+    fetch(CRYPTO_URL+"?t="+Date.now(),{cache:"no-store"})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(cp){ lastCrypto=cp; if(lastPlan) render(lastPlan); })
       .catch(function(){});
     fetch(PLAN_URL+"?t="+Date.now(),{cache:"no-store"})
       .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
