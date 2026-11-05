@@ -1,12 +1,8 @@
 // Feed unificado para el agente Session Analyst. Devuelve, por simbolo
 // (NQ / ES / GC / YM / CL), el ultimo estado de cada fuente:
 //   orb      -> backbone orb_sesgo (sym:<SYM>, lo guarda cc-ingest)
-//   3reads   -> Rutina 3 Reads          (ind:3reads:<SYM>)
-//   drbias   -> Daily Range & Bias Pro  (ind:drbias:<SYM>)
-//   srzones  -> Support & Resistance MTF (ind:srzones:<SYM>)
-//   htfzones -> HTF Context & Zones     (ind:htfzones:<SYM>)
-//   command  -> NQ Command All-in-One   (ind:command:<SYM>) · sesgo fusionado + veredicto Portero
-//   regime   -> Market Regime           (ind:regime:<SYM>) · CHOP/BULL/BEAR, caja y ultimo evento
+//   feed     -> TDL Feed                (ind:feed:<SYM>) · niveles y contexto, un mensaje por vela de 5m
+//   regime  -> Market Regime           (ind:regime:<SYM>) · CHOP/BULL/BEAR, caja y ultimo evento
 //   trendcl  -> Trend Checklist         (ind:trendcl:<SYM>) · confirmed D/4H/1H verdict, flip levels, zone touches
 // ETHUSDT / BTCUSDT van aparte en `crypto` (mismo esquema por simbolo): solo los lee la rutina
 // crypto-weekend del Session Analyst, las corridas de futuros no los tocan.
@@ -17,9 +13,7 @@ import { getStore } from '@netlify/blobs';
 
 const SYMBOLS = ['NQ', 'ES', 'GC', 'YM', 'CL'];
 const CRYPTO = ['ETHUSDT', 'BTCUSDT'];
-// 'feed' = TDL Feed (FEED1), replaces 3reads/drbias/srzones/htfzones/command; the old ones stay
-// listed until their alerts are deleted.
-const SOURCES = ['feed', '3reads', 'drbias', 'srzones', 'htfzones', 'command', 'regime', 'trendcl'];
+const SOURCES = ['feed', 'regime', 'trendcl'];
 
 export default async () => {
   const store = getStore('cc');
