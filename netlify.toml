@@ -140,6 +140,12 @@
   to = "/.netlify/functions/plan-coach-state"
   status = 200
 
+# Plan Intradia · zonas de entrada recalculadas cada 15 min (intraday-cron); ?fresh=1 recalcula, ?log=YYYY-MM-DD registro del dia
+[[redirects]]
+  from = "/api/intraday-plan"
+  to = "/.netlify/functions/intraday-plan"
+  status = 200
+
 # Caching: pages, the service worker and every unhashed file must be revalidated on each load,
 # so a deploy shows up without a hard refresh. Only Vite's hashed /assets/* are immutable.
 [[headers]]
