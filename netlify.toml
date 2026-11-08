@@ -152,6 +152,12 @@
   to = "/.netlify/functions/push-subscribe"
   status = 200
 
+# Mi Mesa · vigilante en vivo de MyFundedPerps (snapshot, posiciones cerradas, config y planes)
+[[redirects]]
+  from = "/api/live"
+  to = "/.netlify/functions/live"
+  status = 200
+
 # Caching: pages, the service worker and every unhashed file must be revalidated on each load,
 # so a deploy shows up without a hard refresh. Only Vite's hashed /assets/* are immutable.
 [[headers]]
