@@ -14,6 +14,16 @@ export const RANK = { nueva: 0, activa: 1, tocada: 2, armada: 3, funciono: 4, in
 const chicagoDay = (ms) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(new Date(ms));
 const num = (v) => { const x = parseFloat(String(v ?? '').replace(/,/g, '')); return Number.isFinite(x) ? x : null; };
 
+// Contexto de la zona que manda el indicador (v3.4+). Solo numeros y etiquetas cortas.
+const FEAT_NUM = ['score', 'scoreS', 'rr', 'dist', 'chop', 'str', 'mfe', 'mae', 'risk', 'tp2'];
+const FEAT_TXT = ['gradeS', 'wv', 'wsv', 'al', 'reg', 'sess', 'keys', 'tf', 'bias'];
+function pickFeatures(kv) {
+  const f = {};
+  for (const k of FEAT_NUM) { const x = num(kv[k]); if (x !== null) f[k] = x; }
+  for (const k of FEAT_TXT) if (kv[k] != null && kv[k] !== '') f[k] = String(kv[k]).slice(0, 200);
+  return f;
+}
+
 // Todas las lineas MMZ1| de un cuerpo de alerta (el mensaje puede traer texto para el telefono antes).
 export function parseMmz(body) {
   const out = [];
@@ -29,7 +39,9 @@ export function parseMmz(body) {
     out.push({
       sym: kv.sym.toUpperCase(), ev: kv.ev, id: kv.id || '', side: kv.side === 'short' ? 'short' : 'long',
       lo: num(kv.lo), hi: num(kv.hi), grade: kv.grade || '', entry: num(kv.entry), stop: num(kv.stop), tp1: num(kv.tp1),
-      size: kv.size || '', conf: kv.conf || '', t: Number(kv.t) || Date.now()
+      size: kv.size || '', conf: kv.conf || '', t: Number(kv.t) || Date.now(),
+      // contexto para el agente de aprendizaje (ver _zonelearn.mjs); campos opcionales
+      f: pickFeatures(kv)
     });
   }
   return out;

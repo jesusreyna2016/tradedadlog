@@ -158,6 +158,17 @@
   to = "/.netlify/functions/live"
   status = 200
 
+# Agente de aprendizaje de zonas · trades de Mi Mesa sin dinero (POST, solo el dueño) y copia manual al bus
+[[redirects]]
+  from = "/api/zone-trades"
+  to = "/.netlify/functions/zone-trades"
+  status = 200
+
+[[redirects]]
+  from = "/api/zones-bus-snapshot"
+  to = "/.netlify/functions/zones-bus-snapshot"
+  status = 200
+
 # Caching: pages, the service worker and every unhashed file must be revalidated on each load,
 # so a deploy shows up without a hard refresh. Only Vite's hashed /assets/* are immutable.
 [[headers]]

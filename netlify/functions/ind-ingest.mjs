@@ -10,6 +10,7 @@
 import { getStore } from '@netlify/blobs';
 import { checkZoneAlerts, notifyTvEvents } from './_push.mjs';
 import { parseMmz, recordTvEvents } from './_tvzones.mjs';
+import { appendZoneEvents } from './_zonelearn.mjs';
 
 const PREFIX_SRC = {
   R3R1: '3reads', DRB1: 'drbias', SRZ1: 'srzones', HCZ1: 'htfzones', TDL1: 'orb',
@@ -76,6 +77,7 @@ export default async (req) => {
   const mmz = parseMmz(body);
   if(mmz.length){
     const changed = await recordTvEvents(mmz);
+    try { await appendZoneEvents(mmz); } catch (e) { /* el registro para el aprendizaje es secundario */ }
     try { await notifyTvEvents(changed); } catch (e) { /* los avisos son secundarios */ }
     return new Response(`ok · mmzonas · ${mmz.length} evento(s) · ${changed.length} nuevo(s)`, { status: 200 });
   }
