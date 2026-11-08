@@ -7,6 +7,7 @@
 // fuente+simbolo en Netlify Blobs (store 'cc', key 'ind:<src>:<SYM>').
 // El backbone orb_sesgo (TDL1) sigue entrando por cc-ingest como 'sym:<SYM>'.
 import { getStore } from '@netlify/blobs';
+import { checkZoneAlerts } from './_push.mjs';
 
 const PREFIX_SRC = {
   R3R1: '3reads', DRB1: 'drbias', SRZ1: 'srzones', HCZ1: 'htfzones', TDL1: 'orb',
@@ -90,5 +91,7 @@ export default async (req) => {
   await store.setJSON(`ind:${src}:${sym}`, record);
   if(src === 'regime') await appendRegimeLog(store, sym, kv);
   if(src === 'trendcl') await appendTrendLog(store, sym, kv);
+  // Mi Mesa: aviso push si el precio se acerca o entra a una zona A/A+ (nunca rompe la ingesta)
+  if(src === 'feed') { try { await checkZoneAlerts(sym, kv); } catch (e) { /* las alertas son secundarias */ } }
   return new Response(`ok · ${src} · ${sym} · ${kv.ts || ''}`, { status: 200 });
 };
