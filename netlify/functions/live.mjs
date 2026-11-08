@@ -43,7 +43,8 @@ export default async (req) => {
         const cfg = {
           windows: Array.isArray(body.windows) ? body.windows.slice(0, 6).map(String) : [],
           cooldownMin: +body.cooldownMin || 15, matchWindowMin: +body.matchWindowMin || 20,
-          riskPerTrade: +body.riskPerTrade || 200, lang: body.lang === 'en' ? 'en' : 'es'
+          riskPerTrade: +body.riskPerTrade || 200, feeDayCap: Math.max(0, +body.feeDayCap || 0), maxSizeX: Math.max(0, +body.maxSizeX || 0),
+          lang: body.lang === 'en' ? 'en' : 'es'
         };
         await store.setJSON('config', cfg);
         return json({ ok: true });

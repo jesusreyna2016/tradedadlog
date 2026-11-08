@@ -6,10 +6,12 @@
 //   · cerraste en PERDIDA     (empieza la pausa)
 //   · te queda POCO           (el margen al limite diario o al de la cuenta ya no alcanza para un trade)
 //   · se acabo tu HORARIO     (fin de cada ventana de trading)
+//   · posicion DEMASIADO GRANDE (mueve mas de maxSizeX veces el tamaño de la cuenta)
+//   · COMISIONES del dia pasaron tu limite (feeDayCap)
 // Ademas guarda un snapshot de tus cuentas (con su riesgo en vivo) que Mi Mesa lee.
 //
 // Store de Blobs 'live':
-//   config     -> { windows, cooldownMin, matchWindowMin, riskPerTrade, lang }   (lo manda Mi Mesa)
+//   config     -> { windows, cooldownMin, matchWindowMin, riskPerTrade, feeDayCap, maxSizeX, lang }   (lo manda Mi Mesa)
 //   plans      -> { plans:[{id,fam,side,ts,status,acct}] }                      (lo manda Mi Mesa)
 //   snapshot   -> { updatedAt, accounts:[...], risk:{id:risk}, open:{id:[pos]} }
 //   state      -> { positions:{posId:{acct,fam,side,openedAt,hasStop,stopWarned}}, lastLoss:{acct:ms}, lowWarned:{} }
@@ -43,6 +45,12 @@ const M = {
   low: (l, acc, kind, room) => l === 'en'
     ? { title: `${acc}: only ${$(room)} left`, body: kind === 'daily' ? 'Your daily loss limit is close. One more loss could end the day for this account.' : 'You are close to losing this account. Trade small or stop.' }
     : { title: `${acc}: solo te quedan ${$(room)}`, body: kind === 'daily' ? 'Estás cerca del límite de pérdida del día. Una pérdida más puede cerrar el día en esta cuenta.' : 'Estás cerca de perder esta cuenta. Opera muy pequeño o detente.' },
+  bigSize: (l, acc, fam, x, move) => l === 'en'
+    ? { title: `${fam}: position too big (${x}x your account)`, body: `${acc}: ${move != null ? `a ${move}% move against you loses the account. ` : ''}Reduce it now.` }
+    : { title: `${fam}: posición demasiado grande (${x} veces tu cuenta)`, body: `${acc}: ${move != null ? `un movimiento de ${move}% en contra y pierdes la cuenta. ` : ''}Redúcela ya.` },
+  fees: (l, total, cap) => l === 'en'
+    ? { title: `You paid ${$(total)} in fees today`, body: `That is past your ${$(cap)} limit. Every extra trade starts in the red: stop for today.` }
+    : { title: `Hoy llevas ${$(total)} en comisiones`, body: `Pasaste tu límite de ${$(cap)}. Cada trade extra empieza perdiendo: para por hoy.` },
   windowEnd: (l, open) => l === 'en'
     ? { title: 'Your trading hours are over', body: open ? 'You still have an open trade: manage it with your plan and close the platform.' : 'Close the platform and go to the Mi Mesa journal.' }
     : { title: 'Se acabó tu horario de trading', body: open ? 'Todavía tienes un trade abierto: manéjalo con tu plan y cierra la plataforma.' : 'Cierra la plataforma y ve al journal de Mi Mesa.' }
@@ -64,6 +72,8 @@ export async function runLive(nowMs = Date.now()) {
   const cooldown = (+cfg.cooldownMin || 15) * 60e3;
   const matchWin = (+cfg.matchWindowMin || 20) * 60e3;
   const riskPerTrade = +cfg.riskPerTrade || 200;
+  const maxSizeX = +cfg.maxSizeX || 0;
+  const feeDayCap = +cfg.feeDayCap || 0;
   const st = (await store.get('state', { type: 'json' }).catch(() => null)) || { positions: {}, lastLoss: {}, lowWarned: {}, firstRun: true };
   const stops = (await store.get('stops', { type: 'json' }).catch(() => null)) || {};
   const log = [];
@@ -97,6 +107,14 @@ export async function runLive(nowMs = Date.now()) {
           const plan = plans.find((x) => x.fam === fam && x.side === p.side && x.status !== 'cancelada' && (!x.acct || x.acct === a.id || x.acct === a.account_number) &&
             p.opened_at >= x.ts - 3 * 60e3 && p.opened_at <= x.ts + matchWin);
           if (!plan) { await notify(M.noPlan(lang, name, fam, p.side, chicago(p.opened_at).hm), 'noplan-' + p.id); log.push(name + ' sin plan ' + fam); }
+          // tamaño: cuanto mueve la posicion contra el tamaño de la cuenta
+          const notional = Math.abs((+p.size || 0) * (+p.entry_price || 0));
+          const x = a.starting_balance ? notional / a.starting_balance : 0;
+          if (maxSizeX > 0 && x > maxSizeX) {
+            const room = detail.risk?.max_drawdown_room;
+            const move = room != null && notional ? +(room / notional * 100).toFixed(2) : null;
+            await notify(M.bigSize(lang, name, fam, x.toFixed(1), move), 'size-' + p.id); log.push(name + ' muy grande ' + x.toFixed(1) + 'x');
+          }
         }
       }
       if (!stopNow && !k.stopWarned && nowMs - p.opened_at > 60e3) {
@@ -128,6 +146,9 @@ export async function runLive(nowMs = Date.now()) {
       const c = closed.find((x) => x.id === id);
       if (c) {
         const net = (+c.realized_pnl || 0) - (+c.fees || 0) + (+c.funding || 0);
+        // comisiones del dia (hora de Chicago)
+        if (!st.fees || st.fees.date !== today) st.fees = { date: today, total: 0, warned: false };
+        st.fees.total += +c.fees || 0;
         if (net < 0) {
           st.lastLoss[acct] = c.closed_at;
           if (nowMs - c.closed_at < 30 * 60e3) { await notify(M.loss(lang, k.name, k.fam, net, chicago(c.closed_at + cooldown).hm), 'loss-' + acct); log.push(k.name + ' perdida'); }
@@ -135,6 +156,11 @@ export async function runLive(nowMs = Date.now()) {
       }
       delete st.positions[id];
     }
+  }
+
+  if (feeDayCap > 0 && st.fees?.date === today && st.fees.total >= feeDayCap && !st.fees.warned) {
+    st.fees.warned = true;
+    await notify(M.fees(lang, st.fees.total, feeDayCap), 'fees-' + today); log.push('comisiones ' + st.fees.total.toFixed(0));
   }
 
   // fin del horario: una vez en el minuto en que termina cada ventana
