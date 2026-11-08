@@ -37,6 +37,30 @@ export async function closedPositions(id, { since = 0, maxPages = 20 } = {}) {
   return out.filter((p) => (p.closed_at || 0) > since);
 }
 
+// Reglas efectivas de la cuenta (inactividad, limites, payout pendiente)
+export const tradingPolicy = async (id) => { const j = await get('/v1/accounts/' + id + '/trading-policy'); return j.data || j; };
+
+// Ultima posicion cerrada (para la regla de inactividad)
+export async function lastClosedAt(id) {
+  const j = await get('/v1/positions', { account_id: id, status: 'closed', limit: 1 });
+  return j.data?.[0]?.closed_at || null;
+}
+
+// Ejecuciones (fills), de la mas nueva a la mas vieja, hasta 'since' (ms) o 'maxPages'
+export async function fillsSince(id, { since = 0, maxPages = 10 } = {}) {
+  const out = [];
+  let cursor = null;
+  for (let i = 0; i < maxPages; i++) {
+    const j = await get('/v1/fills', { account_id: id, limit: 100, cursor });
+    const page = j.data || [];
+    out.push(...page);
+    if (!j.has_more || !j.next_cursor) break;
+    if (page.length && Math.min(...page.map((f) => f.settled_at || 0)) < since) break;
+    cursor = j.next_cursor;
+  }
+  return out.filter((f) => (f.settled_at || 0) > since && f.status === 'filled');
+}
+
 // Una posicion tiene stop si hay una orden viva de stop que la cierre
 export function hasStop(pos, orders) {
   const closeSide = pos.side === 'long' ? 'sell' : 'buy';

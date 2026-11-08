@@ -8,6 +8,7 @@
 //   · se acabo tu HORARIO     (fin de cada ventana de trading)
 //   · posicion DEMASIADO GRANDE (mueve mas de maxSizeX veces el tamaño de la cuenta)
 //   · COMISIONES del dia pasaron tu limite (feeDayCap)
+//   · INACTIVIDAD: a la cuenta le quedan 2 dias o menos antes de perderse por no operar
 // Ademas guarda un snapshot de tus cuentas (con su riesgo en vivo) que Mi Mesa lee.
 //
 // Store de Blobs 'live':
@@ -18,7 +19,7 @@
 //   stops      -> { posId: true }   (si la posicion tuvo stop, para importarlo)
 import { getStore } from '@netlify/blobs';
 import { listSubs, sendTo } from './_push.mjs';
-import { hasKey, listAccounts, getAccount, openPositions, workingOrders, closedPositions, hasStop, familyOf } from './_mfp.mjs';
+import { hasKey, listAccounts, getAccount, openPositions, workingOrders, closedPositions, hasStop, familyOf, tradingPolicy, lastClosedAt, fillsSince } from './_mfp.mjs';
 
 const chicago = (ms) => {
   const p = {};
@@ -51,6 +52,9 @@ const M = {
   fees: (l, total, cap) => l === 'en'
     ? { title: `You paid ${$(total)} in fees today`, body: `That is past your ${$(cap)} limit. Every extra trade starts in the red: stop for today.` }
     : { title: `Hoy llevas ${$(total)} en comisiones`, body: `Pasaste tu límite de ${$(cap)}. Cada trade extra empieza perdiendo: para por hoy.` },
+  inactive: (l, acc, days) => l === 'en'
+    ? { title: `${acc}: ${days <= 0 ? 'inactivity limit today' : `${days} day(s) before inactivity`}`, body: 'MyFundedPerps closes accounts that do not trade for too long. If you want to keep it, place one small trade with a plan.' }
+    : { title: `${acc}: ${days <= 0 ? 'hoy vence por inactividad' : `${days} día(s) para perderla por inactividad`}`, body: 'MyFundedPerps cierra las cuentas que pasan mucho tiempo sin operar. Si quieres conservarla, haz un trade pequeño y con plan.' },
   windowEnd: (l, open) => l === 'en'
     ? { title: 'Your trading hours are over', body: open ? 'You still have an open trade: manage it with your plan and close the platform.' : 'Close the platform and go to the Mi Mesa journal.' }
     : { title: 'Se acabó tu horario de trading', body: open ? 'Todavía tienes un trade abierto: manéjalo con tu plan y cierra la plataforma.' : 'Cierra la plataforma y ve al journal de Mi Mesa.' }
@@ -81,7 +85,7 @@ export async function runLive(nowMs = Date.now()) {
 
   const accounts = await listAccounts();
   const active = accounts.filter((a) => a.status === 'active');
-  const risk = {}, open = {};
+  const risk = {}, open = {}, inactivity = {};
   const seenPos = new Set();
 
   for (const a of active) {
@@ -90,6 +94,23 @@ export async function runLive(nowMs = Date.now()) {
     try { [detail, pos, orders] = await Promise.all([getAccount(a.id), openPositions(a.id), workingOrders(a.id)]); }
     catch (e) { log.push(a.account_number + ': ' + e.message); continue; }
     risk[a.id] = detail.risk || null;
+
+    // inactividad: dias de la regla de la firma desde tu ultima operacion
+    try {
+      const [pol, lastAt] = await Promise.all([tradingPolicy(a.id), lastClosedAt(a.id)]);
+      const rule = (pol.account_rules || []).find((x) => x.id === (a.stage === 'funded' ? 'funded-inactivity' : 'evaluation-inactivity'));
+      const limitDays = rule?.parameters?.days || null;
+      const last = Math.max(lastAt || 0, ...pos.map((p) => p.opened_at || 0), a.created_at || 0);
+      if (limitDays) {
+        const left = Math.floor((last + limitDays * 86400e3 - nowMs) / 86400e3);
+        inactivity[a.id] = { limitDays, lastAt: last, daysLeft: left, payoutPending: !!pol.payout_pending };
+        const key = `${a.id}:inact:${today}`;
+        if (!pos.length && left <= 2 && !st.lowWarned[key]) {
+          st.lowWarned[key] = true;
+          if (!st.firstRun) { await notify(M.inactive(lang, name, left), 'inact-' + a.id); log.push(name + ' inactividad ' + left); }
+        }
+      }
+    } catch (e) { log.push(a.account_number + ' politica: ' + e.message); }
     open[a.id] = pos.map((p) => ({ id: p.id, symbol: p.symbol, side: p.side, size: p.size, entry: p.entry_price, openedAt: p.opened_at, stop: hasStop(p, orders) }));
 
     for (const p of pos) {
@@ -186,9 +207,20 @@ export async function runLive(nowMs = Date.now()) {
   await store.setJSON('snapshot', {
     updatedAt: nowMs,
     accounts: accounts.map((a) => ({ id: a.id, number: a.account_number, name: a.name, stage: a.stage, status: a.status, startingBalance: a.starting_balance, balance: a.balance, createdAt: Math.round(a.created_at) })),
-    risk, open
+    risk, open, inactivity
   });
   return { ok: true, active: active.length, log };
+}
+
+// Ejecuciones para el analisis de Mi Mesa (campos minimos)
+export async function fillsForImport(acctIds, since) {
+  const out = [];
+  for (const id of acctIds) {
+    const list = await fillsSince(id, { since, maxPages: since ? 3 : 15 });
+    for (const f of list) out.push({ account_id: f.account_id, symbol: f.symbol, side: f.side, type: f.type, role: f.liquidity_role || null, reduce_only: !!f.reduce_only,
+      fee: +f.fee || 0, notional: +f.notional || 0, size: +f.size || 0, fill_price: +f.fill_price || 0, expected_price: f.expected_price != null ? +f.expected_price : null, at: f.settled_at });
+  }
+  return out;
 }
 
 // Posiciones cerradas para importar en Mi Mesa (con la marca de stop si el vigilante la vio)
