@@ -14,6 +14,7 @@ import feedHandler from './session-feed.mjs';
 import newsHandler from './cc-news.mjs';
 import { busGet, busPut } from './_sa-bus.mjs';
 import { buildSymbolPlan, trackZones, buildTvSync } from './_intraday.mjs';
+import { loadTv, mergeTv } from './_tvzones.mjs';
 
 export const INTRADAY_SYMS = ['NQ', 'ES', 'GC', 'ETHUSDT', 'BTCUSDT'];
 const CRYPTO = new Set(['ETHUSDT', 'BTCUSDT']);
@@ -72,6 +73,11 @@ export async function runIntraday({ write = true } = {}) {
     plan.zones.filter((z) => z.status !== 'nueva' && z.status !== 'activa').forEach((z) => finished.push({ sym, ...z }));
   }
 
+  // estado en vivo del grafico: entra al plan guardado, asi la siguiente corrida lo arrastra y el registro del dia lo ve
+  try { mergeTv(out, await loadTv(INTRADAY_SYMS, nowMs)); } catch (e) { /* sin eventos del grafico */ }
+  // las zonas que el grafico adelanto entran al registro con su estado nuevo (el log va por id: el ultimo gana)
+  for (const sym of INTRADAY_SYMS) (out.symbols[sym]?.zones || []).filter((z) => z.live).forEach((z) => finished.push({ sym, ...z }));
+
   if (!write) return { ok: true, plan: out };
 
   await store.setJSON('latest', out);
@@ -117,6 +123,8 @@ export default async (req) => {
       return new Response(JSON.stringify(r.plan || r), { headers });
     }
     const j = (await store.get('latest', { type: 'json' })) || {};
+    // estado en vivo del grafico (indicador Mi Mesa · Zonas): si va mas adelantado que la corrida de 15 min, gana
+    try { if (j.symbols) mergeTv(j, await loadTv(Object.keys(j.symbols))); } catch (e) { /* sin eventos del grafico */ }
     return new Response(JSON.stringify(j), { headers });
   } catch (e) {
     return new Response(JSON.stringify({ error: String(e.message || e) }), { status: 500, headers });

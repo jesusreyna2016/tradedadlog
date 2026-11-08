@@ -286,7 +286,7 @@ export function trackZones(prevPlan, plan, f) {
       ? (lod !== null && z.lodAt0 !== null && lod < z.lodAt0 && lod <= z.hi) || z.inside
       : (hod !== null && z.hodAt0 !== null && hod > z.hodAt0 && hod >= z.lo) || z.inside;
     if (touched && !z.touchedAt && (z.status === 'nueva' || z.status === 'activa')) { z.status = 'tocada'; z.touchedAt = now; }
-    if (z.status === 'tocada') {
+    if (z.status === 'tocada' || z.status === 'armada') {
       if ((z.side === 'long' && price < z.stop) || (z.side === 'short' && price > z.stop)) z.status = 'invalidada';
       else if ((z.side === 'long' && price >= z.tp1) || (z.side === 'short' && price <= z.tp1)) z.status = 'funciono';
     }
@@ -294,7 +294,7 @@ export function trackZones(prevPlan, plan, f) {
   // zonas que salieron del plan pero se tocaron: se guardan para el registro del dia
   const gone = [];
   for (const [id, p] of prev) {
-    if (!plan.zones.some((z) => z.id === id) && (p.status === 'tocada' || p.status === 'funciono' || p.status === 'invalidada')) gone.push(p);
+    if (!plan.zones.some((z) => z.id === id) && (p.status === 'tocada' || p.status === 'armada' || p.status === 'funciono' || p.status === 'invalidada')) gone.push(p);
   }
   return gone;
 }
