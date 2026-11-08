@@ -98,7 +98,8 @@ export async function runLive(nowMs = Date.now()) {
   const st = (await store.get('state', { type: 'json' }).catch(() => null)) || { positions: {}, lastLoss: {}, lowWarned: {}, firstRun: true };
   const stops = (await store.get('stops', { type: 'json' }).catch(() => null)) || {};
   const log = [];
-  const today = chicago(nowMs).date;
+  // el dia de MFP (limite diario y comisiones del dia) cambia a medianoche de Nueva York
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(nowMs));
 
   const accounts = await listAccounts();
   const active = accounts.filter((a) => a.status === 'active');
