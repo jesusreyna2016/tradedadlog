@@ -6,7 +6,7 @@
 //   POST /api/live?action=plans    { plans:[{id,fam,side,ts,status,acct}] }
 import { getStore } from '@netlify/blobs';
 import { ownerFromToken } from './_push.mjs';
-import { closedForImport, fillsForImport } from './_live.mjs';
+import { closedForImport, fillsForImport, notify } from './_live.mjs';
 import { hasKey } from './_mfp.mjs';
 
 const cors = {
@@ -44,6 +44,12 @@ export default async (req) => {
       const since = +url.searchParams.get('since') || 0;
       return json({ fills: await fillsForImport(ids, since) });
     }
+    if (req.method === 'POST' && action === 'test') {
+      const cfg = (await store.get('config', { type: 'json' }).catch(() => null)) || {};
+      const l = cfg.lang === 'en' ? 'en' : 'es';
+      await notify(l === 'en' ? { title: 'Mi Mesa: test alert', body: 'If you can read this, alerts reach your phone.' } : { title: 'Mi Mesa: aviso de prueba', body: 'Si lees esto, los avisos llegan a tu teléfono.' }, 'test');
+      return json({ ok: true });
+    }
     if (req.method === 'POST' && (action === 'config' || action === 'plans')) {
       const body = await req.json();
       if (action === 'config') {
@@ -51,6 +57,7 @@ export default async (req) => {
           windows: Array.isArray(body.windows) ? body.windows.slice(0, 6).map(String) : [],
           cooldownMin: +body.cooldownMin || 15, matchWindowMin: +body.matchWindowMin || 20,
           riskPerTrade: +body.riskPerTrade || 200, feeDayCap: Math.max(0, +body.feeDayCap || 0), maxSizeX: Math.max(0, +body.maxSizeX || 0),
+          lostPauseH: Math.max(0, +body.lostPauseH || 0), fundedMaxSizeX: Math.max(0, +body.fundedMaxSizeX || 0),
           lang: body.lang === 'en' ? 'en' : 'es'
         };
         await store.setJSON('config', cfg);
