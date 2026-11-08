@@ -140,6 +140,41 @@ export async function checkZoneAlerts(sym, kv) {
   return { sent };
 }
 
+// Eventos del indicador de TradingView (MMZ1): avisa al momento cuando una zona se ARMA (la vela de 5 min
+// confirmo: es la entrada). Respeta las preferencias de cada suscripcion (mercados, calificacion minima)
+// y avisa una sola vez por zona y dia.
+export async function notifyTvEvents(events) {
+  const armed = (events || []).filter((e) => e.ev === 'armada');
+  if (!armed.length) return { sent: [] };
+  const subs = await listSubs();
+  if (!subs.length) return { skipped: 'sin suscripciones' };
+  const s = store();
+  const sent = [];
+  for (const e of armed) {
+    const day = chicagoDay(e.t);
+    for (const sub of subs) {
+      const pr = sub.prefs || {};
+      const syms = pr.syms && pr.syms.length ? pr.syms : ['NQ', 'ES', 'GC', 'ETH', 'BTC'];
+      if (!syms.includes(fam(e.sym))) continue;
+      if ((GRADE_RANK[e.grade] || 0) < (GRADE_RANK[pr.minGrade || 'A'] || 2)) continue;
+      const key = `sent:${day}:${sub.key.slice(4)}:${e.sym}:${e.id}:armada`;
+      if (await s.get(key).catch(() => null)) continue;
+      const lang = pr.lang === 'en' ? 'en' : 'es';
+      const side = e.side === 'long' ? (lang === 'en' ? 'LONG' : 'COMPRA') : (lang === 'en' ? 'SHORT' : 'VENTA');
+      const f = fam(e.sym);
+      const payload = {
+        title: lang === 'en' ? `${f}: enter now · ${e.grade} ${side}` : `${f}: entra ahora · ${e.grade} ${side}`,
+        body: (lang === 'en' ? `Entry ${px(e.entry)} · stop ${px(e.stop)} · target ${px(e.tp1)}` : `Entrada ${px(e.entry)} · stop ${px(e.stop)} · objetivo ${px(e.tp1)}`) +
+          (e.size ? ` · ${e.size}` : '') + (e.conf ? (lang === 'en' ? `. Why: ` : `. Motivo: `) + e.conf : ''),
+        tag: `${f}-${e.id}-armada`, url: '/#zonas', sym: f, zone: e.id
+      };
+      const r = await sendTo(sub, payload);
+      if (r.ok) { await s.set(key, '1'); sent.push(`${e.sym} ${e.id}`); }
+    }
+  }
+  return { sent };
+}
+
 export function testMessage(lang) {
   return lang === 'en'
     ? { title: 'Mi Mesa: alerts are on', body: 'You will get a notice when price gets close to or reaches an A or A+ zone.', tag: 'test', url: '/#zonas' }

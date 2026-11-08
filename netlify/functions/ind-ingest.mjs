@@ -3,11 +3,13 @@
 //   CMDC1| (command center all-in-one · feed de sintesis: sesgo fusionado + veredicto)
 //   RGM1| (market regime · CHOP/BULL/BEAR + eventos de ruptura, fake, retest)
 //   TCL1| (trend checklist · confirmed verdict, flip levels, zone touches, range day; hb = hourly heartbeat)
+//   MMZ1| (Mi Mesa · Zonas en vivo: cambios de estado de las zonas en el grafico; ver _tvzones.mjs)
 // Valida el secreto, parsea la cadena k=v y guarda el ultimo estado por
 // fuente+simbolo en Netlify Blobs (store 'cc', key 'ind:<src>:<SYM>').
 // El backbone orb_sesgo (TDL1) sigue entrando por cc-ingest como 'sym:<SYM>'.
 import { getStore } from '@netlify/blobs';
-import { checkZoneAlerts } from './_push.mjs';
+import { checkZoneAlerts, notifyTvEvents } from './_push.mjs';
+import { parseMmz, recordTvEvents } from './_tvzones.mjs';
 
 const PREFIX_SRC = {
   R3R1: '3reads', DRB1: 'drbias', SRZ1: 'srzones', HCZ1: 'htfzones', TDL1: 'orb',
@@ -70,6 +72,13 @@ export default async (req) => {
   if(!secret || key !== secret) return new Response('unauthorized', { status: 401 });
 
   const body = await req.text();
+  // Mi Mesa · Zonas en vivo: el mensaje puede traer texto para el telefono y una linea MMZ1| por evento
+  const mmz = parseMmz(body);
+  if(mmz.length){
+    const changed = await recordTvEvents(mmz);
+    try { await notifyTvEvents(changed); } catch (e) { /* los avisos son secundarios */ }
+    return new Response(`ok · mmzonas · ${mmz.length} evento(s) · ${changed.length} nuevo(s)`, { status: 200 });
+  }
   const parsed = parsePipe(body);
   if(!parsed) return new Response('bad payload (esperaba <PREFIJO>|k=v|...)', { status: 400 });
 
