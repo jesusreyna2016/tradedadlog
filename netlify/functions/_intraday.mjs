@@ -57,6 +57,23 @@ const LEVEL_NAME = {
 };
 const FVG_W = { '5m': 1, '15m': 1.5, '1h': 2.5, '4h': 3 };
 
+// Pesos y umbrales del motor. Los valores por defecto son los de siempre; los que estan vigentes viven en
+// session-analyst-bus/zones/weights.json (los ajusta el agente de aprendizaje de zonas con experimentos) y
+// llegan aqui por src.weights. El indicador de TradingView recibe los mismos por la linea de sync (W=...),
+// asi los dos calculan igual. Claves planas para que viajen en una sola linea:
+//   <nivel> (pdh, onh, vah, ...) · f5m f15m f1h f4h (FVG) · gz (golden zone)
+//   align (a favor/contra) · chop (castigo en CHOP) · reg (premio por regimen a favor) · far / farAtr (lejos)
+//   lowrr / rrMin (poco espacio a TP1) · decay (rendimiento decreciente de la confluencia) · ap a b (umbrales A+ A B)
+export const DEFAULT_WEIGHTS = {
+  ...LEVEL_W, f5m: FVG_W['5m'], f15m: FVG_W['15m'], f1h: FVG_W['1h'], f4h: FVG_W['4h'], gz: 1.5,
+  align: 1.5, chop: 0.5, reg: 0.5, far: 1, farAtr: 12, lowrr: 1, rrMin: 1.2, decay: 0.7, ap: 7, a: 5, b: 3.5
+};
+export function mergeWeights(w) {
+  const out = { ...DEFAULT_WEIGHTS };
+  for (const [k, v] of Object.entries(w || {})) if (k in out && Number.isFinite(+v)) out[k] = +v;
+  return out;
+}
+
 // "5m ibull:26962.50:26979.75;1h bear:27425.00:27457.50" -> [{tf,type,lo,hi}]
 export function parseFvg(str) {
   if (!str) return [];
@@ -98,6 +115,7 @@ function frameVote(trendcl, plan) {
  */
 export function buildSymbolPlan(sym, src) {
   const f = src.feed || {};
+  const W = mergeWeights(src.weights);
   const price = n(f.close);
   const atr5 = n(f.atr5), atrD = n(f.atrD);
   const tick = TICK[sym] || 0.01;
@@ -114,25 +132,26 @@ export function buildSymbolPlan(sym, src) {
   for (const k of Object.keys(LEVEL_W)) {
     const px = n(f[k]);
     if (px === null) continue;
-    els.push({ lo: px, hi: px, w: LEVEL_W[k], name: LEVEL_NAME[k] || k });
+    els.push({ lo: px, hi: px, w: W[k], key: k, name: LEVEL_NAME[k] || k });
   }
   for (const g of parseFvg(f.fvg)) {
-    const w = FVG_W[g.tf] || 1;
+    const fk = 'f' + g.tf;
+    const w = W[fk] ?? 1;
     const up = g.type.endsWith('bull'), inv = g.type.startsWith('i');
     const label = B((inv ? 'Hueco invertido ' : 'Hueco ') + (up ? 'alcista' : 'bajista') + ' en ' + g.tf + (inv ? ' (iFVG)' : ' (FVG)'), (inv ? 'Inverted ' + (up ? 'bullish' : 'bearish') : (up ? 'Bullish' : 'Bearish')) + ' gap on ' + g.tf + (inv ? ' (iFVG)' : ' (FVG)'));
     if (g.hi - g.lo > maxW) {
       // FVG enorme: solo su borde cercano al precio y su CE sirven como niveles operables
       const near = Math.abs(g.hi - price) < Math.abs(g.lo - price) ? g.hi : g.lo;
-      els.push({ lo: near, hi: near, w, name: B(label.es + ', borde', label.en + ', edge') });
-      els.push({ lo: (g.lo + g.hi) / 2, hi: (g.lo + g.hi) / 2, w: w * 0.6, name: B(label.es + ', mitad', label.en + ', middle') });
+      els.push({ lo: near, hi: near, w, key: fk, name: B(label.es + ', borde', label.en + ', edge') });
+      els.push({ lo: (g.lo + g.hi) / 2, hi: (g.lo + g.hi) / 2, w: w * 0.6, key: fk, name: B(label.es + ', mitad', label.en + ', middle') });
     } else {
-      els.push({ lo: g.lo, hi: g.hi, w, name: label });
+      els.push({ lo: g.lo, hi: g.hi, w, key: fk, name: label });
     }
   }
   for (const [k, nm] of [['gzLong', B('Zona de descuento (golden zone)', 'Discount zone (golden zone)')], ['gzShort', B('Zona cara (golden zone)', 'Premium zone (golden zone)')]]) {
     const m = String(f[k] || '').split(':').map(n);
     if (m.length === 2 && m[0] !== null && m[1] !== null && Math.abs(m[1] - m[0]) <= maxW * 1.5) {
-      els.push({ lo: Math.min(m[0], m[1]), hi: Math.max(m[0], m[1]), w: 1.5, name: nm });
+      els.push({ lo: Math.min(m[0], m[1]), hi: Math.max(m[0], m[1]), w: W.gz, key: 'gz', name: nm });
     }
   }
   const near = els.filter((e) => Math.abs((e.lo + e.hi) / 2 - price) <= reach);
@@ -167,18 +186,18 @@ export function buildSymbolPlan(sym, src) {
 
     // confluencia con rendimientos decrecientes (5 niveles iguales no valen 5 veces)
     const ws = c.members.map((m) => m.w).sort((a, b) => b - a);
-    let conf = 0; ws.forEach((w, i) => { conf += w * Math.pow(0.7, i); });
+    let conf = 0; ws.forEach((w, i) => { conf += w * Math.pow(W.decay, i); });
     let score = conf;
     const why = [];
-    if (fv.dir === sgn) { score += 1.5; why.push(B('a favor de la dirección del mercado', 'with the market direction')); }
-    else if (fv.dir === -sgn) { score -= 1.5; why.push(B('contra la dirección del mercado', 'against the market direction')); }
-    if (regime === 'CHOP') score -= 0.5;
-    if (regime === 'BULL' && side === 'long') score += 0.5;
-    if (regime === 'BEAR' && side === 'short') score += 0.5;
+    if (fv.dir === sgn) { score += W.align; why.push(B('a favor de la dirección del mercado', 'with the market direction')); }
+    else if (fv.dir === -sgn) { score -= W.align; why.push(B('contra la dirección del mercado', 'against the market direction')); }
+    if (regime === 'CHOP') score -= W.chop;
+    if (regime === 'BULL' && side === 'long') score += W.reg;
+    if (regime === 'BEAR' && side === 'short') score += W.reg;
     // zona muy pegada al precio = ya estas dentro, no es una entrada planeada
     const distPts = inside ? 0 : side === 'long' ? price - hi : lo - price;
     const distAtr = distPts / atr5;
-    if (distAtr > 12) score -= 1; // lejos para hoy
+    if (distAtr > W.farAtr) score -= W.far; // lejos para hoy
 
     // 4) Stop, gatillo y objetivos
     const buf = Math.max(atr5 * 0.3, tick * 4);
@@ -201,10 +220,10 @@ export function buildSymbolPlan(sym, src) {
     const next = ahead.find((m) => (side === 'long' ? m > tp1 + risk * 0.5 : m < tp1 - risk * 0.5));
     const tp2 = roundTo(next !== undefined ? next : tp1 + sgn * risk * 2, tick);
     const rr1 = risk > 0 ? +(Math.abs(tp1 - entry) / risk).toFixed(2) : null;
-    if (rr1 !== null && rr1 < 1.2) { score -= 1; why.push(B('poco espacio hasta el objetivo (' + rr1 + 'R)', 'little room to the target (' + rr1 + 'R)')); }
+    if (rr1 !== null && rr1 < W.rrMin) { score -= W.lowrr; why.push(B('poco espacio hasta el objetivo (' + rr1 + 'R)', 'little room to the target (' + rr1 + 'R)')); }
 
     const aligned = fv.dir === sgn;
-    let grade = score >= 7 && aligned ? 'A+' : score >= 5 ? 'A' : score >= 3.5 ? 'B' : 'C';
+    let grade = score >= W.ap && aligned ? 'A+' : score >= W.a ? 'A' : score >= W.b ? 'B' : 'C';
     if (!aligned && grade === 'A+') grade = 'A';
     if (fv.dir === -sgn && grade === 'A') grade = 'B'; // contra-tendencia nunca pasa de B
 
@@ -216,6 +235,8 @@ export function buildSymbolPlan(sym, src) {
       entry, stop, tp1, tp2, rr1, riskPts: +risk.toFixed(4),
       distPts: +distPts.toFixed(2), distAtr5: +distAtr.toFixed(1), inside,
       score: +score.toFixed(2), grade, aligned, confluence: names,
+      // claves de los niveles que coinciden (para el agente de aprendizaje: que confluencia gana mas)
+      keys: [...new Set(c.members.map((m) => m.key).filter(Boolean))],
       trigger: side === 'long'
         ? B('Espera que el precio toque o pase un poco ' + roundTo(lo, tick) + '–' + roundTo(hi, tick) + ' y que una vela de 5 min cierre de vuelta arriba. Si no cierra arriba, no entras.', 'Wait for price to touch or slightly pass ' + roundTo(lo, tick) + '–' + roundTo(hi, tick) + ' and for a 5-min candle to close back above. If it does not close above, stay out.')
         : B('Espera que el precio toque o pase un poco ' + roundTo(lo, tick) + '–' + roundTo(hi, tick) + ' y que una vela de 5 min cierre de vuelta abajo. Si no cierra abajo, no entras.', 'Wait for price to touch or slightly pass ' + roundTo(lo, tick) + '–' + roundTo(hi, tick) + ' and for a 5-min candle to close back below. If it does not close below, stay out.'),
@@ -305,7 +326,8 @@ export function trackZones(prevPlan, plan, f) {
 // las noticias USD de alto impacto del dia y una foto de las zonas de Mi Mesa para comparar.
 //   MM1;t=<ms>;news=<ms>,<ms>;NQ=<sesgo>/<confianza>/<regimen>/<L|S>:<lo>:<hi>:<grado>:<estado>,...
 // Campos vacios = sin dato. Sin espacios ni '=' dentro de los valores.
-export function buildTvSync(plan, news = [], nowMs = Date.now()) {
+const encW = (w) => Object.entries(mergeWeights(w)).map(([k, v]) => k + ':' + (+v.toFixed(3))).join(',');
+export function buildTvSync(plan, news = [], nowMs = Date.now(), weights = null) {
   const clean = (s) => String(s ?? '').replace(/[;=/,:\s]/g, '');
   const t = Date.parse(plan?.builtAt || '') || nowMs;
   const dayEnd = nowMs + 24 * 3600e3;
@@ -315,6 +337,9 @@ export function buildTvSync(plan, news = [], nowMs = Date.now()) {
     .filter((x) => Number.isFinite(x) && x > nowMs - 15 * 60e3 && x < dayEnd)
     .sort((a, b) => a - b).slice(0, 12);
   const parts = ['MM1', 't=' + t, 'news=' + ev.join(',')];
+  // pesos del motor: activos (W) y en prueba (WS, modo sombra: el indicador los calcula aparte y los manda en los eventos)
+  if (weights && weights.active) parts.push('WV=' + clean(weights.version || 'v1'), 'W=' + encW(weights.active));
+  if (weights && weights.shadow) parts.push('WSV=' + clean(weights.shadowVersion || 'shadow'), 'WS=' + encW(weights.shadow));
   for (const [sym, p] of Object.entries(plan?.symbols || {})) {
     const sa = p.saPlan || {};
     const bias = String(sa.biasSession || sa.biasDay || '').toUpperCase();

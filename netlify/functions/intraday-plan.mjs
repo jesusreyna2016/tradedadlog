@@ -15,6 +15,7 @@ import newsHandler from './cc-news.mjs';
 import { busGet, busPut } from './_sa-bus.mjs';
 import { buildSymbolPlan, trackZones, buildTvSync } from './_intraday.mjs';
 import { loadTv, mergeTv } from './_tvzones.mjs';
+import { loadWeights } from './_zonelearn.mjs';
 
 export const INTRADAY_SYMS = ['NQ', 'ES', 'GC', 'ETHUSDT', 'BTCUSDT'];
 const CRYPTO = new Set(['ETHUSDT', 'BTCUSDT']);
@@ -41,8 +42,8 @@ const chicagoDate = (ms) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Americ
 
 export async function runIntraday({ write = true } = {}) {
   const nowMs = Date.now();
-  const [feed, news, saPlan, saCrypto] = await Promise.all([
-    readJson(feedHandler), readJson(newsHandler), readPlan('plans/latest.json'), readPlan('plans/crypto-latest.json')
+  const [feed, news, saPlan, saCrypto, weights] = await Promise.all([
+    readJson(feedHandler), readJson(newsHandler), readPlan('plans/latest.json'), readPlan('plans/crypto-latest.json'), loadWeights().catch(() => null)
   ]);
   if (!feed || (!feed.symbols && !feed.crypto)) return { ok: false, error: 'session-feed sin datos' };
 
@@ -50,7 +51,7 @@ export async function runIntraday({ write = true } = {}) {
   let prev = null;
   try { prev = await store.get('latest', { type: 'json' }); } catch (e) { prev = null; }
 
-  const out = { schema: 'intraday-1', builtAt: new Date(nowMs).toISOString(), everyMin: 15, symbols: {} };
+  const out = { schema: 'intraday-1', builtAt: new Date(nowMs).toISOString(), everyMin: 15, weightsVersion: weights?.version || 'default', symbols: {} };
   const day = chicagoDate(nowMs);
   const finished = [];
 
@@ -60,7 +61,7 @@ export async function runIntraday({ write = true } = {}) {
     const instr = planSrc?.instruments?.[sym] || planSrc?.instruments?.[sym.replace('USDT', '')] || null;
     const plan = buildSymbolPlan(sym, {
       feed: entry.feed?.raw, trendcl: entry.trendcl?.raw, regime: entry.regime?.raw,
-      plan: instr, news: news?.events || [], now: nowMs, feedAt: entry.feed?.receivedAt
+      plan: instr, news: news?.events || [], now: nowMs, feedAt: entry.feed?.receivedAt, weights: weights?.active || null
     });
     plan.nowMs = nowMs;
     // un plan del dia anterior no arrastra estado: las zonas se reinician cada dia de Chicago
@@ -115,8 +116,8 @@ export default async (req) => {
       return new Response(JSON.stringify({ date: log, zones: Object.values(j) }), { headers });
     }
     if (url.searchParams.get('tv') === '1') {
-      const [j, news] = await Promise.all([store.get('latest', { type: 'json' }).catch(() => null), readJson(newsHandler)]);
-      return new Response(buildTvSync(j || {}, news?.events || []) + '\n', { headers: { ...headers, 'content-type': 'text/plain; charset=utf-8' } });
+      const [j, news, weights] = await Promise.all([store.get('latest', { type: 'json' }).catch(() => null), readJson(newsHandler), loadWeights().catch(() => null)]);
+      return new Response(buildTvSync(j || {}, news?.events || [], Date.now(), weights) + '\n', { headers: { ...headers, 'content-type': 'text/plain; charset=utf-8' } });
     }
     if (url.searchParams.get('fresh') === '1') {
       const r = await runIntraday({ write: false });
