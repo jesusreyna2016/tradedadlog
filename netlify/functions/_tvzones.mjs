@@ -16,7 +16,7 @@ const num = (v) => { const x = parseFloat(String(v ?? '').replace(/,/g, '')); re
 
 // Contexto de la zona que manda el indicador (v3.4+). Solo numeros y etiquetas cortas.
 const FEAT_NUM = ['score', 'scoreS', 'rr', 'dist', 'chop', 'str', 'mfe', 'mae', 'risk', 'tp2'];
-const FEAT_TXT = ['gradeS', 'wv', 'wsv', 'al', 'reg', 'sess', 'keys', 'tf', 'bias'];
+const FEAT_TXT = ['v', 'gradeS', 'wv', 'wsv', 'al', 'reg', 'sess', 'keys', 'tf', 'bias'];
 function pickFeatures(kv) {
   const f = {};
   for (const k of FEAT_NUM) { const x = num(kv[k]); if (x !== null) f[k] = x; }
@@ -67,7 +67,10 @@ export async function recordTvEvents(events) {
     let log = {};
     try { log = (await store.get(key, { type: 'json' })) || {}; } catch (e) { log = {}; }
     let dirty = false;
-    for (const e of list) if (applyEvent(log, e)) { dirty = true; changed.push(e); }
+    for (const e of list) {
+      const prevStatus = log[e.id || e.side + ':' + e.lo]?.status || null;
+      if (applyEvent(log, e)) { dirty = true; changed.push({ ...e, prevStatus }); }
+    }
     if (dirty) await store.setJSON(key, log);
   }
   return changed;
@@ -103,4 +106,70 @@ export function mergeTv(plan, tvBySym) {
     }
   }
   return plan;
+}
+
+// ---------------- Senal de vida del indicador (v3.5+) ----------------
+// Con webhook, cada grafico manda cada 15 min: MMZ1|src=mmzonas|v=3.5|sym=ETHUSDT|t=<ms>|ev=hb|tf=5|px=..|wv=v1|sync=<ms>
+// Se guarda el ultimo por simbolo (store 'intraday', key 'hb'); Mi Mesa muestra si cada grafico esta vivo y
+// intraday-cron avisa por push si uno deja de reportar con el mercado abierto.
+export function parseHb(body) {
+  const out = [];
+  for (const raw of String(body || '').split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line.startsWith('MMZ1|') || !/\|ev=hb(\||$)/.test(line)) continue;
+    const kv = {};
+    for (const part of line.split('|').slice(1)) { const i = part.indexOf('='); if (i > 0) kv[part.slice(0, i).trim()] = part.slice(i + 1).trim(); }
+    if (!kv.sym) continue;
+    out.push({ sym: kv.sym.toUpperCase(), v: String(kv.v || '').slice(0, 10), tf: String(kv.tf || '').slice(0, 6), px: num(kv.px), wv: String(kv.wv || '').slice(0, 20), sync: Number(kv.sync) || null, t: Number(kv.t) || Date.now() });
+  }
+  return out;
+}
+
+export async function recordHb(list, nowMs = Date.now()) {
+  if (!list.length) return 0;
+  const store = getStore('intraday');
+  let hb = {};
+  try { hb = (await store.get('hb', { type: 'json' })) || {}; } catch (e) { hb = {}; }
+  for (const h of list) {
+    const cur = hb[h.sym] || {};
+    // si el simbolo estaba caido y vuelve, se borra el aviso enviado
+    hb[h.sym] = { ...h, at: nowMs, firstAt: cur.firstAt || nowMs, deadNotified: null };
+  }
+  await store.setJSON('hb', hb);
+  return list.length;
+}
+
+// CME (NQ, ES, GC, YM, CL): domingo 17:00 a viernes 16:00 CT, con pausa diaria 16:00-17:00 CT. Cripto: siempre.
+export function marketOpen(sym, ms = Date.now()) {
+  if (/USDT$|^ETH|^BTC/.test(sym)) return true;
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date(ms)).map((x) => [x.type, x.value]));
+  const m = Number(p.hour) * 60 + Number(p.minute);
+  const d = p.weekday;
+  if (d === 'Sat') return false;
+  if (d === 'Sun') return m >= 17 * 60;
+  if (d === 'Fri') return m < 16 * 60;
+  return m < 16 * 60 || m >= 17 * 60;
+}
+
+const versionLt = (a, b) => { const x = parseFloat(a), y = parseFloat(b); return Number.isFinite(x) && Number.isFinite(y) && x < y; };
+
+// Estado de cada grafico: vivo / caido / mercado cerrado, y si tiene una version vieja del indicador.
+export function healthFrom(hb, nowMs, latest) {
+  const out = {};
+  for (const [sym, h] of Object.entries(hb || {})) {
+    const ageMin = Math.round((nowMs - (h.at || h.t)) / 60e3);
+    // con 40 min de gracia despues de que abre el mercado (domingo 17:00, o despues de la pausa diaria)
+    const open = marketOpen(sym, nowMs) && marketOpen(sym, nowMs - 40 * 60e3);
+    out[sym] = {
+      state: ageMin <= 35 ? 'vivo' : !open ? 'cerrado' : 'caido',
+      ageMin, lastAt: new Date(h.at || h.t).toISOString(), v: h.v || null, tf: h.tf || null, wv: h.wv || null,
+      outdated: !!(latest && h.v && versionLt(h.v, latest)),
+      syncAgeH: h.sync ? Math.round((nowMs - h.sync) / 360e3) / 10 : null
+    };
+  }
+  return out;
+}
+
+export async function loadHealth(nowMs = Date.now(), latest = null) {
+  try { return healthFrom((await getStore('intraday').get('hb', { type: 'json' })) || {}, nowMs, latest); } catch (e) { return {}; }
 }

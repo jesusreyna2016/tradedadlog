@@ -9,7 +9,7 @@
 // El backbone orb_sesgo (TDL1) sigue entrando por cc-ingest como 'sym:<SYM>'.
 import { getStore } from '@netlify/blobs';
 import { checkZoneAlerts, notifyTvEvents } from './_push.mjs';
-import { parseMmz, recordTvEvents } from './_tvzones.mjs';
+import { parseMmz, recordTvEvents, parseHb, recordHb } from './_tvzones.mjs';
 import { appendZoneEvents } from './_zonelearn.mjs';
 
 const PREFIX_SRC = {
@@ -74,6 +74,13 @@ export default async (req) => {
 
   const body = await req.text();
   // Mi Mesa · Zonas en vivo: el mensaje puede traer texto para el telefono y una linea MMZ1| por evento
+  // senal de vida del indicador (cada 15 min con webhook): Mi Mesa sabe si cada grafico sigue reportando
+  const hb = parseHb(body);
+  if(hb.length && !parseMmz(body).length){
+    await recordHb(hb);
+    return new Response(`ok · mmzonas · vivo · ${hb.map((h) => h.sym).join(',')}`, { status: 200 });
+  }
+  if(hb.length){ try { await recordHb(hb); } catch (e) { /* secundario */ } }
   const mmz = parseMmz(body);
   if(mmz.length){
     const changed = await recordTvEvents(mmz);
