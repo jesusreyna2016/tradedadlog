@@ -298,3 +298,28 @@ export function trackZones(prevPlan, plan, f) {
   }
   return gone;
 }
+
+// Linea de sync para el indicador "Mi Mesa · Zonas" de TradingView (tdl-indicators/mi_mesa_zonas.pine).
+// TradingView no puede leer la API, asi que el indicador recalcula las zonas en vivo por su cuenta y
+// esta linea solo le pasa lo que el grafico no sabe: el sesgo del plan del Session Analyst, el regimen,
+// las noticias USD de alto impacto del dia y una foto de las zonas de Mi Mesa para comparar.
+//   MM1;t=<ms>;news=<ms>,<ms>;NQ=<sesgo>/<confianza>/<regimen>/<L|S>:<lo>:<hi>:<grado>:<estado>,...
+// Campos vacios = sin dato. Sin espacios ni '=' dentro de los valores.
+export function buildTvSync(plan, news = [], nowMs = Date.now()) {
+  const clean = (s) => String(s ?? '').replace(/[;=/,:\s]/g, '');
+  const t = Date.parse(plan?.builtAt || '') || nowMs;
+  const dayEnd = nowMs + 24 * 3600e3;
+  const ev = (news || [])
+    .filter((e) => String(e.impact || '').toLowerCase() === 'high' && (!e.currency || e.currency === 'USD'))
+    .map((e) => (typeof e.ts === 'number' ? e.ts : Date.parse(e.time || e.date || '')))
+    .filter((x) => Number.isFinite(x) && x > nowMs - 15 * 60e3 && x < dayEnd)
+    .sort((a, b) => a - b).slice(0, 12);
+  const parts = ['MM1', 't=' + t, 'news=' + ev.join(',')];
+  for (const [sym, p] of Object.entries(plan?.symbols || {})) {
+    const sa = p.saPlan || {};
+    const bias = String(sa.biasSession || sa.biasDay || '').toUpperCase();
+    const zones = (p.zones || []).map((z) => [z.side === 'long' ? 'L' : 'S', z.lo, z.hi, clean(z.grade), clean(z.status)].join(':')).join(',');
+    parts.push(clean(sym) + '=' + [bias === 'LONG' || bias === 'SHORT' ? bias : '', clean(sa.conviction), clean(p.regime), zones].join('/'));
+  }
+  return parts.join(';');
+}

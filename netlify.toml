@@ -140,7 +140,7 @@
   to = "/.netlify/functions/plan-coach-state"
   status = 200
 
-# Plan Intradia · zonas de entrada recalculadas cada 15 min (intraday-cron); ?fresh=1 recalcula, ?log=YYYY-MM-DD registro del dia
+# Plan Intradia · zonas de entrada recalculadas cada 15 min (intraday-cron); ?fresh=1 recalcula, ?log=YYYY-MM-DD registro del dia, ?tv=1 linea de sync para TradingView
 [[redirects]]
   from = "/api/intraday-plan"
   to = "/.netlify/functions/intraday-plan"

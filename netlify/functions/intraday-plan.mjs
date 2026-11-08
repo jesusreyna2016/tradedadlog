@@ -2,6 +2,7 @@
 //   GET /api/intraday-plan            -> ultimo plan (lo guarda intraday-cron)
 //   GET /api/intraday-plan?fresh=1    -> lo recalcula al momento (sin esperar al cron)
 //   GET /api/intraday-plan?log=YYYY-MM-DD -> registro de zonas tocadas / invalidadas / que funcionaron ese dia
+//   GET /api/intraday-plan?tv=1       -> linea de sync (texto) para pegar en el indicador "Mi Mesa · Zonas" de TradingView
 //
 // La logica vive en runIntraday(): lee el ultimo estado de los indicadores (session-feed),
 // el calendario (cc-news) y los planes del Session Analyst (bus), arma el plan con
@@ -12,7 +13,7 @@ import { getStore } from '@netlify/blobs';
 import feedHandler from './session-feed.mjs';
 import newsHandler from './cc-news.mjs';
 import { busGet, busPut } from './_sa-bus.mjs';
-import { buildSymbolPlan, trackZones } from './_intraday.mjs';
+import { buildSymbolPlan, trackZones, buildTvSync } from './_intraday.mjs';
 
 export const INTRADAY_SYMS = ['NQ', 'ES', 'GC', 'ETHUSDT', 'BTCUSDT'];
 const CRYPTO = new Set(['ETHUSDT', 'BTCUSDT']);
@@ -106,6 +107,10 @@ export default async (req) => {
     if (log && /^\d{4}-\d{2}-\d{2}$/.test(log)) {
       const j = (await store.get('log:' + log, { type: 'json' })) || {};
       return new Response(JSON.stringify({ date: log, zones: Object.values(j) }), { headers });
+    }
+    if (url.searchParams.get('tv') === '1') {
+      const [j, news] = await Promise.all([store.get('latest', { type: 'json' }).catch(() => null), readJson(newsHandler)]);
+      return new Response(buildTvSync(j || {}, news?.events || []) + '\n', { headers: { ...headers, 'content-type': 'text/plain; charset=utf-8' } });
     }
     if (url.searchParams.get('fresh') === '1') {
       const r = await runIntraday({ write: false });
