@@ -9,6 +9,9 @@
 //   · posicion DEMASIADO GRANDE (mueve mas de maxSizeX veces el tamaño de la cuenta)
 //   · COMISIONES del dia pasaron tu limite (feeDayCap)
 //   · INACTIVIDAD: a la cuenta le quedan 2 dias o menos antes de perderse por no operar
+//   · PERDISTE UNA CUENTA: empieza una pausa (lostPauseH); abrir algo antes avisa
+//   · FONDEADA: en cuentas fondeadas el tamaño maximo es fundedMaxSizeX
+//   · RESUMEN SEMANAL: domingo 16:30 Chicago
 // Ademas guarda un snapshot de tus cuentas (con su riesgo en vivo) que Mi Mesa lee.
 //
 // Store de Blobs 'live':
@@ -55,12 +58,24 @@ const M = {
   inactive: (l, acc, days) => l === 'en'
     ? { title: `${acc}: ${days <= 0 ? 'inactivity limit today' : `${days} day(s) before inactivity`}`, body: 'MyFundedPerps closes accounts that do not trade for too long. If you want to keep it, place one small trade with a plan.' }
     : { title: `${acc}: ${days <= 0 ? 'hoy vence por inactividad' : `${days} día(s) para perderla por inactividad`}`, body: 'MyFundedPerps cierra las cuentas que pasan mucho tiempo sin operar. Si quieres conservarla, haz un trade pequeño y con plan.' },
+  lost: (l, acc, h) => l === 'en'
+    ? { title: `You lost ${acc}`, body: `Take a ${h} h break before trading again. Go to Mi Mesa and write what killed it.` }
+    : { title: `Perdiste ${acc}`, body: `Toma una pausa de ${h} h antes de volver a operar. Entra a Mi Mesa y escribe qué la mató.` },
+  afterLost: (l, acc, fam, h) => l === 'en'
+    ? { title: `${fam}: you are trading right after losing an account`, body: `${acc}: your ${h} h break is not over. This is how accounts die one after another. Close it or protect it.` }
+    : { title: `${fam}: estás operando justo después de perder una cuenta`, body: `${acc}: tu pausa de ${h} h no ha terminado. Así se pierden las cuentas una tras otra. Ciérralo o protégelo.` },
+  week: (l, w) => l === 'en'
+    ? { title: `Your week: ${w.net < 0 ? '-' : '+'}${$(w.net)} after fees`, body: `${w.n} trades · fees ${$(w.fees)} · ${w.noPlan} without a plan · ${w.big} too big · ${w.lost} account(s) lost. Next week, only one goal: ${w.goal.en}.` }
+    : { title: `Tu semana: ${w.net < 0 ? '-' : '+'}${$(w.net)} después de comisiones`, body: `${w.n} trades · comisiones ${$(w.fees)} · ${w.noPlan} sin plan · ${w.big} muy grandes · ${w.lost} cuenta(s) perdida(s). La próxima semana, una sola meta: ${w.goal.es}.` },
+  test: (l) => l === 'en'
+    ? { title: 'Mi Mesa: test alert', body: 'If you can read this, alerts reach your phone.' }
+    : { title: 'Mi Mesa: aviso de prueba', body: 'Si lees esto, los avisos llegan a tu teléfono.' },
   windowEnd: (l, open) => l === 'en'
     ? { title: 'Your trading hours are over', body: open ? 'You still have an open trade: manage it with your plan and close the platform.' : 'Close the platform and go to the Mi Mesa journal.' }
     : { title: 'Se acabó tu horario de trading', body: open ? 'Todavía tienes un trade abierto: manéjalo con tu plan y cierra la plataforma.' : 'Cierra la plataforma y ve al journal de Mi Mesa.' }
 };
 
-async function notify(msg, tag) {
+export async function notify(msg, tag) {
   const subs = await listSubs();
   for (const s of subs) await sendTo(s, { ...msg, tag, url: '/#hoy' });
 }
@@ -78,6 +93,8 @@ export async function runLive(nowMs = Date.now()) {
   const riskPerTrade = +cfg.riskPerTrade || 200;
   const maxSizeX = +cfg.maxSizeX || 0;
   const feeDayCap = +cfg.feeDayCap || 0;
+  const lostPause = (+cfg.lostPauseH || 0) * 3600e3;
+  const fundedMaxX = +cfg.fundedMaxSizeX || 0;
   const st = (await store.get('state', { type: 'json' }).catch(() => null)) || { positions: {}, lastLoss: {}, lowWarned: {}, firstRun: true };
   const stops = (await store.get('stops', { type: 'json' }).catch(() => null)) || {};
   const log = [];
@@ -87,6 +104,17 @@ export async function runLive(nowMs = Date.now()) {
   const active = accounts.filter((a) => a.status === 'active');
   const risk = {}, open = {}, inactivity = {};
   const seenPos = new Set();
+  // semana (se reinicia con el resumen del domingo) y estado de cada cuenta para ver cuando se pierde
+  if (!st.week) st.week = { n: 0, net: 0, fees: 0, noPlan: 0, big: 0, revenge: 0, noStop: 0, lost: 0 };
+  if (!st.acctStatus) st.acctStatus = {};
+  for (const a of accounts) {
+    const prev = st.acctStatus[a.id];
+    if (prev === 'active' && a.status === 'failed') {
+      st.lostAt = nowMs; st.week.lost++;
+      if (!st.firstRun) { await notify(M.lost(lang, shortName(a), +cfg.lostPauseH || 0), 'lost-' + a.id); log.push(shortName(a) + ' perdida de cuenta'); }
+    }
+    st.acctStatus[a.id] = a.status;
+  }
 
   for (const a of active) {
     const name = shortName(a);
@@ -124,14 +152,17 @@ export async function runLive(nowMs = Date.now()) {
         // posicion nueva: ¿habia plan? ¿es revancha?
         if (!st.firstRun && nowMs - p.opened_at < 30 * 60e3) {
           const sinceLoss = st.lastLoss[a.id] ? p.opened_at - st.lastLoss[a.id] : Infinity;
-          if (sinceLoss >= 0 && sinceLoss < cooldown) { await notify(M.revenge(lang, name, fam, Math.round(sinceLoss / 60e3)), 'rev-' + p.id); log.push(name + ' revancha'); }
+          if (sinceLoss >= 0 && sinceLoss < cooldown) { st.week.revenge++; await notify(M.revenge(lang, name, fam, Math.round(sinceLoss / 60e3)), 'rev-' + p.id); log.push(name + ' revancha'); }
+          if (lostPause && st.lostAt && p.opened_at - st.lostAt < lostPause && p.opened_at > st.lostAt) { await notify(M.afterLost(lang, name, fam, +cfg.lostPauseH), 'afterlost-' + p.id); log.push(name + ' tras perder cuenta'); }
           const plan = plans.find((x) => x.fam === fam && x.side === p.side && x.status !== 'cancelada' && (!x.acct || x.acct === a.id || x.acct === a.account_number) &&
             p.opened_at >= x.ts - 3 * 60e3 && p.opened_at <= x.ts + matchWin);
-          if (!plan) { await notify(M.noPlan(lang, name, fam, p.side, chicago(p.opened_at).hm), 'noplan-' + p.id); log.push(name + ' sin plan ' + fam); }
+          if (!plan) { st.week.noPlan++; await notify(M.noPlan(lang, name, fam, p.side, chicago(p.opened_at).hm), 'noplan-' + p.id); log.push(name + ' sin plan ' + fam); }
           // tamaño: cuanto mueve la posicion contra el tamaño de la cuenta
           const notional = Math.abs((+p.size || 0) * (+p.entry_price || 0));
           const x = a.starting_balance ? notional / a.starting_balance : 0;
-          if (maxSizeX > 0 && x > maxSizeX) {
+          const capX = a.stage === 'funded' && fundedMaxX > 0 ? fundedMaxX : maxSizeX;
+          if (capX > 0 && x > capX) {
+            st.week.big++;
             const room = detail.risk?.max_drawdown_room;
             const move = room != null && notional ? +(room / notional * 100).toFixed(2) : null;
             await notify(M.bigSize(lang, name, fam, x.toFixed(1), move), 'size-' + p.id); log.push(name + ' muy grande ' + x.toFixed(1) + 'x');
@@ -140,6 +171,7 @@ export async function runLive(nowMs = Date.now()) {
       }
       if (!stopNow && !k.stopWarned && nowMs - p.opened_at > 60e3) {
         k.stopWarned = true;
+        st.week.noStop++;
         if (!st.firstRun) { await notify(M.noStop(lang, name, fam, detail.risk?.max_drawdown_room), 'nostop-' + p.id); log.push(name + ' sin stop ' + fam); }
       }
     }
@@ -170,6 +202,7 @@ export async function runLive(nowMs = Date.now()) {
         // comisiones del dia (hora de Chicago)
         if (!st.fees || st.fees.date !== today) st.fees = { date: today, total: 0, warned: false };
         st.fees.total += +c.fees || 0;
+        st.week.n++; st.week.net += net; st.week.fees += +c.fees || 0;
         if (net < 0) {
           st.lastLoss[acct] = c.closed_at;
           if (nowMs - c.closed_at < 30 * 60e3) { await notify(M.loss(lang, k.name, k.fam, net, chicago(c.closed_at + cooldown).hm), 'loss-' + acct); log.push(k.name + ' perdida'); }
@@ -199,6 +232,25 @@ export async function runLive(nowMs = Date.now()) {
     }
   }
 
+  // resumen semanal: domingo 16:30-16:31 Chicago
+  const dow = new Date(c.date + 'T12:00:00Z').getUTCDay();
+  const wkKey = 'week:' + c.date;
+  if (dow === 0 && c.min >= 16 * 60 + 30 && c.min < 16 * 60 + 32 && !st.lowWarned[wkKey]) {
+    st.lowWarned[wkKey] = true;
+    const w = st.week;
+    const goals = [
+      [w.lost * 3, { es: 'no perder ninguna cuenta (respeta tu pausa)', en: 'lose no account (respect your break)' }],
+      [w.big * 2, { es: `ninguna posición de más de ${maxSizeX || 3} veces la cuenta`, en: `no position over ${maxSizeX || 3}x the account` }],
+      [w.noPlan, { es: 'cero trades sin plan', en: 'zero trades without a plan' }],
+      [w.revenge * 2, { es: 'respetar la pausa después de cada pérdida', en: 'respect the break after each loss' }],
+      [feeDayCap && w.fees > feeDayCap * 5 ? 3 : 0, { es: 'menos trades: las comisiones se comen todo', en: 'fewer trades: fees eat everything' }]
+    ].sort((a, b) => b[0] - a[0]);
+    const goal = goals[0][0] > 0 ? goals[0][1] : { es: 'repetir esta disciplina', en: 'repeat this discipline' };
+    if (w.n || w.lost) { await notify(M.week(lang, { ...w, goal }), 'week'); log.push('resumen semanal'); }
+    st.lastWeek = { ...w, at: nowMs };
+    st.week = { n: 0, net: 0, fees: 0, noPlan: 0, big: 0, revenge: 0, noStop: 0, lost: 0 };
+  }
+
   // limpieza de marcas viejas
   for (const k of Object.keys(st.lowWarned)) if (!k.includes(today)) delete st.lowWarned[k];
   st.firstRun = false;
@@ -207,7 +259,7 @@ export async function runLive(nowMs = Date.now()) {
   await store.setJSON('snapshot', {
     updatedAt: nowMs,
     accounts: accounts.map((a) => ({ id: a.id, number: a.account_number, name: a.name, stage: a.stage, status: a.status, startingBalance: a.starting_balance, balance: a.balance, createdAt: Math.round(a.created_at) })),
-    risk, open, inactivity
+    risk, open, inactivity, week: st.week, lastWeek: st.lastWeek || null, lostAt: st.lostAt || null
   });
   return { ok: true, active: active.length, log };
 }
