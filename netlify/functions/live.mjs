@@ -1,11 +1,12 @@
 // API del vigilante en vivo para Mi Mesa (solo el dueño, con su sesion de Supabase).
 //   GET  /api/live?action=snapshot                 -> cuentas de MFP + riesgo en vivo + posiciones abiertas
 //   GET  /api/live?action=closed&accounts=a,b&since=ms -> posiciones cerradas para importar como trades
+//   GET  /api/live?action=fills&accounts=a,b&since=ms  -> ejecuciones (tipo de orden, comision, deslizamiento)
 //   POST /api/live?action=config   { windows, cooldownMin, matchWindowMin, riskPerTrade, lang }
 //   POST /api/live?action=plans    { plans:[{id,fam,side,ts,status,acct}] }
 import { getStore } from '@netlify/blobs';
 import { ownerFromToken } from './_push.mjs';
-import { closedForImport } from './_live.mjs';
+import { closedForImport, fillsForImport } from './_live.mjs';
 import { hasKey } from './_mfp.mjs';
 
 const cors = {
@@ -36,6 +37,12 @@ export default async (req) => {
       const ids = (url.searchParams.get('accounts') || '').split(',').filter(Boolean).slice(0, 25);
       const since = +url.searchParams.get('since') || 0;
       return json({ positions: await closedForImport(ids, since) });
+    }
+    if (req.method === 'GET' && action === 'fills') {
+      if (!hasKey()) return json({ error: 'no-key' });
+      const ids = (url.searchParams.get('accounts') || '').split(',').filter(Boolean).slice(0, 10);
+      const since = +url.searchParams.get('since') || 0;
+      return json({ fills: await fillsForImport(ids, since) });
     }
     if (req.method === 'POST' && (action === 'config' || action === 'plans')) {
       const body = await req.json();
