@@ -326,6 +326,8 @@ export function trackZones(prevPlan, plan, f) {
 // las noticias USD de alto impacto del dia y una foto de las zonas de Mi Mesa para comparar.
 //   MM1;t=<ms>;news=<ms>,<ms>;NQ=<sesgo>/<confianza>/<regimen>/<L|S>:<lo>:<hi>:<grado>:<estado>,...
 // Campos vacios = sin dato. Sin espacios ni '=' dentro de los valores.
+// Version vigente de tdl-indicators/mi_mesa_zonas.pine (cambiala junto con VER en el script)
+export const IND_VERSION = '3.5';
 const encW = (w) => Object.entries(mergeWeights(w)).map(([k, v]) => k + ':' + (+v.toFixed(3))).join(',');
 export function buildTvSync(plan, news = [], nowMs = Date.now(), weights = null) {
   const clean = (s) => String(s ?? '').replace(/[;=/,:\s]/g, '');
@@ -336,15 +338,20 @@ export function buildTvSync(plan, news = [], nowMs = Date.now(), weights = null)
     .map((e) => (typeof e.ts === 'number' ? e.ts : Date.parse(e.time || e.date || '')))
     .filter((x) => Number.isFinite(x) && x > nowMs - 15 * 60e3 && x < dayEnd)
     .sort((a, b) => a - b).slice(0, 12);
-  const parts = ['MM1', 't=' + t, 'news=' + ev.join(',')];
+  // IV = ultima version del indicador: si el grafico tiene una vieja, su panel avisa que hay que actualizar
+  const parts = ['MM1', 't=' + t, 'news=' + ev.join(','), 'IV=' + IND_VERSION];
   // pesos del motor: activos (W) y en prueba (WS, modo sombra: el indicador los calcula aparte y los manda en los eventos)
   if (weights && weights.active) parts.push('WV=' + clean(weights.version || 'v1'), 'W=' + encW(weights.active));
   if (weights && weights.shadow) parts.push('WSV=' + clean(weights.shadowVersion || 'shadow'), 'WS=' + encW(weights.shadow));
   for (const [sym, p] of Object.entries(plan?.symbols || {})) {
     const sa = p.saPlan || {};
+    // sesgo igual que frameVote: el de la sesion manda; si la sesion es NEUTRAL va NEUTRAL^<dia> (el indicador
+    // muestra "NEUTRAL · dia ▼" en vez de "sin plan", y no le suma direccion, igual que el servidor)
     const bias = String(sa.biasSession || sa.biasDay || '').toUpperCase();
+    const day = String(sa.biasDay || '').toUpperCase();
+    const tok = bias === 'LONG' || bias === 'SHORT' ? bias : bias === 'NEUTRAL' ? 'NEUTRAL' + (day === 'LONG' || day === 'SHORT' ? '^' + day : '') : '';
     const zones = (p.zones || []).map((z) => [z.side === 'long' ? 'L' : 'S', z.lo, z.hi, clean(z.grade), clean(z.status)].join(':')).join(',');
-    parts.push(clean(sym) + '=' + [bias === 'LONG' || bias === 'SHORT' ? bias : '', clean(sa.conviction), clean(p.regime), zones].join('/'));
+    parts.push(clean(sym) + '=' + [tok, clean(sa.conviction), clean(p.regime), zones].join('/'));
   }
   return parts.join(';');
 }

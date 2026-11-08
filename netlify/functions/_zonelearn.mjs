@@ -68,11 +68,17 @@ export async function saveTrades(list) {
   let cur = {};
   try { cur = (await s.get('trades', { type: 'json' })) || {}; } catch (e) { cur = {}; }
   let n2 = 0;
-  for (const raw of list || []) { const t = cleanTrade(raw); if (t) { cur[t.id] = t; n2++; } }
+  const clean = (list || []).map(cleanTrade).filter(Boolean);
+  // cruce automatico con las zonas del dia (sin que tengas que llenar la ficha)
+  let matches = {};
+  try { matches = await autoMatch(clean); } catch (e) { matches = {}; }
+  for (const t of clean) { if (matches[t.id]) t.auto = matches[t.id]; else if (cur[t.id]?.auto) t.auto = cur[t.id].auto; cur[t.id] = t; n2++; }
   const keys = Object.keys(cur);
   if (keys.length > 3000) keys.sort((a, b) => (cur[a].topen || 0) - (cur[b].topen || 0)).slice(0, keys.length - 3000).forEach((k) => delete cur[k]);
   await s.setJSON('trades', cur);
-  return { saved: n2, total: Object.keys(cur).length };
+  const all = {};
+  for (const t of Object.values(cur)) if (t.auto) all[t.id] = t.auto;
+  return { saved: n2, total: Object.keys(cur).length, matches: all };
 }
 export async function loadTrades() {
   try { return Object.values((await store().get('trades', { type: 'json' })) || {}); } catch (e) { return []; }
@@ -92,4 +98,62 @@ export async function loadWeights() {
   } catch (e) { data = null; }
   try { await s.setJSON('weights-cache', { at: Date.now(), data }); } catch (e) { /* no importa */ }
   return data;
+}
+
+// ---------------- Cruce automatico trade <-> zona ----------------
+// Cada trade se liga a la zona del mismo dia, simbolo y lado cuyo rango (con medio ancho de colchon) contiene tu
+// precio de entrada y que ya existia cuando entraste (con 10 min de tolerancia, el toque se marca al cierre de la
+// vela). Fuentes: el estado en vivo del indicador (store 'intraday', 'tv:<SYM>:<dia>') y el registro del plan del
+// servidor ('log:<dia>'). Gana la del indicador, luego la de mejor calificacion. Puro salvo autoMatch.
+const FAM_SYM = { NQ: 'NQ', MNQ: 'NQ', ES: 'ES', MES: 'ES', GC: 'GC', MGC: 'GC', ETH: 'ETHUSDT', BTC: 'BTCUSDT', ETHUSDT: 'ETHUSDT', BTCUSDT: 'BTCUSDT' };
+const GR = { 'A+': 3, A: 2, B: 1 };
+const ms = (v) => (typeof v === 'number' ? v : v ? Date.parse(v) : null);
+
+export function matchTrade(t, zones) {
+  if (t.entry == null || !t.topen) return null;
+  const hits = (zones || []).filter((z) => {
+    if (z.side !== t.side || z.lo == null || z.hi == null) return false;
+    const pad = (z.hi - z.lo) * 0.5;
+    if (t.entry < z.lo - pad || t.entry > z.hi + pad) return false;
+    const born = Math.min(...[z.createdAt, z.touchedAt, z.armedAt, z.t].map(ms).filter((x) => Number.isFinite(x)));
+    return !Number.isFinite(born) || born <= t.topen + 10 * 60e3;
+  });
+  if (!hits.length) return null;
+  hits.sort((a, b) => (b.src === 'tv') - (a.src === 'tv') || (GR[b.grade] || 0) - (GR[a.grade] || 0));
+  const z = hits[0];
+  const armedAt = ms(z.armedAt);
+  return {
+    zoneId: z.id, grade: z.grade || null, lo: z.lo, hi: z.hi, status: z.status || null, src: z.src,
+    inside: t.entry >= z.lo && t.entry <= z.hi, armedAt: armedAt || null, touchedAt: ms(z.touchedAt) || null,
+    // entraste antes de que la vela de 5 min confirmara (gatillo); null = la zona nunca se armo
+    beforeTrigger: armedAt ? t.topen < armedAt : null, armed: !!armedAt
+  };
+}
+
+export async function autoMatch(trades, nowMs = Date.now()) {
+  const since = nowMs - 21 * 86400e3;
+  const need = new Map();
+  for (const t of trades) {
+    const sym = FAM_SYM[String(t.fam || '').toUpperCase()];
+    if (!sym || !t.day || !t.topen || t.topen < since) continue;
+    const k = t.day + '|' + sym;
+    if (!need.has(k)) need.set(k, []);
+    need.get(k).push(t);
+  }
+  const intr = getStore('intraday');
+  const logs = {};
+  const keys = [...need.keys()].slice(0, 60);
+  await Promise.all(keys.map(async (k) => {
+    const [day, sym] = k.split('|');
+    const zs = [];
+    try { Object.values((await intr.get('tv:' + sym + ':' + day, { type: 'json' })) || {}).forEach((z) => zs.push({ ...z, src: 'tv' })); } catch (e) { /* sin eventos */ }
+    try {
+      if (!logs[day]) logs[day] = (await intr.get('log:' + day, { type: 'json' })) || {};
+      Object.values(logs[day]).filter((z) => z.sym === sym).forEach((z) => zs.push({ ...z, src: 'plan' }));
+    } catch (e) { /* sin log */ }
+    for (const t of need.get(k)) { const m = matchTrade(t, zs); if (m) t._m = m; }
+  }));
+  const out = {};
+  for (const t of trades) if (t._m) { out[t.id] = t._m; delete t._m; }
+  return out;
 }

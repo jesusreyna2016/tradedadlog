@@ -144,7 +144,8 @@ export async function checkZoneAlerts(sym, kv) {
 // confirmo: es la entrada). Respeta las preferencias de cada suscripcion (mercados, calificacion minima)
 // y avisa una sola vez por zona y dia.
 export async function notifyTvEvents(events) {
-  const armed = (events || []).filter((e) => e.ev === 'armada');
+  // armada = "entra ahora"; funciono / invalidada solo de zonas que se armaron (el resultado de la entrada)
+  const armed = (events || []).filter((e) => e.ev === 'armada' || ((e.ev === 'funciono' || e.ev === 'invalidada') && e.prevStatus === 'armada'));
   if (!armed.length) return { sent: [] };
   const subs = await listSubs();
   if (!subs.length) return { skipped: 'sin suscripciones' };
@@ -157,12 +158,12 @@ export async function notifyTvEvents(events) {
       const syms = pr.syms && pr.syms.length ? pr.syms : ['NQ', 'ES', 'GC', 'ETH', 'BTC'];
       if (!syms.includes(fam(e.sym))) continue;
       if ((GRADE_RANK[e.grade] || 0) < (GRADE_RANK[pr.minGrade || 'A'] || 2)) continue;
-      const key = `sent:${day}:${sub.key.slice(4)}:${e.sym}:${e.id}:armada`;
+      const key = `sent:${day}:${sub.key.slice(4)}:${e.sym}:${e.id}:${e.ev}`;
       if (await s.get(key).catch(() => null)) continue;
       const lang = pr.lang === 'en' ? 'en' : 'es';
       const side = e.side === 'long' ? (lang === 'en' ? 'LONG' : 'COMPRA') : (lang === 'en' ? 'SHORT' : 'VENTA');
       const f = fam(e.sym);
-      const payload = {
+      const payload = e.ev !== 'armada' ? resultPayload(e, f, side, lang) : {
         title: lang === 'en' ? `${f}: enter now · ${e.grade} ${side}` : `${f}: entra ahora · ${e.grade} ${side}`,
         body: (lang === 'en' ? `Entry ${px(e.entry)} · stop ${px(e.stop)} · target ${px(e.tp1)}` : `Entrada ${px(e.entry)} · stop ${px(e.stop)} · objetivo ${px(e.tp1)}`) +
           (e.size ? ` · ${e.size}` : '') + (e.conf ? (lang === 'en' ? `. Why: ` : `. Motivo: `) + e.conf : ''),
@@ -173,6 +174,34 @@ export async function notifyTvEvents(events) {
     }
   }
   return { sent };
+}
+
+function resultPayload(e, f, side, lang) {
+  const ok = e.ev === 'funciono';
+  const mfe = e.f?.mfe, mae = e.f?.mae;
+  const ex = Number.isFinite(mfe) ? (lang === 'en' ? ` · went ${mfe}R in favor, ${mae}R against` : ` · fue ${mfe}R a favor, ${mae}R en contra`) : '';
+  return {
+    title: lang === 'en' ? `${f}: ${e.grade} ${side} ${ok ? 'hit target 1' : 'stopped out'}` : `${f}: ${e.grade} ${side} ${ok ? 'llegó al objetivo 1' : 'tocó el stop'}`,
+    body: (lang === 'en' ? `Entry ${px(e.entry)} · stop ${px(e.stop)} · target ${px(e.tp1)}` : `Entrada ${px(e.entry)} · stop ${px(e.stop)} · objetivo ${px(e.tp1)}`) + ex,
+    tag: `${f}-${e.id}-${e.ev}`, url: '/#zonas', sym: f, zone: e.id
+  };
+}
+
+// Aviso cuando un grafico deja de mandar su senal de vida con el mercado abierto (una vez por caida).
+export async function notifyTvDead(health, hbRaw) {
+  const dead = Object.entries(health || {}).filter(([sym, h]) => h.state === 'caido' && !hbRaw?.[sym]?.deadNotified);
+  if (!dead.length) return { dead: [] };
+  const subs = await listSubs();
+  for (const [sym, h] of dead) {
+    const f = fam(sym);
+    for (const sub of subs) {
+      const lang = (sub.prefs || {}).lang === 'en' ? 'en' : 'es';
+      await sendTo(sub, lang === 'en'
+        ? { title: `${f}: TradingView alert stopped`, body: `The Mi Mesa Zonas chart for ${f} has not reported for ${h.ageMin} min. Open the chart and check or recreate the alert.`, tag: `${f}-hb`, url: '/#zonas' }
+        : { title: `${f}: la alerta de TradingView se cayó`, body: `El gráfico de Mi Mesa Zonas de ${f} no reporta hace ${h.ageMin} min. Abre el gráfico y revisa o vuelve a crear la alerta.`, tag: `${f}-hb`, url: '/#zonas' }).catch(() => null);
+    }
+  }
+  return { dead: dead.map(([s]) => s) };
 }
 
 export function testMessage(lang) {
