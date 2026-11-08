@@ -18,7 +18,7 @@ const cors = {
 const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: cors });
 
 export default async (req) => {
-  if (req.method === 'OPTIONS') return new Response('', { status: 204, headers: cors });
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
   if (req.method === 'GET') {
     const v = await getVapid();
     return json({ publicKey: v.publicKey });
