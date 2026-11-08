@@ -125,18 +125,36 @@ export function parseHb(body) {
   return out;
 }
 
+// Cada simbolo en su propia clave (hb:<SYM>): las alertas de los 5 graficos llegan casi juntas y,
+// con una sola clave compartida, una escritura borraba a la otra.
 export async function recordHb(list, nowMs = Date.now()) {
   if (!list.length) return 0;
   const store = getStore('intraday');
-  let hb = {};
-  try { hb = (await store.get('hb', { type: 'json' })) || {}; } catch (e) { hb = {}; }
   for (const h of list) {
-    const cur = hb[h.sym] || {};
+    let cur = {};
+    try { cur = (await store.get('hb:' + h.sym, { type: 'json' })) || {}; } catch (e) { cur = {}; }
     // si el simbolo estaba caido y vuelve, se borra el aviso enviado
-    hb[h.sym] = { ...h, at: nowMs, firstAt: cur.firstAt || nowMs, deadNotified: null };
+    await store.setJSON('hb:' + h.sym, { ...h, at: nowMs, firstAt: cur.firstAt || nowMs, deadNotified: null });
   }
-  await store.setJSON('hb', hb);
   return list.length;
+}
+
+// Todas las senales de vida: claves hb:<SYM> (y la clave vieja 'hb' de la v3.5 inicial, como respaldo).
+export async function loadHbRaw(store = getStore('intraday')) {
+  let out = {};
+  try { out = { ...((await store.get('hb', { type: 'json' })) || {}) }; } catch (e) { out = {}; }
+  try {
+    const { blobs } = await store.list({ prefix: 'hb:' });
+    const rows = await Promise.all(blobs.map((b) => store.get(b.key, { type: 'json' }).catch(() => null)));
+    blobs.forEach((b, i) => { if (rows[i]) out[b.key.slice(3)] = rows[i]; });
+  } catch (e) { /* respaldo: clave vieja */ }
+  return out;
+}
+
+export async function markHbDead(syms, nowMs = Date.now(), store = getStore('intraday')) {
+  for (const s of syms) {
+    try { const cur = await store.get('hb:' + s, { type: 'json' }); if (cur) await store.setJSON('hb:' + s, { ...cur, deadNotified: nowMs }); } catch (e) { /* siguiente */ }
+  }
 }
 
 // CME (NQ, ES, GC, YM, CL): domingo 17:00 a viernes 16:00 CT, con pausa diaria 16:00-17:00 CT. Cripto: siempre.
@@ -171,5 +189,5 @@ export function healthFrom(hb, nowMs, latest) {
 }
 
 export async function loadHealth(nowMs = Date.now(), latest = null) {
-  try { return healthFrom((await getStore('intraday').get('hb', { type: 'json' })) || {}, nowMs, latest); } catch (e) { return {}; }
+  try { return healthFrom(await loadHbRaw(), nowMs, latest); } catch (e) { return {}; }
 }

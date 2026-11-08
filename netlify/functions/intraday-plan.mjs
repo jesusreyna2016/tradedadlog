@@ -14,7 +14,7 @@ import feedHandler from './session-feed.mjs';
 import newsHandler from './cc-news.mjs';
 import { busGet, busPut } from './_sa-bus.mjs';
 import { buildSymbolPlan, trackZones, buildTvSync, IND_VERSION } from './_intraday.mjs';
-import { loadTv, mergeTv, healthFrom } from './_tvzones.mjs';
+import { loadTv, mergeTv, healthFrom, loadHbRaw, markHbDead } from './_tvzones.mjs';
 import { notifyTvDead } from './_push.mjs';
 import { loadWeights } from './_zonelearn.mjs';
 
@@ -84,9 +84,9 @@ export async function runIntraday({ write = true } = {}) {
 
   // graficos que dejaron de mandar su senal de vida con el mercado abierto: un push por caida
   try {
-    const hbRaw = (await store.get('hb', { type: 'json' })) || {};
+    const hbRaw = await loadHbRaw(store);
     const r = await notifyTvDead(healthFrom(hbRaw, nowMs, IND_VERSION), hbRaw);
-    if (r.dead?.length) { for (const s of r.dead) hbRaw[s].deadNotified = nowMs; await store.setJSON('hb', hbRaw); }
+    if (r.dead?.length) await markHbDead(r.dead, nowMs, store);
   } catch (e) { /* los avisos son secundarios */ }
 
   await store.setJSON('latest', out);
@@ -135,7 +135,7 @@ export default async (req) => {
     // estado en vivo del grafico (indicador Mi Mesa · Zonas): si va mas adelantado que la corrida de 15 min, gana
     try { if (j.symbols) mergeTv(j, await loadTv(Object.keys(j.symbols))); } catch (e) { /* sin eventos del grafico */ }
     // estado de cada grafico de TradingView (senal de vida del indicador) y la version vigente
-    try { j.tvHealth = healthFrom((await store.get('hb', { type: 'json' })) || {}, Date.now(), IND_VERSION); j.indVersion = IND_VERSION; } catch (e) { /* opcional */ }
+    try { j.tvHealth = healthFrom(await loadHbRaw(store), Date.now(), IND_VERSION); j.indVersion = IND_VERSION; } catch (e) { /* opcional */ }
     return new Response(JSON.stringify(j), { headers });
   } catch (e) {
     return new Response(JSON.stringify({ error: String(e.message || e) }), { status: 500, headers });
