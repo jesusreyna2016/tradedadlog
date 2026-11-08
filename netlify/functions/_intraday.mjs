@@ -32,14 +32,28 @@ const LEVEL_W = {
   sh1h: 2, sl1h: 2, sh4h: 2.5, sl4h: 2.5, sh5: 0.5, sl5: 0.5,
   ema200: 1, ema50h: 1, vwapUp: 1, vwapDn: 1, vwap: 1
 };
+// Nombres en los dos idiomas (la app Mi Mesa elige). Explicados en palabras simples.
+const B = (es, en) => ({ es, en: en ?? es });
 const LEVEL_NAME = {
-  pdh: 'PDH', pdl: 'PDL', pwh: 'PWH', pwl: 'PWL', pmh: 'PMH', pml: 'PML', onh: 'ONH', onl: 'ONL',
-  asH: 'Asia H', asL: 'Asia L', loH: 'Londres H', loL: 'Londres L', ibh: 'IBH', ibl: 'IBL',
-  vah: 'VAH', val: 'VAL', poc: 'POC', dvah: 'VAH dia', dval: 'VAL dia', dpoc: 'POC dia',
-  pdc: 'Cierre previo', pdMid: 'Mitad dia previo', do: 'Apertura dia', tdo: 'Apertura real (TDO)',
-  wo: 'Apertura semana', mOpen: 'Apertura mes', sh1h: 'Swing H 1h', sl1h: 'Swing L 1h',
-  sh4h: 'Swing H 4h', sl4h: 'Swing L 4h', sh5: 'Swing H 5m', sl5: 'Swing L 5m',
-  ema200: 'EMA200 5m', ema50h: 'EMA50 1h', vwapUp: 'VWAP +1σ', vwapDn: 'VWAP -1σ', vwap: 'VWAP'
+  pdh: B('Máximo de ayer', "Yesterday's high"), pdl: B('Mínimo de ayer', "Yesterday's low"),
+  pwh: B('Máximo de la semana pasada', "Last week's high"), pwl: B('Mínimo de la semana pasada', "Last week's low"),
+  pmh: B('Máximo del mes pasado', "Last month's high"), pml: B('Mínimo del mes pasado', "Last month's low"),
+  onh: B('Máximo de la noche', 'Overnight high'), onl: B('Mínimo de la noche', 'Overnight low'),
+  asH: B('Máximo de Asia', 'Asia high'), asL: B('Mínimo de Asia', 'Asia low'),
+  loH: B('Máximo de Londres', 'London high'), loL: B('Mínimo de Londres', 'London low'),
+  ibh: B('Máximo de la primera hora', 'First-hour high'), ibl: B('Mínimo de la primera hora', 'First-hour low'),
+  vah: B('Parte alta del volumen (VAH)', 'Top of the volume area (VAH)'), val: B('Parte baja del volumen (VAL)', 'Bottom of the volume area (VAL)'),
+  poc: B('Precio con más volumen (POC)', 'Highest-volume price (POC)'),
+  dvah: B('Parte alta del volumen de hoy', "Top of today's volume area"), dval: B('Parte baja del volumen de hoy', "Bottom of today's volume area"),
+  dpoc: B('Precio con más volumen hoy', "Today's highest-volume price"),
+  pdc: B('Cierre de ayer', "Yesterday's close"), pdMid: B('Mitad del rango de ayer', "Middle of yesterday's range"),
+  do: B('Apertura del día', 'Day open'), tdo: B('Apertura real del día', 'True day open'),
+  wo: B('Apertura de la semana', 'Week open'), mOpen: B('Apertura del mes', 'Month open'),
+  sh1h: B('Máximo reciente en 1 hora', 'Recent 1-hour high'), sl1h: B('Mínimo reciente en 1 hora', 'Recent 1-hour low'),
+  sh4h: B('Máximo reciente en 4 horas', 'Recent 4-hour high'), sl4h: B('Mínimo reciente en 4 horas', 'Recent 4-hour low'),
+  sh5: B('Máximo reciente en 5 min', 'Recent 5-min high'), sl5: B('Mínimo reciente en 5 min', 'Recent 5-min low'),
+  ema200: B('Media de 200 en 5 min', '200 average on 5 min'), ema50h: B('Media de 50 en 1 hora', '50 average on 1 hour'),
+  vwapUp: B('Banda alta del VWAP', 'Upper VWAP band'), vwapDn: B('Banda baja del VWAP', 'Lower VWAP band'), vwap: B('VWAP (precio promedio del día)', 'VWAP (day average price)')
 };
 const FVG_W = { '5m': 1, '15m': 1.5, '1h': 2.5, '4h': 3 };
 
@@ -71,7 +85,7 @@ function frameVote(trendcl, plan) {
     sa = b === 'LONG' ? 1 : b === 'SHORT' ? -1 : 0;
     const w = String(plan.conviction || '').toLowerCase() === 'alta' ? 1.5 : 1;
     v += sa * w;
-    if (sa) parts.push('Plan ' + (sa > 0 ? 'LONG' : 'SHORT') + (plan.conviction ? ' (' + plan.conviction + ')' : ''));
+    if (sa) parts.push(B('Plan ' + (sa > 0 ? 'compra' : 'venta') + (plan.conviction ? ' (confianza ' + plan.conviction + ')' : ''), 'Plan ' + (sa > 0 ? 'long' : 'short') + (plan.conviction ? ' (' + ({ alta: 'high', media: 'medium', baja: 'low' }[plan.conviction] || plan.conviction) + ' confidence)' : '')));
   }
   const dir = v >= 1.5 ? 1 : v <= -1.5 ? -1 : 0;
   return { score: +v.toFixed(2), dir, label: dir > 0 ? 'ALCISTA' : dir < 0 ? 'BAJISTA' : 'NEUTRAL', parts, sa };
@@ -88,7 +102,7 @@ export function buildSymbolPlan(sym, src) {
   const atr5 = n(f.atr5), atrD = n(f.atrD);
   const tick = TICK[sym] || 0.01;
   if (price === null || !atr5 || !atrD) {
-    return { sym, price, verdict: 'SIN DATOS', warnings: ['El TDL Feed no tiene datos de este simbolo'], zones: [] };
+    return { sym, price, verdict: 'SIN DATOS', warnings: [B('Todavía no llegan datos de este mercado', 'No data for this market yet')], zones: [] };
   }
   const now = src.now || Date.now();
   const tol = Math.max(atr5 * 0.5, tick * 4);
@@ -104,17 +118,18 @@ export function buildSymbolPlan(sym, src) {
   }
   for (const g of parseFvg(f.fvg)) {
     const w = FVG_W[g.tf] || 1;
-    const label = g.tf + (g.type.startsWith('i') ? ' iFVG' : ' FVG') + (g.type.endsWith('bull') ? ' alcista' : ' bajista');
+    const up = g.type.endsWith('bull'), inv = g.type.startsWith('i');
+    const label = B((inv ? 'Hueco invertido ' : 'Hueco ') + (up ? 'alcista' : 'bajista') + ' en ' + g.tf + (inv ? ' (iFVG)' : ' (FVG)'), (inv ? 'Inverted ' + (up ? 'bullish' : 'bearish') : (up ? 'Bullish' : 'Bearish')) + ' gap on ' + g.tf + (inv ? ' (iFVG)' : ' (FVG)'));
     if (g.hi - g.lo > maxW) {
       // FVG enorme: solo su borde cercano al precio y su CE sirven como niveles operables
       const near = Math.abs(g.hi - price) < Math.abs(g.lo - price) ? g.hi : g.lo;
-      els.push({ lo: near, hi: near, w, name: label + ' (borde)' });
-      els.push({ lo: (g.lo + g.hi) / 2, hi: (g.lo + g.hi) / 2, w: w * 0.6, name: label + ' (CE)' });
+      els.push({ lo: near, hi: near, w, name: B(label.es + ', borde', label.en + ', edge') });
+      els.push({ lo: (g.lo + g.hi) / 2, hi: (g.lo + g.hi) / 2, w: w * 0.6, name: B(label.es + ', mitad', label.en + ', middle') });
     } else {
       els.push({ lo: g.lo, hi: g.hi, w, name: label });
     }
   }
-  for (const [k, nm] of [['gzLong', 'Golden zone long'], ['gzShort', 'Golden zone short']]) {
+  for (const [k, nm] of [['gzLong', B('Zona de descuento (golden zone)', 'Discount zone (golden zone)')], ['gzShort', B('Zona cara (golden zone)', 'Premium zone (golden zone)')]]) {
     const m = String(f[k] || '').split(':').map(n);
     if (m.length === 2 && m[0] !== null && m[1] !== null && Math.abs(m[1] - m[0]) <= maxW * 1.5) {
       els.push({ lo: Math.min(m[0], m[1]), hi: Math.max(m[0], m[1]), w: 1.5, name: nm });
@@ -155,8 +170,8 @@ export function buildSymbolPlan(sym, src) {
     let conf = 0; ws.forEach((w, i) => { conf += w * Math.pow(0.7, i); });
     let score = conf;
     const why = [];
-    if (fv.dir === sgn) { score += 1.5; why.push('a favor de ' + fv.label.toLowerCase()); }
-    else if (fv.dir === -sgn) { score -= 1.5; why.push('contra los marcos (' + fv.label.toLowerCase() + ')'); }
+    if (fv.dir === sgn) { score += 1.5; why.push(B('a favor de la dirección del mercado', 'with the market direction')); }
+    else if (fv.dir === -sgn) { score -= 1.5; why.push(B('contra la dirección del mercado', 'against the market direction')); }
     if (regime === 'CHOP') score -= 0.5;
     if (regime === 'BULL' && side === 'long') score += 0.5;
     if (regime === 'BEAR' && side === 'short') score += 0.5;
@@ -186,14 +201,15 @@ export function buildSymbolPlan(sym, src) {
     const next = ahead.find((m) => (side === 'long' ? m > tp1 + risk * 0.5 : m < tp1 - risk * 0.5));
     const tp2 = roundTo(next !== undefined ? next : tp1 + sgn * risk * 2, tick);
     const rr1 = risk > 0 ? +(Math.abs(tp1 - entry) / risk).toFixed(2) : null;
-    if (rr1 !== null && rr1 < 1.2) { score -= 1; why.push('poco recorrido hasta el objetivo (' + rr1 + 'R)'); }
+    if (rr1 !== null && rr1 < 1.2) { score -= 1; why.push(B('poco espacio hasta el objetivo (' + rr1 + 'R)', 'little room to the target (' + rr1 + 'R)')); }
 
     const aligned = fv.dir === sgn;
     let grade = score >= 7 && aligned ? 'A+' : score >= 5 ? 'A' : score >= 3.5 ? 'B' : 'C';
     if (!aligned && grade === 'A+') grade = 'A';
     if (fv.dir === -sgn && grade === 'A') grade = 'B'; // contra-tendencia nunca pasa de B
 
-    const names = [...new Set(c.members.map((m) => m.name))];
+    const seen = new Set();
+    const names = c.members.map((m) => m.name).filter((nm) => { const k = nm.es || nm; if (seen.has(k)) return false; seen.add(k); return true; });
     zones.push({
       id: side + ':' + roundTo(mid, tick * 4).toFixed(2),
       side, lo: roundTo(lo, tick), hi: roundTo(hi, tick), mid: roundTo(mid, tick),
@@ -201,9 +217,9 @@ export function buildSymbolPlan(sym, src) {
       distPts: +distPts.toFixed(2), distAtr5: +distAtr.toFixed(1), inside,
       score: +score.toFixed(2), grade, aligned, confluence: names,
       trigger: side === 'long'
-        ? 'Barrida o toque de ' + roundTo(lo, tick) + '–' + roundTo(hi, tick) + ' y cierre de 5m de vuelta arriba (reclamo). Sin cierre de vuelta, no hay trade.'
-        : 'Barrida o toque de ' + roundTo(lo, tick) + '–' + roundTo(hi, tick) + ' y cierre de 5m de vuelta abajo (rechazo). Sin cierre de vuelta, no hay trade.',
-      invalid: 'Cierre de 5m ' + (side === 'long' ? 'bajo ' : 'sobre ') + stop,
+        ? B('Espera que el precio toque o pase un poco ' + roundTo(lo, tick) + '–' + roundTo(hi, tick) + ' y que una vela de 5 min cierre de vuelta arriba. Si no cierra arriba, no entras.', 'Wait for price to touch or slightly pass ' + roundTo(lo, tick) + '–' + roundTo(hi, tick) + ' and for a 5-min candle to close back above. If it does not close above, stay out.')
+        : B('Espera que el precio toque o pase un poco ' + roundTo(lo, tick) + '–' + roundTo(hi, tick) + ' y que una vela de 5 min cierre de vuelta abajo. Si no cierra abajo, no entras.', 'Wait for price to touch or slightly pass ' + roundTo(lo, tick) + '–' + roundTo(hi, tick) + ' and for a 5-min candle to close back below. If it does not close below, stay out.'),
+      invalid: B('La idea falla si una vela de 5 min cierra ' + (side === 'long' ? 'debajo de ' : 'arriba de ') + stop, 'The idea fails if a 5-min candle closes ' + (side === 'long' ? 'below ' : 'above ') + stop),
       why
     });
   }
@@ -214,13 +230,13 @@ export function buildSymbolPlan(sym, src) {
 
   // 5) Avisos y veredicto
   const warnings = [];
-  if (chop !== null && chop >= 61.8) warnings.push('Chop alto (' + chop + '): rango sucio, solo extremos A+ o no operar');
-  if (stretch !== null && Math.abs(stretch) >= 2) warnings.push('Precio estirado ' + stretch + '× ATR 5m: no persigas, espera la zona');
-  if (rangePct !== null && rangePct >= 100) warnings.push('El dia ya hizo ' + rangePct + '% de su ATR (' + (f.emRegime || 'agotado') + '): objetivos cortos');
-  if (f.sweep && n(f.sweepAgo) !== null && n(f.sweepAgo) <= 6) warnings.push('Barrida reciente ' + f.sweep + ' hace ' + f.sweepAgo + ' velas');
-  if (f.smt && f.smt !== 'none') warnings.push('SMT ' + (f.smt === 'bull' ? 'alcista' : 'bajista') + ' activa');
+  if (chop !== null && chop >= 61.8) warnings.push(B('Mercado lateral y sucio (' + chop + '): solo zonas A+ en los extremos, o no operes', 'Choppy, messy market (' + chop + '): only A+ zones at the extremes, or do not trade'));
+  if (stretch !== null && Math.abs(stretch) >= 2) warnings.push(B('El precio se alejó mucho (' + stretch + ' veces su movimiento normal): no lo persigas, espera la zona', 'Price ran far (' + stretch + ' times its normal move): do not chase it, wait for the zone'));
+  if (rangePct !== null && rangePct >= 100) warnings.push(B('Hoy ya se movió el ' + rangePct + '% de un día normal: usa objetivos cortos', 'Today already moved ' + rangePct + '% of a normal day: use short targets'));
+  if (f.sweep && n(f.sweepAgo) !== null && n(f.sweepAgo) <= 6) warnings.push(B('Barrida reciente (' + f.sweep + ') hace ' + f.sweepAgo + ' velas: el precio sacó stops y regresó', 'Recent sweep (' + f.sweep + ') ' + f.sweepAgo + ' candles ago: price took out stops and came back'));
+  if (f.smt && f.smt !== 'none') warnings.push(f.smt === 'bull' ? B('NQ y ES no coinciden (SMT): posible giro hacia arriba', 'NQ and ES disagree (SMT): possible turn up') : B('NQ y ES no coinciden (SMT): posible giro hacia abajo', 'NQ and ES disagree (SMT): possible turn down'));
   const vix = n(f.vix);
-  if (vix !== null && vix >= 25) warnings.push('VIX ' + vix + ': stops mas anchos, baja el tamaño');
+  if (vix !== null && vix >= 25) warnings.push(B('Volatilidad alta (VIX ' + vix + '): stops más anchos, usa menos tamaño', 'High volatility (VIX ' + vix + '): wider stops, use less size'));
 
   // calendario de cc-news (forexfactory): solo USD de impacto alto mueve estos simbolos
   const upcoming = (src.news || []).filter((e) => {
@@ -228,7 +244,7 @@ export function buildSymbolPlan(sym, src) {
     return Number.isFinite(t) && String(e.impact || '').toLowerCase() === 'high' &&
       (!e.currency || e.currency === 'USD') && t > now - 10 * 60e3 && t < now + 45 * 60e3;
   });
-  if (upcoming.length) warnings.push('Noticia USD de alto impacto en la ventana de -10/+45 min: ' + upcoming.map((e) => e.title || e.event).join(', '));
+  if (upcoming.length) warnings.push(B('Noticia importante de EE. UU. en los próximos 45 min: ' + upcoming.map((e) => e.title || e.event).join(', '), 'Major US news in the next 45 min: ' + upcoming.map((e) => e.title || e.event).join(', ')));
 
   let feedAgeMin = null;
   if (src.feedAt) feedAgeMin = Math.round((now - Date.parse(src.feedAt)) / 60e3);
