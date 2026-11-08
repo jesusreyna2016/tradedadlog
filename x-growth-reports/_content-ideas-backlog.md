@@ -91,6 +91,18 @@ Running list of post ideas sourced from real audience comments and trend scans. 
 
 - **Rule (31 oct 2026)** — 11 posts in 5 days did not raise reach (median 662). Generic bait and the motivational template voice sit at 350 to 645. Max 2 a day, one real detail each.
 
+- **Pull it and buy a new eval, source: @mannyjplays, @R3G5B7, @gcfukdme on the Nov 5 $4,242 post** `[USED 2026-11-08 as complaint+question draft 2, cycle #18]`
+
+- **After a withdrawal, oversizing to get back to $4k, source: @otisarcade (Nov 5, "ask me how I know")**. Open, ask him how he fixed it before drafting.
+
+- **Weekly "payouts vs fees" scoreboard, source: his Nov 1 post (4.1K) + niche genre (@Market_Emotions, @trades_sage, @kunaltradess)** `[USED 2026-11-08 as scoreboard draft 1, cycle #18, bracketed]`
+
+- **Thursday I stopped, Friday I lost accounts, source: his own Nov 5 and Nov 6 posts** `[USED 2026-11-08 as confession draft 3, cycle #18]`
+
+- **Rule (8 nov 2026)**: one story, one post: four posts on the Nov 5 payout split reach (1.3K, 471, 873, 693). The post with a real number and a real question wins; restatements and firm-tag praise sit under 900.
+
+- **Rule (8 nov 2026)**: ask for numbers, not agreement: the scoreboard got 20 replies of applause; the $4,242 decision question got 11 replies of advice.
+
 ## Used ideas
 - **Mine the viral pair's comments, source: own account, Sep 2-3** — `[USED 2026-09-04 — mined the 15K/10K posts' replies interactively, yielded the need-vs-want, payout-maxxing, physical-ritual and emotional-neutrality ideas above]`
 - **Aphorism riff, @RealizedTrader comment (27 ago 2026)** — "Knowing the rule was never the problem. Breaking it anyway is." `[USED 2026-08-31 — posted as the Aug 31 aphorism, status 2094580592495002023]`
