@@ -283,7 +283,21 @@ export async function closedForImport(acctIds, since) {
   const out = [];
   for (const id of acctIds) {
     const list = await closedPositions(id, { since, maxPages: since ? 3 : 20 });
-    for (const p of list) out.push({ ...p, had_stop: stops[p.id] ? true : p.close_reason === 'stop_loss' ? true : undefined });
+    // stop y objetivo de cada posicion, sacados de sus ejecuciones:
+    //   entrada con stop/objetivo pegado (attached_*), o el stop/objetivo que la cerro (trigger_price)
+    let fills = [];
+    try { fills = await fillsSince(id, { since: since ? since - 86400e3 : 0, maxPages: since ? 4 : 25 }); } catch (e) { fills = []; }
+    const bySym = {};
+    fills.forEach((f) => (bySym[f.symbol] = bySym[f.symbol] || []).push(f));
+    for (const p of list) {
+      const F = (bySym[p.symbol] || []).filter((f) => f.settled_at >= p.opened_at - 1000 && f.settled_at <= (p.closed_at || p.opened_at) + 1000);
+      const entryF = F.filter((f) => !f.reduce_only);
+      const exitF = F.filter((f) => f.reduce_only);
+      const sl = entryF.map((f) => +f.attached_stop_loss_price).find((v) => v > 0) || exitF.filter((f) => /^stop/.test(f.type || '') || f.bracket_role === 'stop_loss').map((f) => +f.trigger_price).find((v) => v > 0) || null;
+      const tp = entryF.map((f) => +f.attached_take_profit_price).find((v) => v > 0) || exitF.filter((f) => /^take/.test(f.type || '') || f.bracket_role === 'take_profit').map((f) => +f.trigger_price).find((v) => v > 0) || null;
+      const market = entryF.some((f) => f.type === 'market') ? 'market' : entryF.some((f) => f.type === 'limit') ? 'limit' : null;
+      out.push({ ...p, had_stop: stops[p.id] || sl || p.close_reason === 'stop_loss' ? true : undefined, stop_price: sl, tp_price: tp, entry_type: market });
+    }
   }
   return out;
 }
