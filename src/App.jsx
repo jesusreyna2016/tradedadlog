@@ -64,7 +64,7 @@ const Icon = {
 const TOOLS = [
   {
     icon: 'journal', tone: 'pos', url: 'https://mywhyjournal.com/', badge: 'live', featured: true,
-    title: 'Trading Journal',
+    title: 'My Why Journal',
     sub: { en: 'Free discipline-first journal: leaks, tilt score, routine and calendar.', es: 'Journal gratis centrado en disciplina: fugas, score de tilt, rutina y calendario.' },
   },
   {
