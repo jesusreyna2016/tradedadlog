@@ -1012,6 +1012,36 @@ body::before{
 
   </section>
 
+  <section class="tabpane" id="tab-sys" role="tabpanel" aria-labelledby="tb-sys" hidden>
+  <div class="tabintro">
+    <h2 data-i18n-es="Estado del sistema" data-i18n-en="System status">System status</h2>
+    <p data-i18n-es="Rutinas, alertas de TradingView y feeds de un vistazo. Lo escribe el watchdog cuatro veces al d&iacute;a; si algo se par&oacute;, sale aqu&iacute; en rojo." data-i18n-en="Routines, TradingView alerts and feeds at a glance. The watchdog writes it four times a day; if something stopped, it shows here in red.">Routines, TradingView alerts and feeds at a glance. The watchdog writes it four times a day; if something stopped, it shows here in red.</p>
+  </div>
+  <div class="dash two">
+    <div class="panel full">
+      <div class="phead"><span class="dot"></span><h2 data-i18n-es="Resumen" data-i18n-en="Summary">Summary</h2><a class="tag" href="health.html" target="_blank" rel="noopener" style="color:var(--cyan)" data-i18n-html-es="Detalle &#9654;" data-i18n-html-en="Details &#9654;">Details &#9654;</a></div>
+      <div id="ssTop"><div class="ss-note" data-i18n-es="Cargando..." data-i18n-en="Loading...">Loading...</div></div>
+    </div>
+    <div class="panel">
+      <div class="phead"><span class="dot"></span><h2 data-i18n-es="Qu&eacute; revisar" data-i18n-en="What to check">What to check</h2><span class="tag" id="ssIssN"></span></div>
+      <ul class="ss-list" id="ssIssues"></ul>
+    </div>
+    <div class="panel">
+      <div class="phead"><span class="dot"></span><h2 data-i18n-es="Rutinas &middot; commits" data-i18n-en="Routines &middot; pushes">Routines &middot; pushes</h2><span class="tag" id="ssPushTag"></span></div>
+      <ul class="ss-list" id="ssPush"></ul>
+    </div>
+    <div class="panel">
+      <div class="phead"><span class="dot"></span><h2 data-i18n-es="Alertas de TradingView" data-i18n-en="TradingView alerts">TradingView alerts</h2></div>
+      <div class="ss-grid" id="ssSrc"></div>
+      <div class="ss-legend" id="ssSrcLeg"></div>
+    </div>
+    <div class="panel">
+      <div class="phead"><span class="dot"></span><h2 data-i18n-es="Servicios" data-i18n-en="Services">Services</h2></div>
+      <ul class="ss-list" id="ssSvc"></ul>
+    </div>
+  </div>
+  </section>
+
   <!-- RETIRED · hidden on purpose: manual plan paste, relative strength and the broker CSV
        (the journal owns performance now). Kept in the DOM so their scripts keep working. -->
   <div id="retired" hidden aria-hidden="true"><div class="dash">
@@ -2958,6 +2988,7 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
   function renderHealth(h){
     if(h!==undefined) lastHealth=h;   // fetch pasa el json (o null); __reHealth() reevalúa sin arg
     var hh=lastHealth;
+    renderSys(hh, h===null);
     var el=document.getElementById('saHealth'); if(!el) return;
     var st=hh&&String(hh.status||'').toLowerCase();
     if(!hh || !st || st==='ok'){ el.style.display='none'; el.textContent=''; return; }
@@ -2984,6 +3015,89 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     el.className='sahealth '+(st==='down'?'down':'warn');
     el.textContent=T('Datos','Feed')+' '+st.toUpperCase()+(iss?' · '+iss:'');
     el.style.display='';
+  }
+  // ===== System status tab (#tab-sys): the whole health.json, in plain language =====
+  var SS_ROUT=['pre-asia','pre-london','pre-ny','crypto-close','crypto-ny','weekly','watchdog','zones-agent'];
+  var SS_RNAME={'pre-asia':['Plan pre Asia','Pre-Asia plan'],'pre-london':['Plan pre Londres','Pre-London plan'],'pre-ny':['Plan pre NY','Pre-NY plan'],
+    'crypto-close':['Cripto cierre','Crypto close'],'crypto-ny':['Cripto NY','Crypto NY'],'weekly':['Revisión semanal','Weekly review'],
+    'watchdog':['Watchdog','Watchdog'],'zones-agent':['Agente de zonas','Zones agent']};
+  var SS_SRC={orb:'ORB',feed:'Feed',regime:'Regime',trendcl:'TrendCL'};
+  function ssAge(m){ if(m==null||isNaN(m)) return '·'; m=Math.round(m);
+    if(m<60) return m+' min'; if(m<48*60) return Math.round(m/60)+' h'; return Math.round(m/1440)+' d'; }
+  function ssAgo(iso){ var t=Date.parse(iso); if(!t) return '·'; var m=(Date.now()-t)/60000; return T('hace '+ssAge(m),ssAge(m)+' ago'); }
+  function ssLi(cls,txt,sub){ return '<li class="'+cls+'"><i></i><span>'+esc(txt)+(sub?'<small>'+esc(sub)+'</small>':'')+'</span></li>'; }
+  function ssIssue(s){
+    var m;
+    if((m=/^(\w+)@(\w+) dead(?: streak)? \((\d+) min\)/i.exec(s))) return T('Alerta '+(SS_SRC[m[1]]||m[1])+' de '+m[2]+' parada hace '+ssAge(+m[3])+': revisa la alerta en TradingView',
+      m[2]+' '+(SS_SRC[m[1]]||m[1])+' alert stopped '+ssAge(+m[3])+' ago: check the alert in TradingView');
+    if((m=/^(\w+)@(\w+) (stale|missing)/i.exec(s))) return T('Alerta '+(SS_SRC[m[1]]||m[1])+' de '+m[2]+(m[3].toLowerCase()==='missing'?' sin datos':' atrasada'),m[2]+' '+(SS_SRC[m[1]]||m[1])+' alert '+(m[3].toLowerCase()==='missing'?'has no data':'is late'));
+    if((m=/^push missing: (\S+) (.+)$/i.exec(s))){ var n=SS_RNAME[m[1]]; return T('La rutina '+(n?n[0]:m[1])+' no subió su commit ('+m[2]+')','Routine '+(n?n[1]:m[1])+' did not push its commit ('+m[2]+')'); }
+    if((m=/^journal stale \((\d+) h\)/i.exec(s))) return T('Journal sin actualizar hace '+m[1]+' h','Journal not updated for '+m[1]+' h');
+    if((m=/^webhook silencioso \((\d+) min\)/i.exec(s))) return T('Webhook de TradingView sin mensajes hace '+ssAge(+m[1]),'No TradingView webhook for '+ssAge(+m[1]));
+    return s;
+  }
+  function renderSys(hh, failed){
+    var top=document.getElementById('ssTop'); if(!top) return;
+    var dot=document.getElementById('tdSys');
+    if(!hh){
+      top.innerHTML='<div class="ss-top"><span class="ss-pill err">'+(failed?T('SIN DATOS','NO DATA'):'·')+'</span><span class="ss-when">'+
+        esc(failed?T('No pude leer live/health.json','Could not read live/health.json'):T('Cargando...','Loading...'))+'</span></div>';
+      if(dot) dot.className='tdot'+(failed?' avoid':''); return;
+    }
+    var st=String(hh.status||'').toLowerCase(), cls=st==='ok'?'ok':st==='down'?'down':'warn';
+    var chkMin=hh.checkedAt?(Date.now()-Date.parse(hh.checkedAt))/60000:0, stuck=chkMin>7*60;
+    if(stuck) cls='down';
+    var closed=typeof ccMarketClosedNow==='function'&&ccMarketClosedNow();
+    if(dot) dot.className='tdot '+(cls==='ok'?'go':cls==='warn'?'wait':'avoid');
+    top.innerHTML='<div class="ss-top"><span class="ss-pill '+cls+'">'+(cls==='ok'?T('TODO BIEN','ALL GOOD'):cls==='warn'?T('REVISAR','CHECK'):T('CAÍDO','DOWN'))+'</span>'+
+      '<span class="ss-when">Watchdog <b>'+esc(ssAgo(hh.checkedAt))+'</b>'+(stuck?' · '+esc(T('no corre desde hace horas','has not run for hours')):'')+'</span></div>'+
+      (L(hh.note)?'<div class="ss-note">'+esc(L(hh.note))+'</div>':'')+
+      (closed?'<div class="ss-closed">'+esc(T('Mercado cerrado: que las alertas lleven horas quietas es normal. Solo cuenta lo que el watchdog marca.','Market closed: alerts idle for hours is normal. Only what the watchdog flags counts.'))+'</div>':'');
+    var iss=Array.isArray(hh.issues)?hh.issues:[];
+    document.getElementById('ssIssN').textContent=iss.length?String(iss.length):'';
+    document.getElementById('ssIssues').innerHTML=iss.length?iss.map(function(s){ return ssLi(/dead|missing|down/i.test(s)?'ss-bad':'ss-warn',ssIssue(s),s); }).join('')
+      :ssLi('ss-ok',T('Nada que revisar','Nothing to check'));
+    // routines and their pushes
+    var pu=hh.pushes, pl=document.getElementById('ssPush'), pt=document.getElementById('ssPushTag');
+    if(!pu){ pl.innerHTML=ssLi('ss-idle',T('El watchdog aún no reporta commits','The watchdog does not report pushes yet')); pt.textContent=''; }
+    else{
+      var miss=pu.missing||[], dup=pu.duplicated||[], c=pu.counts||{};
+      pt.textContent=((c.present||0)+(c.duplicated||0))+' ✓'+(c.missing?' · '+c.missing+' ✕':'')+(c.pending?' · '+c.pending+' …':'');
+      var slots=Array.isArray(pu.slots)?pu.slots:null;
+      pl.innerHTML=SS_ROUT.map(function(r){
+        var n=SS_RNAME[r], nm=T(n[0],n[1]);
+        var mm=miss.filter(function(x){ return x.split(' ')[0]===r; }), dd=dup.filter(function(x){ return x.split(' ')[0]===r; });
+        var mine=slots?slots.filter(function(x){ return x.routine===r; }):null;
+        if(mm.length) return ssLi('ss-bad',nm+' · '+T('no subió','not pushed'),mm.map(function(x){ return x.slice(r.length+1); }).join(' · '));
+        if(mine&&mine.length&&mine.every(function(x){ return x.state==='pending'; })) return ssLi('ss-idle',nm+' · '+T('en curso','pending'));
+        if(dd.length) return ssLi('ss-ok',nm+' · '+T('subido (repetido)','pushed (twice)'),dd.map(function(x){ return x.slice(r.length+1); }).join(' · '));
+        return ssLi('ss-ok',nm+' · '+T('al día','on time'));
+      }).join('');
+    }
+    // sources grid: a stopped TradingView alert is a red cell
+    var src=hh.sources||{}, keys=['orb','feed','regime','trendcl'];
+    var g='<span></span>'+keys.map(function(k){ return '<span class="h">'+SS_SRC[k]+'</span>'; }).join('');
+    Object.keys(src).forEach(function(sym){
+      g+='<span class="sym">'+esc(sym)+'</span>';
+      keys.forEach(function(k){
+        var o=(src[sym]||{})[k]||{}, s=String(o.state||'missing').toLowerCase();
+        var flagged=iss.some(function(x){ return x.toLowerCase().indexOf(k+'@'+sym.toLowerCase())===0; });
+        if(closed&&s!=='ok'&&!flagged) s='idle';
+        g+='<span class="ss-c '+esc(s)+'" title="'+esc(sym+' '+SS_SRC[k]+': '+s)+'"><i></i>'+esc(ssAge(o.ageMin))+'</span>';
+      });
+    });
+    document.getElementById('ssSrc').innerHTML=g;
+    document.getElementById('ssSrcLeg').textContent=T('Tiempo desde el último mensaje. Verde al día, ámbar atrasada, rojo parada'+(closed?', gris quieta por el cierre.':'.'),
+      'Time since the last message. Green fresh, amber late, red stopped'+(closed?', grey idle for the close.':'.'));
+    // services
+    function st2(s){ s=String(s||'').toLowerCase(); return s==='ok'?'ss-ok':/dead|down|viejo|silencioso|missing/.test(s)?(closed?'ss-idle':'ss-bad'):'ss-warn'; }
+    var v='', sn=hh.snapshot, wh=hh.webhook, nw=hh.news, sa=hh.sa, sc=hh.scalp;
+    if(sn) v+=ssLi(st2(sn.state),T('Snapshot del mercado','Market snapshot')+' · '+T('hace '+ssAge(sn.ageMin),ssAge(sn.ageMin)+' ago'));
+    if(wh) v+=ssLi(st2(wh.state),T('Webhook de TradingView','TradingView webhook')+' · '+T('último hace '+ssAge(wh.lastSeenMin),'last '+ssAge(wh.lastSeenMin)+' ago'),closed&&wh.state!=='ok'?T('mercado cerrado','market closed'):'');
+    if(nw) v+=ssLi(st2(nw.state),T('Noticias','News')+' · '+(nw.count!=null?nw.count+' · ':'')+T('hace '+ssAge(nw.ageMin),ssAge(nw.ageMin)+' ago'));
+    if(sa) v+=ssLi(sa.lateBy>30?'ss-warn':'ss-ok','Session Analyst · '+(sa.runType||'')+' · '+ssAgo(sa.lastRun),sa.lateBy?T('tarde '+sa.lateBy+' min','late '+sa.lateBy+' min'):'');
+    if(sc) v+=ssLi(st2(sc.state),'Scalp CC · '+T('ingesta hace '+ssAge(sc.ingestMin),'ingest '+ssAge(sc.ingestMin)+' ago'));
+    document.getElementById('ssSvc').innerHTML=v||ssLi('ss-idle','·');
   }
   window.__reHealth=function(){ renderHealth(); };
   // meta-review semanal (rutina weekly, sabado -> reviews/weekly-latest.md). Panel colapsable.
