@@ -325,6 +325,8 @@ function num(v){var n=parseFloat(v);return isFinite(n)?n:null}
 function fmt(v,s){if(v==null||!isFinite(v))return '·';var d=SYMS[s||SYM].dec;var x=Math.abs(v).toFixed(d).split('.');x[0]=x[0].replace(/\B(?=(\d{3})+(?!\d))/g,LANG==='es'?' ':',');return (v<0?'-':'')+x.join('.')}
 function ago(ts){if(!ts)return '·';var m=Math.round((Date.now()-ts)/60000);if(m<1)return T('ahora','now');if(m<60)return m+' min';var h=Math.round(m/60);return h<48?h+' h':Math.round(h/24)+' d'}
 function ct(d){var p={};new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',weekday:'short',hour:'2-digit',minute:'2-digit',hour12:false,month:'short',day:'numeric'}).formatToParts(d||new Date()).forEach(function(x){p[x.type]=x.value});var h=+p.hour%24;return{wd:p.weekday,h:h,m:+p.minute,mins:h*60+(+p.minute),day:p.day,mon:p.month}}
+var WD={Mon:'lun',Tue:'mar',Wed:'mié',Thu:'jue',Fri:'vie',Sat:'sáb',Sun:'dom'};
+function wdTxt(w){return LANG==='es'&&WD[w]?WD[w]:w}
 function hhmm(ts){var c=ct(new Date(ts));return String(c.h).padStart(2,'0')+':'+String(c.m).padStart(2,'0')}
 function todayKey(){var c=ct();return c.mon+c.day}
 var DIR={SHORT:['bajista','bearish','down','▼'],LONG:['alcista','bullish','up','▲'],NEUTRAL:['sin dirección','no direction','warn','·']};
@@ -350,16 +352,34 @@ var LV={vah:['VAH','techo del valor de ayer','top of yesterday\'s value'],poc:['
   dayOpen:['DO','apertura del día','day open'],tdo:['TDO','apertura real, 00:00 NY','true day open, 00:00 NY'],orH:['ORH','máximo de la apertura de NY','NY opening range high'],orL:['ORL','mínimo de la apertura de NY','NY opening range low'],
   pwh:['PWH','máximo de la semana pasada','last week\'s high'],pwl:['PWL','mínimo de la semana pasada','last week\'s low'],
   onh:['ONH','máximo overnight','overnight high'],onl:['ONL','mínimo overnight','overnight low'],ibh:['IBH','máximo de la 1ª hora de NY','NY first-hour high'],ibl:['IBL','mínimo de la 1ª hora de NY','NY first-hour low'],
-  hod:['HOD','máximo de hoy','today\'s high'],lod:['LOD','mínimo de hoy','today\'s low'],ema200:['EMA200','media de 200 en 5m','5m 200 EMA']};
+  hod:['HOD','máximo de hoy','today\'s high'],lod:['LOD','mínimo de hoy','today\'s low'],ema200:['EMA200','media de 200 en 5m','5m 200 EMA'],
+  fcl:['CIERRE','cierre del viernes','Friday\'s close'],fvwap:['VWAP vie','VWAP del viernes (se reinicia el lunes)','Friday\'s VWAP (resets Monday)']};
+/* el lunes, lo del viernes pasa a ser "ayer" */
+var LVW={pdh:['PDH','máximo del viernes, el PDH del lunes','Friday\'s high, Monday\'s PDH'],pdl:['PDL','mínimo del viernes, el PDL del lunes','Friday\'s low, Monday\'s PDL'],
+  vah:['VAH','techo del valor del viernes','top of Friday\'s value'],poc:['POC','precio más negociado el viernes','Friday\'s most traded price'],val:['VAL','suelo del valor del viernes','bottom of Friday\'s value']};
 
 function model(s){
   var cf=SYMS[s],box=FEED&&FEED[cf.src]&&FEED[cf.src][cf.key];
   if(!box||!box.orb||!box.orb.levels)return{ok:false,sym:s};
   var o=box.orb,f=(box.feed&&box.feed.raw)||{},rg=(box.regime&&box.regime.raw)||{},tc=(box.trendcl&&box.trendcl.raw)||{};
-  var price=num(f.close)||o.price,lv={};
+  // precio: el dato más reciente entre el feed, el régimen y el checklist
+  var fT=num(f.t)||0,px=[[num(f.close),fT],[num(rg.close),num(rg.t)||0],[num(tc.px),num(tc.t)||0]].filter(function(x){return x[0]!=null&&x[1]});
+  px.sort(function(a,b){return b[1]-a[1]});
+  var pxT=px.length?px[0][1]:fT,price=px.length?px[0][0]:(num(f.close)||o.price);
+  // feed de niveles caído: su vela va más de 1 h por detrás del resto; sus datos de sesión no valen
+  var oT=Date.parse(o.updatedAt||0)||0,down=!fT||Math.max(pxT,Math.min(oT,Date.now()))-fT>3600e3;
+  if(down)f={};
+  var wk=!cf.crypto&&market().st==='closed',lv={};
   Object.keys(o.levels).forEach(function(k){if(LV[k]&&num(o.levels[k])!=null)lv[k]=num(o.levels[k])});
   ['onh','onl','ibh','ibl','hod','lod','ema200'].forEach(function(k){var v=num(f[k]);if(v!=null)lv[k]=v});
   if(num(f.vwap)!=null)lv.vwap=num(f.vwap);
+  if(wk){ // fin de semana: el máximo / mínimo / valor del viernes son los de "ayer" para el lunes
+    var nv={};['ema200'].forEach(function(k){if(lv[k]!=null)nv[k]=lv[k]});
+    if(lv.hod!=null){nv.pdh=lv.hod;nv.pdl=lv.lod}
+    if(lv.dvah!=null){nv.vah=lv.dvah;nv.poc=lv.dpoc;nv.val=lv.dval}
+    if(lv.vwap!=null)nv.fvwap=lv.vwap;
+    nv.fcl=price;lv=nv;
+  }
   var fvgs=[];String(f.fvg||'').split(';').forEach(function(x){var p=x.split(':');if(p.length<3)return;var a=num(p[1]),b=num(p[2]);if(a==null||b==null)return;
     var tf=p[0].split(' ')[0],kd=p[0].split(' ')[1]||'';fvgs.push({tf:tf,kind:kd,lo:Math.min(a,b),hi:Math.max(a,b)})});
   var upd=Math.max(Date.parse(o.updatedAt||0)||0,Date.parse(box.feed&&box.feed.receivedAt||0)||0,num(f.t)||0);
@@ -367,16 +387,39 @@ function model(s){
     rg:rg.regime||'',chop:num(f.chopIdx),tcl:num(tc.v),tclFlip:num(tc.flip),tclNext:tc.next||'',lv:lv,fvgs:fvgs,ntz:o.noTradeZone||null,inNtz:!!o.inNtz,
     adr:{pct:num(f.rangePct),range:num(f.rangeToday),atr:num(f.atrD),rem:num(f.remPts),state:f.emRegime||''},
     ses:{asH:num(f.asH),asL:num(f.asL),loH:num(f.loH),loL:num(f.loL),ibh:num(f.ibh),ibl:num(f.ibl),ibBrk:f.ibBrk||'',hod:num(f.hod),lod:num(f.lod),onh:num(f.onh),onl:num(f.onl)},
-    sweep:f.sweep||'',sweepAgo:num(f.sweepAgo),barT:num(f.t),upd:upd,gz:f.gzLong||'',stretch:num(f.stretchAtr)};
-  // nivel más cercano (sin EMA)
-  var best=null;Object.keys(lv).forEach(function(k){if(k==='ema200')return;var dt=Math.round((lv[k]-price)/cf.tick);if(!best||Math.abs(dt)<Math.abs(best.dt))best={k:k,dt:dt,p:lv[k]}});
-  m.near=best;m.far=m.inNtz||!best||Math.abs(best.dt)>cf.nml;
+    sweep:f.sweep||'',sweepAgo:num(f.sweepAgo),barT:down?null:num(f.t),upd:upd,gz:f.gzLong||'',stretch:num(f.stretchAtr),
+    down:down,downT:fT,pxT:pxT,wk:wk};
   m.plan=planOf(s,m);
+  // borde más cercano: niveles (sin EMA), bordes de FVG y zonas del plan aún vivas
+  var cand=[];Object.keys(lv).forEach(function(k){if(k!=='ema200'&&k!=='fcl')cand.push({p:lv[k],n:lvName(k),d:lvDesc(k)})});
+  fvgs.forEach(function(g){var nm=g.tf+' '+(g.kind.charAt(0)==='i'?'iFVG':'FVG')+' '+(g.kind.indexOf('bull')>=0?'▲':'▼');
+    cand.push({p:g.hi,n:nm,d:T('hueco de precio','price gap')});cand.push({p:g.lo,n:nm,d:T('hueco de precio','price gap')})});
+  (m.plan.zones||[]).forEach(function(z){if(z.st.k!=='live')return;var nm=T('zona del plan ','plan zone ')+(z.dir==='SHORT'?'▼':'▲');
+    cand.push({p:z.hi,n:nm,d:T('marcada por el agente','marked by the agent')});cand.push({p:z.lo,n:nm,d:T('marcada por el agente','marked by the agent')})});
+  var best=null;cand.forEach(function(c){var dt=Math.round((c.p-price)/cf.tick);if(!best||Math.abs(dt)<Math.abs(best.dt)){best=c;c.dt=dt}});
+  // "cerca" escala con el ADR: el mayor entre el umbral fijo y el 4 % del ADR
+  m.nearT=Math.max(cf.nml,m.adr.atr?Math.round(m.adr.atr*.04/cf.tick):0);
+  m.near=best;m.far=!best||Math.abs(best.dt)>m.nearT;
   m.verdict=m.plan.fresh&&m.plan.verdict?m.plan.verdict:liveVerdict(m);
   return m;
 }
 function liveVerdict(m){if(m.rg==='CHOP'&&m.far)return 'AVOID';return 'WAIT'}
 
+/* estado de una idea del plan frente al precio de ahora */
+function nums(s,ref){var out=[];String(s||'').replace(/\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?/g,function(x){var v=parseFloat(x.replace(/,/g,''));if(ref&&Math.abs(v-ref)/ref<.04)out.push(v)});return out}
+function zoneState(z,pl,px){
+  var sh=z.dir==='SHORT',mid=(z.lo+z.hi)/2,stop=num(pl.stop),tp1=num(pl.tp1),tp2=num(pl.tp2);
+  if(stop==null){var c=nums(L(pl.ifWrong)+' '+L(pl.structStop),mid).filter(function(v){return sh?v>z.hi:v<z.lo});if(c.length)stop=sh?Math.min.apply(null,c):Math.max.apply(null,c)}
+  var sc=L(pl.scale);
+  if(tp1==null){var a=/TP1[^\d]*([\d,]+(?:\.\d+)?)/i.exec(sc);if(a)tp1=parseFloat(a[1].replace(/,/g,''))}
+  if(tp2==null){var b=/TP2[^\d]*([\d,]+(?:\.\d+)?)/i.exec(sc);if(b)tp2=parseFloat(b[1].replace(/,/g,''))}
+  if(px==null)return{k:'live'};
+  if(stop!=null&&(sh?px>stop:px<stop))return{k:'stop',t:T('invalidada: el precio pasó su stop ('+fmt(stop)+')','invalidated: price is past its stop ('+fmt(stop)+')')};
+  var last=tp2!=null?tp2:null;
+  if(last!=null&&(sh?px<last:px>last)&&(sh?px<z.lo:px>z.hi))return{k:'done',t:T('fuera de juego: el precio ya está más allá de su último objetivo ('+fmt(last)+')','out of play: price is already beyond its last target ('+fmt(last)+')')};
+  if(tp1!=null&&(sh?px<tp1:px>tp1)&&(sh?px<z.lo:px>z.hi))return{k:'live',late:1,t:T('el precio ya pasó el TP1','price is already past TP1')};
+  return{k:'live'};
+}
 function planOf(s,m){
   var cf=SYMS[s],P=cf.plan==='fut'?PF:PC,ins=P&&P.instruments&&P.instruments[cf.key];
   var out={ok:false,fresh:false};
@@ -396,9 +439,11 @@ function planOf(s,m){
   out.zones=(ins.zones||[]).map(function(z){var pl=z.play||{};
     var tgt=pl.scale?L(pl.scale):[pl.tp1,pl.tp2].filter(function(x){return x!=null}).map(function(x){return fmt(+x,s)}).join(' → ');
     var inv=pl.ifWrong?L(pl.ifWrong):(pl.structStop?L(pl.structStop):(pl.stop!=null?T('stop en ','stop at ')+fmt(+pl.stop,s):''));
-    return{dir:z.dir,lo:Math.min(z.range[0],z.range[1]),hi:Math.max(z.range[0],z.range[1]),type:z.type||'',grade:z.grade||'',fav:z.tcl==='favor'||(!z.tcl&&z.vs24h==='with'),
-      win:pl.window||'',trig:L(pl.trigger),tgt:tgt,inv:inv,why:L(z.why)}});
-  out.pred=(ins.predictions||[]).slice(0,4).map(function(p){return{t:L(p.text),when:p.resolveAt||'',prob:p.prob}});
+    var zz={dir:z.dir,lo:Math.min(z.range[0],z.range[1]),hi:Math.max(z.range[0],z.range[1]),type:z.type||'',grade:z.grade||'',fav:z.tcl==='favor'||(!z.tcl&&z.vs24h==='with'),
+      win:pl.window||'',trig:L(pl.trigger),tgt:tgt,inv:inv,why:L(z.why)};
+    zz.st=zoneState(zz,pl,m.price);return zz});
+  // predicciones con hora ISO ya vencida: fuera
+  out.pred=(ins.predictions||[]).filter(function(p){var w=/^\d{4}-/.test(p.resolveAt||'')?Date.parse(p.resolveAt):0;return !w||w>Date.now()}).slice(0,4).map(function(p){return{t:L(p.text),when:p.resolveAt||'',prob:p.prob}});
   out.exp=ins.expectedMove||null;
   out.personal=P.personal?L(P.personal.note):'';
   out.cal=P.calendarContext?L(P.calendarContext.note):'';out.newsNote=P.newsRisk?L(P.newsRisk.note):'';
@@ -410,25 +455,35 @@ function planOf(s,m){
 var REG={BULL:['en tendencia alcista','in an uptrend'],BEAR:['en tendencia bajista','in a downtrend'],CHOP:['en chop','chopping'],TRANS:['en transición','in transition']};
 function regTxt(m){var r=REG[m.rg]||(m.regimeO.indexOf('Trans')===0?REG.TRANS:null);return r?T(r[0],r[1]):T('sin régimen claro','no clear regime')}
 function dtx(dt,signed,s){var c=SYMS[s||SYM],sg=signed&&dt>0?'+':'';return c.crypto?sg+(dt<0?'-':'')+'$'+fmt(Math.abs(dt*c.tick),s||SYM):sg+dt+'t'}
+function isWk(){return !SYMS[SYM].crypto&&market().st==='closed'}
 function lvName(k){return LV[k]?LV[k][0]:k}
-function lvDesc(k){return LV[k]?T(LV[k][1],LV[k][2]):''}
+function lvDesc(k){var x=isWk()&&LVW[k]||LV[k];return x?T(x[1],x[2]):''}
+function ntzTxt(m){return fmt(Math.min(m.ntz[0],m.ntz[1]))+T(' a ',' to ')+fmt(Math.max(m.ntz[0],m.ntz[1]))}
 function headline(m){
-  var d=dirOf(m.bias),vw=m.lv.vwap,side=vw==null?'':(m.price<vw?T(' y debajo del VWAP',', below VWAP'):T(' y encima del VWAP',', above VWAP'));
-  var h=m.sym+' <em>'+T(d[0],d[1])+(d[3]!=='·'?' '+d[3]:'')+'</em>, '+regTxt(m)+side+'. ';
-  if(m.far)h+=T('Está en <em>tierra de nadie</em>, lejos de todo borde.','It is in <em>no-man\'s land</em>, away from every edge.');
-  else h+=T('Está a <em>'+dtx(Math.abs(m.near.dt))+' de '+lvName(m.near.k)+'</em>: zona de decisión.','It is <em>'+dtx(Math.abs(m.near.dt))+' from '+lvName(m.near.k)+'</em>: decision zone.');
+  var d=dirOf(m.bias),dw=T(d[0],d[1])+(d[3]!=='·'?' '+d[3]:''),vw=m.lv.vwap!=null?m.lv.vwap:m.lv.fvwap;
+  var side=vw==null?'':(m.price<vw?T(' y debajo del VWAP',', below VWAP'):T(' y encima del VWAP',', above VWAP'));
+  var h=m.wk?m.sym+T(' cerró el viernes <em>',' closed Friday <em>')+dw+'</em>'+side+'. ':m.sym+' <em>'+dw+'</em>, '+regTxt(m)+side+'. ';
+  if(!m.near)return h;
+  var dd=dtx(Math.abs(m.near.dt));
+  if(m.far)h+=m.inNtz?T('Está en <em>tierra de nadie</em> ('+ntzTxt(m)+'); el borde más cercano, '+m.near.n+', queda a '+dd+'.','It is in <em>no-man\'s land</em> ('+ntzTxt(m)+'); the nearest edge, '+m.near.n+', is '+dd+' away.')
+    :T('Está lejos de todo borde: lo más cercano, '+m.near.n+', a '+dd+'.','It is away from every edge: the nearest, '+m.near.n+', is '+dd+' away.');
+  else h+=T('Está a <em>'+dd+' de '+m.near.n+'</em>'+(m.inNtz?', en el borde de la tierra de nadie':'')+': zona de decisión.','It is <em>'+dd+' from '+m.near.n+'</em>'+(m.inNtz?', at the edge of no-man\'s land':'')+': decision zone.');
   return h;
 }
 function todo(m){
+  var pre=m.down?T('⚠ El feed de niveles de '+m.sym+' está caído desde las '+hhmm(m.downT)+' CT: el precio sale de otro indicador ('+hhmm(m.pxT)+' CT) y faltan VWAP en vivo, FVG y rangos de sesión. Mira el gráfico antes de fiarte del mapa. ','⚠ '+m.sym+'\'s level feed has been down since '+hhmm(m.downT)+' CT: price comes from another indicator ('+hhmm(m.pxT)+' CT) and live VWAP, FVGs and session ranges are missing. Check the chart before trusting the map. '):'';
+  return pre+todo2(m);
+}
+function todo2(m){
   var mk=market();
   if(!SYMS[m.sym].crypto&&mk.st!=='open')return T('El mercado está cerrado. Lee la tesis y deja las alertas puestas en los bordes del mapa antes de la reapertura.','The market is closed. Read the thesis and set alerts on the map edges before the reopen.');
   if(m.verdict==='AVOID')return T('Hoy este mercado no da nada claro. Cierra el gráfico o mira otro.','This market offers nothing clear today. Close the chart or look at another one.');
   if(m.far)return T('No hay nada que hacer aquí. Pon alertas en los bordes del mapa y espera a que el precio llegue.','Nothing to do here. Set alerts on the map edges and wait for price to get there.');
   var z=inZone(m);
   if(z)return T('El precio está en la zona del plan ('+fmt(z.lo)+' a '+fmt(z.hi)+'). Mira el gatillo de la idea y espera la vela de 5m cerrada.','Price is inside the plan zone ('+fmt(z.lo)+' to '+fmt(z.hi)+'). Check the idea\'s trigger and wait for the closed 5m candle.');
-  return T('Mira cómo reacciona en '+lvName(m.near.k)+' ('+lvDesc(m.near.k)+'). Solo actúa con una vela de 5m cerrada, a favor del sesgo.','Watch how it reacts at '+lvName(m.near.k)+' ('+lvDesc(m.near.k)+'). Act only on a closed 5m candle, with the bias.');
+  return T('Mira cómo reacciona en '+m.near.n+' ('+m.near.d+'). Solo actúa con una vela de 5m cerrada, a favor del sesgo.','Watch how it reacts at '+m.near.n+' ('+m.near.d+'). Act only on a closed 5m candle, with the bias.');
 }
-function inZone(m){var r=null;(m.plan.zones||[]).forEach(function(z){if(m.price>=z.lo-m.cf.tick*8&&m.price<=z.hi+m.cf.tick*8)r=z});return r}
+function inZone(m){var r=null;(m.plan.zones||[]).forEach(function(z){if(z.st.k==='live'&&m.price>=z.lo-m.cf.tick*8&&m.price<=z.hi+m.cf.tick*8)r=z});return r}
 function strength(m){var s=Math.abs(m.tcl||0);if(m.bias!=='NEUTRAL'&&m.bias===m.weekly)s++;if(/alineado/i.test(m.htf))s++;if(m.rg==='BULL'||m.rg==='BEAR')s++;return Math.min(5,s)}
 function meaning(m,above){
   var b=m.bias;
@@ -461,22 +516,25 @@ function hero(m){
   var v=VW[m.verdict]||VW.NODATA;$('vbox').style.setProperty('--vc',v[2]);$('vWord').textContent=vword(m.verdict);
   $('vSym').textContent=m.sym;$('vPx').textContent=fmt(m.price);
   var d=dirOf(m.bias);
-  $('vDay').textContent=dayTypeTxt(m.dayType)+(m.plan.ok&&!m.plan.fresh?T(' · plan viejo',' · old plan'):'');
+  $('vDay').textContent=(m.wk&&m.dayType?T('Viernes: ','Friday: '):'')+dayTypeTxt(m.dayType)+(m.plan.ok&&!m.plan.fresh?T(' · plan viejo',' · old plan'):'');
   var st=strength(m),col=m.bias==='SHORT'?'var(--down)':m.bias==='LONG'?'var(--up)':'var(--warn)';
   $('meter').innerHTML=[1,2,3,4,5].map(function(i){return '<i style="'+(i<=st?'background:'+col:'')+'"></i>'}).join('');
   $('vWhy').textContent=m.plan.fresh&&m.plan.reason?cut(m.plan.reason,170):T('Veredicto calculado en vivo: el agente aún no tiene plan fresco para este mercado.','Live verdict: the agent has no fresh plan for this market yet.');
-  var stale=Date.now()-m.upd>40*60e3&&(SYMS[m.sym].crypto||market().st==='open');
+  var stale=m.down||(Date.now()-m.upd>40*60e3&&(SYMS[m.sym].crypto||market().st==='open'));
   $('live').className='live'+(stale?' stale':'');
-  $('liveT').textContent=(stale?T('DATOS VIEJOS · ','STALE DATA · '):T('EN VIVO · ','LIVE · '))+T('indicador hace ','indicator ')+ago(m.upd)+(LANG==='en'?' ago':'')+(m.barT?T(' · vela ',' · bar ')+hhmm(m.barT)+' CT':'');
+  $('liveT').textContent=m.down?T('FEED CAÍDO · niveles desde las ','FEED DOWN · levels since ')+hhmm(m.downT)+' CT · '+T('precio de las ','price from ')+hhmm(m.pxT)+' CT'
+    :m.wk?T('MERCADO CERRADO · último dato ','MARKET CLOSED · last data ')+wdTxt(ct(new Date(m.pxT||m.upd)).wd)+' '+hhmm(m.pxT||m.upd)+' CT'
+    :(stale?T('DATOS VIEJOS · ','STALE DATA · '):T('EN VIVO · ','LIVE · '))+T('indicador hace ','indicator ')+ago(m.upd)+(LANG==='en'?' ago':'')+(m.barT?T(' · vela ',' · bar ')+hhmm(m.barT)+' CT':'');
   $('nowH').innerHTML=headline(m);
   $('nowTodo').textContent=todo(m);
-  var vw=m.lv.vwap,t=m.cf.tick;
+  var vw=m.lv.vwap!=null?m.lv.vwap:m.lv.fvwap,t=m.cf.tick,ex=m.plan.exp;
   var tclT=m.tcl==null?'·':(m.tcl>0?'▲ ':m.tcl<0?'▼ ':'· ')+(Math.abs(m.tcl)>=2?T('confirmada','confirmed'):Math.abs(m.tcl)===1?T('débil','weak'):T('neutral','neutral'));
   var facts=[
     [T('Sesgo','Bias'),'<span class="'+d[2]+'">'+d[3]+' '+T(d[0],d[1])+'</span>',T('semana ','week ')+dirOf(m.weekly)[3]],
-    [T('Régimen','Regime'),esc(m.rg||m.regimeO||'·'),esc(m.struct.replace('dn','▼').replace('up','▲'))+(m.chop!=null?' · CI '+Math.round(m.chop):'')],
+    [T('Régimen','Regime'),esc(m.rg||m.regimeO||'·'),esc(m.struct.replace('dn','▼').replace('up','▲'))+(m.chop!=null?' · CI '+Math.round(m.chop):'')+(m.wk?T(' · al cierre',' · at the close'):'')],
     [T('Tendencia','Trend'),'<span class="'+(m.tcl>0?'up':m.tcl<0?'down':'')+'">'+tclT+'</span>',m.tclFlip!=null?T('gira en ','flips at ')+fmt(m.tclFlip):'·'],
-    ['VWAP','<span class="num">'+fmt(vw)+'</span>',vw!=null?(m.price<vw?T('debajo, a ','below, ')+dtx(Math.abs(Math.round((vw-m.price)/t))):T('encima, a ','above, ')+dtx(Math.abs(Math.round((vw-m.price)/t)))):'·'],
+    [m.wk?T('VWAP vie','Fri VWAP'):'VWAP','<span class="num">'+fmt(vw)+'</span>',vw!=null?(m.price<vw?T('debajo, a ','below, ')+dtx(Math.abs(Math.round((vw-m.price)/t))):T('encima, a ','above, ')+dtx(Math.abs(Math.round((vw-m.price)/t)))):'·'],
+    m.wk?[T('Asia esperada','Asia expected'),'<span class="num">'+(ex?Math.round(ex.low)+T(' a ',' to ')+Math.round(ex.high)+' pts':'·')+'</span>',ex?'base '+Math.round(ex.base)+' pts':'·']:
     ['ADR','<span class="num '+(m.adr.pct>=100?'down':'')+'">'+(m.adr.pct!=null?Math.round(m.adr.pct)+' %':'·')+'</span>',m.adr.pct==null?'·':m.adr.pct>=100?T('movimiento hecho','move is done'):T('queda recorrido','room left')]];
   $('facts').innerHTML=facts.map(function(x){return '<div class="fact"><span class="lbl">'+x[0]+'</span><span class="v">'+x[1]+'</span><span class="s">'+x[2]+'</span></div>'}).join('');
 }
@@ -495,24 +553,26 @@ function thesis(m){
 
 var ZT={retest_break:['Retest de la ruptura','Retest of the break'],sweep_pdl:['Barrida del PDL','PDL sweep'],sweep_pdh:['Barrida del PDH','PDH sweep'],rejection:['Rechazo en el borde','Edge rejection'],continuation:['Continuación','Continuation']};
 function ideas(m){
-  var zs=m.plan.zones||[],t=m.cf.tick;
+  var all=m.plan.zones||[],zs=all.filter(function(z){return z.st.k==='live'}),gone=all.filter(function(z){return z.st.k!=='live'}),t=m.cf.tick;
   $('ideas').innerHTML=zs.length?zs.map(function(z){
     var sh=z.dir==='SHORT',nm=ZT[z.type]?T(ZT[z.type][0],ZT[z.type][1]):(z.type||'').replace(/_/g,' ');
     var dist=Math.round(((m.price>z.hi?z.hi:m.price<z.lo?z.lo:m.price)-m.price)/t);
     return '<article class="idea '+(sh?'short':'long')+'"><div class="t"><span class="ic">'+(sh?'▼':'▲')+'</span><div><div class="tt">'+(sh?T('Corto','Short'):T('Largo','Long'))+' · '+esc(nm)+'</div>'+
       '<div class="tags"><span class="tag '+(z.fav?'fav':'contra')+'">'+(z.fav?T('a favor','with trend'):T('en contra','against trend'))+'</span>'+(z.grade?'<span class="tag">'+T('calidad ','grade ')+esc(z.grade)+'</span>':'')+
-      '<span class="tag dist">'+(dist===0?T('precio dentro','price inside'):dtx(dist,1))+'</span></div></div></div>'+
+      (z.st.late?'<span class="tag contra">'+esc(z.st.t)+'</span>':'')+'<span class="tag dist">'+(dist===0?T('precio dentro','price inside'):dtx(dist,1))+'</span></div></div></div>'+
       '<dl><dt>'+T('Dónde','Where')+'</dt><dd><span class="num">'+fmt(z.lo)+' – '+fmt(z.hi)+'</span>'+(z.win?' · '+esc(z.win):'')+'</dd>'+
       (z.trig?'<dt>'+T('Gatillo','Trigger')+'</dt><dd>'+esc(z.trig)+'</dd>':'')+
       (z.tgt?'<dt>'+T('Objetivo','Target')+'</dt><dd class="tg">'+esc(z.tgt)+'</dd>':'')+
       (z.inv?'<dt>'+T('Invalida','Invalid')+'</dt><dd class="iv">'+esc(z.inv)+'</dd>':'')+'</dl></article>'}).join('')
-    :'<div class="idea empty">'+(m.plan.ok?T('El agente no marcó ninguna zona que valga la pena en este mercado. Sin zona no hay idea.','The agent marked no zone worth trading in this market. No zone, no idea.'):T('Sin plan del agente. Las ideas salen de sus zonas; mientras tanto, solo bordes del mapa a favor del sesgo.','No agent plan. Ideas come from its zones; meanwhile, only map edges with the bias.'))+'</div>';
+    :'<div class="idea empty">'+(gone.length?T('Las ideas de este plan ya se resolvieron. Espera al próximo plan del agente; mientras tanto, nada que hacer aquí.','This plan\'s ideas have already played out. Wait for the agent\'s next plan; until then, nothing to do here.'):m.plan.ok?T('El agente no marcó ninguna zona que valga la pena en este mercado. Sin zona no hay idea.','The agent marked no zone worth trading in this market. No zone, no idea.'):T('Sin plan del agente. Las ideas salen de sus zonas; mientras tanto, solo bordes del mapa a favor del sesgo.','No agent plan. Ideas come from its zones; meanwhile, only map edges with the bias.'))+'</div>';
+  if(gone.length)$('ideas').innerHTML+='<div class="idea empty"><b>'+T('Ya resueltas','Already resolved')+'</b><br>'+gone.map(function(z){return (z.dir==='SHORT'?'▼ '+T('Corto','Short'):'▲ '+T('Largo','Long'))+' '+fmt(z.lo)+T(' a ',' to ')+fmt(z.hi)+' · '+esc(z.st.t)}).join('<br>')+'</div>';
   var av=[];
-  if(m.ntz)av.push(T('Operar entre '+fmt(Math.min(m.ntz[0],m.ntz[1]))+' y '+fmt(Math.max(m.ntz[0],m.ntz[1]))+': tierra de nadie, lejos de todo borde.','Trading between '+fmt(Math.min(m.ntz[0],m.ntz[1]))+' and '+fmt(Math.max(m.ntz[0],m.ntz[1]))+': no-man\'s land, away from every edge.'));
+  if(m.ntz)av.push(T('Operar dentro de la tierra de nadie ('+ntzTxt(m)+'): si el precio entra, espera a que salga por un lado.','Trading inside no-man\'s land ('+ntzTxt(m)+'): if price gets in, wait for it to leave on one side.'));
   if(m.bias!=='NEUTRAL')av.push(m.bias==='SHORT'?T('Largos sin CISD ▲ confirmado: van contra el sesgo.','Longs without a confirmed CISD ▲: they go against the bias.'):T('Cortos sin CISD ▼ confirmado: van contra el sesgo.','Shorts without a confirmed CISD ▼: they go against the bias.'));
-  if(m.adr.pct!=null&&m.adr.pct>=100)av.push(T('Perseguir: el ADR va al '+Math.round(m.adr.pct)+' %, el movimiento del día ya está hecho.','Chasing: ADR is at '+Math.round(m.adr.pct)+' %, the day\'s move is done.'));
-  if(m.rg==='CHOP')av.push(T('Operar el chop: el régimen está en rango, los rompimientos fallan.','Trading the chop: the regime is ranging, breakouts fail.'));
-  if(m.stretch!=null&&m.stretch>=2)av.push(T('Entrar a favor del estirón: el precio está a '+m.stretch.toFixed(1)+' ATR de su media.','Entering with the stretch: price is '+m.stretch.toFixed(1)+' ATR from its mean.'));
+  if(m.wk)av.push(T('Operar la reapertura sin ver dónde abre: el hueco del domingo puede mover todo el mapa. Espera a que el agente rehaga el plan antes de Asia.','Trading the reopen without seeing where it opens: Sunday\'s gap can shift the whole map. Wait for the agent to rebuild the plan before Asia.'));
+  if(!m.wk&&m.adr.pct!=null&&m.adr.pct>=100)av.push(T('Perseguir: el ADR va al '+Math.round(m.adr.pct)+' %, el movimiento del día ya está hecho.','Chasing: ADR is at '+Math.round(m.adr.pct)+' %, the day\'s move is done.'));
+  if(!m.wk&&m.rg==='CHOP')av.push(T('Operar el chop: el régimen está en rango, los rompimientos fallan.','Trading the chop: the regime is ranging, breakouts fail.'));
+  if(!m.wk&&m.stretch!=null&&m.stretch>=2)av.push(T('Entrar a favor del estirón: el precio está a '+m.stretch.toFixed(1)+' ATR de su media.','Entering with the stretch: price is '+m.stretch.toFixed(1)+' ATR from its mean.'));
   if(m.plan.personal)av.push(m.plan.personal);
   $('avoid').innerHTML=av.map(function(a){return '<li>'+esc(a)+'</li>'}).join('');
 }
@@ -525,7 +585,7 @@ function drawMap(m){
   raw.sort(function(a,b){return b.p-a.p});
   var rows=[];raw.forEach(function(r){var last=rows[rows.length-1];
     if(last&&!last.p2&&Math.abs(last.p-r.p)<=t*3){last.n+=' · '+lvName(r.k);last.w+=' · '+lvDesc(r.k)}else rows.push({p:r.p,n:lvName(r.k),w:lvDesc(r.k)})});
-  (m.plan.zones||[]).forEach(function(z){if(Math.abs((z.lo+z.hi)/2-px)<=span*1.3)rows.push({p:z.hi,p2:z.lo,n:T('Zona del plan ','Plan zone ')+(z.dir==='SHORT'?'▼':'▲'),w:T('marcada por el agente','marked by the agent'),kind:'zone plan',m:z.trig?cut(z.trig,150):''})});
+  (m.plan.zones||[]).forEach(function(z){if(z.st.k==='live'&&Math.abs((z.lo+z.hi)/2-px)<=span*1.3)rows.push({p:z.hi,p2:z.lo,n:T('Zona del plan ','Plan zone ')+(z.dir==='SHORT'?'▼':'▲'),w:T('marcada por el agente','marked by the agent'),kind:'zone plan',m:z.trig?cut(z.trig,150):''})});
   var fv=m.fvgs.filter(function(g){return g.hi>=px-span&&g.lo<=px+span}).sort(function(a,b){return Math.abs((a.lo+a.hi)/2-px)-Math.abs((b.lo+b.hi)/2-px)}).slice(0,3);
   fv.forEach(function(g){var inv=g.kind.charAt(0)==='i',bull=g.kind.indexOf('bull')>=0;rows.push({p:g.hi,p2:g.lo,n:g.tf+' '+(inv?'iFVG':'FVG')+' '+(bull?'▲':'▼'),w:T('hueco de precio','price gap'),kind:'zone',
     m:bull?T('Soporte: si barre y cierra dentro, puede rebotar.','Support: if it sweeps and closes inside, it can bounce.'):T('Resistencia: si llega y cierra de vuelta, puede girar.','Resistance: if it tags it and closes back, it can turn.')})});
@@ -538,7 +598,7 @@ function drawMap(m){
   var narrow=innerWidth<620,AX=narrow?22:86,LX=narrow?50:118,H=520;
   function y(p){return 14+(hi-p)/((hi-lo)||1)*(H-28)}
   map.innerHTML='';map.style.height='auto';
-  rows.forEach(function(r){var near=r.kind!=='px'&&r.kind.indexOf('ntz')<0&&Math.abs(r.dt)<=m.cf.nml*.6;
+  rows.forEach(function(r){var near=r.kind!=='px'&&r.kind.indexOf('ntz')<0&&Math.abs(r.dt)<=m.nearT*.6;
     var e=document.createElement('div');e.className='lv '+r.kind+(near?' near':'');
     var pr=r.p2!=null?fmt(r.p2)+' – '+fmt(r.p):fmt(r.p);
     e.innerHTML='<span class="n">'+esc(r.n)+'<small>'+esc(r.w)+'</small></span><span class="pd"><span class="p">'+pr+'</span><span class="d">'+(r.kind==='px'?'':dtx(r.dt,1))+'</span></span><span class="m">'+esc(r.m)+'</span>';
@@ -567,15 +627,17 @@ function timeline(m){
   if(s.asH!=null)it.push(['ASIA',T('Asia hizo máximo en '+fmt(s.asH)+' y mínimo en '+fmt(s.asL)+'.','Asia made its high at '+fmt(s.asH)+' and low at '+fmt(s.asL)+'.')]);
   if(s.loH!=null){var x=s.asH!=null?(s.loH>s.asH&&s.loL<s.asL?T(' Barrió los dos lados de Asia.',' It swept both sides of Asia.'):s.loH>s.asH?T(' Rompió el máximo de Asia.',' It broke the Asia high.'):s.loL<s.asL?T(' Rompió el mínimo de Asia.',' It broke the Asia low.'):T(' Se quedó dentro de Asia.',' It stayed inside Asia.')):'';
     it.push(['LDN',T('Londres: '+fmt(s.loL)+' a '+fmt(s.loH)+'.','London: '+fmt(s.loL)+' to '+fmt(s.loH)+'.')+x])}
-  if(s.ibh!=null&&s.ibh!==s.ibl){var bk=s.ibBrk==='up'?T(' Ya rompió por arriba.',' It already broke higher.'):s.ibBrk==='down'?T(' Ya rompió por abajo.',' It already broke lower.'):s.ibBrk==='both'?T(' Rompió los dos lados.',' It broke both sides.'):T(' Sigue dentro.',' Still inside.');
+  if(s.ibh!=null&&s.ibh!==s.ibl){var ib=s.ibBrk;if(!ib||ib==='none'){var u=s.hod!=null&&s.hod>s.ibh&&(s.onh==null||s.hod>s.onh),dn=s.lod!=null&&s.lod<s.ibl&&(s.onl==null||s.lod<s.onl);ib=u&&dn?'both':u?'up':dn?'down':''}
+    var bk=ib==='up'?T(' Ya rompió por arriba.',' It already broke higher.'):ib==='down'?T(' Ya rompió por abajo.',' It already broke lower.'):ib==='both'?T(' Rompió los dos lados.',' It broke both sides.'):T(' Sigue dentro.',' Still inside.');
     it.push(['NY IB',T('Primera hora de NY: '+fmt(s.ibl)+' a '+fmt(s.ibh)+'.','NY first hour: '+fmt(s.ibl)+' to '+fmt(s.ibh)+'.')+bk])}
   if(m.sweep&&m.sweep!=='none'){var sp=m.sweep.split(':'),lvl=sp[0],dd=sp[1],when=m.barT&&m.sweepAgo!=null?hhmm(m.barT-m.sweepAgo*5*60e3):'';
     it.push([when||T('BARRIDA','SWEEP'),dd==='up'?T('Barrió '+lvl+' por abajo y recuperó: rechazo al alza.','Swept '+lvl+' from below and reclaimed: bullish rejection.'):T('Barrió '+lvl+' por arriba y perdió: rechazo a la baja.','Swept '+lvl+' from above and lost it: bearish rejection.')])}
-  if(s.hod!=null)it.push([T('HOY','TODAY'),T('Rango de hoy '+fmt(s.lod)+' a '+fmt(s.hod),'Today\'s range '+fmt(s.lod)+' to '+fmt(s.hod))+(m.adr.pct!=null?T(', el '+Math.round(m.adr.pct)+' % de un día normal.',', '+Math.round(m.adr.pct)+' % of a normal day.'):'.')]);
+  if(s.hod!=null)it.push([m.wk?T('VIE','FRI'):T('HOY','TODAY'),(m.wk?T('Rango del viernes ','Friday\'s range '):T('Rango de hoy ','Today\'s range '))+fmt(s.lod)+T(' a ',' to ')+fmt(s.hod)+(m.adr.pct!=null?T(', el '+Math.round(m.adr.pct)+' % de un día normal.',', '+Math.round(m.adr.pct)+' % of a normal day.'):'.')]);
+  if(m.wk&&m.plan.fresh&&m.plan.scen&&m.plan.scen.length)it.push([T('REAPERTURA','REOPEN'),m.plan.scen.map(function(x){return x.k+': '+x.g}).join(' · ')]);
   var evs=readEv(m.sym);
   var html=it.map(function(x){return '<li><time>'+esc(x[0])+'</time><span>'+esc(x[1])+'</span></li>'}).join('');
   html+=evs.map(function(e,i){return '<li class="ev'+(i===evs.length-1?' new':'')+'"><time>'+hhmm(e.t)+'</time><span>'+esc(LANG==='es'?e.es:e.en)+'</span></li>'}).join('');
-  var nowT=T('Ahora: ','Now: ')+(m.far?T('en tierra de nadie.','in no-man\'s land.'):T('a '+dtx(Math.abs(m.near.dt))+' de '+lvName(m.near.k)+'.',dtx(Math.abs(m.near.dt))+' from '+lvName(m.near.k)+'.'));
+  var nowT=(m.wk?T('Mercado cerrado, reabre dom 17:00 CT. ','Market closed, reopens Sun 17:00 CT. '):T('Ahora: ','Now: '))+(!m.near?'':m.far&&m.inNtz?T('en tierra de nadie ('+ntzTxt(m)+').','in no-man\'s land ('+ntzTxt(m)+').'):T((m.wk?'Precio a ':'a ')+dtx(Math.abs(m.near.dt))+' de '+m.near.n+'.',(m.wk?'Price ':'')+dtx(Math.abs(m.near.dt))+' from '+m.near.n+'.'));
   html+='<li class="'+(evs.length?'':'new')+'"><time>'+T('AHORA','NOW')+'</time><span>'+esc(nowT)+'</span></li>';
   $('tl').innerHTML=html;
 }
@@ -583,7 +645,7 @@ function evKey(s){return 'cc3_ev_'+s+'_'+todayKey()}
 function readEv(s){try{return JSON.parse(ls(evKey(s))||'[]')}catch(e){return []}}
 function logEvents(m){
   var k='cc3_last_'+m.sym,prev=null;try{prev=JSON.parse(ls(k)||'null')}catch(e){}
-  var cur={v:m.verdict,st:m.struct,rg:m.rg,tc:m.tcl,vw:m.lv.vwap==null?0:(m.price>m.lv.vwap?1:-1),nr:m.far?'':m.near.k,u:m.upd};
+  var cur={v:m.verdict,st:m.struct,rg:m.rg,tc:m.tcl,vw:m.lv.vwap==null?0:(m.price>m.lv.vwap?1:-1),nr:m.far||!m.near?'':m.near.n,u:m.upd};
   if(prev&&prev.u!==cur.u){var ev=readEv(m.sym),now=m.upd||Date.now();
     function add(es,en){ev.push({t:now,es:es,en:en})}
     if(prev.v!==cur.v)add('El veredicto pasa a '+VW[cur.v][0]+'.','Verdict turns '+VW[cur.v][1]+'.');
@@ -591,7 +653,7 @@ function logEvents(m){
     if(prev.rg!==cur.rg&&cur.rg)add('Régimen: '+cur.rg+'.','Regime: '+cur.rg+'.');
     if(prev.tc!==cur.tc&&cur.tc!=null)add('Trend Checklist: '+(cur.tc>0?'+':'')+cur.tc+'.','Trend Checklist: '+(cur.tc>0?'+':'')+cur.tc+'.');
     if(prev.vw&&cur.vw&&prev.vw!==cur.vw)add(cur.vw>0?'Recupera el VWAP.':'Pierde el VWAP.',cur.vw>0?'Reclaims VWAP.':'Loses VWAP.');
-    if(cur.nr&&prev.nr!==cur.nr)add('Llega a '+lvName(cur.nr)+' ('+LV[cur.nr][1]+').','Reaches '+lvName(cur.nr)+' ('+LV[cur.nr][2]+').');
+    if(cur.nr&&prev.nr!==cur.nr)add('Llega a '+cur.nr+'.','Reaches '+cur.nr+'.');
     ls(evKey(m.sym),JSON.stringify(ev.slice(-25)))}
   ls(k,JSON.stringify(cur));
 }
@@ -601,10 +663,13 @@ function expect(m){
   $('sess').innerHTML=SESS.map(function(s,i){var on=i===cur,next=cur<0&&i===nx.i;
     var tt=String(Math.floor(s[2]/60)).padStart(2,'0')+':'+String(s[2]%60).padStart(2,'0')+' – '+String(Math.floor(s[3]/60)).padStart(2,'0')+':'+String(s[3]%60).padStart(2,'0');
     return '<div class="ss'+(on||next?' on':'')+'"><b>'+T(s[0],s[1])+'</b><span class="num">'+tt+'</span>'+(on?'<span class="gold">'+T('ahora','now')+'</span>':next?'<span class="gold">'+T('en ','in ')+Math.floor(nx.min/60)+'h '+nx.min%60+'m</span>':'')+'</div>'}).join('');
-  var a=m.adr;$('adrT').textContent=a.pct!=null?Math.round(a.pct)+' %':'·';
+  var a=m.adr,ex=m.plan.exp;
+  if(m.wk){document.querySelector('.adrh .lbl').textContent=T('Rango esperado en Asia','Expected Asia range');$('adrT').textContent=ex?Math.round(ex.low)+T(' a ',' to ')+Math.round(ex.high)+' pts':'·';$('adrB').style.width='0%';
+    $('adrN').textContent=ex?T('Según el agente, base '+Math.round(ex.base)+' pts. El día empieza de cero en la reapertura: presupuesto de '+Math.round(ex.dayBudget)+' pts.','Per the agent, base '+Math.round(ex.base)+' pts. The day starts from zero at the reopen: budget of '+Math.round(ex.dayBudget)+' pts.'):T('El día empieza de cero en la reapertura.','The day starts from zero at the reopen.')}
+  else{$('adrT').textContent=a.pct!=null?Math.round(a.pct)+' %':'·';
   $('adrB').style.width=(a.pct!=null?Math.min(a.pct,150)/1.5:0)+'%';
   var base=a.range!=null&&a.atr!=null?fmt(a.range)+T(' de ',' of ')+fmt(a.atr)+' pts. ':'';
-  $('adrN').textContent=a.pct==null?'·':base+(a.pct>=100?T('Ya recorrió más que un día normal: espera giros o recorridos cortos.','It already moved more than a normal day: expect turns or short moves.'):a.pct>=70?T('Le queda poco recorrido: objetivos cortos.','Little room left: keep targets short.'):T('Le queda recorrido para un movimiento completo.','There is room for a full move.'));
+  $('adrN').textContent=a.pct==null?'·':base+(a.pct>=100?T('Ya recorrió más que un día normal: espera giros o recorridos cortos.','It already moved more than a normal day: expect turns or short moves.'):a.pct>=70?T('Le queda poco recorrido: objetivos cortos.','Little room left: keep targets short.'):T('Le queda recorrido para un movimiento completo.','There is room for a full move.'))}
   var pr=m.plan.pred||[];$('predW').hidden=!pr.length;
   $('pred').innerHTML=pr.map(function(p){return '<div class="pred"><span>'+(p.prob!=null?Math.round(p.prob*100)+'%':'·')+'</span><div>'+esc(p.t)+(p.when&&!/^\d{4}-/.test(p.when)?'<small>'+esc(p.when)+'</small>':'')+'</div></div>'}).join('');
   var rows=[],now=Date.now();
@@ -617,7 +682,7 @@ function expect(m){
 }
 function others(M){
   $('oth').innerHTML=ORDER.filter(function(s){return s!==SYM}).map(function(s){var m=M[s],v=m.ok?m.verdict:'NODATA',txt;
-    if(!m.ok)txt=T('sin datos del indicador','no indicator data');else{var d=dirOf(m.bias);txt=d[3]+' '+T(d[0],d[1])+' · '+(m.far?T('tierra de nadie','no-man\'s land'):dtx(Math.abs(m.near.dt),0,s)+' '+T('de ','from ')+lvName(m.near.k))}
+    if(!m.ok)txt=T('sin datos del indicador','no indicator data');else{var d=dirOf(m.bias);txt=d[3]+' '+T(d[0],d[1])+' · '+(!m.near?'·':m.far?(m.inNtz?T('tierra de nadie','no-man\'s land'):T('lejos de bordes','away from edges')):dtx(Math.abs(m.near.dt),0,s)+' '+T('de ','from ')+m.near.n)}
     return '<button class="ot" data-s="'+s+'"><b>'+s+'</b><span class="st '+v+'"><span class="dot '+v+'"></span>'+vword(v)+'</span><span>'+esc(txt)+'</span><em>›</em></button>'}).join('');
 }
 function noData(m){
