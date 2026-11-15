@@ -80,6 +80,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold2);outline-offs
 @media (prefers-reduced-motion:no-preference){.live:not(.stale) i{animation:pulse 2s infinite}@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(230,185,100,.5)}70%{box-shadow:0 0 0 7px rgba(230,185,100,0)}100%{box-shadow:0 0 0 0 rgba(230,185,100,0)}}}
 .head{font:700 clamp(24px,2.7vw,34px)/1.18 var(--display);font-stretch:88%;margin:0;text-wrap:balance;max-width:32ch}
 .head em{font-style:normal;color:var(--gold2)}
+.since{font-size:13.5px;color:var(--mute);margin:10px 0 0;padding-left:16px}.since b{font-weight:600}
 .todo{font-size:16.5px;color:var(--ink2);max-width:66ch;margin:0;padding-left:14px;border-left:2px solid var(--gold)}
 .facts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin-top:4px;border-top:1px solid var(--line);padding-top:14px}
 .fact{display:grid;gap:3px;min-width:0;padding:0 14px;border-left:1px solid var(--line)}
@@ -232,6 +233,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold2);outline-offs
       <div class="live" id="live"><i></i><span id="liveT"></span></div>
       <h1 class="head" id="nowH"></h1>
       <p class="todo" id="nowTodo"></p>
+      <p class="since" id="nowSince"></p>
       <div class="facts" id="facts"></div>
     </div>
   </section>
@@ -420,6 +422,12 @@ function zoneState(z,pl,px){
   if(tp1!=null&&(sh?px<tp1:px>tp1)&&(sh?px<z.lo:px>z.hi))return{k:'live',late:1,t:T('el precio ya pasó el TP1','price is already past TP1')};
   return{k:'live'};
 }
+function refOf(kl){
+  kl=kl.filter(function(k){return k.price!=null&&k.distPts!=null});if(!kl.length)return null;
+  var c=[kl[0].price+kl[0].distPts,kl[0].price-kl[0].distPts],best=null,be=1e18;
+  c.forEach(function(r){var e=0;kl.forEach(function(k){e+=Math.abs(Math.abs(k.price-r)-k.distPts)});if(e<be){be=e;best=r}});
+  return best;
+}
 function planOf(s,m){
   var cf=SYMS[s],P=cf.plan==='fut'?PF:PC,ins=P&&P.instruments&&P.instruments[cf.key];
   var out={ok:false,fresh:false};
@@ -445,6 +453,7 @@ function planOf(s,m){
   // predicciones con hora ISO ya vencida: fuera
   out.pred=(ins.predictions||[]).filter(function(p){var w=/^\d{4}-/.test(p.resolveAt||'')?Date.parse(p.resolveAt):0;return !w||w>Date.now()}).slice(0,4).map(function(p){return{t:L(p.text),when:p.resolveAt||'',prob:p.prob}});
   out.exp=ins.expectedMove||null;
+  out.ref=ins.price!=null?+ins.price:refOf(ins.keyLevels||[]);
   out.personal=P.personal?L(P.personal.note):'';
   out.cal=P.calendarContext?L(P.calendarContext.note):'';out.newsNote=P.newsRisk?L(P.newsRisk.note):'';
   out.alarm=P.alarm?L(P.alarm):'';out.focus=P.focus&&(P.focus.sym===cf.key||P.focus.sym===s);
@@ -527,6 +536,11 @@ function hero(m){
     :(stale?T('DATOS VIEJOS · ','STALE DATA · '):T('EN VIVO · ','LIVE · '))+T('indicador hace ','indicator ')+ago(m.upd)+(LANG==='en'?' ago':'')+(m.barT?T(' · vela ',' · bar ')+hhmm(m.barT)+' CT':'');
   $('nowH').innerHTML=headline(m);
   $('nowTodo').textContent=todo(m);
+  var pr=m.plan.ref,sn=$('nowSince');
+  if(m.plan.ok&&pr!=null&&m.plan.gen){
+    var dt=Math.round((m.price-pr)/m.cf.tick),g=ct(new Date(m.plan.gen)),cls=dt>0?'up':dt<0?'down':'';
+    sn.innerHTML=T('Desde el plan del agente (','Since the agent\'s plan (')+wdTxt(g.wd)+' '+hhmm(m.plan.gen)+' CT, '+fmt(pr)+'): '+(dt===0?T('sin cambio','no change')+(m.wk?T(', mercado cerrado',', market closed'):''):'<b class="'+cls+'">'+(dt>0?'▲ ':'▼ ')+dtx(dt,1)+'</b>'+(m.cf.crypto?'':' · '+(Math.round((m.price-pr)*100)/100)+' pts'))+(m.plan.fresh?'':T(' · plan viejo',' · stale plan'));
+  }else sn.textContent='';
   var vw=m.lv.vwap!=null?m.lv.vwap:m.lv.fvwap,t=m.cf.tick,ex=m.plan.exp;
   var tclT=m.tcl==null?'·':(m.tcl>0?'▲ ':m.tcl<0?'▼ ':'· ')+(Math.abs(m.tcl)>=2?T('confirmada','confirmed'):Math.abs(m.tcl)===1?T('débil','weak'):T('neutral','neutral'));
   var facts=[
