@@ -22,6 +22,7 @@
 //   stops      -> { posId: true }   (si la posicion tuvo stop, para importarlo)
 import { getStore } from '@netlify/blobs';
 import { listSubs, sendTo } from './_push.mjs';
+import { latestPrices, trackExcursions, excursionOf } from './_excursion.mjs';
 import { hasKey, listAccounts, getAccount, openPositions, workingOrders, closedPositions, hasStop, familyOf, tradingPolicy, lastClosedAt, fillsSince } from './_mfp.mjs';
 
 const chicago = (ms) => {
@@ -105,6 +106,7 @@ export async function runLive(nowMs = Date.now()) {
   const active = accounts.filter((a) => a.status === 'active');
   const risk = {}, open = {}, inactivity = {};
   const seenPos = new Set();
+  const openAll = [];   // posiciones abiertas de todas las cuentas, para muestrear su precio
   // semana (se reinicia con el resumen del domingo) y estado de cada cuenta para ver cuando se pierde
   if (!st.week) st.week = { n: 0, net: 0, fees: 0, noPlan: 0, big: 0, revenge: 0, noStop: 0, lost: 0 };
   if (!st.acctStatus) st.acctStatus = {};
@@ -142,6 +144,7 @@ export async function runLive(nowMs = Date.now()) {
     } catch (e) { log.push(a.account_number + ' politica: ' + e.message); }
     open[a.id] = pos.map((p) => ({ id: p.id, symbol: p.symbol, side: p.side, size: p.size, entry: p.entry_price, openedAt: p.opened_at, stop: hasStop(p, orders) }));
 
+    openAll.push(...pos);
     for (const p of pos) {
       seenPos.add(p.id);
       const fam = familyOf(p.symbol);
@@ -257,6 +260,14 @@ export async function runLive(nowMs = Date.now()) {
   st.firstRun = false;
   await store.setJSON('state', st);
   await store.setJSON('stops', stops);
+  // recorrido del precio de lo que esta abierto (mejor y peor precio, una muestra por minuto)
+  if (openAll.length) {
+    try {
+      const exc = (await store.get('excursion', { type: 'json' }).catch(() => null)) || {};
+      trackExcursions(exc, openAll, await latestPrices(openAll), nowMs);
+      await store.setJSON('excursion', exc);
+    } catch (e) { log.push('recorrido: ' + e.message); }
+  }
   await store.setJSON('snapshot', {
     updatedAt: nowMs,
     accounts: accounts.map((a) => ({ id: a.id, number: a.account_number, name: a.name, stage: a.stage, status: a.status, startingBalance: a.starting_balance, balance: a.balance, createdAt: Math.round(a.created_at) })),
@@ -280,6 +291,7 @@ export async function fillsForImport(acctIds, since) {
 export async function closedForImport(acctIds, since) {
   const store = getStore('live');
   const stops = (await store.get('stops', { type: 'json' }).catch(() => null)) || {};
+  const exc = (await store.get('excursion', { type: 'json' }).catch(() => null)) || {};
   const out = [];
   for (const id of acctIds) {
     const list = await closedPositions(id, { since, maxPages: since ? 3 : 20 });
@@ -296,7 +308,7 @@ export async function closedForImport(acctIds, since) {
       const sl = entryF.map((f) => +f.attached_stop_loss_price).find((v) => v > 0) || exitF.filter((f) => /^stop/.test(f.type || '') || f.bracket_role === 'stop_loss').map((f) => +f.trigger_price).find((v) => v > 0) || null;
       const tp = entryF.map((f) => +f.attached_take_profit_price).find((v) => v > 0) || exitF.filter((f) => /^take/.test(f.type || '') || f.bracket_role === 'take_profit').map((f) => +f.trigger_price).find((v) => v > 0) || null;
       const market = entryF.some((f) => f.type === 'market') ? 'market' : entryF.some((f) => f.type === 'limit') ? 'limit' : null;
-      out.push({ ...p, had_stop: stops[p.id] || sl || p.close_reason === 'stop_loss' ? true : undefined, stop_price: sl, tp_price: tp, entry_type: market });
+      out.push({ ...p, had_stop: stops[p.id] || sl || p.close_reason === 'stop_loss' ? true : undefined, stop_price: sl, tp_price: tp, entry_type: market, ...(excursionOf(p, exc[p.id]) || {}) });
     }
   }
   return out;
