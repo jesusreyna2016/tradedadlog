@@ -4,10 +4,12 @@
 //   GET  /api/live?action=fills&accounts=a,b&since=ms  -> ejecuciones (tipo de orden, comision, deslizamiento)
 //   POST /api/live?action=config   { windows, cooldownMin, matchWindowMin, riskPerTrade, lang }
 //   POST /api/live?action=plans    { plans:[{id,fam,side,ts,status,acct}] }
+//   POST /api/live?action=journal  { byDay:[...] }  -> digest de disciplina (sin dinero) al bus del Session Analyst
 import { getStore } from '@netlify/blobs';
 import { ownerFromToken } from './_push.mjs';
 import { closedForImport, fillsForImport, notify } from './_live.mjs';
 import { hasKey } from './_mfp.mjs';
+import { writeJournalDigest } from './journal-ingest.mjs';
 
 const cors = {
   'access-control-allow-origin': '*',
@@ -49,6 +51,13 @@ export default async (req) => {
       const l = cfg.lang === 'en' ? 'en' : 'es';
       await notify(l === 'en' ? { title: 'Mi Mesa: test alert', body: 'If you can read this, alerts reach your phone.' } : { title: 'Mi Mesa: aviso de prueba', body: 'Si lees esto, los avisos llegan a tu teléfono.' }, 'test');
       return json({ ok: true });
+    }
+    if (req.method === 'POST' && action === 'journal') {
+      const body = await req.json().catch(() => null);
+      if (!body || !Array.isArray(body.byDay)) return json({ error: 'bad body (need {byDay:[...]})' }, 400);
+      const r = await writeJournalDigest(body.byDay, 'mi-mesa');
+      const { status, ...out } = r;
+      return json(out, status);
     }
     if (req.method === 'POST' && (action === 'config' || action === 'plans')) {
       const body = await req.json();
