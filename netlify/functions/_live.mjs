@@ -23,6 +23,7 @@
 import { getStore } from '@netlify/blobs';
 import { listSubs, sendTo } from './_push.mjs';
 import { latestPrices, trackExcursions, excursionOf } from './_excursion.mjs';
+import { trackPayouts } from './_payouts.mjs';
 import { hasKey, listAccounts, getAccount, openPositions, workingOrders, closedPositions, hasStop, familyOf, tradingPolicy, lastClosedAt, fillsSince } from './_mfp.mjs';
 
 const chicago = (ms) => {
@@ -107,6 +108,7 @@ export async function runLive(nowMs = Date.now()) {
   const risk = {}, open = {}, inactivity = {};
   const seenPos = new Set();
   const openAll = [];   // posiciones abiertas de todas las cuentas, para muestrear su precio
+  const policyById = {};   // politica de cada cuenta activa (payout_pending para los retiros)
   // semana (se reinicia con el resumen del domingo) y estado de cada cuenta para ver cuando se pierde
   if (!st.week) st.week = { n: 0, net: 0, fees: 0, noPlan: 0, big: 0, revenge: 0, noStop: 0, lost: 0 };
   if (!st.acctStatus) st.acctStatus = {};
@@ -129,6 +131,7 @@ export async function runLive(nowMs = Date.now()) {
     // inactividad: dias de la regla de la firma desde tu ultima operacion
     try {
       const [pol, lastAt] = await Promise.all([tradingPolicy(a.id), lastClosedAt(a.id)]);
+      policyById[a.id] = pol;
       const rule = (pol.account_rules || []).find((x) => x.id === (a.stage === 'funded' ? 'funded-inactivity' : 'evaluation-inactivity'));
       const limitDays = rule?.parameters?.days || null;
       const last = Math.max(lastAt || 0, ...pos.map((p) => p.opened_at || 0), a.created_at || 0);
@@ -258,6 +261,11 @@ export async function runLive(nowMs = Date.now()) {
   // limpieza de marcas viejas
   for (const k of Object.keys(st.lowWarned)) if (!k.includes(today)) delete st.lowWarned[k];
   st.firstRun = false;
+  // retiros de las fondeadas (la API no los lista: se deducen del saldo)
+  try {
+    const paid = await trackPayouts(st, accounts, policyById, nowMs);
+    for (const p of paid) log.push(`retiro ${p.number} ${p.amount}`);
+  } catch (e) { log.push('retiros: ' + e.message); }
   await store.setJSON('state', st);
   await store.setJSON('stops', stops);
   // recorrido del precio de lo que esta abierto (mejor y peor precio, una muestra por minuto)
@@ -271,7 +279,7 @@ export async function runLive(nowMs = Date.now()) {
   await store.setJSON('snapshot', {
     updatedAt: nowMs,
     accounts: accounts.map((a) => ({ id: a.id, number: a.account_number, name: a.name, stage: a.stage, status: a.status, startingBalance: a.starting_balance, balance: a.balance, createdAt: Math.round(a.created_at) })),
-    risk, open, inactivity, week: st.week, lastWeek: st.lastWeek || null, lostAt: st.lostAt || null
+    risk, open, inactivity, payouts: st.payouts || [], week: st.week, lastWeek: st.lastWeek || null, lostAt: st.lostAt || null
   });
   return { ok: true, active: active.length, log };
 }
