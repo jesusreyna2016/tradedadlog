@@ -107,28 +107,14 @@ function mergeByDay(existing, incoming) {
   return [...map.values()].sort((a, b) => a.date.localeCompare(b.date));
 }
 
-export default async (req) => {
-  const origin = req.headers.get('origin') || '*';
-  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(origin) });
-  if (req.method !== 'POST') return new Response('POST only', { status: 405, headers: cors(origin) });
-
-  const secret = process.env.CC_INGEST_SECRET;
-  const key = new URL(req.url).searchParams.get('key');
-  if (!secret || key !== secret) return new Response('unauthorized', { status: 401, headers: cors(origin) });
-
-  let b;
-  try { b = JSON.parse(await req.text()); }
-  catch (e) { return new Response('bad JSON', { status: 400, headers: cors(origin) }); }
-  if (!b || typeof b !== 'object' || Array.isArray(b) || !Array.isArray(b.byDay)) {
-    return new Response('bad body (need {byDay:[...]})', { status: 400, headers: cors(origin) });
-  }
-
+// Escribe live/journal.json en el bus: mezcla por fecha con lo que ya hay y recalcula el rollup.
+// Lo usan este endpoint (Trading Journal, con ?key=) y /api/live?action=journal (Mi Mesa, con la sesion del dueño).
+export async function writeJournalDigest(byDayIn, source) {
   const now = new Date().toISOString();
-  const incoming = b.byDay.slice(-HARD_CAP).map(cleanDay).filter(Boolean);
-  if (!incoming.length) return new Response('no valid days', { status: 400, headers: cors(origin) });
-
+  const incoming = (Array.isArray(byDayIn) ? byDayIn : []).slice(-HARD_CAP).map(cleanDay).filter(Boolean);
+  if (!incoming.length) return { ok: false, status: 400, error: 'no valid days' };
   const token = process.env.SA_BUS_TOKEN;
-  if (!token) return new Response('SA_BUS_TOKEN missing', { status: 503, headers: cors(origin) });
+  if (!token) return { ok: false, status: 503, error: 'SA_BUS_TOKEN missing' };
 
   let existing = [];
   let known = undefined;
@@ -148,23 +134,39 @@ export default async (req) => {
   const clean = {
     schema: 'journal-digest-1',
     note: 'De-identified discipline digest from the trader journal. No P&L, no balances. Counts and flags only.',
+    source: source || 'trading-journal',
     updatedAt: now,
     window: { days: byDay.length },
     rollup: recomputeRollup(byDay),
     byDay
   };
   const body = JSON.stringify(clean, null, 2) + '\n';
-
   try {
     const r = await busPut('live/journal.json', body, `sa-bus: journal digest ${now}`, { token, known });
-    return new Response(JSON.stringify({
-      ok: true, ...r, days: byDay.length, merged: existing.length > 0, incoming: incoming.length
-    }), {
-      status: 200, headers: { ...cors(origin), 'content-type': 'application/json' }
-    });
+    return { ok: true, status: 200, ...r, days: byDay.length, merged: existing.length > 0, incoming: incoming.length };
   } catch (e) {
-    return new Response(JSON.stringify({ ok: false, error: String(e && e.message || e) }), {
-      status: 502, headers: { ...cors(origin), 'content-type': 'application/json' }
-    });
+    return { ok: false, status: 502, error: String(e && e.message || e) };
   }
+}
+
+export default async (req) => {
+  const origin = req.headers.get('origin') || '*';
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(origin) });
+  if (req.method !== 'POST') return new Response('POST only', { status: 405, headers: cors(origin) });
+
+  const secret = process.env.CC_INGEST_SECRET;
+  const key = new URL(req.url).searchParams.get('key');
+  if (!secret || key !== secret) return new Response('unauthorized', { status: 401, headers: cors(origin) });
+
+  let b;
+  try { b = JSON.parse(await req.text()); }
+  catch (e) { return new Response('bad JSON', { status: 400, headers: cors(origin) }); }
+  if (!b || typeof b !== 'object' || Array.isArray(b) || !Array.isArray(b.byDay)) {
+    return new Response('bad body (need {byDay:[...]})', { status: 400, headers: cors(origin) });
+  }
+
+  const r = await writeJournalDigest(b.byDay, 'trading-journal');
+  if (!r.ok && r.status !== 502) return new Response(r.error, { status: r.status, headers: cors(origin) });
+  const { status, ...out } = r;
+  return new Response(JSON.stringify(out), { status, headers: { ...cors(origin), 'content-type': 'application/json' } });
 };
