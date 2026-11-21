@@ -169,6 +169,22 @@
   to = "/.netlify/functions/zones-bus-snapshot"
   status = 200
 
+# Trader OS · ingest unico (JSON + pipe) + snapshot/lente Contexto del bus trader-os-bus
+[[redirects]]
+  from = "/api/tos-ingest"
+  to = "/.netlify/functions/tos-ingest"
+  status = 200
+
+[[redirects]]
+  from = "/api/tos-bus-snapshot"
+  to = "/.netlify/functions/tos-bus-snapshot"
+  status = 200
+
+[[redirects]]
+  from = "/api/tos-market"
+  to = "/.netlify/functions/tos-market"
+  status = 200
+
 # Caching: pages, the service worker and every unhashed file must be revalidated on each load,
 # so a deploy shows up without a hard refresh. Only Vite's hashed /assets/* are immutable.
 [[headers]]
