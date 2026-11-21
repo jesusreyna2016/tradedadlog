@@ -77,9 +77,29 @@ const M = {
     : { title: 'Se acabó tu horario de trading', body: open ? 'Todavía tienes un trade abierto: manéjalo con tu plan y cierra la plataforma.' : 'Cierra la plataforma y ve al journal de Mi Mesa.' }
 };
 
+// Trader OS (Fase 3): los nudges de conducta tambien entran al stream del cerebro
+// (store Blobs 'tos', events:<dia>), para que el Coach los vea en vivo y la review
+// los lea. Dedup por tag/dia para no spamear (el aviso ya se dedup por estado).
+const TOS_COACH_EV = { rev: 'REVENGE', nostop: 'NO_STOP', noplan: 'NO_PLAN', size: 'OVERSIZE', loss: 'LOSS', afterlost: 'AFTER_LOST', lost: 'LOST_ACCOUNT' };
+async function tosNudge(tag, msg) {
+  const ev = TOS_COACH_EV[String(tag || '').split('-')[0]];
+  if (!ev) return;
+  const day = new Date().toISOString().slice(0, 10);
+  const key = `events:${day}`;
+  const store = getStore('tos');
+  let logArr = [];
+  try { logArr = (await store.get(key, { type: 'json' })) || []; } catch { logArr = []; }
+  if (logArr.some((e) => e.tag === tag)) return;   // un nudge por tag y dia
+  logArr.push({ t: Date.now(), src: 'coach', sym: null, event: ev, kind: 'NUDGE', tag,
+    text: (msg && (msg.title || msg.body)) || ev, receivedAt: new Date().toISOString() });
+  if (logArr.length > 2000) logArr = logArr.slice(-2000);
+  await store.setJSON(key, logArr);
+}
+
 export async function notify(msg, tag) {
   const subs = await listSubs();
   for (const s of subs) await sendTo(s, { ...msg, tag, url: '/#hoy' });
+  try { await tosNudge(tag, msg); } catch { /* el evento al bus nunca rompe el aviso */ }
 }
 
 const shortName = (a) => (a.name || '').replace(/ Challenge$/, '') + ' · ' + (a.account_number || a.id);
