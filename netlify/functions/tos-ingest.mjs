@@ -28,14 +28,16 @@ const STATE_SRCS = new Set(['feed', 'command', 'orb', 'regime', 'trendcl']);
 const SYM_ALIAS = { MNQ: 'NQ', MES: 'ES', MGC: 'GC', MYM: 'YM', MCL: 'CL', M2K: 'RTY' };
 const EVENTS_MAX = 1500;   // tope por dia, por si una alerta se dispara en bucle
 
-// "CME_MINI:NQ1!" / "NQ1!" / "NQZ2026" -> "NQ"
-function symFromTicker(t){
-  if(!t) return null;
-  let s = String(t);
+// "CME_MINI:NQ1!" -> "NQ" · "BINANCE:ETHUSDT25Z2026" / "ETHUSDT" / "ETHUSDT.P" -> "ETH"
+function normSym(raw){
+  if(!raw) return null;
+  let s = String(raw);
   const c = s.lastIndexOf(':');
-  if(c >= 0) s = s.slice(c + 1);
-  s = s.replace(/[0-9!].*$/, '');           // corta en el primer digito o '!'
+  if(c >= 0) s = s.slice(c + 1);              // quita el prefijo de exchange (BINANCE:)
   s = s.toUpperCase();
+  s = s.replace(/[0-9!].*$/, '');             // corta en el primer digito o '!' (NQ1!, ETHUSDT25Z2026 -> ETHUSDT)
+  s = s.replace(/\.?P$/, '');                 // perpetuos (ETHUSDT.P -> ETHUSDT)
+  s = s.replace(/(USDT|USDC|USD|PERP)$/, ''); // quote de cripto (ETHUSDT -> ETH)
   return SYM_ALIAS[s] || s || null;
 }
 
@@ -48,7 +50,7 @@ function parsePipe(text){
     if(idx > 0) kv[parts[i].slice(0, idx).trim()] = parts[i].slice(idx + 1).trim();
   }
   return { src: (kv.src || PREFIX_SRC[parts[0].trim()] || parts[0].trim()).toLowerCase(),
-           sym: (kv.sym || symFromTicker(kv.ticker) || 'NQ').toUpperCase(),
+           sym: (normSym(kv.sym || kv.ticker) || 'NQ'),
            kv, fmt: 'pipe' };
 }
 
@@ -59,7 +61,7 @@ function parseLine(line){
   if(s[0] === '{'){
     let obj; try { obj = JSON.parse(s); } catch { return null; }
     const src = String(obj.src || 'unknown').toLowerCase();
-    const sym = (obj.sym || symFromTicker(obj.ticker) || 'NQ').toUpperCase();
+    const sym = normSym(obj.sym || obj.ticker) || 'NQ';
     return { src, sym, ev: obj.event || obj.signal || null, obj, fmt: 'json' };
   }
   if(s.includes('|')){
