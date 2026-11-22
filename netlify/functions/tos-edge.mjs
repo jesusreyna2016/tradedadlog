@@ -23,7 +23,7 @@ const REV_LOOKBACK_DAYS = 7;          // ventana movil para el Reversal medido e
 const MIN_N_SETUP = 50;               // por debajo es ruido, no se publica como setup
 
 // edge "probado" (misma definicion que el gate del scalp: readyForLive)
-const hasEdge = (m) => m && m.n >= 100 && m.expRnet > 0 && m.pfNet >= 1.3 && m.wr >= 50;
+const hasEdge = (m) => m && m.n >= 100 && m.expRnet > 0 && m.pfNet >= 1.3 && m.wrTP1 >= 50;
 
 const round = (v, d = 3) => (typeof v === 'number' && isFinite(v) ? Number(v.toFixed(d)) : null);
 const numR = (v) => { const x = typeof v === 'string' ? Number(v) : v; return typeof x === 'number' && isFinite(x) ? x : null; };
