@@ -190,6 +190,12 @@
   to = "/.netlify/functions/tos-coach"
   status = 200
 
+# Trader OS · lente Edge (destila el edge medido del scalp-cc-bus + Reversal en vivo)
+[[redirects]]
+  from = "/api/tos-edge"
+  to = "/.netlify/functions/tos-edge"
+  status = 200
+
 # Trader OS · admin / limpieza puntual (purga de simbolos fantasma), protegido por secreto
 [[redirects]]
   from = "/api/tos-admin"

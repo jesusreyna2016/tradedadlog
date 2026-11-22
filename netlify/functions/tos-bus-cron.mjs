@@ -5,6 +5,7 @@
 import { runSnapshot } from './tos-bus-snapshot.mjs';
 import { runMarket } from './tos-market.mjs';
 import { runCoach } from './tos-coach.mjs';
+import { runEdge } from './tos-edge.mjs';
 
 export const config = { schedule: '*/15 * * * *' };
 
@@ -17,8 +18,11 @@ export default async () => {
   // El Coach lee MFP (API externa); aislado para que un fallo suyo no rompa el bus
   let coach;
   try { coach = await runCoach(); } catch (e) { coach = { ok: false, error: String(e) }; }
+  // Lente Edge: lee scalp-cc-bus (solo lectura) + eventos tdl_rev; aislada igual
+  let edge;
+  try { edge = await runEdge(); } catch (e) { edge = { ok: false, error: String(e) }; }
   const ok = snapshot.ok !== false;
-  return new Response(JSON.stringify({ snapshot, market, coach }), {
+  return new Response(JSON.stringify({ snapshot, market, coach, edge }), {
     status: ok ? 200 : 500,
     headers: { 'content-type': 'application/json' }
   });
