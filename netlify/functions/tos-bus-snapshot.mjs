@@ -4,21 +4,47 @@
 //   state:<src>:<SYM>   -> live/feeds.json   (mapa crudo del ultimo estado por fuente+simbolo)
 //   events:<YYYY-MM-DD> -> events/<fecha>.jsonl  (log append-only de eventos semanticos Tier B)
 //
+// PUENTE Fase 4 / Paso 1 (opcion c): ademas espeja al bus las fuentes que el
+// Session Analyst ya tiene en el store Blobs 'cc' (las rellenan sus alertas
+// EXISTENTES via ind-ingest): command/regime/trendcl (ind:<src>:<SYM>) y el
+// backbone orb (sym:<SYM>). Asi la lente Contexto Tier 2 tendra paridad con el
+// SA sin tocar ninguna alerta de TradingView. Es aditivo y reversible: si una
+// clave YA la escribe tos-ingest de forma nativa, NO se pisa (tos-ingest manda);
+// el puente solo rellena lo que falta. Y escribe live/news.json (cc-news +
+// cc-macro) para el pase de calendario. Cuando en el Paso 6 se corte el SA, esas
+// alertas se reapuntan a tos-ingest (opcion a) y el puente deja de hacer falta.
+//
 // El snapshot es un ESPEJO FIEL, no compone: la lente Contexto es quien leera
-// live/feeds.json + events/ y escribira el live/market.json del esquema. Aqui
-// solo garantizamos que el dato llega al bus, merge-only (nunca encoge) y sin
+// live/feeds.json + events/ + news y escribira el live/market.json del esquema.
+// Aqui solo garantizamos que el dato llega al bus, merge-only (nunca encoge) y sin
 // commit si no cambio (lo maneja ghPut). Procesa hoy y ayer para los eventos.
 //
 // Invocable por HTTP para pruebas (GET); el schedule vive en tos-bus-cron.mjs.
 import { getStore } from '@netlify/blobs';
 import { ghGet, ghPut } from './_gh-bus.mjs';
+import newsHandler from './cc-news.mjs';
+import macroHandler from './cc-macro.mjs';
 
 const OWNER = 'jesusreyna2016';
 const REPO = 'trader-os-bus';
 const BRANCH = 'main';
 const EVENTS_MAX = 5000;   // tope por archivo de dia
 
+// Puente 'cc': simbolos del SA y sus fuentes. command/regime/trendcl viven en
+// ind:<src>:<SYM>; el backbone orb en sym:<SYM>. SYM del store 'cc' es crudo
+// (ETHUSDT), se normaliza a la convencion del bus (ETH) igual que tos-ingest.
+const BRIDGE_SYMS = ['NQ', 'ES', 'GC', 'YM', 'CL', 'ETHUSDT', 'BTCUSDT'];
+const BRIDGE_IND_SRCS = ['command', 'regime', 'trendcl'];
+const bridgeNorm = (raw) => String(raw).toUpperCase()
+  .replace(/[0-9!].*$/, '').replace(/\.?P$/, '').replace(/(USDT|USDC|USD|PERP)$/, '');
+
 const evKey = (e) => `${e.t}|${e.src}|${e.sym}|${e.event || ''}`;
+
+// Llama a un handler de funcion Netlify en proceso (sin red) y devuelve su JSON.
+const readHandlerJson = async (handler) => {
+  try { return await (await handler(new Request('https://tradedadlog.com/internal'))).json(); }
+  catch (e) { return { error: String(e && e.message || e) }; }
+};
 
 function daysToProcess() {
   const now = Date.now();
@@ -66,6 +92,31 @@ export async function runSnapshot() {
     const rec = await store.get(key, { type: 'json' });   // get es fuertemente consistente
     if (rec) feeds[key.slice('state:'.length)] = rec;     // si get devuelve null, se conserva el valor previo
   }
+
+  // ---- 1b. Puente (opcion c): fuentes del SA desde el store Blobs 'cc' ----
+  // Rellena command/regime/trendcl (ind:<src>:<SYM>) y orb (sym:<SYM>) SOLO si la
+  // clave no la provee ya tos-ingest de forma nativa (lo nativo no lleva _bridged
+  // y manda). Marca lo puenteado con _bridged:'cc' para poder refrescarlo y para
+  // que el Paso 6 sepa que viene del pipeline viejo.
+  try {
+    const cc = getStore('cc');
+    for (const rawSym of BRIDGE_SYMS) {
+      if (Date.now() > deadline) break;
+      const sym = bridgeNorm(rawSym);
+      for (const src of BRIDGE_IND_SRCS) {
+        const key = `${src}:${sym}`;
+        if (feeds[key] && !feeds[key]._bridged) continue;   // nativo de tos-ingest manda
+        const rec = await cc.get(`ind:${src}:${rawSym}`, { type: 'json' });
+        if (rec) feeds[key] = { ...rec, src, sym, receivedAt: rec.receivedAt || rec.updatedAt || null, _bridged: 'cc' };
+      }
+      const okey = `orb:${sym}`;
+      if (!(feeds[okey] && !feeds[okey]._bridged)) {
+        const orb = await cc.get(`sym:${rawSym}`, { type: 'json' });   // backbone orb_sesgo
+        if (orb) feeds[okey] = { ...orb, src: 'orb', sym, receivedAt: orb.receivedAt || orb.updatedAt || null, _bridged: 'cc' };
+      }
+    }
+  } catch (e) { out.push({ bridge: 'cc', error: String(e && e.message || e) }); }
+
   feeds._updatedAt = new Date().toISOString();
   if (Object.keys(feeds).length > 1) {
     out.push(await ghPut(OWNER, REPO, BRANCH, 'live/feeds.json',
@@ -98,6 +149,26 @@ export async function runSnapshot() {
     out.push(await ghPut(OWNER, REPO, BRANCH, `events/${day}.jsonl`, serializeEvents(map),
       `tos: events ${day} (${map.size})`, { token, known: cur }));
   }
+
+  // ---- 3. Puente de noticias -> live/news.json (cc-news + cc-macro) ----
+  // El Tier 2 lo leera como el SA lee market.json.news. Dedupe por los eventos del
+  // calendario (builtAt y macro cambian cada llamada; macro viaja de arrastre como
+  // en el SA). Best-effort: un fallo aqui nunca rompe el espejo de feeds/eventos.
+  try {
+    const [news, macro] = await Promise.all([readHandlerJson(newsHandler), readHandlerJson(macroHandler)]);
+    if (news && Array.isArray(news.events)) {
+      const cur = await ghGet(OWNER, REPO, BRANCH, 'live/news.json', { token });
+      let prevFp = null;
+      try { prevFp = cur?.content ? JSON.stringify(JSON.parse(cur.content).news?.events ?? null) : null; } catch { prevFp = null; }
+      const fp = JSON.stringify(news.events);
+      if (fp !== prevFp) {
+        const body = JSON.stringify({ builtAt: new Date().toISOString(), news, macro: macro || null }, null, 2) + '\n';
+        out.push(await ghPut(OWNER, REPO, BRANCH, 'live/news.json', body, `tos: news snapshot`, { token, known: cur }));
+      } else {
+        out.push({ skipped: true, path: 'live/news.json', guard: 'unchanged' });
+      }
+    }
+  } catch (e) { out.push({ news: true, error: String(e && e.message || e) }); }
 
   // marcador de frescura (lo lee el watchdog unificado mas adelante)
   try { await store.setJSON('meta:lastSnapshot', { at: new Date().toISOString(), wrote: out.filter((w) => !w.skipped).length }); } catch { /* best effort */ }
