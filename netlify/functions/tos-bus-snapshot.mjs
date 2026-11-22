@@ -30,11 +30,15 @@ const REPO = 'trader-os-bus';
 const BRANCH = 'main';
 const EVENTS_MAX = 5000;   // tope por archivo de dia
 
-// Puente 'cc': simbolos del SA y sus fuentes. command/regime/trendcl viven en
+// Puente 'cc': simbolos del SA y sus fuentes. regime/trendcl viven en
 // ind:<src>:<SYM>; el backbone orb en sym:<SYM>. SYM del store 'cc' es crudo
 // (ETHUSDT), se normaliza a la convencion del bus (ETH) igual que tos-ingest.
+// `command` NO se puentea: la alerta clasica CMDC1 esta retirada (la reemplazo
+// FEED1 el ~1 nov) y su ultimo dato esta congelado 3 semanas; el veredicto
+// fusionado lo forma la lente Tier 2 desde feed+orb+regime+trendcl, como el SA.
 const BRIDGE_SYMS = ['NQ', 'ES', 'GC', 'YM', 'CL', 'ETHUSDT', 'BTCUSDT'];
-const BRIDGE_IND_SRCS = ['command', 'regime', 'trendcl'];
+const BRIDGE_IND_SRCS = ['regime', 'trendcl'];
+const BRIDGE_ACTIVE = new Set(['orb', 'regime', 'trendcl']);   // srcs que el puente mantiene vivos
 const bridgeNorm = (raw) => String(raw).toUpperCase()
   .replace(/[0-9!].*$/, '').replace(/\.?P$/, '').replace(/(USDT|USDC|USD|PERP)$/, '');
 
@@ -114,6 +118,13 @@ export async function runSnapshot() {
         const orb = await cc.get(`sym:${rawSym}`, { type: 'json' });   // backbone orb_sesgo
         if (orb) feeds[okey] = { ...orb, src: 'orb', sym, receivedAt: orb.receivedAt || orb.updatedAt || null, _bridged: 'cc' };
       }
+    }
+    // Barrido de huerfanas: borra claves PUENTEADAS cuya src ya no mantiene el
+    // puente (p.ej. command retirado). No toca claves nativas de tos-ingest.
+    for (const k of Object.keys(feeds)) {
+      if (k === '_updatedAt') continue;
+      const rec = feeds[k];
+      if (rec && rec._bridged === 'cc' && !BRIDGE_ACTIVE.has(k.slice(0, k.indexOf(':')))) delete feeds[k];
     }
   } catch (e) { out.push({ bridge: 'cc', error: String(e && e.message || e) }); }
 
