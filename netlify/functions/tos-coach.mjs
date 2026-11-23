@@ -18,14 +18,50 @@ const OWNER = 'jesusreyna2016';
 const REPO = 'trader-os-bus';
 const BRANCH = 'main';
 
-// Contrato por defecto (MFP 10k NDX, de memoria); configurable por env
-const CFG = {
+// Reglas del Coach. Los valores VIVOS los pone Jesus en el bus (state/coach-config.json)
+// y el Coach los lee cada corrida (editar alli cambia los umbrales SIN redeploy). Estos
+// son solo el respaldo si el archivo falta (y env como ultimo recurso). dayStop es un
+// freno BLANDO: debe pegar antes del limite duro de la firma.
+const DEFAULT_CFG = {
   maxTrades: +process.env.COACH_MAX_TRADES || 5,
-  dayStop: +process.env.COACH_DAY_STOP || 100,      // USD
-  riskPerTrade: +process.env.COACH_RISK || 50,      // USD, para la R proxy
+  dayStop: +process.env.COACH_DAY_STOP || 500,      // USD, freno blando
+  riskPerTrade: +process.env.COACH_RISK || 50,      // USD, unidad de riesgo para la R proxy
   pauseMin: +process.env.COACH_PAUSE_MIN || 10,     // R1: pausa tras un SL
   lossStreakLock: +process.env.COACH_LOCK_STREAK || 3
 };
+let CFG = { ...DEFAULT_CFG };
+
+// Carga la config viva del bus. Si no existe, la siembra con los defaults para que
+// Jesus la edite en GitHub sin tocar codigo. Campos del archivo: maxTrades, dayStopUsd,
+// riskPerTradeUsd, pauseMin, lossStreakLock.
+async function loadConfig(token) {
+  const fin = (v, d) => (Number.isFinite(+v) ? +v : d);
+  try {
+    const cur = await ghGet(OWNER, REPO, BRANCH, 'state/coach-config.json', { token });
+    if (cur?.content) {
+      const c = JSON.parse(cur.content);
+      return {
+        maxTrades: fin(c.maxTrades, DEFAULT_CFG.maxTrades),
+        dayStop: fin(c.dayStopUsd, DEFAULT_CFG.dayStop),
+        riskPerTrade: fin(c.riskPerTradeUsd, DEFAULT_CFG.riskPerTrade),
+        pauseMin: fin(c.pauseMin, DEFAULT_CFG.pauseMin),
+        lossStreakLock: fin(c.lossStreakLock, DEFAULT_CFG.lossStreakLock)
+      };
+    }
+    const seed = {
+      schema: 'coach-config-1',
+      note: 'Reglas del Coach que controla Jesus. El Coach la lee cada corrida; editar aqui cambia los umbrales sin redeploy. dayStopUsd es un freno BLANDO (debe pegar antes del limite duro de la firma).',
+      updatedAt: new Date().toISOString(),
+      maxTrades: DEFAULT_CFG.maxTrades,
+      dayStopUsd: DEFAULT_CFG.dayStop,
+      riskPerTradeUsd: DEFAULT_CFG.riskPerTrade,
+      pauseMin: DEFAULT_CFG.pauseMin,
+      lossStreakLock: DEFAULT_CFG.lossStreakLock
+    };
+    try { await ghPut(OWNER, REPO, BRANCH, 'state/coach-config.json', JSON.stringify(seed, null, 2) + '\n', 'tos: seed coach-config', { token }); } catch { /* best-effort */ }
+  } catch { /* usa defaults */ }
+  return { ...DEFAULT_CFG };
+}
 
 const RULES_ACTIVE = [
   'R1 pausa post-SL', 'R2 se-me-escapa = STOP', 'R3 cortar sin promediar/reentrar',
@@ -45,6 +81,7 @@ function chiDayStartMs() {
 export async function runCoach() {
   const token = process.env.TOS_BUS_TOKEN;
   if (!token) return { ok: false, error: 'falta TOS_BUS_TOKEN' };
+  CFG = await loadConfig(token);   // umbrales vivos del bus (Jesus los controla)
   if (!hasKey()) {
     // sin API MFP: no sobreescribimos trader.json, solo reportamos
     return { ok: true, note: 'sin MFP_API_KEY: el Coach queda a la espera de fills (o de captura manual)' };
@@ -156,6 +193,26 @@ export async function runCoach() {
   for (const o of openRows) if (!o.hadStop) openFlags.push({ rule: 'stop', at: o.openedAt, sym: o.sym, note: 'posicion abierta sin stop' });
   for (const t of trades) if (t.flags.includes('NO_ZONE')) openFlags.push({ rule: 'zona', at: t.openedAt, sym: t.sym, note: `entrada en tierra de nadie (${t.distZone} pts al nivel mas cercano)` });
 
+  // 5b. enlaza la autopsia diaria mas reciente (reviews/<fecha>.md en la raiz, la escribe
+  //     la rutina Coach a las 16:35 CT) para que el HUD pueda mostrarla sin adivinar el nombre.
+  async function readReview(dateStr) {
+    try {
+      const r = await ghGet(OWNER, REPO, BRANCH, `reviews/${dateStr}.md`, { token });
+      if (!r?.content) return null;
+      let headline = '';
+      for (const raw of r.content.split('\n')) {
+        const l = raw.trim();
+        if (l && !l.startsWith('#') && !l.startsWith('---') && !l.startsWith('>')) {
+          headline = l.replace(/^[*_`\s-]+/, '').replace(/[*_`\s]+$/, '').slice(0, 240);
+          break;
+        }
+      }
+      return { date: dateStr, path: `reviews/${dateStr}.md`, headline };
+    } catch { return null; }
+  }
+  const yday = new Date(now - 864e5).toISOString().slice(0, 10);
+  const lastReview = (await readReview(today)) || (await readReview(yday)) || prev.lastReview || null;
+
   const trader = {
     _writer: 'coach', _schema: 1, _day: today, asOf: new Date(now).toISOString(),
     state, disciplineStreak: streak, todayViolations: violations,
@@ -171,7 +228,7 @@ export async function runCoach() {
     todayTrades: trades,
     openPositions: openRows,
     captures,
-    lastReview: prev.lastReview || null
+    lastReview
   };
 
   const res = await ghPut(OWNER, REPO, BRANCH, 'live/trader.json',
