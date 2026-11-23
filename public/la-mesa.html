@@ -70,7 +70,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .terrain-head .where{font-family:var(--mono);font-size:.72rem;margin-left:auto;padding:3px 9px;border-radius:20px}
 .where.edge{color:var(--ember-soft);background:var(--ember-dim)}
 .where.nml{color:var(--muted);background:rgba(140,130,118,.1)}
-#terrain{width:100%;height:440px;display:block}
+#terrain{width:100%;height:360px;display:block}
 .tcaption{font-family:var(--mono);font-size:.64rem;color:var(--faint);margin-top:8px;text-align:center}
 
 /* ACT III — woven truths */
@@ -124,7 +124,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 
   <div class="terrain-wrap">
     <div class="terrain-head"><h2 id="terrainTitle">El terreno</h2><span class="where" id="where"></span></div>
-    <svg id="terrain" viewBox="0 0 820 440" preserveAspectRatio="xMidYMid meet" role="img" aria-label="mapa de precio"></svg>
+    <svg id="terrain" viewBox="0 0 820 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="mapa de precio"></svg>
     <div class="tcaption" id="tcaption"></div>
   </div>
 
@@ -270,58 +270,70 @@ function renderCryptoFocus(){
 
 /* ACT II — terrain SVG */
 function drawTerrain(d,symOver){
-  const svg=document.getElementById("terrain");const W=820,H=440,PADT=24,PADB=24,x0=70,x1=W-150;
+  const svg=document.getElementById("terrain");const W=820,H=360,PADT=22,PADB=22,x0=72,x1=W-200;
   const where=document.getElementById("where"),cap=document.getElementById("tcaption");
   if(!d){svg.innerHTML="";where.className="where";where.textContent="";cap.textContent="";return;}
   const sym=symOver||FOCUS;
   // anchors
-  const kl=(d.keyLevels||[]).filter(k=>k&&k.price).map(k=>({name:tr(k.name),price:k.price,kind:"lvl"}));
-  const zones=(d.zones||[]).filter(z=>z.range&&z.range.length===2).map(z=>({lo:Math.min(...z.range),hi:Math.max(...z.range),dir:z.dir,type:z.type}));
-  const sa=d.scenarioA||{};const targets=[];if(sa.target)targets.push({price:sa.target,name:LANG==="es"?"objetivo":"target"});if(sa.target2)targets.push({price:sa.target2,name:"obj 2"});
+  const kl=(d.keyLevels||[]).filter(k=>k&&k.price).map(k=>({name:tr(k.name),price:k.price}));
+  const seenZ=new Set();
+  const zones=(d.zones||[]).filter(z=>z.range&&z.range.length===2).map(z=>({lo:Math.min(...z.range),hi:Math.max(...z.range),dir:z.dir,type:z.type}))
+    .filter(z=>{const k=Math.round(z.lo)+"-"+Math.round(z.hi)+(z.type||"");if(seenZ.has(k))return false;seenZ.add(k);return true;});
+  const sa=d.scenarioA||{};const targets=[];if(sa.target)targets.push({price:sa.target,name:LANG==="es"?"objetivo":"target"});if(sa.target2)targets.push({price:sa.target2,name:LANG==="es"?"obj 2":"tgt 2"});
   const invLv=(d.invalidation&&(d.invalidation.level||d.invalidation.price))|| (findKL(kl,"vwap")||{}).price || null;
   let price=livePrice(sym);
   // plan ref price if no market or market far from anchors
   const z0=zones[0];
   if(z0){const ref=z0.dir==="SHORT"?z0.lo-(d.zones[0].distPts||0):z0.hi+(d.zones[0].distPts||0);
-    if(price==null||Math.abs(price-ref)>(d.expectedMove&&d.expectedMove.high||300)*2.2)price=ref;}
+    if(price==null||Math.abs(price-ref)>((d.expectedMove&&d.expectedMove.high)||300)*2.2)price=ref;}
   if(price==null&&kl.length)price=kl[0].price;
   // scale window around price
   const em=d.expectedMove||{};const near=[...zones.map(z=>Math.abs(((z.lo+z.hi)/2)-price)),...kl.map(k=>Math.abs(k.price-price))].filter(x=>!isNaN(x));
-  const half=Math.max((em.high||0)*1.15,(Math.min(...(near.length?near:[200])))*1.6,(em.base||150)*1.2,120);
+  const half=Math.max((em.high||0)*1.15,((near.length?Math.min(...near):200))*1.7,(em.base||150)*1.2,100);
   const top=price+half,bot=price-half;
   const Y=(pp)=>PADT+(top-pp)/(top-bot)*(H-PADT-PADB);
   const clamp=(pp)=>pp>top?top:pp<bot?bot:pp;
-  let out="";
-  // premium/discount gradient + pivot
-  out+=`<defs><linearGradient id="pd" x1="0" y1="0" x2="0" y2="1">
+  const sgc={GO:"--go",WAIT:"--wait",AVOID:"--avoid"}[(d.verdict&&d.verdict.signal)]||"--ember";
+  let out=`<defs><linearGradient id="pd" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="rgba(224,138,60,.10)"/><stop offset="0.5" stop-color="rgba(0,0,0,0)"/>
     <stop offset="1" stop-color="rgba(91,140,212,.09)"/></linearGradient>
     <filter id="glow"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
   out+=`<rect x="${x0}" y="${PADT}" width="${x1-x0}" height="${H-PADT-PADB}" fill="url(#pd)"/>`;
-  out+=`<text x="${x0+4}" y="${PADT+14}" fill="var(--faint)" font-family="var(--mono)" font-size="10" letter-spacing="2">${t("prem")}</text>`;
-  out+=`<text x="${x0+4}" y="${H-PADB-6}" fill="var(--faint)" font-family="var(--mono)" font-size="10" letter-spacing="2">${t("disc")}</text>`;
+  out+=`<text x="${x0+4}" y="${PADT+13}" fill="var(--faint)" font-family="var(--mono)" font-size="9.5" letter-spacing="2">${t("prem")}</text>`;
+  out+=`<text x="${x0+4}" y="${H-PADB-5}" fill="var(--faint)" font-family="var(--mono)" font-size="9.5" letter-spacing="2">${t("disc")}</text>`;
+  const R=[]; // right-side labels, resolved for collisions after all lines are placed
   // zones as bands
   zones.forEach(z=>{const yt=Y(clamp(z.hi)),yb=Y(clamp(z.lo));const col=z.dir==="SHORT"?"255,106,92":z.dir==="LONG"?"91,212,138":"232,184,75";
-    out+=`<rect x="${x0}" y="${yt}" width="${x1-x0}" height="${Math.max(3,yb-yt)}" fill="rgba(${col},.11)" stroke="rgba(${col},.4)" stroke-width="1"/>
-      <text x="${x1+8}" y="${(yt+yb)/2+3}" fill="rgb(${col})" font-family="var(--mono)" font-size="10.5">${z.dir||""} ${z.type||""}</text>`;});
-  // key levels
+    out+=`<rect x="${x0}" y="${yt}" width="${x1-x0}" height="${Math.max(3,yb-yt)}" fill="rgba(${col},.11)" stroke="rgba(${col},.4)" stroke-width="1"/>`;
+    R.push({yReal:(yt+yb)/2,text:`${z.dir||""} ${(z.type||"").replace(/_/g," ")}`.trim(),color:`rgb(${col})`,size:10.5});});
+  // key levels (line + left price now; right name deferred to the stack)
   kl.forEach(k=>{const y=Y(clamp(k.price));const off=(k.price>top||k.price<bot);
-    out+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="var(--line2)" stroke-width="1" stroke-dasharray="${off?'2 4':'1 5'}"/>
-      <text x="${x0-8}" y="${y+3}" text-anchor="end" fill="var(--muted)" font-family="var(--mono)" font-size="10">${num(k.price)}</text>
-      <text x="${x1+8}" y="${y+3}" fill="var(--faint)" font-family="var(--mono)" font-size="10">${k.name}${off?(k.price>top?" ↑":" ↓"):""}</text>`;});
+    out+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="var(--line2)" stroke-width="1" stroke-dasharray="${off?'2 4':'1 5'}"/>`;
+    R.push({yReal:y,text:`${k.name}${off?(k.price>top?" ↑":" ↓"):""}`,color:"var(--faint)",size:9.5,left:num(k.price)});});
   // targets (dashed ember)
   targets.forEach(tg=>{if(tg.price>top||tg.price<bot)return;const y=Y(tg.price);
-    out+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="var(--ember)" stroke-width="1" stroke-dasharray="6 4" opacity=".7"/>
-      <text x="${x1+8}" y="${y+3}" fill="var(--ember-soft)" font-family="var(--mono)" font-size="10">▸ ${tg.name}</text>`;});
+    out+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="var(--ember)" stroke-width="1" stroke-dasharray="6 4" opacity=".7"/>`;
+    R.push({yReal:y,text:`▸ ${tg.name}`,color:"var(--ember-soft)",size:10});});
   // invalidation line (where the thesis dies)
   if(invLv!=null&&invLv<=top&&invLv>=bot){const y=Y(invLv);
-    out+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="var(--avoid)" stroke-width="1" stroke-dasharray="2 5" opacity=".55"/>
-      <text x="${x1+8}" y="${y+3}" fill="var(--avoid)" font-family="var(--mono)" font-size="10" opacity=".85">✕ ${LANG==="es"?"invalida":"invalid"}</text>`;}
-  // price marker
-  if(price!=null){const y=Y(clamp(price));const sgc={GO:"--go",WAIT:"--wait",AVOID:"--avoid"}[(d.verdict&&d.verdict.signal)]||"--ember";
+    out+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="var(--avoid)" stroke-width="1" stroke-dasharray="2 5" opacity=".55"/>`;
+    R.push({yReal:y,text:`✕ ${LANG==="es"?"invalida":"invalid"}`,color:"var(--avoid)",size:10});}
+  // price marker (line + dot now; label joins the stack with a pill)
+  if(price!=null){const y=Y(clamp(price));
     out+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="var(${sgc})" stroke-width="2" filter="url(#glow)"/>
-      <circle cx="${x0}" cy="${y}" r="5" fill="var(${sgc})" filter="url(#glow)"/>
-      <text x="${x1+8}" y="${y-6}" fill="var(--fg)" font-family="var(--mono)" font-size="12" font-weight="700">${t("now")} ${num(price)}</text>`;}
+      <circle cx="${x0}" cy="${y}" r="5" fill="var(${sgc})" filter="url(#glow)"/>`;
+    R.push({yReal:y,text:`${t("now")} ${num(price)}`,color:"var(--fg)",size:12,weight:700,pc:sgc});}
+  // resolve right-label collisions: stack with a minimum gap, guide line if nudged
+  R.sort((a,b)=>a.yReal-b.yReal);
+  const gap=13,minY=PADT+7,maxY=H-PADB-3;
+  R.forEach((r,i)=>{r.y=Math.max(r.yReal,(i>0?R[i-1].y+gap:minY));});
+  for(let i=R.length-1;i>=0;i--){R[i].y=Math.min(R[i].y,(i<R.length-1?R[i+1].y-gap:maxY));}
+  R.forEach(r=>{const moved=Math.abs(r.y-r.yReal)>5;
+    if(moved)out+=`<line x1="${x1}" y1="${r.yReal}" x2="${x1+6}" y2="${r.y}" stroke="${r.color}" stroke-width="1" opacity=".3"/>`;
+    if(r.pc)out+=`<rect x="${x1+5}" y="${r.y-10}" width="${r.text.length*7+12}" height="16" rx="3" fill="var(${r.pc})" opacity=".14"/>`;
+    out+=`<text x="${x1+9}" y="${r.y+3}" fill="${r.color}" font-family="var(--mono)" font-size="${r.size}"${r.weight?` font-weight="${r.weight}"`:""}>${r.text}</text>`;
+    if(r.left){if(moved)out+=`<line x1="${x0}" y1="${r.yReal}" x2="${x0-6}" y2="${r.y}" stroke="var(--line2)" stroke-width="1" opacity=".3"/>`;
+      out+=`<text x="${x0-8}" y="${r.y+3}" text-anchor="end" fill="var(--muted)" font-family="var(--mono)" font-size="9.5">${r.left}</text>`;}});
   svg.innerHTML=out;
   // where am I
   const minDist=near.length?Math.min(...near):1e9;
