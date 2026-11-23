@@ -51,6 +51,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .decision{font-family:var(--disp);font-weight:900;font-size:clamp(2.2rem,7vw,3.4rem);line-height:.92;letter-spacing:-.02em;margin:0;text-wrap:balance}
 .decision.d-GO{color:var(--go)}.decision.d-WAIT{color:var(--wait)}.decision.d-AVOID{color:var(--avoid)}
 .decision.d-REST{color:var(--faint);font-weight:600;font-size:clamp(1.7rem,4.5vw,2.4rem)}
+.decision.d-LOCK{color:var(--muted);font-weight:900;font-size:clamp(1.8rem,4.8vw,2.6rem);opacity:.85}
 .healthline{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;line-height:1.4;color:var(--wait);margin:2px 0 0;max-width:52ch}
 .decrip{font-family:var(--mono);font-size:.7rem;color:var(--muted);text-align:right;padding-bottom:12px;white-space:nowrap}
 @media(max-width:620px){.decrip{text-align:left}}
@@ -272,14 +273,18 @@ function nearest(d){const arr=[];
   arr.sort((a,b)=>a.d-b.d);return arr[0]||null;}
 function edgeLoses(){try{return S.edge&&S.edge.overall&&S.edge.overall.expRnet<0;}catch(e){return false;}}
 function N(x){return `<span class="nums">${num(x)}</span>`;}
+// bloqueo = estado LOCKOUT del Coach (stop del día perdido o 3 pérdidas seguidas), y SOLO si es de hoy
+// (no un trader.json viejo de un día de bloqueo anterior). Ver tos-coach.mjs.
+function lockedNow(){const c=S.coach;if(!c||c.__err)return false;if((c.state||"").toUpperCase()!=="LOCKOUT")return false;
+  try{const today=new Date().toLocaleDateString("en-CA",{timeZone:"America/Chicago"});return !c._day||c._day===today;}catch(e){return true;}}
 
 /* la voz: en lenguaje llano, armada desde los datos (no vuelca la jerga cruda del plan).
    Entendible aunque no sepas de trading; los términos técnicos quedan con explicación al pasar el cursor. */
 function plainVoice(sym,d){
   const parts=[];const sg=(d.verdict&&d.verdict.signal)||"WAIT";
   const coach=S.coach&&!S.coach.__err?S.coach:null;
-  if(coach&&(coach.state||"").toUpperCase()==="LOCKOUT"){
-    parts.push(`<span class="warn">${t("lockout")}</span> ${LANG==="es"?"Vienes de perder y":"You're coming off losses and"} ${t("pausa")}.`);
+  if(lockedNow()){
+    parts.push(`<span class="warn">${t("lockout")}</span> ${LANG==="es"?"Perdiste el stop del día o encadenaste pérdidas seguidas: hoy ya no se opera, diga lo que diga el plan.":"You hit the day stop or strung losses together: no more trading today, whatever the plan says."}`);
   } else if(coach&&(coach.todayViolations>0)){
     parts.push(`<span class="warn">${LANG==="es"?"Ojo contigo hoy":"Watch yourself today"}:</span> ${coach.todayViolations} ${LANG==="es"?"violación(es) ya.":"violation(s) already."}`);
   }
@@ -336,9 +341,10 @@ function renderFocus(){
                    :"No plan published for this symbol yet. Pre-Asia runs daily at 17:20 CT, after the reopen.");
     as.innerHTML="";drawTerrain(null);return;
   }
-  const sg=(d.verdict&&d.verdict.signal)||"WAIT";
-  eb.innerHTML=`<b>${FOCUS}</b> · ${p.session||p.runType||""} · ${LANG==="es"?"el cerebro dice":"the brain says"}`;
-  dec.textContent=DEC[sg][LANG];dec.className="decision d-"+sg;
+  const sg=(d.verdict&&d.verdict.signal)||"WAIT";const locked=lockedNow();
+  eb.innerHTML=`<b>${FOCUS}</b> · ${p.session||p.runType||""} · ${locked?(LANG==="es"?"pero estás en bloqueo":"but you're locked out"):(LANG==="es"?"el cerebro dice":"the brain says")}`;
+  if(locked){dec.textContent=LANG==="es"?"EN BLOQUEO":"LOCKED OUT";dec.className="decision d-LOCK";}
+  else{dec.textContent=DEC[sg][LANG];dec.className="decision d-"+sg;}
   const conv=tr(d.conviction),bias=(d.biasSession&&d.biasSession!=="NEUTRAL"&&d.biasSession)||d.biasDay||"NEUTRAL";
   dr.innerHTML=`${LANG==="es"?"sesgo":"bias"} ${bias}<br>${LANG==="es"?"convicción":"conviction"} ${conv||"·"}`;
   // data-health whisper: the plan's own alarm line explains an all-WAIT / frozen-feed run
@@ -361,7 +367,8 @@ function renderCryptoFocus(){
   if(!s){eb.innerHTML="<b>ETH</b> · 24/7";dec.textContent=LANG==="es"?"EN REPOSO":"AT REST";dec.className="decision d-REST";dr.innerHTML="";
     vo.innerHTML=LANG==="es"?"El plan de cripto se reconstruye al cierre diario UTC (00:15Z). Vuelve tras el cierre.":"The crypto plan rebuilds at the daily UTC close (00:15Z). Check back after the close.";as.innerHTML="";drawTerrain(null);return;}
   const sg=(s.verdict&&s.verdict.signal)||"WAIT";
-  eb.innerHTML="<b>ETH</b> · 24/7";dec.textContent=DEC[sg][LANG];dec.className="decision d-"+sg;
+  if(lockedNow()){eb.innerHTML="<b>ETH</b> · "+(LANG==="es"?"24/7 · pero estás en bloqueo":"24/7 · but you're locked out");dec.textContent=LANG==="es"?"EN BLOQUEO":"LOCKED OUT";dec.className="decision d-LOCK";}
+  else{eb.innerHTML="<b>ETH</b> · 24/7";dec.textContent=DEC[sg][LANG];dec.className="decision d-"+sg;}
   dr.innerHTML=`${LANG==="es"?"sesgo":"bias"} ${s.biasSession||s.biasDay||"·"}`;
   vo.innerHTML=gloss(firstSentence(tr(s.verdict&&s.verdict.reason)||tr(s.context)||""));as.innerHTML="";drawTerrain(s,"ETH");
 }
