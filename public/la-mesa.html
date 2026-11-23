@@ -98,6 +98,19 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .err{font-family:var(--mono);font-size:.74rem;color:var(--wait)}
 .skel{font-family:var(--mono);font-size:.76rem;color:var(--faint)}
 .foot{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-size:.72rem;color:var(--faint);line-height:1.6}
+/* salud del sistema */
+.top .hdot{width:7px;height:7px;border-radius:50%;background:var(--go);box-shadow:0 0 8px var(--go)}
+.top .hdot.warn{background:var(--wait);box-shadow:0 0 8px var(--wait)}
+.top .hdot.bad{background:var(--avoid);box-shadow:0 0 8px var(--avoid)}
+.sysline{font-family:var(--body);font-size:.82rem;line-height:1.55;margin:2px 0 0;padding:11px 13px;border-radius:9px;border:1px solid var(--line2);background:var(--panel)}
+.sysline.ok{display:none}
+.sysline .k{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;margin-right:9px}
+.sysline.warn{border-color:rgba(232,184,75,.4)}.sysline.warn .k{color:var(--wait)}
+.sysline.bad{border-color:rgba(255,106,92,.45)}.sysline.bad .k{color:var(--avoid)}
+/* jerga con explicación al pasar el cursor */
+.voice abbr.t,.aside abbr.t,.sysline abbr.t{text-decoration:underline dotted var(--line2);text-underline-offset:3px;cursor:help;color:inherit}
+@keyframes freshpulse{0%{color:var(--ember-soft)}100%{color:inherit}}
+.fresh{animation:freshpulse 1.8s ease-out}
 </style>
 
 <div class="wrap">
@@ -105,9 +118,11 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <span class="dot" id="dot"></span><span id="liveTxt">conectando</span>
     <span class="sep">/</span><span id="clock">·</span>
     <span class="sep">/</span><span id="sess">·</span>
+    <span class="sep">/</span><span class="hdot" id="hdot"></span><span id="htxt"></span>
     <span class="sp"></span>
     <span class="lang" role="group" aria-label="idioma"><button id="es" aria-pressed="true">ES</button><button id="en" aria-pressed="false">EN</button></span>
   </div>
+  <div class="sysline ok" id="sysline"></div>
 
   <div class="switch" id="switch"></div>
 
@@ -155,13 +170,17 @@ const L={es:{live:"en vivo",stale:"rezagado",off:"sin señal",ter:"El terreno",e
   pausa:"la pausa post-SL sigue activa",streak:(n)=>`racha de disciplina ${n}`,
   nothing:"No hay nada que operar.",wait1:"Espera.",go1:"Hay un gatillo.",out:"Hoy, fuera.",
   of:"de",ago:"hace",now:"ahora",prem:"PREMIUM",disc:"DESCUENTO",price:"precio",
-  foot:"La Mesa lee los dos buses en vivo, cada 2 min. Prototipo: el Contexto corre en paralelo al Session Analyst hasta probar paridad."},
+  foot:"La Mesa lee los dos buses y se refresca sola en cuanto hay datos nuevos (mira cada ~45 s y solo repinta cuando algo cambió). Prototipo: el Contexto corre en paralelo al Session Analyst hasta probar paridad.",
+  sysok:"sistema al día",syswarn:"sistema: avisos",sysbad:"sistema: revisar",
+  sysheadw:"salud del sistema",syslead:"Algo no está llegando a tiempo. Mientras tanto el plan que ves puede estar un poco viejo:"},
  en:{live:"live",stale:"stale",off:"no signal",ter:"The terrain",edge:"at the edge",nml:"no man's land",
   minds:"Two minds",conf:"How much I trust this",agree:"agree",na:"n/a",lockout:"You're in lockout.",
   pausa:"the post-SL pause is still active",streak:(n)=>`discipline streak ${n}`,
   nothing:"There is nothing to trade.",wait1:"Wait.",go1:"There is a trigger.",out:"Today, stand down.",
   of:"of",ago:"",now:"now",prem:"PREMIUM",disc:"DISCOUNT",price:"price",
-  foot:"La Mesa reads both buses live, every 2 min. Prototype: Contexto runs in parallel to the Session Analyst until parity is proven."}};
+  foot:"La Mesa reads both buses and refreshes on its own as soon as new data lands (it checks every ~45s and only repaints when something changed). Prototype: Contexto runs in parallel to the Session Analyst until parity is proven.",
+  sysok:"system healthy",syswarn:"system: warnings",sysbad:"system: check",
+  sysheadw:"system health",syslead:"Something isn't arriving on time. Until it does, the plan you see may be a bit stale:"}};
 const tr=(o)=>!o?"":(typeof o==="string"?o:(o[LANG]||o.es||o.en||""));
 const t=(k)=>L[LANG][k];
 const num=(x,d=0)=>x==null||isNaN(x)?"·":Number(x).toLocaleString("en-US",{maximumFractionDigits:d});
@@ -197,24 +216,101 @@ function renderSwitch(){
 }
 function cryptoSig(){try{const c=S.crypto.instruments;const s=c.ETHUSDT||c.ETH;return s.verdict.signal;}catch(e){return null;}}
 
-/* compose the brain's voice — natural, behavioral-first */
-function composeVoice(sym,d){
+/* glosario: términos de trading con una explicación llana al pasar el cursor.
+   Mantiene la palabra (el trader la necesita) y la hace entendible para cualquiera. */
+const GLOSS={es:{
+ "EMA50":"media móvil de 50 velas: el precio promedio reciente; suele frenar al precio como un suelo o un techo",
+ "EMA15":"media móvil de 15 velas: promedio reciente de corto plazo",
+ "EMA5":"media móvil de 5 velas: promedio muy reciente, casi pegado al precio",
+ "VWAP":"precio medio del día ponderado por volumen; la referencia de precio justo del día",
+ "CHoCH":"primer aviso de que la dirección podría estar cambiando",
+ "BOS":"ruptura de estructura: la tendencia queda confirmada",
+ "FEED1":"la fuente de niveles en vivo; si no llega, el plan va con datos de días atrás",
+ "orb":"rango de apertura: el primer rango de precios del día, que suele marcar los límites",
+ "POC":"el precio donde más se negoció ayer; actúa como imán",
+ "VAH":"borde alto de la zona donde más se negoció ayer",
+ "VAL":"borde bajo de la zona donde más se negoció ayer",
+ "PDH":"máximo del día anterior",
+ "PDL":"mínimo del día anterior",
+ "TDO":"precio de apertura del día de trading",
+ "FVG":"un hueco que dejó el precio al moverse rápido; el mercado suele volver a rellenarlo",
+ "SMT":"desacuerdo entre dos índices parecidos; a veces adelanta un giro",
+ "BE":"break-even: mover el stop al precio de entrada para no arriesgar nada ya",
+ "stop":"stop-loss: el precio donde cierras la pérdida si te equivocas"},
+ en:{
+ "EMA50":"50-bar moving average: the recent average price; often acts as a floor or ceiling",
+ "EMA15":"15-bar moving average: a short-term recent average",
+ "EMA5":"5-bar moving average: a very recent average, hugging price",
+ "VWAP":"volume-weighted average price of the day; the day's fair-value reference",
+ "CHoCH":"first hint that direction may be changing",
+ "BOS":"break of structure: the trend is confirmed",
+ "FEED1":"the live levels source; if it doesn't arrive, the plan runs on older data",
+ "orb":"opening range: the day's first price range, often the day's bounds",
+ "POC":"the price where most trading happened yesterday; acts like a magnet",
+ "VAH":"top edge of yesterday's heaviest-traded zone",
+ "VAL":"bottom edge of yesterday's heaviest-traded zone",
+ "PDH":"previous day's high","PDL":"previous day's low",
+ "TDO":"trading-day opening price",
+ "FVG":"a gap price left while moving fast; the market tends to fill it back",
+ "SMT":"disagreement between two similar indexes; sometimes leads a turn",
+ "BE":"break-even: move the stop to your entry so you risk nothing more",
+ "stop":"stop-loss: the price where you cut the loss if you're wrong"}};
+function gloss(s){if(!s)return s;const g=GLOSS[LANG]||GLOSS.es;
+  Object.keys(g).sort((a,b)=>b.length-a.length).forEach(term=>{
+    const esc=term.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+    const re=new RegExp("(^|[^\\w>])("+esc+")(?![\\w])");
+    if(re.test(s))s=s.replace(re,`$1<abbr class="t" title="${g[term]}">$2</abbr>`);});
+  return s;}
+function ptype(ty){const m={es:{pullback_cont:"un retroceso que luego sigue la tendencia",reversal:"un giro",poc_reversion:"una vuelta al centro de valor de ayer",breakout:"una ruptura"},
+  en:{pullback_cont:"a pullback that then continues the trend",reversal:"a reversal",poc_reversion:"a return to yesterday's value center",breakout:"a breakout"}};
+  return (m[LANG]||m.es)[ty]||(ty||"").replace(/_/g," ");}
+function nearest(d){const arr=[];
+  (d.zones||[]).forEach(z=>{if(z.distPts!=null)arr.push({d:Math.abs(z.distPts),name:ptype(z.type)});});
+  (d.keyLevels||[]).forEach(k=>{if(k.distPts!=null)arr.push({d:Math.abs(k.distPts),name:tr(k.name)});});
+  arr.sort((a,b)=>a.d-b.d);return arr[0]||null;}
+function edgeLoses(){try{return S.edge&&S.edge.overall&&S.edge.overall.expRnet<0;}catch(e){return false;}}
+function N(x){return `<span class="nums">${num(x)}</span>`;}
+
+/* la voz: en lenguaje llano, armada desde los datos (no vuelca la jerga cruda del plan).
+   Entendible aunque no sepas de trading; los términos técnicos quedan con explicación al pasar el cursor. */
+function plainVoice(sym,d){
   const parts=[];const sg=(d.verdict&&d.verdict.signal)||"WAIT";
   const coach=S.coach&&!S.coach.__err?S.coach:null;
-  // behavioral lead
   if(coach&&(coach.state||"").toUpperCase()==="LOCKOUT"){
     parts.push(`<span class="warn">${t("lockout")}</span> ${LANG==="es"?"Vienes de perder y":"You're coming off losses and"} ${t("pausa")}.`);
   } else if(coach&&(coach.todayViolations>0)){
-    parts.push(`<span class="warn">${LANG==="es"?"Ojo contigo hoy":"Watch yourself today"}:</span> ${coach.todayViolations} ${LANG==="es"?"violación(es) ya":"violation(s) already"}.`);
+    parts.push(`<span class="warn">${LANG==="es"?"Ojo contigo hoy":"Watch yourself today"}:</span> ${coach.todayViolations} ${LANG==="es"?"violación(es) ya.":"violation(s) already."}`);
   }
-  // market read
-  const reason=tr(d.verdict&&d.verdict.reason);
-  if(sg==="WAIT"){
+  const nr=nearest(d);const conv=(tr(d.conviction)||"").toLowerCase();
+  if(sg==="GO"){
+    parts.push(`<span class="hl">${sym}: ${LANG==="es"?"hay una entrada preparada.":"there's a setup ready."}</span>`);
+    const sa=d.scenarioA||{};
+    if(sa.entryZone&&sa.entryZone.length===2){
+      parts.push(LANG==="es"
+        ?`No entres a lo loco: espera a que el precio llegue a la zona ${N(sa.entryZone[0])}-${N(sa.entryZone[1])} y reaccione ahí${sa.target?`, y apunta a ${N(sa.target)}`:""}. Si no reacciona, no hay trade.`
+        :`Don't jump in: wait for price to reach the ${N(sa.entryZone[0])}-${N(sa.entryZone[1])} zone and react there${sa.target?`, aiming for ${N(sa.target)}`:""}. If it doesn't react, there's no trade.`);
+    }
+  } else if(sg==="AVOID"){
+    parts.push(`<span class="hl">${sym}: ${LANG==="es"?"hoy, fuera.":"today, stand down."}</span> ${LANG==="es"?"El plan dice no tocar esto hoy.":"The plan says don't touch this today."}`);
+  } else {
     const allWait=SYMS.every(s=>{const v=sig(s);return !v||v==="WAIT"||v==="AVOID";});
-    parts.push(allWait?`<span class="hl">${t("nothing")}</span>`:`<span class="hl">${sym}: ${t("wait1")}</span>`);
-  } else if(sg==="GO"){parts.push(`<span class="hl">${sym}: ${t("go1")}</span>`);}
-  else {parts.push(`<span class="hl">${sym}: ${t("out")}</span>`);}
-  if(reason)parts.push(firstSentence(reason));
+    parts.push(allWait
+      ?`<span class="hl">${LANG==="es"?"No hay nada que operar todavía.":"There's nothing to trade yet."}</span>`
+      :`<span class="hl">${sym}: ${LANG==="es"?"todavía no hay una entrada clara.":"no clear setup yet."}</span>`);
+    if(nr&&nr.d>0){
+      parts.push(LANG==="es"
+        ?`El nivel más cercano que importa está a ${N(Math.round(nr.d))} puntos (${gloss(nr.name)}); hasta que el precio no llegue ahí y reaccione, no hay punto de entrada: entrar en medio es perseguir, no operar.`
+        :`The nearest level that matters is ${N(Math.round(nr.d))} points away (${gloss(nr.name)}); until price gets there and reacts, there's no entry: jumping in between is chasing, not trading.`);
+    }
+  }
+  if(edgeLoses()&&sg!=="GO"){
+    parts.push(LANG==="es"
+      ?`Además, la ventaja medida de este tipo de operación está hoy en negativo: a la larga pierde dinero una vez descontadas las comisiones, así que no es momento de forzar.`
+      :`On top of that, the measured edge of this kind of trade is negative today: over time it loses money after costs, so this isn't the moment to force it.`);
+  }
+  if(conv&&(conv.includes("baj")||conv.includes("low"))){
+    parts.push(LANG==="es"?`La confianza del propio plan en esto es baja.`:`The plan's own confidence in this is low.`);
+  }
   return parts.join(" ");
 }
 function firstSentence(s){s=String(s).trim();const m=s.match(/^[^.]{0,180}\./);let out=m?m[0]:s.slice(0,170);
@@ -234,8 +330,8 @@ function renderFocus(){
     vo.innerHTML=err
       ?(LANG==="es"?`El bus no respondió ahora mismo <span class="nums">(${err})</span>. La Mesa reintenta sola cada 2 min; no es un error del plan.`
                    :`The bus didn't answer just now <span class="nums">(${err})</span>. La Mesa retries on its own every 2 min; it isn't a plan error.`)
-      :(LANG==="es"?"Aún no hay plan publicado para este símbolo. El pre-Asia del domingo corre a las 16:05 CT."
-                   :"No plan published for this symbol yet. Sunday pre-Asia runs at 16:05 CT.");
+      :(LANG==="es"?"Aún no hay plan publicado para este símbolo. El pre-Asia corre cada día a las 17:20 CT, tras la reapertura."
+                   :"No plan published for this symbol yet. Pre-Asia runs daily at 17:20 CT, after the reopen.");
     as.innerHTML="";drawTerrain(null);return;
   }
   const sg=(d.verdict&&d.verdict.signal)||"WAIT";
@@ -246,12 +342,12 @@ function renderFocus(){
   // data-health whisper: the plan's own alarm line explains an all-WAIT / frozen-feed run
   const sm=p.summary&&p.summary[LANG];
   hl.textContent=(sm&&sm[0]&&/^!!/.test(sm[0]))?sm[0].replace(/^!!\s*/,"⚠ "):"";
-  vo.innerHTML=composeVoice(FOCUS,d);
+  vo.innerHTML=plainVoice(FOCUS,d);
   // aside: this instrument's own scenario + invalidation + the behavioral note for the focus
   const bits=[];
-  if(d.scenarioA&&d.scenarioA.text)bits.push(`<span class="k">${LANG==="es"?"si acaso":"if anything"}</span>${tr(d.scenarioA.text)}`);
-  if(d.invalidation&&d.invalidation.text)bits.push(`<span class="k">${LANG==="es"?"invalida":"invalidates"}</span>${tr(d.invalidation.text)}`);
-  if(p.focus&&p.focus.sym===FOCUS&&p.focus.note)bits.push(`<span class="k" style="color:var(--avoid)">${LANG==="es"?"ojo":"heads up"}</span>${tr(p.focus.note)}`);
+  if(d.scenarioA&&d.scenarioA.text)bits.push(`<span class="k">${LANG==="es"?"si acaso":"if anything"}</span>${gloss(tr(d.scenarioA.text))}`);
+  if(d.invalidation&&d.invalidation.text)bits.push(`<span class="k">${LANG==="es"?"invalida":"invalidates"}</span>${gloss(tr(d.invalidation.text))}`);
+  if(p.focus&&p.focus.sym===FOCUS&&p.focus.note)bits.push(`<span class="k" style="color:var(--avoid)">${LANG==="es"?"ojo":"heads up"}</span>${gloss(tr(p.focus.note))}`);
   as.innerHTML=bits.map(b=>`<div style="margin-bottom:7px">${b}</div>`).join("")||"";
   drawTerrain(d);
 }
@@ -265,7 +361,7 @@ function renderCryptoFocus(){
   const sg=(s.verdict&&s.verdict.signal)||"WAIT";
   eb.innerHTML="<b>ETH</b> · 24/7";dec.textContent=DEC[sg][LANG];dec.className="decision d-"+sg;
   dr.innerHTML=`${LANG==="es"?"sesgo":"bias"} ${s.biasSession||s.biasDay||"·"}`;
-  vo.innerHTML=firstSentence(tr(s.verdict&&s.verdict.reason)||tr(s.context)||"");as.innerHTML="";drawTerrain(s,"ETH");
+  vo.innerHTML=gloss(firstSentence(tr(s.verdict&&s.verdict.reason)||tr(s.context)||""));as.innerHTML="";drawTerrain(s,"ETH");
 }
 
 /* ACT II — terrain SVG */
@@ -392,7 +488,21 @@ function syncStatic(){
   document.getElementById("k-conf").textContent=t("conf");
   document.getElementById("foot").textContent=t("foot");
 }
-function renderAll(){tick();renderSwitch();renderFocus();renderMinds();renderConf();syncStatic();}
+/* salud del sistema: chip en la barra + línea en lenguaje llano si algo se retrasó */
+function renderHealth(){
+  const h=S.health;const hd=document.getElementById("hdot"),ht=document.getElementById("htxt"),sl=document.getElementById("sysline");
+  if(!hd||!ht||!sl)return;
+  if(!h){hd.className="hdot";ht.textContent="";sl.className="sysline ok";sl.innerHTML="";return;}
+  const st=["ok","warn","bad"].includes(h.status)?h.status:"ok";
+  hd.className="hdot"+(st==="ok"?"":" "+st);
+  ht.textContent=st==="ok"?t("sysok"):st==="warn"?t("syswarn"):t("sysbad");
+  const iss=(h.issues||[]);
+  if(st==="ok"||!iss.length){sl.className="sysline ok";sl.innerHTML="";return;}
+  sl.className="sysline "+st;
+  sl.innerHTML=`<span class="k">${t("sysheadw")}</span>${t("syslead")} `
+    +iss.map(x=>`<b style="color:var(--fg2)">${gloss(String(x))}</b>`).join(" · ");
+}
+function renderAll(){tick();renderHealth();renderSwitch();renderFocus();renderMinds();renderConf();syncStatic();}
 
 function setLang(l){LANG=l;document.getElementById("es").setAttribute("aria-pressed",l==="es");
   document.getElementById("en").setAttribute("aria-pressed",l==="en");try{localStorage.setItem("mesa-lang",l)}catch(e){}renderAll();}
@@ -400,21 +510,32 @@ document.getElementById("es").onclick=()=>setLang("es");document.getElementById(
 try{const sl=localStorage.getItem("mesa-lang");if(sl)LANG=sl;}catch(e){}
 document.getElementById("es").setAttribute("aria-pressed",LANG==="es");document.getElementById("en").setAttribute("aria-pressed",LANG==="en");
 
-async function boot(){
-  syncStatic();
-  const [plan,sa,coach,market,crypto,parity]=await Promise.all([
+/* refresco automático: mira el bus cada ~45 s, calcula una firma con los sellos de
+   tiempo de cada archivo y SOLO repinta cuando algo cambió de verdad (sin parpadeo
+   cuando no hay datos nuevos). Conserva el instrumento que elegiste. */
+let LAST_SIG="",LAST_PLAN="",FIRST=true;
+function stampOf(o){if(!o||o.__err)return"";for(const f of["_updatedAt","generatedAt","builtAt","checkedAt","lastRun","asOf","updatedAt"]){if(o[f])return String(o[f]);}return"";}
+function sigOf(){return [S.plan,S.sa,S.coach,S.market,S.crypto,S.parity,S.health,S.edge].map(stampOf).join("|");}
+function flashFresh(){const el=document.getElementById("liveTxt");if(!el)return;el.classList.remove("fresh");void el.offsetWidth;el.classList.add("fresh");}
+async function loadCal(){const cs=await getJSON(TOS+"/state/contexto-state.json");if(cs&&!cs.__err&&cs.scorecard){S.cal=cs.scorecard;renderConf();}}
+async function load(){
+  const [plan,sa,coach,market,crypto,parity,health,edge]=await Promise.all([
     getJSON(TOS+"/live/plan.json"),getJSON(SA+"/plans/latest.json"),getJSON(TOS+"/live/trader.json"),
-    getJSON(TOS+"/live/market.json"),getJSON(TOS+"/plans/crypto-latest.json"),getJSON(TOS+"/live/parity.json")]);
-  SAMPLE=false;
-  if((!plan||plan.__err)&&typeof PLAN_SEED!=="undefined"){plan=PLAN_SEED;SAMPLE=true;}
-  if((!sa||sa.__err)&&typeof SA_SEED!=="undefined"){sa=SA_SEED;}
-  S.plan=plan;S.sa=sa;S.coach=coach;S.market=market;S.crypto=crypto;S.parity=parity&&!parity.__err?parity:null;
-  if(plan&&plan.cleanest&&plan.instruments&&plan.instruments[plan.cleanest])FOCUS=plan.cleanest;
-  renderAll();
-  const cs=await getJSON(TOS+"/state/contexto-state.json");
-  if(cs&&!cs.__err&&cs.scorecard){S.cal=cs.scorecard;renderConf();}
+    getJSON(TOS+"/live/market.json"),getJSON(TOS+"/plans/crypto-latest.json"),getJSON(TOS+"/live/parity.json"),
+    getJSON(TOS+"/live/health.json"),getJSON(TOS+"/live/edge.json")]);
+  let pl=plan;SAMPLE=false;
+  if((!pl||pl.__err)&&typeof PLAN_SEED!=="undefined"){pl=PLAN_SEED;SAMPLE=true;}
+  let sap=sa;if((!sap||sap.__err)&&typeof SA_SEED!=="undefined")sap=SA_SEED;
+  S.plan=pl;S.sa=sap;S.coach=coach;S.market=market;S.crypto=crypto;
+  S.parity=parity&&!parity.__err?parity:null;S.health=health&&!health.__err?health:null;S.edge=edge&&!edge.__err?edge:null;
+  const sig=sigOf(),ps=stampOf(S.plan);
+  if(FIRST){FIRST=false;LAST_SIG=sig;LAST_PLAN=ps;
+    if(pl&&pl.cleanest&&pl.instruments&&pl.instruments[pl.cleanest])FOCUS=pl.cleanest;
+    renderAll();loadCal();return;}
+  if(sig!==LAST_SIG){LAST_SIG=sig;renderAll();flashFresh();
+    if(ps&&ps!==LAST_PLAN){LAST_PLAN=ps;loadCal();}}
 }
-boot();
+syncStatic();load();
 setInterval(tick,30000);
-setInterval(boot,120000);
+setInterval(load,45000);
 </script>
