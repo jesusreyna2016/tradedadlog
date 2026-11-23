@@ -276,7 +276,9 @@ function N(x){return `<span class="nums">${num(x)}</span>`;}
 // bloqueo = estado LOCKOUT del Coach (stop del día perdido o 3 pérdidas seguidas), y SOLO si es de hoy
 // (no un trader.json viejo de un día de bloqueo anterior). Ver tos-coach.mjs.
 function lockedNow(){const c=S.coach;if(!c||c.__err)return false;if((c.state||"").toUpperCase()!=="LOCKOUT")return false;
-  try{const today=new Date().toLocaleDateString("en-CA",{timeZone:"America/Chicago"});return !c._day||c._day===today;}catch(e){return true;}}
+  // el Coach recalcula el estado cada corrida y el bloqueo se limpia al nuevo día de trading;
+  // confía en el LOCKOUT solo si el Coach corrió hace poco (asOf), no en un trader.json viejo.
+  try{if(!c.asOf)return true;return (Date.now()-Date.parse(c.asOf))<20*3600e3;}catch(e){return true;}}
 
 /* la voz: en lenguaje llano, armada desde los datos (no vuelca la jerga cruda del plan).
    Entendible aunque no sepas de trading; los términos técnicos quedan con explicación al pasar el cursor. */
