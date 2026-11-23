@@ -133,6 +133,15 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .pfill{height:100%;border-radius:4px}
 .prow{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.72rem;padding:3px 0;color:var(--muted)}
 .prow.me{color:var(--fg);border-top:1px solid var(--line);margin-top:2px;padding-top:6px}
+.gate{margin:14px 0 0;padding:12px 15px;border-radius:11px;border:1px solid var(--line2);background:var(--panel)}
+.gate .glead{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;display:flex;align-items:center;gap:8px;color:var(--fg2)}
+.gate .gdot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:0 0 auto}
+.gate .gbody{font-family:var(--disp);font-size:clamp(1.05rem,2.4vw,1.25rem);line-height:1.35;margin-top:6px;color:var(--fg)}
+.gate .gnear{font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:8px;line-height:1.5}
+.gate .gnear b{color:var(--fg2);font-weight:500}
+.gate.zone{border-color:rgba(91,212,138,.5)}.gate.zone .gdot{background:var(--go);box-shadow:0 0 8px var(--go)}.gate.zone .glead{color:var(--go)}
+.gate.edge{border-color:rgba(232,184,75,.45)}.gate.edge .gdot{background:var(--wait);box-shadow:0 0 8px var(--wait)}.gate.edge .glead{color:var(--wait)}
+.gate.nml{border-color:rgba(255,106,92,.4)}.gate.nml .gdot{background:var(--avoid);box-shadow:0 0 8px var(--avoid)}.gate.nml .glead{color:var(--avoid)}
 </style>
 
 <div class="wrap">
@@ -156,6 +165,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     </div>
     <div class="decrip" id="decrip"></div>
   </div>
+  <div class="gate" id="gate" hidden></div>
   <div class="healthline" id="healthline"></div>
   <p class="voice" id="voice"><span class="skel">leyendo el cerebro…</span></p>
   <div class="aside" id="aside"></div>
@@ -358,7 +368,7 @@ function firstSentence(s){s=String(s).trim();const m=s.match(/^[^.]{0,180}\./);l
 /* ACT I + focus render */
 function renderFocus(){
   const p=S.plan;const d=inst(FOCUS);
-  renderPulso(FOCUS);
+  renderPulso(FOCUS);renderGate(FOCUS);
   const eb=document.getElementById("eyebrow"),dec=document.getElementById("decision"),vo=document.getElementById("voice"),
     dr=document.getElementById("decrip"),as=document.getElementById("aside");
   const hl=document.getElementById("healthline");
@@ -523,6 +533,34 @@ function barsFor(sym){try{const k=sym==="ETH"?"ETHUSDT":sym;const a=S.bars.symbo
 // pulso del mercado: dato crudo en vivo del feed del indicador (feeds.json: feed:<SYM>)
 function pget(sym){try{const f=S.feeds;if(!f||f.__err)return null;const w=f["feed:"+sym];if(!w)return null;return w.raw||w;}catch(e){return null;}}
 function tcget(sym){try{const f=S.feeds;if(!f||f.__err)return null;const w=f["trendcl:"+sym];if(!w)return null;return w.raw||w;}catch(e){return null;}}
+// portero "¿en zona?": clasifica el precio vivo frente a las zonas/niveles del plan y nombra lo más cercano
+function renderGate(sym){
+  const g=document.getElementById("gate");if(!g)return;
+  const d=inst(sym);let price=livePrice(sym);
+  if(price==null){const r=pget(sym);if(r)price=parseFloat(r.close);}
+  if(!d||price==null||isNaN(price)){g.hidden=true;return;}
+  const es=LANG==="es";const pois=[];
+  (d.zones||[]).forEach(z=>{if(z.range&&z.range.length===2){const lo=Math.min(...z.range),hi=Math.max(...z.range);pois.push({name:(`${z.dir||""} ${(z.type||"").replace(/_/g," ")}`).trim()||"zona",lo,hi});}});
+  (d.keyLevels||[]).forEach(k=>{if(k&&k.price){pois.push({name:tr(k.name),lo:k.price,hi:k.price});}});
+  if(!pois.length){g.hidden=true;return;}
+  const em=d.expectedMove||{};const tol=Math.max((em.base||150)*0.08,8),edgeThresh=Math.max((em.base||150)*0.35,30);
+  let inName=null,minD=1e9,above=null,below=null;
+  pois.forEach(z=>{const inside=price>=z.lo-tol&&price<=z.hi+tol;const dd=inside?0:Math.min(Math.abs(price-z.lo),Math.abs(price-z.hi));
+    if(inside&&!inName)inName=z.name;if(dd<minD)minD=dd;
+    if(z.lo>price){const du=z.lo-price;if(!above||du<above.d)above={d:du,name:z.name};}
+    if(z.hi<price){const db=price-z.hi;if(!below||db<below.d)below={d:db,name:z.name};}});
+  let cls,lead,body;
+  if(inName){cls="zone";lead=es?"EN ZONA":"IN A ZONE";body=(es?"Aquí sí hay punto de interés: ":"There is a point of interest here: ")+`<b>${inName}</b>. `+(es?"Si reacciona y tienes gatillo, es entrada.":"If it reacts and a trigger fires, that's an entry.");}
+  else if(minD<=edgeThresh){cls="edge";lead=es?"CERCA DE ZONA":"NEAR A ZONE";body=es?`El precio se acerca a un nivel (a ${Math.round(minD)} pts). Espera a que llegue y reaccione, no te anticipes.`:`Price is approaching a level (${Math.round(minD)} pts away). Wait for it to get there and react.`;}
+  else{cls="nml";lead=es?"TIERRA DE NADIE":"NO-MAN'S-LAND";body=es?`Nada que operar aquí. El nivel más cercano está a ${Math.round(minD)} pts: entrar en el medio es perseguir.`:`Nothing to trade here. Nearest level is ${Math.round(minD)} pts away: entering in the middle is chasing.`;}
+  const near=[];
+  if(above)near.push((es?"arriba ":"up ")+`<b>${above.name}</b> +${Math.round(above.d)}`);
+  if(below)near.push((es?"abajo ":"down ")+`<b>${below.name}</b> -${Math.round(below.d)}`);
+  g.className="gate "+cls;
+  g.innerHTML=`<div class="glead"><span class="gdot"></span>${lead}</div><div class="gbody">${gloss(body)}</div>`+
+    (near.length?`<div class="gnear">${(es?"Zona más cercana · ":"Nearest · ")+near.join(" · ")}</div>`:"");
+  g.hidden=false;
+}
 function renderPulso(sym){
   const box=document.getElementById("pulso"),grid=document.getElementById("pulsoGrid"),meta=document.getElementById("pulsoMeta");
   if(!box)return;
