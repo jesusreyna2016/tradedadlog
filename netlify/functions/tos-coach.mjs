@@ -106,6 +106,31 @@ export async function runCoach() {
   const noStopNow = openRows.filter((o) => !o.hadStop).length;
   if (noStopNow) violations += noStopNow;
 
+  // 2b. entradas en TIERRA DE NADIE (fuera de zona / sin punto de interes):
+  //     cruza el precio de entrada con el mapa de niveles del feed por simbolo.
+  //     Es MEDICION (marca y cuenta), no toca el estado de bloqueo.
+  const token2 = token;
+  let levelsBySym = {};
+  try {
+    const feedsCur = await ghGet(OWNER, REPO, BRANCH, 'live/feeds.json', { token: token2 });
+    const feeds = feedsCur?.content ? JSON.parse(feedsCur.content) : {};
+    const num = (v) => { const f = parseFloat(v); return isNaN(f) ? null : f; };
+    const PTS = ['pdh','pdl','pdc','pdMid','vah','poc','val','dvah','dpoc','dval','onh','onl','ibh','ibl','asH','asL','loH','loL','hod','lod','eq','ema20','ema50'];
+    for (const k of Object.keys(feeds)) {
+      const m = k.match(/^feed:(.+)$/); if (!m) continue;
+      const r = (feeds[k] && feeds[k].raw) || feeds[k] || {};
+      const levels = [];
+      for (const f of PTS) { const v = num(r[f]); if (v != null) levels.push({ name: f, lo: v, hi: v }); }
+      for (const gz of ['gzLong','gzShort']) { const s = r[gz]; if (typeof s === 'string' && s.includes(':')) { const [a,b] = s.split(':').map(num); if (a != null && b != null) levels.push({ name: gz, lo: Math.min(a,b), hi: Math.max(a,b) }); } }
+      const atrD = num(r.atrD); const tol = Math.max(atrD != null ? atrD * 0.02 : 0, 15);
+      if (levels.length) levelsBySym[m[1]] = { levels, tol };
+    }
+  } catch { levelsBySym = {}; }
+  const nearestDist = (entry, levels) => { let best = Infinity; for (const L of levels) { const d = (entry >= L.lo && entry <= L.hi) ? 0 : Math.min(Math.abs(entry - L.lo), Math.abs(entry - L.hi)); if (d < best) best = d; } return best; };
+  let offZoneCount = 0, offZonePnl = 0;
+  for (const t of trades) { const lv = levelsBySym[t.sym]; if (lv && t.entry != null) { const d = nearestDist(t.entry, lv.levels); t.distZone = Math.round(d); if (d > lv.tol) { t.flags.push('NO_ZONE'); offZoneCount++; offZonePnl += t.pnl; } } }
+  for (const o of openRows) { const lv = levelsBySym[o.sym]; if (lv && o.entry != null) { const d = nearestDist(o.entry, lv.levels); o.distZone = Math.round(d); if (d > lv.tol) o.flags.push('NO_ZONE'); } }
+
   // 3. estado del dia
   let state = 'OK';
   if (dayPnl <= -CFG.dayStop || lossStreak >= CFG.lossStreakLock) state = 'LOCKOUT';
@@ -129,6 +154,7 @@ export async function runCoach() {
   const openFlags = [];
   for (const t of trades) for (const f of t.flags) if (f.startsWith('R1')) openFlags.push({ rule: 'R1', at: t.openedAt, sym: t.sym, note: 'entrada dentro de la pausa tras un SL' });
   for (const o of openRows) if (!o.hadStop) openFlags.push({ rule: 'stop', at: o.openedAt, sym: o.sym, note: 'posicion abierta sin stop' });
+  for (const t of trades) if (t.flags.includes('NO_ZONE')) openFlags.push({ rule: 'zona', at: t.openedAt, sym: t.sym, note: `entrada en tierra de nadie (${t.distZone} pts al nivel mas cercano)` });
 
   const trader = {
     _writer: 'coach', _schema: 1, _day: today, asOf: new Date(now).toISOString(),
@@ -140,6 +166,7 @@ export async function runCoach() {
       pnlR: CFG.riskPerTrade ? Math.round(dayPnl / CFG.riskPerTrade * 100) / 100 : null,
       maxLossStreak
     },
+    offZone: { count: offZoneCount, pnl: Math.round(offZonePnl * 100) / 100, ofTrades: trades.length },
     openFlags,
     todayTrades: trades,
     openPositions: openRows,
