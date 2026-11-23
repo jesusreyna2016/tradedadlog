@@ -104,6 +104,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .top .hdot{width:7px;height:7px;border-radius:50%;background:var(--go);box-shadow:0 0 8px var(--go)}
 .top .hdot.warn{background:var(--wait);box-shadow:0 0 8px var(--wait)}
 .top .hdot.bad{background:var(--avoid);box-shadow:0 0 8px var(--avoid)}
+.top .planage{color:var(--muted)}
+.top .planage.old{color:var(--wait)}
 .sysline{font-family:var(--body);font-size:.82rem;line-height:1.55;margin:2px 0 0;padding:11px 13px;border-radius:9px;border:1px solid var(--line2);background:var(--panel)}
 .sysline.ok{display:none}
 .sysline .k{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;margin-right:9px}
@@ -123,6 +125,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <span class="dot" id="dot"></span><span id="liveTxt">conectando</span>
     <span class="sep">/</span><span id="clock">·</span>
     <span class="sep">/</span><span id="sess">·</span>
+    <span class="sep">/</span><span id="planAge" class="planage"></span>
     <span class="sep">/</span><span class="hdot" id="hdot"></span><span id="htxt"></span>
     <span class="sp"></span>
     <span class="lang" role="group" aria-label="idioma"><button id="es" aria-pressed="true">ES</button><button id="en" aria-pressed="false">EN</button></span>
@@ -204,10 +207,12 @@ function livePrice(sym){try{return S.market.symbols[sym].geo.close;}catch(e){ret
 function tick(){
   const now=new Date();
   document.getElementById("clock").textContent=now.toLocaleTimeString(LANG==="es"?"es-MX":"en-US",{hour:"2-digit",minute:"2-digit"});
-  const p=S.plan;let m=p&&p.generatedAt?ageMin(p.generatedAt):1e9;
-  const c=m<120?"":m<1440?"stale":"off";
-  const dot=document.getElementById("dot");dot.className="dot"+(SAMPLE?" stale":(c?" "+c:""));
-  document.getElementById("liveTxt").textContent=SAMPLE?(LANG==="es"?"muestra · bus no disponible":"sample · bus unavailable"):(c===""?t("live"):c==="stale"?t("stale")+" "+fmtAge(p.generatedAt):t("off"));
+  const p=S.plan;
+  const dot=document.getElementById("dot");dot.className="dot"+(SAMPLE?" stale":"");
+  document.getElementById("liveTxt").textContent=SAMPLE?(LANG==="es"?"muestra · bus no disponible":"sample · bus unavailable"):t("live");
+  const pa=document.getElementById("planAge");
+  if(p&&p.generatedAt){const m=ageMin(p.generatedAt);pa.textContent=(LANG==="es"?"plan · ":"plan · ")+fmtAge(p.generatedAt);pa.className="planage"+(m>1800?" old":"");}
+  else{pa.textContent="";pa.className="planage";}
   document.getElementById("sess").textContent=p&&p.session?p.session:(p&&p.runType)||"·";
 }
 
