@@ -90,21 +90,44 @@ export async function runCoach() {
   const since = chiDayStartMs();
   const now = Date.now();
 
+  // prev: se lee aqui arriba para arrastrar la racha Y para auto-sanar una cuenta
+  // que falle esta corrida (ver mas abajo).
+  const today = new Date(now).toISOString().slice(0, 10);
+  const prevCur = await ghGet(OWNER, REPO, BRANCH, 'live/trader.json', { token });
+  let prev = {};
+  try { prev = prevCur?.content ? JSON.parse(prevCur.content) : {}; } catch { prev = {}; }
+
   // 1. recoger trades reales de todas las cuentas
   const trades = [];
   const openRows = [];
+  const failedAccts = [];
   let accounts = [];
   try { accounts = await listAccounts(); } catch (e) { return { ok: false, error: 'mfp: ' + e.message }; }
 
+  // Una cuenta flaky (429 / timeout) NO debe caer en silencio y encoger el conteo:
+  // reintenta (respetando retry-after del 429) y, si aun falla, se rellena con lo
+  // previo mas abajo. Esto mata la oscilacion de 'used' entre corridas.
+  const fetchAcct = async (a) => {
+    let lastErr;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        return await Promise.all([
+          closedPositions(a.id, { since, maxPages: 5 }),
+          openPositions(a.id),
+          workingOrders(a.id)
+        ]);
+      } catch (e) {
+        lastErr = e;
+        if (attempt < 2) { const w = e.retryAfter ? Math.min(e.retryAfter * 1000, 5000) : 400 * (attempt + 1); await new Promise((r) => setTimeout(r, w)); }
+      }
+    }
+    throw lastErr;
+  };
+
   for (const a of accounts) {
-    let closed = [], open = [], orders = [];
-    try {
-      [closed, open, orders] = await Promise.all([
-        closedPositions(a.id, { since, maxPages: 5 }),
-        openPositions(a.id),
-        workingOrders(a.id)
-      ]);
-    } catch (e) { continue; }
+    let closed, open, orders;
+    try { [closed, open, orders] = await fetchAcct(a); }
+    catch (e) { failedAccts.push({ id: a.id, name: a.name || a.id, err: String((e && e.message) || e) }); continue; }
 
     for (const p of closed) {
       const pnl = (+p.realized_pnl || 0) - (+p.fees || 0) + (+p.funding || 0);
@@ -121,6 +144,22 @@ export async function runCoach() {
         size: +p.size || null, entry: +p.entry_price || null, openedAt: p.opened_at || null,
         hadStop: hasStop(p, orders), flags: hasStop(p, orders) ? [] : ['NO_STOP']
       });
+    }
+  }
+
+  // auto-sanado: por cada cuenta que fallo esta corrida, conserva sus trades/posiciones
+  // del trader.json previo (del MISMO dia). Los cerrados son inmutables; se les limpian
+  // los flags y distZone para que las reglas (seccion 2 y 2b) se recomputen sin duplicar.
+  // Cuando la cuenta vuelve a responder, el dato fresco la reemplaza sola.
+  if (failedAccts.length && prev._day === today) {
+    const failedIds = new Set(failedAccts.map((f) => f.id));
+    for (const t of (prev.todayTrades || [])) {
+      if (!failedIds.has(t.acct)) continue;
+      const { flags, distZone, ...rest } = t; trades.push({ ...rest, flags: [], _stale: true });
+    }
+    for (const o of (prev.openPositions || [])) {
+      if (!failedIds.has(o.acct)) continue;
+      const { flags, distZone, ...rest } = o; openRows.push({ ...rest, flags: o.hadStop ? [] : ['NO_STOP'], _stale: true });
     }
   }
 
@@ -174,10 +213,7 @@ export async function runCoach() {
   else if (trades.some((t) => t.flags.includes('R1_REVENGE')) || lossStreak >= 2 || noStopNow) state = 'TILT';
 
   // 4. racha de disciplina (se arrastra; la review diaria la ajusta en el rollover)
-  const prevCur = await ghGet(OWNER, REPO, BRANCH, 'live/trader.json', { token });
-  let prev = {};
-  try { prev = prevCur?.content ? JSON.parse(prevCur.content) : {}; } catch { prev = {}; }
-  const today = new Date(now).toISOString().slice(0, 10);
+  // prev/prevCur/today ya se leyeron arriba (para el auto-sanado por cuenta).
   let streak = prev.disciplineStreak || 0;
   if (prev._day && prev._day !== today) streak = (prev.todayViolations === 0) ? streak + 1 : 0;
 
@@ -224,6 +260,7 @@ export async function runCoach() {
       maxLossStreak
     },
     offZone: { count: offZoneCount, pnl: Math.round(offZonePnl * 100) / 100, ofTrades: trades.length },
+    dataHealth: { accounts: accounts.length, ok: accounts.length - failedAccts.length, failed: failedAccts, partial: failedAccts.length > 0 },
     openFlags,
     todayTrades: trades,
     openPositions: openRows,
