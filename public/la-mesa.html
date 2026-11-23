@@ -54,6 +54,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .decision.d-REST{color:var(--faint);font-weight:600;font-size:clamp(1.7rem,4.5vw,2.4rem)}
 .decision.d-LOCK{color:var(--muted);font-weight:900;font-size:clamp(1.8rem,4.8vw,2.6rem);opacity:.85}
 .healthline{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;line-height:1.4;color:var(--wait);margin:2px 0 0;max-width:52ch}
+.discrev{font-family:var(--body);font-size:.9rem;line-height:1.55;color:var(--fg2);margin-top:16px;padding:14px 17px;border:1px solid var(--line);border-radius:14px;background:var(--ink2)}
+.discrev .k{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:9px}
+.discrev .v{color:var(--avoid);font-weight:600}
 .decrip{font-family:var(--mono);font-size:.7rem;color:var(--muted);text-align:right;padding-bottom:12px;white-space:nowrap}
 @media(max-width:620px){.decrip{text-align:left}}
 .voice{font-family:var(--disp);font-weight:400;font-size:clamp(1rem,2.2vw,1.2rem);line-height:1.5;color:var(--fg);
@@ -184,6 +187,12 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   <div class="truths">
     <div class="truth"><div class="k" id="k-minds">Dos mentes</div><div id="minds"><div class="skel">reconciliando…</div></div></div>
     <div class="truth"><div class="k" id="k-conf">Cuánto me creo esto</div><div class="conf" id="conf"><div class="skel">calibración…</div></div></div>
+  </div>
+
+  <div class="pulso" id="disc" hidden>
+    <div class="pulso-head"><h2 id="discTitle">¿Cómo vas hoy?</h2><span id="discMeta"></span></div>
+    <div class="pulso-grid" id="discGrid"></div>
+    <div class="discrev" id="discRev" style="display:none"></div>
   </div>
 
   <div class="foot" id="foot"></div>
@@ -690,7 +699,52 @@ function renderHealth(){
   sl.innerHTML=`<span class="k">${t("sysheadw")}</span>${t("syslead")} `
     +iss.map(x=>`<b style="color:var(--fg2)">${gloss(String(x))}</b>`).join(" · ");
 }
-function renderAll(){tick();renderHealth();renderSwitch();renderFocus();renderMinds();renderConf();syncStatic();}
+/* ACT IV — ¿cómo vas hoy? (conducta del Coach, global, al final) */
+function renderDisciplina(){
+  const box=document.getElementById("disc"),grid=document.getElementById("discGrid"),meta=document.getElementById("discMeta"),rev=document.getElementById("discRev");
+  if(!box)return;
+  const c=S.coach&&!S.coach.__err?S.coach:null;
+  if(!c||!c.sessionBudget){box.hidden=true;return;}
+  const es=LANG==="es",sb=c.sessionBudget||{},st=(c.state||"OK").toUpperCase();
+  const money=v=>v==null?"·":(v<0?"-$":"$")+Math.abs(Math.round(v)).toLocaleString("en-US");
+  const cards=[];
+  // estado
+  const stMap={LOCKOUT:["EN BLOQUEO","--avoid","rgba(255,106,92,.16)"],TILT:[es?"Cuidado":"Careful","--wait","rgba(232,184,75,.16)"],OK:[es?"Libre":"Clear","--go","rgba(91,212,138,.16)"]};
+  const stx=stMap[st]||stMap.OK;
+  cards.push(`<div class="pcard"><div class="pk">${es?"Estado":"State"}</div>`+
+    `<div class="pbig" style="color:var(${stx[1]});display:flex;align-items:center;gap:11px"><span style="width:11px;height:11px;border-radius:50%;background:var(${stx[1]});box-shadow:0 0 0 4px ${stx[2]};flex:none"></span>${stx[0]}</div>`+
+    `<div class="psub">${st==="LOCKOUT"?(es?"El Coach te paró. Hoy el plan es para leer, no para operar.":"The Coach stopped you. Today the plan is to read, not to trade."):st==="TILT"?(es?"Señales de tilt. Baja el tamaño y respira.":"Tilt signs. Cut size and breathe."):(es?"Dentro de tus reglas. Sigue así.":"Within your rules. Keep it up.")}</div></div>`);
+  // del día
+  const pnl=sb.pnl,pnlR=sb.pnlR,dayStop=sb.dayStop;
+  const dCol=pnl==null?"--fg":pnl<=-(dayStop||Infinity)?"--avoid":pnl<0?"--ember":"--go";
+  cards.push(`<div class="pcard"><div class="pk">${es?"Del día":"Today"}</div>`+
+    `<div class="pbig" style="color:var(${dCol})">${pnlR==null?"·":(pnlR>0?"+":"")+pnlR.toFixed(1)}<small> R</small></div>`+
+    `<div class="psub">${money(pnl)}${dayStop?` · ${es?"tope":"limit"} ${money(-dayStop)}`:""}</div></div>`);
+  // trades
+  const used=sb.used,maxT=sb.maxTrades,over=maxT&&used>maxT?used-maxT:0;
+  const tCol=used==null?"--fg":maxT&&used>maxT?"--avoid":maxT&&used===maxT?"--wait":"--fg";
+  cards.push(`<div class="pcard"><div class="pk">${es?"Trades":"Trades"}</div>`+
+    `<div class="pbig" style="color:var(${tCol})">${used==null?"·":used}<small> / ${maxT||"·"}</small></div>`+
+    `<div class="psub">${over>0?(es?`${over} de más. Sobre-operaste.`:`${over} over. You overtraded.`):(es?"Dentro del tope.":"Within the cap.")}</div></div>`);
+  // fuera de zona (la fuga)
+  if(c.offZone&&c.offZone.ofTrades){const oz=c.offZone,ozCol=oz.count>0?"--avoid":"--go";
+    cards.push(`<div class="pcard"><div class="pk">${es?"Fuera de zona":"Out of zone"}</div>`+
+      `<div class="pbig" style="color:var(${ozCol})">${oz.count}<small> ${es?"de":"of"} ${oz.ofTrades}</small></div>`+
+      `<div class="psub">${oz.count>0?(es?`${money(oz.pnl)} en tierra de nadie. Tu fuga.`:`${money(oz.pnl)} in no-man's-land. Your leak.`):(es?"Todas en nivel. Bien.":"All at a level. Good.")}</div></div>`);}
+  // racha
+  const stk=c.disciplineStreak;
+  cards.push(`<div class="pcard"><div class="pk">${es?"Racha disciplina":"Discipline streak"}</div>`+
+    `<div class="pbig" style="color:var(${stk>0?"--go":"--muted"})">${stk==null?"·":stk}<small> ${es?(stk===1?"día":"días"):(stk===1?"day":"days")}</small></div>`+
+    `<div class="psub">${!stk?(es?"Se reinició. Un día limpio la reabre.":"Reset. A clean day reopens it."):(es?"Días seguidos siguiendo el plan.":"Days in a row following the plan.")}</div></div>`);
+  grid.innerHTML=cards.join("");
+  // última autopsia (lastReview)
+  const lr=c.lastReview;
+  if(lr&&lr.headline){const hd=String(lr.headline).replace(/\*\*/g,"").replace(/^#+\s*/,"");
+    rev.style.display="";rev.innerHTML=`<span class="k">${es?"Última autopsia":"Last review"} · ${lr.date||""}</span>${gloss(hd)}`;}
+  else{rev.style.display="none";rev.innerHTML="";}
+  box.hidden=false;meta.textContent=es?"tus cuentas · hoy":"your accounts · today";
+}
+function renderAll(){tick();renderHealth();renderSwitch();renderFocus();renderMinds();renderConf();renderDisciplina();syncStatic();}
 
 function setLang(l){LANG=l;document.getElementById("es").setAttribute("aria-pressed",l==="es");
   document.getElementById("en").setAttribute("aria-pressed",l==="en");try{localStorage.setItem("mesa-lang",l)}catch(e){}renderAll();}
