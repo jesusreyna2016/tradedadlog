@@ -72,7 +72,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .terrain-head .where{font-family:var(--mono);font-size:.72rem;margin-left:auto;padding:3px 9px;border-radius:20px}
 .where.edge{color:var(--ember-soft);background:var(--ember-dim)}
 .where.nml{color:var(--muted);background:rgba(140,130,118,.1)}
-#terrain{width:100%;height:360px;display:block}
+#terrain{width:100%;height:auto;aspect-ratio:820/360;display:block}
 .tcaption{font-family:var(--mono);font-size:.64rem;color:var(--faint);margin-top:8px;text-align:center}
 
 /* ACT III — woven truths */
@@ -381,7 +381,11 @@ function renderCryptoFocus(){
 
 /* ACT II — terrain SVG */
 function drawTerrain(d,symOver){
-  const svg=document.getElementById("terrain");const W=820,H=360,PADT=22,PADB=22,x0=72,x1=W-200;
+  const svg=document.getElementById("terrain");
+  const mob=(window.innerWidth||820)<600;
+  const W=mob?470:820,H=mob?495:360,PADT=22,PADB=22,x0=mob?40:72,x1=W-(mob?150:200);
+  const FZ=mob?1.2:1,trunc=(s)=>mob&&s.length>18?s.slice(0,17)+"…":s;
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.style.aspectRatio=`${W} / ${H}`;
   const where=document.getElementById("where"),cap=document.getElementById("tcaption");
   if(!d){svg.innerHTML="";where.className="where";where.textContent="";cap.textContent="";return;}
   const sym=symOver||FOCUS;
@@ -419,8 +423,8 @@ function drawTerrain(d,symOver){
     <stop offset="1" stop-color="rgba(91,140,212,.09)"/></linearGradient>
     <filter id="glow"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
   out+=`<rect x="${x0}" y="${PADT}" width="${x1-x0}" height="${H-PADT-PADB}" fill="url(#pd)"/>`;
-  out+=`<text x="${x0+4}" y="${PADT+13}" fill="var(--faint)" font-family="var(--mono)" font-size="9.5" letter-spacing="2">${t("prem")}</text>`;
-  out+=`<text x="${x0+4}" y="${H-PADB-5}" fill="var(--faint)" font-family="var(--mono)" font-size="9.5" letter-spacing="2">${t("disc")}</text>`;
+  out+=`<text x="${x0+4}" y="${PADT+13}" fill="var(--faint)" font-family="var(--mono)" font-size="${(9.5*FZ).toFixed(1)}" letter-spacing="2">${t("prem")}</text>`;
+  out+=`<text x="${x0+4}" y="${H-PADB-5}" fill="var(--faint)" font-family="var(--mono)" font-size="${(9.5*FZ).toFixed(1)}" letter-spacing="2">${t("disc")}</text>`;
   const R=[]; // right-side labels, resolved for collisions after all lines are placed
   // zones as bands
   zones.forEach(z=>{const yt=Y(clamp(z.hi)),yb=Y(clamp(z.lo));const col=z.dir==="SHORT"?"255,106,92":z.dir==="LONG"?"91,212,138":"232,184,75";
@@ -452,27 +456,27 @@ function drawTerrain(d,symOver){
     out+=`<polyline class="ppath" points="${pts}" fill="none" stroke="var(--fg2)" stroke-width="1.6" opacity=".95" stroke-linejoin="round" stroke-linecap="round"/>`;
     // apertura
     const oy=Y(clamp(bars[0][1]+sh));
-    out+=`<circle cx="${xOf(t0)}" cy="${oy}" r="3.2" fill="var(--ink)" stroke="var(--muted)" stroke-width="1.4"/>`;
-    out+=`<text x="${xOf(t0)+7}" y="${oy-5}" fill="var(--muted)" font-family="var(--mono)" font-size="8.5" letter-spacing=".5">${LANG==="es"?"abrió":"open"}</text>`;
+    out+=`<circle cx="${xOf(t0)}" cy="${oy}" r="${(3.2*FZ).toFixed(1)}" fill="var(--ink)" stroke="var(--muted)" stroke-width="1.4"/>`;
+    out+=`<text x="${xOf(t0)+7}" y="${oy-5}" fill="var(--muted)" font-family="var(--mono)" font-size="${(8.5*FZ).toFixed(1)}" letter-spacing=".5">${LANG==="es"?"abrió":"open"}</text>`;
     // 3) puntos de toque: el primer cruce del recorrido con cada nivel que tocó
-    kl.forEach(k=>{if(k.price>top||k.price<bot)return;for(const b of bars){if((b[3]+sh)<=k.price&&k.price<=(b[2]+sh)){out+=`<circle cx="${xOf(b[0]).toFixed(1)}" cy="${Y(clamp(k.price)).toFixed(1)}" r="2.6" fill="var(--ember)" opacity=".9"/>`;break;}}});
+    kl.forEach(k=>{if(k.price>top||k.price<bot)return;for(const b of bars){if((b[3]+sh)<=k.price&&k.price<=(b[2]+sh)){out+=`<circle cx="${xOf(b[0]).toFixed(1)}" cy="${Y(clamp(k.price)).toFixed(1)}" r="${(2.6*FZ).toFixed(1)}" fill="var(--ember)" opacity=".9"/>`;break;}}});
   }
   // price marker (línea de nivel actual + punto "ahora" al final del recorrido, ya alineados)
   if(price!=null){const y=Y(clamp(price));
     out+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="var(${sgc})" stroke-width="${endX>x0?1:2}" stroke-dasharray="${endX>x0?'4 4':'0'}" opacity="${endX>x0?.55:1}"/>
-      <circle cx="${endX}" cy="${y}" r="5" fill="var(${sgc})" filter="url(#glow)"/>`;
+      <circle cx="${endX}" cy="${y}" r="${(5*FZ).toFixed(1)}" fill="var(${sgc})" filter="url(#glow)"/>`;
     R.push({yReal:y,text:`${t("now")} ${num(price)}`,color:"var(--fg)",size:12,weight:700,pc:sgc});}
   // resolve right-label collisions: stack with a minimum gap, guide line if nudged
   R.sort((a,b)=>a.yReal-b.yReal);
-  const gap=13,minY=PADT+7,maxY=H-PADB-3;
+  const gap=13*FZ,minY=PADT+7,maxY=H-PADB-3;
   R.forEach((r,i)=>{r.y=Math.max(r.yReal,(i>0?R[i-1].y+gap:minY));});
   for(let i=R.length-1;i>=0;i--){R[i].y=Math.min(R[i].y,(i<R.length-1?R[i+1].y-gap:maxY));}
-  R.forEach(r=>{const moved=Math.abs(r.y-r.yReal)>5;
+  R.forEach(r=>{const moved=Math.abs(r.y-r.yReal)>5;const lbl=trunc(r.text);const fs=r.size*FZ;
     if(moved)out+=`<line x1="${x1}" y1="${r.yReal}" x2="${x1+6}" y2="${r.y}" stroke="${r.color}" stroke-width="1" opacity=".3"/>`;
-    if(r.pc)out+=`<rect x="${x1+5}" y="${r.y-10}" width="${r.text.length*7+12}" height="16" rx="3" fill="var(${r.pc})" opacity=".14"/>`;
-    out+=`<text x="${x1+9}" y="${r.y+3}" fill="${r.color}" font-family="var(--mono)" font-size="${r.size}"${r.weight?` font-weight="${r.weight}"`:""}>${r.text}</text>`;
-    if(r.left){if(moved)out+=`<line x1="${x0}" y1="${r.yReal}" x2="${x0-6}" y2="${r.y}" stroke="var(--line2)" stroke-width="1" opacity=".3"/>`;
-      out+=`<text x="${x0-8}" y="${r.y+3}" text-anchor="end" fill="var(--muted)" font-family="var(--mono)" font-size="9.5">${r.left}</text>`;}});
+    if(r.pc)out+=`<rect x="${x1+5}" y="${r.y-fs+1}" width="${(lbl.length*fs*0.62+12).toFixed(0)}" height="${(fs+4).toFixed(0)}" rx="3" fill="var(${r.pc})" opacity=".14"/>`;
+    out+=`<text x="${x1+9}" y="${r.y+3}" fill="${r.color}" font-family="var(--mono)" font-size="${fs.toFixed(1)}"${r.weight?` font-weight="${r.weight}"`:""}>${lbl}</text>`;
+    if(r.left&&!mob){if(moved)out+=`<line x1="${x0}" y1="${r.yReal}" x2="${x0-6}" y2="${r.y}" stroke="var(--line2)" stroke-width="1" opacity=".3"/>`;
+      out+=`<text x="${x0-8}" y="${r.y+3}" text-anchor="end" fill="var(--muted)" font-family="var(--mono)" font-size="${(9.5*FZ).toFixed(1)}">${r.left}</text>`;}});
   svg.innerHTML=out;
   // where am I
   const minDist=near.length?Math.min(...near):1e9;
