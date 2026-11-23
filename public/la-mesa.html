@@ -546,32 +546,41 @@ function zoneName(dir,type,es){
   let base=m[t]||plainJargon(t.replace(/_/g," "),es);
   const d=dir==="SHORT"?(es?"para cortos":"for shorts"):dir==="LONG"?(es?"para largos":"for longs"):"";
   return (base+(d?" "+d:"")).trim()||(es?"zona":"zone"); }
+// mapa de niveles del feed (MISMO que usa el Coach, para que portero y Coach midan igual), nombres llanos
+const FLVL={es:{pdh:"máximo de ayer",pdl:"mínimo de ayer",pdc:"cierre de ayer",pdMid:"medio de ayer",vah:"cima del valor (VAH)",poc:"precio más operado (POC)",val:"base del valor (VAL)",dvah:"cima del valor hoy",dpoc:"POC de hoy",dval:"base del valor hoy",onh:"máximo de la noche",onl:"mínimo de la noche",ibh:"techo del balance inicial",ibl:"piso del balance inicial",asH:"máximo de Asia",asL:"mínimo de Asia",loH:"máximo de Londres",loL:"mínimo de Londres",hod:"máximo de hoy",lod:"mínimo de hoy",eq:"medio del rango",ema20:"EMA20",ema50:"EMA50",gzLong:"zona dorada (largos)",gzShort:"zona dorada (cortos)"},
+  en:{pdh:"prev day high",pdl:"prev day low",pdc:"prev close",pdMid:"prev mid",vah:"value area high (VAH)",poc:"point of control (POC)",val:"value area low (VAL)",dvah:"today VAH",dpoc:"today POC",dval:"today VAL",onh:"overnight high",onl:"overnight low",ibh:"initial balance high",ibl:"initial balance low",asH:"Asia high",asL:"Asia low",loH:"London high",loL:"London low",hod:"high of day",lod:"low of day",eq:"range mid",ema20:"EMA20",ema50:"EMA50",gzLong:"golden zone (longs)",gzShort:"golden zone (shorts)"}};
+function feedLevels(sym){
+  const r=pget(sym);if(!r)return null;const nm=FLVL[LANG==="es"?"es":"en"];
+  const N=v=>{const f=parseFloat(v);return isNaN(f)?null:f;};
+  const PTS=["pdh","pdl","pdc","pdMid","vah","poc","val","dvah","dpoc","dval","onh","onl","ibh","ibl","asH","asL","loH","loL","hod","lod","eq","ema20","ema50"];
+  const levels=[];
+  for(const f of PTS){const v=N(r[f]);if(v!=null)levels.push({name:nm[f]||f,lo:v,hi:v});}
+  for(const gz of ["gzLong","gzShort"]){const s=r[gz];if(typeof s==="string"&&s.includes(":")){const a=N(s.split(":")[0]),b=N(s.split(":")[1]);if(a!=null&&b!=null)levels.push({name:nm[gz]||gz,lo:Math.min(a,b),hi:Math.max(a,b)});}}
+  const atrD=N(r.atrD);const tol=Math.max(atrD!=null?atrD*0.02:0,15);
+  return levels.length?{levels,tol}:null; }
 // portero "¿en zona?": clasifica el precio vivo frente a las zonas/niveles del plan y nombra lo más cercano
 function renderGate(sym){
   const g=document.getElementById("gate");if(!g)return;
-  const d=inst(sym);let price=livePrice(sym);
+  const fl=feedLevels(sym);let price=livePrice(sym);
   if(price==null){const r=pget(sym);if(r)price=parseFloat(r.close);}
-  if(!d||price==null||isNaN(price)){g.hidden=true;return;}
-  const es=LANG==="es";const pois=[];
-  (d.zones||[]).forEach(z=>{if(z.range&&z.range.length===2){const lo=Math.min(...z.range),hi=Math.max(...z.range);pois.push({name:zoneName(z.dir,z.type,es),lo,hi});}});
-  (d.keyLevels||[]).forEach(k=>{if(k&&k.price){pois.push({name:plainJargon(tr(k.name),es),lo:k.price,hi:k.price});}});
-  if(!pois.length){g.hidden=true;return;}
-  const em=d.expectedMove||{};const tol=Math.max((em.base||150)*0.08,8),edgeThresh=Math.max((em.base||150)*0.35,30);
-  let inName=null,minD=1e9,above=null,below=null;
-  pois.forEach(z=>{const inside=price>=z.lo-tol&&price<=z.hi+tol;const dd=inside?0:Math.min(Math.abs(price-z.lo),Math.abs(price-z.hi));
-    if(inside&&!inName)inName=z.name;if(dd<minD)minD=dd;
+  if(!fl||price==null||isNaN(price)){g.hidden=true;return;}
+  const es=LANG==="es";const tol=fl.tol,edgeThresh=tol*2.5;
+  let inName=null,inBest=1e9,minD=1e9,above=null,below=null;
+  fl.levels.forEach(z=>{const c=(z.lo+z.hi)/2;const inside=price>=z.lo-tol&&price<=z.hi+tol;const dd=(price>=z.lo&&price<=z.hi)?0:Math.min(Math.abs(price-z.lo),Math.abs(price-z.hi));
+    if(dd<minD)minD=dd;
+    if(inside){const cd=Math.abs(price-c);if(cd<inBest){inBest=cd;inName=z.name;}}
     if(z.lo>price){const du=z.lo-price;if(!above||du<above.d)above={d:du,name:z.name};}
     if(z.hi<price){const db=price-z.hi;if(!below||db<below.d)below={d:db,name:z.name};}});
   let cls,lead,body;
-  if(inName){cls="zone";lead=es?"EN ZONA":"IN A ZONE";body=(es?"Aquí sí hay punto de interés: ":"There is a point of interest here: ")+`<b>${inName}</b>. `+(es?"Si reacciona y tienes gatillo, es entrada.":"If it reacts and a trigger fires, that's an entry.");}
+  if(minD<=tol){cls="zone";lead=es?"EN ZONA":"IN A ZONE";const nm=inName||(above&&above.name)||(below&&below.name)||"";body=(es?"Aquí sí hay punto de interés: ":"There is a point of interest here: ")+`<b>${nm}</b>. `+(es?"Si reacciona y tienes gatillo, es entrada.":"If it reacts and a trigger fires, that's an entry.");}
   else if(minD<=edgeThresh){cls="edge";lead=es?"CERCA DE ZONA":"NEAR A ZONE";body=es?`El precio se acerca a un nivel (a ${Math.round(minD)} pts). Espera a que llegue y reaccione, no te anticipes.`:`Price is approaching a level (${Math.round(minD)} pts away). Wait for it to get there and react.`;}
   else{cls="nml";lead=es?"TIERRA DE NADIE":"NO-MAN'S-LAND";body=es?`Nada que operar aquí. El nivel más cercano está a ${Math.round(minD)} pts: entrar en el medio es perseguir.`:`Nothing to trade here. Nearest level is ${Math.round(minD)} pts away: entering in the middle is chasing.`;}
   const near=[];
   if(above)near.push((es?"arriba ":"up ")+`<b>${above.name}</b> +${Math.round(above.d)}`);
   if(below)near.push((es?"abajo ":"down ")+`<b>${below.name}</b> -${Math.round(below.d)}`);
   g.className="gate "+cls;
-  g.innerHTML=`<div class="glead"><span class="gdot"></span>${lead}</div><div class="gbody">${gloss(body)}</div>`+
-    (near.length?`<div class="gnear">${(es?"Zona más cercana · ":"Nearest · ")+near.join(" · ")}</div>`:"");
+  g.innerHTML=`<div class="glead"><span class="gdot"></span>${lead}</div><div class="gbody">${body}</div>`+
+    (near.length?`<div class="gnear">${(es?"Nivel más cercano · ":"Nearest · ")+near.join(" · ")}</div>`:"");
   g.hidden=false;
 }
 function renderPulso(sym){
