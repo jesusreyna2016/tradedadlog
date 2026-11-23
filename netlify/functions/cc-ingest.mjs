@@ -48,7 +48,8 @@ export default async (req) => {
       vwap: num(kv.vwap), pdh: num(kv.pdh), pdl: num(kv.pdl),
       dayOpen: num(kv.dayopen), orH: num(kv.orh), orL: num(kv.orl),
       pwh: num(kv.pwh), pwl: num(kv.pwl), tdo: num(kv.tdo),
-      ema5: num(kv.ema20), ema15: num(kv.ema20_15), ema50: num(kv.ema50)
+      // orb EMAs nombradas por su longitud real (el sufijo _15m es el timeframe): todas son EMA20/EMA50
+      ema20: num(kv.ema20), ema20_15m: num(kv.ema20_15), ema50: num(kv.ema50)
     },
     noTradeZone: (num(kv.ntz1)!=null && num(kv.ntz2)!=null) ? [num(kv.ntz1), num(kv.ntz2)] : null,
     // contexto extra + senal en vivo

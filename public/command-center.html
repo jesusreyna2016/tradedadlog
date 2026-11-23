@@ -1672,14 +1672,16 @@ function onLit(){ try{startCountUps();}catch(e){} try{sweep();}catch(e){} }
     if(P==null) return null;
     var tol=P*0.0004;                 // zona muerta (~pocos puntos) = neutral en ese factor
     var F=[];
+    // orb EMA20: nombres nuevos ema20 / ema20_15m; acepta los viejos ema5 / ema15 durante la transicion
+    var e20=(L.ema20!=null?L.ema20:L.ema5), e20_15=(L.ema20_15m!=null?L.ema20_15m:L.ema15);
     function add(label,val,w){ if(val==null) return; var d=Math.abs(P-val)<=tol?0:(P>val?1:-1); F.push({label:label,w:w,d:d}); }
     add('VWAP',      L.vwap,    24);
-    add('EMA20 15m', L.ema15,   20);
-    add('EMA20 5m',  L.ema5,    14);
+    add('EMA20 15m', e20_15,    20);
+    add('EMA20 5m',  e20,       14);
     add(T('Apertura','Open'),  L.dayOpen, 12);
     add(T('True Day Open','True Day Open'), L.tdo, 8);
-    if(L.ema5!=null && L.ema15!=null){
-      var ds=Math.abs(L.ema5-L.ema15)<=tol?0:(L.ema5>L.ema15?1:-1);
+    if(e20!=null && e20_15!=null){
+      var ds=Math.abs(e20-e20_15)<=tol?0:(e20>e20_15?1:-1);
       F.push({label:T('EMAs apiladas','EMAs stacked'),w:10,d:ds});
     }
     if(L.pdh!=null && L.pdl!=null){
