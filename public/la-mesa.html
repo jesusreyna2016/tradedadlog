@@ -427,7 +427,7 @@ function drawTerrain(d,symOver){
   if(!d){svg.innerHTML="";where.className="where";where.textContent="";cap.textContent="";return;}
   const sym=symOver||FOCUS;
   // anchors
-  const kl=(d.keyLevels||[]).filter(k=>k&&k.price).map(k=>({name:tr(k.name),price:k.price}));
+  const kl=(d.keyLevels||[]).filter(k=>k&&k.price).map(k=>({name:plainJargon(tr(k.name),LANG==="es"),price:k.price}));
   const seenZ=new Set();
   const zones=(d.zones||[]).filter(z=>z.range&&z.range.length===2).map(z=>({lo:Math.min(...z.range),hi:Math.max(...z.range),dir:z.dir,type:z.type}))
     .filter(z=>{const k=Math.round(z.lo)+"-"+Math.round(z.hi)+(z.type||"");if(seenZ.has(k))return false;seenZ.add(k);return true;});
@@ -466,7 +466,7 @@ function drawTerrain(d,symOver){
   // zones as bands
   zones.forEach(z=>{const yt=Y(clamp(z.hi)),yb=Y(clamp(z.lo));const col=z.dir==="SHORT"?"255,106,92":z.dir==="LONG"?"91,212,138":"232,184,75";
     out+=`<rect x="${x0}" y="${yt}" width="${x1-x0}" height="${Math.max(3,yb-yt)}" fill="rgba(${col},.11)" stroke="rgba(${col},.4)" stroke-width="1"/>`;
-    R.push({yReal:(yt+yb)/2,text:`${z.dir||""} ${(z.type||"").replace(/_/g," ")}`.trim(),color:`rgb(${col})`,size:10.5});});
+    R.push({yReal:(yt+yb)/2,text:zoneName(z.dir,z.type,LANG==="es"),color:`rgb(${col})`,size:10.5});});
   // key levels (line + left price now; right name deferred to the stack)
   kl.forEach(k=>{const y=Y(clamp(k.price));const off=(k.price>top||k.price<bot);const tc=touched(k.price);
     out+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="${tc?'var(--muted)':'var(--line2)'}" stroke-width="${tc?1.2:1}" stroke-dasharray="${off?'2 4':'1 5'}"/>`;
@@ -533,6 +533,19 @@ function barsFor(sym){try{const k=sym==="ETH"?"ETHUSDT":sym;const a=S.bars.symbo
 // pulso del mercado: dato crudo en vivo del feed del indicador (feeds.json: feed:<SYM>)
 function pget(sym){try{const f=S.feeds;if(!f||f.__err)return null;const w=f["feed:"+sym];if(!w)return null;return w.raw||w;}catch(e){return null;}}
 function tcget(sym){try{const f=S.feeds;if(!f||f.__err)return null;const w=f["trendcl:"+sym];if(!w)return null;return w.raw||w;}catch(e){return null;}}
+// jerga del plan -> palabras llanas (zonas y niveles del terreno y del portero)
+function plainJargon(s,es){ if(!s)return s||""; let o=" "+String(s)+" ";
+  const reps=es?[["gzshort","corto de la zona dorada"],["gzlong","largo de la zona dorada"],["golden zone","zona dorada"],["\\bgz\\b","zona dorada"],["cluster","grupo de niveles"],["cúmulo","grupo de niveles"],["retest\\s*break","reprueba de ruptura"],["poc\\s*reversion","giro en el POC"],["\\breversion\\b","giro"],["\\bsweep\\b","barrido"],["\\bbreak\\b","ruptura"]]
+              :[["gzshort","short of golden zone"],["gzlong","long of golden zone"],["golden zone","golden zone"],["\\bgz\\b","golden zone"],["cluster","level cluster"],["retest\\s*break","break retest"],["poc\\s*reversion","POC reversal"],["\\breversion\\b","reversal"]];
+  for(const [a,b] of reps)o=o.replace(new RegExp(a,"ig"),b);
+  return o.replace(/_/g," ").replace(/\s+/g," ").trim(); }
+function zoneName(dir,type,es){
+  const t=(type||"").toLowerCase();
+  const m=es?{retest_break:"reprueba de ruptura",poc_reversion:"giro en el POC",golden_zone:"zona dorada",gz_long:"zona dorada",gz_short:"zona dorada",vah:"cima del valor",val:"base del valor"}
+            :{retest_break:"break retest",poc_reversion:"POC reversal",golden_zone:"golden zone",gz_long:"golden zone",gz_short:"golden zone",vah:"value high",val:"value low"};
+  let base=m[t]||plainJargon(t.replace(/_/g," "),es);
+  const d=dir==="SHORT"?(es?"para cortos":"for shorts"):dir==="LONG"?(es?"para largos":"for longs"):"";
+  return (base+(d?" "+d:"")).trim()||(es?"zona":"zone"); }
 // portero "¿en zona?": clasifica el precio vivo frente a las zonas/niveles del plan y nombra lo más cercano
 function renderGate(sym){
   const g=document.getElementById("gate");if(!g)return;
@@ -540,8 +553,8 @@ function renderGate(sym){
   if(price==null){const r=pget(sym);if(r)price=parseFloat(r.close);}
   if(!d||price==null||isNaN(price)){g.hidden=true;return;}
   const es=LANG==="es";const pois=[];
-  (d.zones||[]).forEach(z=>{if(z.range&&z.range.length===2){const lo=Math.min(...z.range),hi=Math.max(...z.range);pois.push({name:(`${z.dir||""} ${(z.type||"").replace(/_/g," ")}`).trim()||"zona",lo,hi});}});
-  (d.keyLevels||[]).forEach(k=>{if(k&&k.price){pois.push({name:tr(k.name),lo:k.price,hi:k.price});}});
+  (d.zones||[]).forEach(z=>{if(z.range&&z.range.length===2){const lo=Math.min(...z.range),hi=Math.max(...z.range);pois.push({name:zoneName(z.dir,z.type,es),lo,hi});}});
+  (d.keyLevels||[]).forEach(k=>{if(k&&k.price){pois.push({name:plainJargon(tr(k.name),es),lo:k.price,hi:k.price});}});
   if(!pois.length){g.hidden=true;return;}
   const em=d.expectedMove||{};const tol=Math.max((em.base||150)*0.08,8),edgeThresh=Math.max((em.base||150)*0.35,30);
   let inName=null,minD=1e9,above=null,below=null;
