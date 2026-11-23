@@ -522,6 +522,7 @@ function findKL(kl,needle){return kl.find(k=>(k.name||"").toLowerCase().includes
 function barsFor(sym){try{const k=sym==="ETH"?"ETHUSDT":sym;const a=S.bars.symbols[k];return a&&a.length?a:null;}catch(e){return null;}}
 // pulso del mercado: dato crudo en vivo del feed del indicador (feeds.json: feed:<SYM>)
 function pget(sym){try{const f=S.feeds;if(!f||f.__err)return null;const w=f["feed:"+sym];if(!w)return null;return w.raw||w;}catch(e){return null;}}
+function tcget(sym){try{const f=S.feeds;if(!f||f.__err)return null;const w=f["trendcl:"+sym];if(!w)return null;return w.raw||w;}catch(e){return null;}}
 function renderPulso(sym){
   const box=document.getElementById("pulso"),grid=document.getElementById("pulsoGrid"),meta=document.getElementById("pulsoMeta");
   if(!box)return;
@@ -537,18 +538,23 @@ function renderPulso(sym){
       `<div class="pbig">${Math.round(pct)}%<small> ${es?"recorrido":"of range"}</small></div>`+
       `<div class="ptrack"><div class="pfill" style="width:${Math.min(100,pct)}%;background:var(${col})"></div></div>`+
       `<div class="psub">${es?`Ya se movió <b>${I(rt)}</b> pts de los ~<b>${I(ad)}</b> que suele moverse un día. Quedan ~<b>${I(rem)}</b> pts.`:`Already ran <b>${I(rt)}</b> pts of the ~<b>${I(ad)}</b> it usually moves in a day. ~<b>${I(rem)}</b> pts left.`}</div></div>`;}
-  // 2) Tus medias: dónde está el precio frente a EMA20 y EMA50
-  let c2="";const cl=N(r.close),e20=N(r.ema20),e50=N(r.ema50);
-  if(cl!=null&&e20!=null&&e50!=null){
-    const lo=Math.min(e20,e50),hi=Math.max(e20,e50);let head,arr,dcol,sub;
-    if(cl<lo){head=es?"Bajo":"Below";arr=`↓ -${Math.round(lo-cl)} pts`;dcol="--avoid";sub=es?"El precio está por debajo de tus dos medias (EMA20 y EMA50).":"Price is below both your moving averages (EMA20 and EMA50).";}
-    else if(cl>hi){head=es?"Sobre":"Above";arr=`↑ +${Math.round(cl-hi)} pts`;dcol="--go";sub=es?"El precio está por encima de tus dos medias (EMA20 y EMA50).":"Price is above both your moving averages (EMA20 and EMA50).";}
-    else{head=es?"Entre":"Between";arr=es?"entre las dos":"between them";dcol="--wait";sub=es?"El precio está entre tu EMA20 y tu EMA50.":"Price sits between your EMA20 and EMA50.";}
-    const rows=[["EMA20",e20,false],["EMA50",e50,false],[es?"precio":"price",cl,true]].sort((a,b)=>b[1]-a[1]);
-    const rh=rows.map(x=>`<div class="prow${x[2]?" me":""}"><span>${x[2]?"● ":""}${x[0]}</span><span>${I(x[1])}</span></div>`).join("");
-    c2=`<div class="pcard"><div class="pk">${es?"Tus medias":"Your MAs"}</div>`+
-      `<div class="pbig" style="color:var(--fg2)">${head} <small style="color:var(${dcol})">${arr}</small></div>`+
-      `<div style="margin-top:12px">${rh}</div><div class="psub">${sub}</div></div>`;}
+  // 2) Marcos de tiempo (Trend Checklist): si las temporalidades coinciden
+  let c2="";const tc=tcget(sym);
+  if(tc){const dd=N(tc.d),h4=N(tc.h4),h1=N(tc.h1),flip=N(tc.flip);
+    const arrow=v=>v>0?"▲":v<0?"▼":"·";
+    const acol=v=>v>0?"--go":v<0?"--avoid":"--muted";
+    const dirs=[dd,h4,h1].filter(v=>v!=null);
+    const up=dirs.length===3&&dirs.every(v=>v>0),dn=dirs.length===3&&dirs.every(v=>v<0);
+    let head,hcol,sub;
+    if(up){head=(es?"Alineado":"Aligned")+" ▲";hcol="--go";sub=es?"Las tres temporalidades apuntan arriba.":"All three timeframes point up.";}
+    else if(dn){head=(es?"Alineado":"Aligned")+" ▼";hcol="--avoid";sub=es?"Las tres temporalidades apuntan abajo.":"All three timeframes point down.";}
+    else{head=es?"Mixto":"Mixed";hcol="--wait";sub=es?"Los marcos no coinciden: el corto plazo va contra el fondo. Mejor esperar a que se alineen.":"The timeframes disagree: the short term runs against the backdrop. Better to wait for them to line up.";}
+    const labs=[[es?"Diario":"Daily",dd],["4H",h4],["1H",h1]];
+    const rh=labs.map(x=>`<div class="prow"><span>${x[0]}</span><span style="color:var(${acol(x[1])});font-size:.85rem">${arrow(x[1])}</span></div>`).join("");
+    c2=`<div class="pcard"><div class="pk">${es?"Marcos de tiempo":"Timeframes"}</div>`+
+      `<div class="pbig" style="color:var(${hcol})">${head}</div>`+
+      `<div style="margin-top:12px">${rh}</div>`+
+      `<div class="psub">${sub}${flip!=null?(es?` El sesgo cambia en <b>${I(flip)}</b>.`:` Bias flips at <b>${I(flip)}</b>.`):""}</div></div>`;}
   // 3) Volatilidad: VIX y su percentil
   let c3="";const vx=N(r.vix),vr=N(r.vixRank);
   if(vx!=null){const rank=vr;
