@@ -537,7 +537,7 @@ function renderPulso(sym){
     c1=`<div class="pcard"><div class="pk">${es?"El día":"The day"}</div>`+
       `<div class="pbig">${Math.round(pct)}%<small> ${es?"recorrido":"of range"}</small></div>`+
       `<div class="ptrack"><div class="pfill" style="width:${Math.min(100,pct)}%;background:var(${col})"></div></div>`+
-      `<div class="psub">${es?`Ya se movió <b>${I(rt)}</b> pts de los ~<b>${I(ad)}</b> que suele moverse un día. Quedan ~<b>${I(rem)}</b> pts.`:`Already ran <b>${I(rt)}</b> pts of the ~<b>${I(ad)}</b> it usually moves in a day. ~<b>${I(rem)}</b> pts left.`}</div></div>`;}
+      `<div class="psub">${es?`Ya se movió <b>${I(rt)}</b> pts de los ~<b>${I(ad)}</b> que suele moverse un día. ${(rem==null||rem<=0)?"Ya pasó su rango normal del día.":`Quedan ~<b>${I(rem)}</b> pts.`}`:`Already ran <b>${I(rt)}</b> pts of the ~<b>${I(ad)}</b> it usually moves in a day. ${(rem==null||rem<=0)?"Already past its usual daily range.":`~<b>${I(rem)}</b> pts left.`}`}</div></div>`;}
   // 2) Marcos de tiempo (Trend Checklist): si las temporalidades coinciden
   let c2="";const tc=tcget(sym);
   if(tc){const dd=N(tc.d),h4=N(tc.h4),h1=N(tc.h1),flip=N(tc.flip);
