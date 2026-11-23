@@ -220,8 +220,9 @@ function cryptoSig(){try{const c=S.crypto.instruments;const s=c.ETHUSDT||c.ETH;r
    Mantiene la palabra (el trader la necesita) y la hace entendible para cualquiera. */
 const GLOSS={es:{
  "EMA50":"media móvil de 50 velas: el precio promedio reciente; suele frenar al precio como un suelo o un techo",
- "EMA15":"media móvil de 15 velas: promedio reciente de corto plazo",
- "EMA5":"media móvil de 5 velas: promedio muy reciente, casi pegado al precio",
+ "EMA20":"media móvil de 20 velas (tu media rápida): el precio promedio reciente; suele frenar al precio como un suelo o un techo",
+ "EMA15":"es tu EMA20 medida en el marco de 15 minutos (el 15 es el marco de tiempo, no la longitud; tú usas EMA20 y EMA50)",
+ "EMA5":"es tu EMA20 medida en el gráfico (no es una media de 5 periodos)",
  "VWAP":"precio medio del día ponderado por volumen; la referencia de precio justo del día",
  "CHoCH":"primer aviso de que la dirección podría estar cambiando",
  "BOS":"ruptura de estructura: la tendencia queda confirmada",
@@ -239,8 +240,9 @@ const GLOSS={es:{
  "stop":"stop-loss: el precio donde cierras la pérdida si te equivocas"},
  en:{
  "EMA50":"50-bar moving average: the recent average price; often acts as a floor or ceiling",
- "EMA15":"15-bar moving average: a short-term recent average",
- "EMA5":"5-bar moving average: a very recent average, hugging price",
+ "EMA20":"20-bar moving average (your fast one): the recent average price; often acts as a floor or ceiling",
+ "EMA15":"this is your EMA20 measured on the 15-minute timeframe (the 15 is the timeframe, not the length; you use EMA20 and EMA50)",
+ "EMA5":"this is your EMA20 measured on the chart (not a 5-period average)",
  "VWAP":"volume-weighted average price of the day; the day's fair-value reference",
  "CHoCH":"first hint that direction may be changing",
  "BOS":"break of structure: the trend is confirmed",
