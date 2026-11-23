@@ -112,6 +112,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .voice abbr.t,.aside abbr.t,.sysline abbr.t{text-decoration:underline dotted var(--line2);text-underline-offset:3px;cursor:help;color:inherit}
 @keyframes freshpulse{0%{color:var(--ember-soft)}100%{color:inherit}}
 .fresh{animation:freshpulse 1.8s ease-out}
+@keyframes drawpath{to{stroke-dashoffset:0}}
+#terrain .ppath{stroke-dasharray:6000;stroke-dashoffset:6000;animation:drawpath 1.1s ease-out forwards}
+@media(prefers-reduced-motion:reduce){#terrain .ppath{animation:none;stroke-dashoffset:0}}
 </style>
 
 <div class="wrap">
@@ -397,14 +400,18 @@ function drawTerrain(d,symOver){
   // scale window around price
   const em=d.expectedMove||{};const near=[...zones.map(z=>Math.abs(((z.lo+z.hi)/2)-price)),...kl.map(k=>Math.abs(k.price-price))].filter(x=>!isNaN(x));
   const half=Math.max((em.high||0)*1.15,((near.length?Math.min(...near):200))*1.7,(em.base||150)*1.2,100);
-  // recorrido intradía (velas 5m): expande la ventana para que entre todo el trayecto
-  const bars=barsFor(sym);let pLo=null,pHi=null;
-  if(bars){for(const b of bars){if(pLo==null||b[3]<pLo)pLo=b[3];if(pHi==null||b[2]>pHi)pHi=b[2];}}
+  // recorrido intradía (velas 5m), ALINEADO a la escala del plan: los niveles vienen de TradingView
+  // y las velas de Yahoo, con un desfase de pocos puntos; se corrige para que el final caiga en el
+  // precio actual y el trayecto cuadre con los niveles dibujados.
+  const bars=barsFor(sym);
+  const sh=(bars&&bars.length&&price!=null)?(price-bars[bars.length-1][4]):0;
+  let pLo=null,pHi=null;
+  if(bars){for(const b of bars){const l=b[3]+sh,h=b[2]+sh;if(pLo==null||l<pLo)pLo=l;if(pHi==null||h>pHi)pHi=h;}}
   let top=price+half,bot=price-half;
   if(pHi!=null){top=Math.max(top,pHi);bot=Math.min(bot,pLo);const pad=(top-bot)*0.07;top+=pad;bot-=pad;}
   const Y=(pp)=>PADT+(top-pp)/(top-bot)*(H-PADT-PADB);
   const clamp=(pp)=>pp>top?top:pp<bot?bot:pp;
-  const touched=(p)=>!!(bars&&bars.some(b=>b[3]<=p&&p<=b[2]));
+  const touched=(p)=>!!(bars&&bars.some(b=>(b[3]+sh)<=p&&p<=(b[2]+sh)));
   const sgc={GO:"--go",WAIT:"--wait",AVOID:"--avoid"}[(d.verdict&&d.verdict.signal)]||"--ember";
   let out=`<defs><linearGradient id="pd" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="rgba(224,138,60,.10)"/><stop offset="0.5" stop-color="rgba(0,0,0,0)"/>
@@ -435,16 +442,24 @@ function drawTerrain(d,symOver){
   if(bars&&bars.length>1){
     const t0=bars[0][0],tN=bars[bars.length-1][0],span=(tN-t0)||1;
     const xOf=(tt)=>x0+(tt-t0)/span*(x1-x0);endX=x1;
-    const pts=bars.map(b=>`${xOf(b[0]).toFixed(1)},${Y(clamp(b[4])).toFixed(1)}`).join(" ");
-    out+=`<polyline points="${pts}" fill="none" stroke="var(--fg2)" stroke-width="1.5" opacity=".9" stroke-linejoin="round" stroke-linecap="round"/>`;
-    const oy=Y(clamp(bars[0][1]));
+    // 1) sombra alto-bajo: la banda de mechas, para ver barridas que perforan un nivel y vuelven
+    const hiP=bars.map(b=>`${xOf(b[0]).toFixed(1)},${Y(clamp(b[2]+sh)).toFixed(1)}`);
+    const loP=bars.map(b=>`${xOf(b[0]).toFixed(1)},${Y(clamp(b[3]+sh)).toFixed(1)}`).reverse();
+    out+=`<polygon points="${hiP.concat(loP).join(' ')}" fill="var(--fg2)" opacity=".08"/>`;
+    // 2) la línea del cierre (se dibuja animada de la apertura al ahora)
+    const pts=bars.map(b=>`${xOf(b[0]).toFixed(1)},${Y(clamp(b[4]+sh)).toFixed(1)}`).join(" ");
+    out+=`<polyline class="ppath" points="${pts}" fill="none" stroke="var(--fg2)" stroke-width="1.6" opacity=".95" stroke-linejoin="round" stroke-linecap="round"/>`;
+    // apertura
+    const oy=Y(clamp(bars[0][1]+sh));
     out+=`<circle cx="${xOf(t0)}" cy="${oy}" r="3.2" fill="var(--ink)" stroke="var(--muted)" stroke-width="1.4"/>`;
     out+=`<text x="${xOf(t0)+7}" y="${oy-5}" fill="var(--muted)" font-family="var(--mono)" font-size="8.5" letter-spacing=".5">${LANG==="es"?"abrió":"open"}</text>`;
+    // 3) puntos de toque: el primer cruce del recorrido con cada nivel que tocó
+    kl.forEach(k=>{if(k.price>top||k.price<bot)return;for(const b of bars){if((b[3]+sh)<=k.price&&k.price<=(b[2]+sh)){out+=`<circle cx="${xOf(b[0]).toFixed(1)}" cy="${Y(clamp(k.price)).toFixed(1)}" r="2.6" fill="var(--ember)" opacity=".9"/>`;break;}}});
   }
-  // price marker (línea de nivel actual + punto "ahora" al final del recorrido)
+  // price marker (línea de nivel actual + punto "ahora" al final del recorrido, ya alineados)
   if(price!=null){const y=Y(clamp(price));
-    out+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="var(${sgc})" stroke-width="${endX>x0?1:2}" stroke-dasharray="${endX>x0?'4 4':'0'}" opacity="${endX>x0?.5:1}"/>
-      <circle cx="${endX}" cy="${Y(clamp(bars&&bars.length?bars[bars.length-1][4]:price))}" r="5" fill="var(${sgc})" filter="url(#glow)"/>`;
+    out+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="var(${sgc})" stroke-width="${endX>x0?1:2}" stroke-dasharray="${endX>x0?'4 4':'0'}" opacity="${endX>x0?.55:1}"/>
+      <circle cx="${endX}" cy="${y}" r="5" fill="var(${sgc})" filter="url(#glow)"/>`;
     R.push({yReal:y,text:`${t("now")} ${num(price)}`,color:"var(--fg)",size:12,weight:700,pc:sgc});}
   // resolve right-label collisions: stack with a minimum gap, guide line if nudged
   R.sort((a,b)=>a.yReal-b.yReal);
