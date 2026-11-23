@@ -103,6 +103,18 @@ export async function runCoach() {
   const failedAccts = [];
   let accounts = [];
   try { accounts = await listAccounts(); } catch (e) { return { ok: false, error: 'mfp: ' + e.message }; }
+  const totalAccounts = accounts.length;
+  // Solo escanear lo que importa hoy. listAccounts devuelve TODAS las cuentas no
+  // archivadas (status active|passed|failed|closed) y pueden ser cientos de retos
+  // viejos: escanearlas todas son cientos de llamadas por corrida, 429 y conteo que
+  // baila. Deja las ACTIVAS + cualquiera que ya opero hoy (por si una se rompio a
+  // media sesion y paso a failed/closed; sus trades del dia siguen contando).
+  const tradedToday = new Set();
+  if (prev._day === today) {
+    for (const t of (prev.todayTrades || [])) if (t.acct) tradedToday.add(t.acct);
+    for (const o of (prev.openPositions || [])) if (o.acct) tradedToday.add(o.acct);
+  }
+  accounts = accounts.filter((a) => a.status === 'active' || tradedToday.has(a.id));
 
   // Una cuenta flaky (429 / timeout) NO debe caer en silencio y encoger el conteo:
   // reintenta (respetando retry-after del 429) y, si aun falla, se rellena con lo
@@ -260,7 +272,7 @@ export async function runCoach() {
       maxLossStreak
     },
     offZone: { count: offZoneCount, pnl: Math.round(offZonePnl * 100) / 100, ofTrades: trades.length },
-    dataHealth: { accounts: accounts.length, ok: accounts.length - failedAccts.length, failed: failedAccts, partial: failedAccts.length > 0 },
+    dataHealth: { scanned: accounts.length, total: totalAccounts, ok: accounts.length - failedAccts.length, failed: failedAccts, partial: failedAccts.length > 0 },
     openFlags,
     todayTrades: trades,
     openPositions: openRows,
