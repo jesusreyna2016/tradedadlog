@@ -103,6 +103,15 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .aside .asrow{margin-bottom:9px;line-height:1.5}
 .aside .asrow b{color:var(--fg2);font-weight:600}
 .aside .adist{font-family:var(--mono);font-size:.82em;color:var(--faint);white-space:nowrap}
+.struct{margin:16px 0 0 16px;padding-top:14px;border-top:1px solid var(--line);max-width:54ch}
+.struct .k{font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:9px}
+.struct .sverdict{font-family:var(--body);font-size:.9rem;line-height:1.5;color:var(--fg2);margin-bottom:11px}
+.struct .schips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.struct .chip{font-family:var(--mono);font-size:.58rem;letter-spacing:.05em;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:3px 8px;display:inline-flex;gap:6px;align-items:center;white-space:nowrap}
+.struct .chip b{color:var(--fg2);font-weight:600}
+.struct .slast{font-family:var(--body);font-size:.82rem;color:var(--muted);line-height:1.5}
+.struct .slast b{color:var(--fg2);font-weight:600}
+.struct .up{color:var(--go)}.struct .dn{color:var(--avoid)}.struct .mid{color:var(--wait)}
 .aside b{color:var(--fg2)}
 
 /* ACT II — el terreno */
@@ -209,6 +218,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   <div class="healthline" id="healthline"></div>
   <p class="voice" id="voice"><span class="skel">leyendo el cerebro…</span></p>
   <div class="aside" id="aside"></div>
+  <div class="struct" id="structRead"></div>
 
   <div class="terrain-wrap">
     <div class="terrain-head"><h2 id="terrainTitle">El terreno</h2><span class="where" id="where"></span></div>
@@ -431,9 +441,57 @@ function firstSentence(s){s=String(s).trim();const m=s.match(/^[^.]{0,180}\./);l
   return out.replace(/(\d[\d.,]*)/g,'<span class="nums">$1</span>');}
 
 /* ACT I + focus render */
+// La estructura ahora: lee market.json.symbols[SYM].struct (Tier B: TDL_KL régimen/align/CISD
+// por TF + PO3 + último evento de nivel) y lo cuenta en una frase clara, chips y el último toque.
+function renderEstructura(sym){
+  const el=document.getElementById("structRead");if(!el)return;
+  const es=LANG==="es";
+  const m=S.market&&S.market.symbols&&S.market.symbols[sym];
+  const st=m&&m.struct;
+  if(!st||(!st.regime&&!st.align&&!st.po3&&!(st.lastLevelEvent&&st.lastLevelEvent.level))){el.innerHTML="";return;}
+  const REG={TREND_UP:[es?"tendencia al alza":"uptrend","up"],TREND_DOWN:[es?"tendencia a la baja":"downtrend","dn"],
+    CHOP:[es?"sin rumbo":"no trend","mid"],MIXED:[es?"mixto":"mixed","mid"]};
+  const ALI={ALIGNED_UP:[es?"todo apunta arriba":"everything points up","up"],
+    ALIGNED_DOWN:[es?"todo apunta abajo":"everything points down","dn"],
+    CISD_UP:[es?"giro alcista formándose":"bullish turn forming","mid"],
+    CISD_DOWN:[es?"giro bajista formándose":"bearish turn forming","mid"],
+    CHOP:[es?"sin alineación":"no alignment","mid"],MIXED:[es?"señales en desacuerdo":"signals disagree","mid"],
+    NONE:[es?"sin señal clara":"no clear signal","mid"]};
+  const PO3={ACCUMULATION:es?"acumulación":"accumulation",MANIPULATION:es?"manipulación (trampa)":"manipulation",
+    DISTRIBUTION:es?"distribución":"distribution",EXPANSION:es?"expansión":"expansion"};
+  const EVT={TOUCH:es?"toque":"touch",SWEEP:es?"barrido":"sweep",REJECT:es?"rechazo":"rejection",
+    ACCEPT_UP:es?"aceptó al alza":"accepted up",ACCEPT_DOWN:es?"aceptó a la baja":"accepted down",
+    RETEST:es?"retest":"retest",FAILED_BREAK:es?"ruptura fallida":"failed break",CROSS:es?"cruce":"cross"};
+  const reg=REG[st.regime]||(st.regime?[String(st.regime).toLowerCase(),"mid"]:null);
+  const ali=ALI[st.align]||(st.align?[String(st.align).toLowerCase().replace(/_/g," "),"mid"]:null);
+  const c=st.cisd||{};const dirs=[c.chart,c.h1,c.h2,c.h3].filter(v=>v===1||v===-1);
+  const up=dirs.filter(v=>v===1).length,dn=dirs.filter(v=>v===-1).length,nT=dirs.length;
+  const cap=s=>s?s[0].toUpperCase()+s.slice(1):s;
+  let verdict="";
+  if(ali){verdict=`<span class="${ali[1]}">${cap(ali[0])}</span>`;
+    if(nT){const side=up>=dn?(es?"arriba":"up"):(es?"abajo":"down");const n=Math.max(up,dn);
+      verdict+=es?`: los marcos coinciden ${side} (${n} de ${nT}).`:`: timeframes agree ${side} (${n} of ${nT}).`;}
+    else verdict+=".";}
+  else if(reg){verdict=`<span class="${reg[1]}">${cap(reg[0])}</span>.`;}
+  const arrow=v=>v===1?'<span class="up">▲</span>':v===-1?'<span class="dn">▼</span>':'<span class="mid">·</span>';
+  const chips=[];
+  if(st.regime&&reg)chips.push(`<span class="chip">${es?"régimen":"regime"} <b class="${reg[1]}">${reg[0]}</b></span>`);
+  if(nT)chips.push(`<span class="chip" title="${es?"CISD del marco corto al largo":"CISD short to long TF"}">CISD ${arrow(c.chart)}${arrow(c.h1)}${arrow(c.h2)}${arrow(c.h3)}</span>`);
+  if(st.po3&&PO3[st.po3]){const dd=st.po3Dir==="up"?' <span class="up">▲</span>':(st.po3Dir==="down"||st.po3Dir==="dn")?' <span class="dn">▼</span>':"";
+    chips.push(`<span class="chip">PO3 <b>${PO3[st.po3]}</b>${dd}</span>`);}
+  let last="";const le=st.lastLevelEvent;
+  if(le&&le.level){const ev=EVT[le.event]||String(le.event||"").toLowerCase().replace(/_/g," ");
+    const lvl=plainJargon(tr(le.level),es)||le.level;
+    const dist=(le.dist!=null&&!isNaN(+le.dist))?` ${es?"a":""} ${Math.abs(Math.round(+le.dist))} pts`:"";
+    last=es?`Último en los niveles: <b>${ev}</b> de ${lvl}${dist}.`:`Last at the levels: <b>${ev}</b> of ${lvl}${dist}.`;}
+  el.innerHTML=`<span class="k">${es?"la estructura ahora":"structure right now"}</span>`+
+    (verdict?`<div class="sverdict">${verdict}</div>`:"")+
+    (chips.length?`<div class="schips">${chips.join("")}</div>`:"")+
+    (last?`<div class="slast">${last}</div>`:"");
+}
 function renderFocus(){
   const p=S.plan;const d=inst(FOCUS);
-  renderPulso(FOCUS);renderGate(FOCUS);
+  renderPulso(FOCUS);renderGate(FOCUS);renderEstructura(FOCUS);
   const eb=document.getElementById("eyebrow"),dec=document.getElementById("decision"),vo=document.getElementById("voice"),
     dr=document.getElementById("decrip"),as=document.getElementById("aside");
   const hl=document.getElementById("healthline");
