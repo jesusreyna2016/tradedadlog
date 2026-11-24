@@ -196,6 +196,12 @@
   to = "/.netlify/functions/tos-edge"
   status = 200
 
+# Trader OS · captura manual de trades desde La Mesa (razon/emocion + imagen)
+[[redirects]]
+  from = "/api/tos-capture"
+  to = "/.netlify/functions/tos-capture"
+  status = 200
+
 # Trader OS · admin / limpieza puntual (purga de simbolos fantasma), protegido por secreto
 [[redirects]]
   from = "/api/tos-admin"
