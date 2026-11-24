@@ -11,11 +11,15 @@ export default async () => {
     const store = getStore('live');
     const snap = await store.get('snapshot', { type: 'json' }).catch(() => null);
     const open = (snap && snap.open) || {};
+    const accById = {};
+    for (const a of (snap && snap.accounts) || []) accById[a.id] = a;
     const positions = [];
     for (const acct of Object.keys(open)) {
+      const a = accById[acct] || {};
       for (const p of (open[acct] || [])) {
         positions.push({
-          acct, sym: familyOf(p.symbol), side: p.side || null,
+          acct, acctNo: a.number || null, stage: a.stage || null, name: a.name || null,
+          sym: familyOf(p.symbol), side: p.side || null,
           size: p.size ?? null, entry: p.entry ?? null,
           openedAt: p.openedAt ?? null, hadStop: !!p.stop
         });

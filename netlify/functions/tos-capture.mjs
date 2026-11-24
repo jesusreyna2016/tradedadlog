@@ -63,10 +63,11 @@ export default async (req) => {
   try {
     const snap = await getStore('live').get('snapshot', { type: 'json' });
     const open = (snap && snap.open) || {};
-    for (const a of Object.keys(open)) for (const p of (open[a] || [])) {
-      all.push({ openedAt: p.openedAt, sym: familyOf(p.symbol), side: p.side, entry: p.entry, acct: a });
+    const accById = {}; for (const a of (snap && snap.accounts) || []) accById[a.id] = a;
+    for (const a of Object.keys(open)) { const ac = accById[a] || {}; for (const p of (open[a] || [])) {
+      all.push({ openedAt: p.openedAt, sym: familyOf(p.symbol), side: p.side, entry: p.entry, acct: a, acctNo: ac.number || null, stage: ac.stage || null });
       openAts.add(+p.openedAt);
-    }
+    } }
   } catch { /* best-effort */ }
   const match = all.find((t) => +t.openedAt === openedAt);
   if (!match) return json({ ok: false, error: 'trade no encontrado hoy' }, 404);
@@ -95,6 +96,7 @@ export default async (req) => {
   const cap = {
     key, date, sym: match.sym || b.sym || null, side: match.side || b.side || null,
     entry: match.entry ?? b.entry ?? null, pnl: match.pnl ?? b.pnl ?? null,
+    acctNo: b.acctNo || match.acctNo || null, stage: b.stage || match.stage || null,
     openedAt, reason, emotion: emotion || null, checklist, atEntry: wasOpen, shot: shotRef,
     at: new Date().toISOString(), src: 'la-mesa'
   };
