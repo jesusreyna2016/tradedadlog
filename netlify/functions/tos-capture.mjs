@@ -12,6 +12,7 @@
 // que nadie pueda inyectar capturas sueltas. Sin secreto en la pagina publica.
 import { ghGet, ghPut } from './_gh-bus.mjs';
 import { getStore } from '@netlify/blobs';
+import { familyOf } from './_mfp.mjs';
 
 const OWNER = 'jesusreyna2016';
 const REPO = 'trader-os-bus';
@@ -56,6 +57,17 @@ export default async (req) => {
   let traderCur = null, tr = {};
   try { traderCur = await ghGet(OWNER, REPO, BRANCH, 'live/trader.json', { token }); tr = traderCur?.content ? JSON.parse(traderCur.content) : {}; } catch { tr = {}; }
   const all = [...(tr.todayTrades || []), ...(tr.openPositions || [])];
+  const openAts = new Set((tr.openPositions || []).map((o) => +o.openedAt));
+  // tambien el snapshot fresco de _live (abiertas de hace ~1 min): el trader.json del Coach va
+  // ~15 min atrasado, asi que una entrada recien abierta todavia no esta ahi pero SI aqui.
+  try {
+    const snap = await getStore('live').get('snapshot', { type: 'json' });
+    const open = (snap && snap.open) || {};
+    for (const a of Object.keys(open)) for (const p of (open[a] || [])) {
+      all.push({ openedAt: p.openedAt, sym: familyOf(p.symbol), side: p.side, entry: p.entry, acct: a });
+      openAts.add(+p.openedAt);
+    }
+  } catch { /* best-effort */ }
   const match = all.find((t) => +t.openedAt === openedAt);
   if (!match) return json({ ok: false, error: 'trade no encontrado hoy' }, 404);
   const acct = b.acct || match.acct || '';
@@ -78,7 +90,7 @@ export default async (req) => {
   // checklist de entrada (la regla entryOnlyIf: nivel + sesgo + gatillo). true/false/null.
   const tri = (v) => (v === true || v === false ? v : null);
   const checklist = { atLevel: tri(b.atLevel), withBias: tri(b.withBias), hadTrigger: tri(b.hadTrigger) };
-  const wasOpen = (tr.openPositions || []).some((o) => +o.openedAt === openedAt);
+  const wasOpen = openAts.has(openedAt);
 
   const cap = {
     key, date, sym: match.sym || b.sym || null, side: match.side || b.side || null,
