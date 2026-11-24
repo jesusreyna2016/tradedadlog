@@ -99,6 +99,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .voice .nums{font-family:var(--mono);font-size:.82em;color:var(--fg2)}
 .aside{font-family:var(--body);font-size:.84rem;color:var(--muted);margin-top:16px;padding-top:14px;border-top:1px solid var(--line);max-width:46ch}
 .aside .k{font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-right:8px}
+.aside .asrow{margin-bottom:9px;line-height:1.5}
+.aside .asrow b{color:var(--fg2);font-weight:600}
+.aside .adist{font-family:var(--mono);font-size:.82em;color:var(--faint);white-space:nowrap}
 .aside b{color:var(--fg2)}
 
 /* ACT II — el terreno */
@@ -456,11 +459,22 @@ function renderFocus(){
   hl.textContent=(sm&&sm[0]&&/^!!/.test(sm[0]))?sm[0].replace(/^!!\s*/,"⚠ "):"";
   vo.innerHTML=plainVoice(FOCUS,d);
   // aside: this instrument's own scenario + invalidation + the behavioral note for the focus
+  const es=LANG==="es";
+  const NF=v=>(v==null||isNaN(+v))?"·":Math.round(+v).toLocaleString("en-US");
+  const fr=pget(FOCUS);const px=fr?parseFloat(fr.close):NaN;
+  const dpts=(lo,hi)=>{if(isNaN(px)||lo==null)return null;if(hi!=null){const a=Math.min(lo,hi),b=Math.max(lo,hi);if(px>=a&&px<=b)return 0;return Math.round(Math.min(Math.abs(px-a),Math.abs(px-b)));}return Math.round(Math.abs(px-lo));};
+  const chip=(lo,hi)=>{const z=dpts(lo,hi);return z==null?"":` <span class="adist">${z===0?(es?"· aquí":"· here"):(es?"· a "+NF(z)+" pts":"· "+NF(z)+" pts away")}</span>`;};
+  const pj=s=>plainJargon(tr(s)||"",es);
   const bits=[];
-  if(d.scenarioA&&d.scenarioA.text)bits.push(`<span class="k">${LANG==="es"?"si acaso":"if anything"}</span>${gloss(tr(d.scenarioA.text))}`);
-  if(d.invalidation&&d.invalidation.text)bits.push(`<span class="k">${LANG==="es"?"invalida":"invalidates"}</span>${gloss(tr(d.invalidation.text))}`);
-  if(p.focus&&p.focus.sym===FOCUS&&p.focus.note)bits.push(`<span class="k" style="color:var(--avoid)">${LANG==="es"?"ojo":"heads up"}</span>${gloss(tr(p.focus.note))}`);
-  as.innerHTML=bits.map(b=>`<div style="margin-bottom:7px">${b}</div>`).join("")||"";
+  const sa=d.scenarioA||{},sb=d.scenarioB||{},iv=d.invalidation||{};
+  if(sa.trigger)bits.push(`<span class="k">${es?"el gatillo":"the trigger"}</span>${gloss(pj(sa.trigger))}`);
+  if(sa.entryZone&&sa.entryZone.length===2){const tgt=[sa.target,sa.target2].filter(x=>x!=null).map(NF).join(" / ");
+    bits.push(`<span class="k" style="color:var(--go)">${es?"si rechaza":"if it rejects"}</span>${es?"entra en":"enter"} <b>${NF(sa.entryZone[0])}-${NF(sa.entryZone[1])}</b>${chip(sa.entryZone[0],sa.entryZone[1])}${tgt?` → ${es?"objetivo":"target"} <b>${tgt}</b>`:""}`);}
+  if(sb.trigger||sb.text){const z=(sb.zone&&sb.zone.length===2)?` → <b>${NF(sb.zone[0])}-${NF(sb.zone[1])}</b>`:"";
+    bits.push(`<span class="k" style="color:var(--wait)">${es?"si rompe":"if it breaks"}</span>${gloss(pj(sb.trigger||sb.text))}${z}`);}
+  if(iv.text||iv.level){bits.push(`<span class="k" style="color:var(--avoid)">${es?"se acaba si":"it's over if"}</span>${gloss(pj(iv.text||""))}${iv.level?chip(iv.level):""}`);}
+  if(p.focus&&p.focus.sym===FOCUS&&p.focus.note)bits.push(`<span class="k" style="color:var(--avoid)">${es?"ojo":"heads up"}</span>${gloss(tr(p.focus.note))}`);
+  as.innerHTML=bits.map(b=>`<div class="asrow">${b}</div>`).join("")||"";
   drawTerrain(d);
 }
 function renderCryptoFocus(){
@@ -488,7 +502,7 @@ function drawTerrain(d,symOver){
   if(!d){svg.innerHTML="";where.className="where";where.textContent="";cap.textContent="";return;}
   const sym=symOver||FOCUS;
   // anchors
-  const kl=(d.keyLevels||[]).filter(k=>k&&k.price).map(k=>({name:plainJargon(tr(k.name),LANG==="es"),price:k.price}));
+  const kl=(d.keyLevels||[]).filter(k=>k&&k.price&&!/ema|vwap/i.test(tr(k.name)||"")).map(k=>({name:plainJargon(tr(k.name),LANG==="es"),price:k.price}));
   const seenZ=new Set();
   const zones=(d.zones||[]).filter(z=>z.range&&z.range.length===2).map(z=>({lo:Math.min(...z.range),hi:Math.max(...z.range),dir:z.dir,type:z.type}))
     .filter(z=>{const k=Math.round(z.lo)+"-"+Math.round(z.hi)+(z.type||"");if(seenZ.has(k))return false;seenZ.add(k);return true;});
@@ -804,7 +818,7 @@ function renderDisciplina(){
       const col=opens.length?"--go":"--ember",tc=opens.length?"--go":"--ember-soft";
       rv.innerHTML=`<button class="discreviewbtn" id="discReviewBtn" style="border-color:var(${col});color:var(${tc})"><span class="n" style="color:var(${col})">${pend.length}</span> ${lbl}</button>`;
       const b=document.getElementById("discReviewBtn");if(b)b.onclick=openCapQueue;}
-    else{rv.innerHTML=`<div class="discreviewdone">${es?"todas las entradas de hoy revisadas":"all of today's entries reviewed"}</div>`;}
+    else{rv.innerHTML=`<div class="discreviewdone">${es?"esperando tu próxima entrada":"waiting for your next entry"}</div>`;}
     const newOpen=opens.filter(o=>!CAPautoPopped.has(tkey(o)));
     if(newOpen.length&&document.getElementById("capModal").hidden){newOpen.forEach(o=>CAPautoPopped.add(tkey(o)));openCapQueue();}
   }
@@ -818,7 +832,9 @@ function tkey(t){return (t.acct?t.acct+":":"")+t.openedAt;}
 function capLS(k){try{return JSON.parse(localStorage.getItem(k)||"{}");}catch(e){return{};}}
 function capMark(store,date,key){const cur=capLS(store);const keys=cur.date===date?(cur.keys||[]):[];if(!keys.includes(key))keys.push(key);try{localStorage.setItem(store,JSON.stringify({date,keys}));}catch(e){}}
 function capSet(store,date){const o=capLS(store);return o.date===date?new Set(o.keys||[]):new Set();}
-function allTrades(){const c=S.coach&&!S.coach.__err?S.coach:null;if(!c)return{opens:[],closed:[],date:null};const date=c._day;const bus=new Set((c.captures||[]).map(x=>x.key));const done=capSet("mesa-cap-done",date),skip=capSet("mesa-cap-skip",date);const taken=k=>bus.has(k)||done.has(k)||skip.has(k);const opens=(c.openPositions||[]).filter(o=>o.openedAt&&!taken(tkey(o))).map(o=>({...o,_open:true}));const closed=(c.todayTrades||[]).filter(t=>t.openedAt&&!taken(tkey(t)));return{opens,closed,date};}
+// base de tiempo: la entrevista solo cuenta las entradas DESDE que abres La Mesa (no los trades viejos del dia)
+function capBaseline(date){const k="mesa-cap-base";const o=capLS(k);if(o.date===date&&typeof o.ts==="number")return o.ts;const ts=Date.now();try{localStorage.setItem(k,JSON.stringify({date,ts}));}catch(e){}return ts;}
+function allTrades(){const c=S.coach&&!S.coach.__err?S.coach:null;if(!c)return{opens:[],closed:[],date:null};const date=c._day;const base=capBaseline(date);const bus=new Set((c.captures||[]).map(x=>x.key));const done=capSet("mesa-cap-done",date),skip=capSet("mesa-cap-skip",date);const taken=k=>bus.has(k)||done.has(k)||skip.has(k);const opens=(c.openPositions||[]).filter(o=>o.openedAt&&o.openedAt>=base&&!taken(tkey(o))).map(o=>({...o,_open:true}));const closed=(c.todayTrades||[]).filter(t=>t.openedAt&&t.openedAt>=base&&!taken(tkey(t)));return{opens,closed,date};}
 function pendingCaps(){const r=allTrades();return [...r.opens,...r.closed];}
 let CAPq=[],CAPi=0,CAPsel=null,CAPshot=null,CAPchk={atLevel:null,withBias:null,hadTrigger:null};
 const CAPautoPopped=new Set();
