@@ -75,10 +75,15 @@ export default async (req) => {
     } catch (e) { /* la imagen es best-effort; sigue con el texto */ }
   }
 
+  // checklist de entrada (la regla entryOnlyIf: nivel + sesgo + gatillo). true/false/null.
+  const tri = (v) => (v === true || v === false ? v : null);
+  const checklist = { atLevel: tri(b.atLevel), withBias: tri(b.withBias), hadTrigger: tri(b.hadTrigger) };
+  const wasOpen = (tr.openPositions || []).some((o) => +o.openedAt === openedAt);
+
   const cap = {
     key, date, sym: match.sym || b.sym || null, side: match.side || b.side || null,
     entry: match.entry ?? b.entry ?? null, pnl: match.pnl ?? b.pnl ?? null,
-    openedAt, reason, emotion: emotion || null, shot: shotRef,
+    openedAt, reason, emotion: emotion || null, checklist, atEntry: wasOpen, shot: shotRef,
     at: new Date().toISOString(), src: 'la-mesa'
   };
 

@@ -80,6 +80,16 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .capsave{flex:1;background:var(--ember);border:0;color:#1a1206;border-radius:10px;padding:10px 16px;font-family:var(--body);font-weight:600;font-size:.9rem;cursor:pointer}
 .capsave:disabled{opacity:.5;cursor:default}
 .caperr{color:var(--avoid);font-size:.78rem;margin-top:9px;min-height:1em}
+.caphero{font-family:var(--disp);font-weight:600;font-size:1.15rem;margin:0 0 12px;letter-spacing:-.01em}
+.capchk{margin-bottom:13px}
+.capchkrow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
+.capchkrow:last-child{border-bottom:0}
+.capchkrow>span:first-child{font-size:.86rem;color:var(--fg2)}
+.capchkbtns{display:flex;gap:6px}
+.capchkbtns button{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--ink2);border:1px solid var(--line2);border-radius:7px;padding:5px 12px;cursor:pointer}
+.capchkbtns button.yes.on{background:var(--go);border-color:var(--go);color:#07120b;font-weight:600}
+.capchkbtns button.no.on{background:var(--avoid);border-color:var(--avoid);color:#1a0806;font-weight:600}
+.capopen{display:inline-block;font-family:var(--mono);font-size:.54rem;letter-spacing:.14em;text-transform:uppercase;color:var(--go);border:1px solid var(--go);border-radius:6px;padding:2px 7px;margin-left:7px;vertical-align:middle}
 .decrip{font-family:var(--mono);font-size:.7rem;color:var(--muted);text-align:right;padding-bottom:12px;white-space:nowrap}
 @media(max-width:620px){.decrip{text-align:left}}
 .voice{font-family:var(--disp);font-weight:400;font-size:clamp(1rem,2.2vw,1.2rem);line-height:1.5;color:var(--fg);
@@ -225,8 +235,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 <div class="capmodal" id="capModal" hidden>
   <div class="capcard" role="dialog" aria-modal="true" aria-label="revisar trade">
     <div class="caphead"><span id="capProg"></span><button class="capx" id="capClose" aria-label="cerrar">✕</button></div>
+    <h3 class="caphero" id="capHero">¿Por qué entraste?</h3>
     <div class="captrade" id="capTrade"></div>
-    <textarea id="capReason" rows="3" placeholder="¿Por qué entraste? ¿Qué sentías en ese momento?"></textarea>
+    <div class="capchk" id="capChk"></div>
+    <textarea id="capReason" rows="3" placeholder="¿Qué viste? ¿Qué sentías en ese momento?"></textarea>
     <div class="capemos" id="capEmos"></div>
     <div class="capshot">
       <label class="capshotbtn" for="capFile"><span id="capShotLbl">+ subir captura</span></label>
@@ -784,10 +796,18 @@ function renderDisciplina(){
   else{rev.style.display="none";rev.innerHTML="";}
   // cola de captura manual (anotar por qué entraste)
   const rv=document.getElementById("discReview");
-  if(rv){const pend=pendingCaps();
-    if(!Array.isArray(c.todayTrades)||!c.todayTrades.length){rv.innerHTML="";}
-    else if(pend.length){rv.innerHTML=`<button class="discreviewbtn" id="discReviewBtn"><span class="n">${pend.length}</span> ${es?"sin revisar · anota por qué entraste":"to review · log why you entered"}</button>`;const b=document.getElementById("discReviewBtn");if(b)b.onclick=openCapQueue;}
-    else{rv.innerHTML=`<div class="discreviewdone">${es?"todos los trades de hoy revisados":"all of today's trades reviewed"}</div>`;}}
+  if(rv){const at=allTrades(),opens=at.opens,pend=[...at.opens,...at.closed];
+    const hasTrades=(Array.isArray(c.todayTrades)&&c.todayTrades.length)||(Array.isArray(c.openPositions)&&c.openPositions.length);
+    if(!hasTrades){rv.innerHTML="";}
+    else if(pend.length){
+      const lbl=opens.length?(es?(opens.length===1?"operación abierta · di por qué entraste":"operaciones abiertas · di por qué entraste"):(opens.length===1?"open trade · log why you entered":"open trades · log why you entered")):(es?"sin revisar · anota por qué entraste":"to review · log why you entered");
+      const col=opens.length?"--go":"--ember",tc=opens.length?"--go":"--ember-soft";
+      rv.innerHTML=`<button class="discreviewbtn" id="discReviewBtn" style="border-color:var(${col});color:var(${tc})"><span class="n" style="color:var(${col})">${pend.length}</span> ${lbl}</button>`;
+      const b=document.getElementById("discReviewBtn");if(b)b.onclick=openCapQueue;}
+    else{rv.innerHTML=`<div class="discreviewdone">${es?"todas las entradas de hoy revisadas":"all of today's entries reviewed"}</div>`;}
+    const newOpen=opens.filter(o=>!CAPautoPopped.has(tkey(o)));
+    if(newOpen.length&&document.getElementById("capModal").hidden){newOpen.forEach(o=>CAPautoPopped.add(tkey(o)));openCapQueue();}
+  }
   box.hidden=false;meta.textContent=es?"tus cuentas · hoy":"your accounts · today";
 }
 
@@ -798,20 +818,31 @@ function tkey(t){return (t.acct?t.acct+":":"")+t.openedAt;}
 function capLS(k){try{return JSON.parse(localStorage.getItem(k)||"{}");}catch(e){return{};}}
 function capMark(store,date,key){const cur=capLS(store);const keys=cur.date===date?(cur.keys||[]):[];if(!keys.includes(key))keys.push(key);try{localStorage.setItem(store,JSON.stringify({date,keys}));}catch(e){}}
 function capSet(store,date){const o=capLS(store);return o.date===date?new Set(o.keys||[]):new Set();}
-function pendingCaps(){const c=S.coach&&!S.coach.__err?S.coach:null;if(!c||!Array.isArray(c.todayTrades))return[];const date=c._day;const bus=new Set((c.captures||[]).map(x=>x.key));const done=capSet("mesa-cap-done",date),skip=capSet("mesa-cap-skip",date);return c.todayTrades.filter(t=>t.openedAt&&!bus.has(tkey(t))&&!done.has(tkey(t))&&!skip.has(tkey(t)));}
-let CAPq=[],CAPi=0,CAPsel=null,CAPshot=null;
+function allTrades(){const c=S.coach&&!S.coach.__err?S.coach:null;if(!c)return{opens:[],closed:[],date:null};const date=c._day;const bus=new Set((c.captures||[]).map(x=>x.key));const done=capSet("mesa-cap-done",date),skip=capSet("mesa-cap-skip",date);const taken=k=>bus.has(k)||done.has(k)||skip.has(k);const opens=(c.openPositions||[]).filter(o=>o.openedAt&&!taken(tkey(o))).map(o=>({...o,_open:true}));const closed=(c.todayTrades||[]).filter(t=>t.openedAt&&!taken(tkey(t)));return{opens,closed,date};}
+function pendingCaps(){const r=allTrades();return [...r.opens,...r.closed];}
+let CAPq=[],CAPi=0,CAPsel=null,CAPshot=null,CAPchk={atLevel:null,withBias:null,hadTrigger:null};
+const CAPautoPopped=new Set();
 function openCapQueue(){CAPq=pendingCaps();if(!CAPq.length)return;CAPi=0;document.getElementById("capModal").hidden=false;renderCapStep();}
 function closeCapQueue(){document.getElementById("capModal").hidden=true;CAPshot=null;renderDisciplina();}
 function renderCapStep(){
   const es=LANG==="es";const t=CAPq[CAPi];
   if(!t){closeCapQueue();return;}
-  CAPsel=null;CAPshot=null;
-  document.getElementById("capProg").textContent=`${es?"revisar":"review"} ${CAPi+1} / ${CAPq.length}`;
+  CAPsel=null;CAPshot=null;CAPchk={atLevel:null,withBias:null,hadTrigger:null};
+  const open=!!t._open;
+  document.getElementById("capProg").textContent=`${es?(open?"entrevista":"revisar"):(open?"interview":"review")} ${CAPi+1} / ${CAPq.length}`;
+  document.getElementById("capHero").textContent=open?(es?"Acabas de entrar. ¿Por qué?":"You just entered. Why?"):(es?"¿Por qué entraste?":"Why did you enter?");
   const side=t.side==="long"?(es?"largo":"long"):(es?"corto":"short");
-  const pnl=t.pnl==null?"":(t.pnl<0?"-$":"+$")+Math.abs(Math.round(t.pnl));
   const tm=t.openedAt?new Date(t.openedAt).toLocaleTimeString(es?"es-MX":"en-US",{hour:"2-digit",minute:"2-digit"}):"";
-  const flags=(t.flags||[]).map(f=>capFlagName(f,es)).filter(Boolean);
-  document.getElementById("capTrade").innerHTML=`<b>${t.sym} ${side}</b> · ${t.entry!=null?(es?"entró ":"in ")+Math.round(t.entry):""}${t.exit!=null?" → "+Math.round(t.exit):""} · <span style="color:var(${t.pnl<0?"--avoid":"--go"})">${pnl}${t.r!=null?" ("+t.r+"R)":""}</span>${tm?" · "+tm:""}${flags.length?'<br><span style="color:var(--ember-soft)">'+flags.join(" · ")+"</span>":""}`;
+  let line;
+  if(open){const mins=t.openedAt?Math.max(0,Math.round((Date.now()-t.openedAt)/60000)):null;
+    line=`<b>${t.sym} ${side}</b>${t.entry!=null?" · "+(es?"entró ":"in ")+Math.round(t.entry):""} <span class="capopen">${es?"abierta":"open"}${mins!=null?" · "+mins+" min":""}</span>`;}
+  else{const pnl=t.pnl==null?"":(t.pnl<0?"-$":"+$")+Math.abs(Math.round(t.pnl));const flags=(t.flags||[]).map(f=>capFlagName(f,es)).filter(Boolean);
+    line=`<b>${t.sym} ${side}</b> · ${t.entry!=null?(es?"entró ":"in ")+Math.round(t.entry):""}${t.exit!=null?" → "+Math.round(t.exit):""} · <span style="color:var(${t.pnl<0?"--avoid":"--go"})">${pnl}${t.r!=null?" ("+t.r+"R)":""}</span>${tm?" · "+tm:""}${flags.length?'<br><span style="color:var(--ember-soft)">'+flags.join(" · ")+"</span>":""}`;}
+  document.getElementById("capTrade").innerHTML=line;
+  const CHK=[["atLevel",es?"¿En un nivel del plan?":"At a plan level?"],["withBias",es?"¿A favor del sesgo?":"With the bias?"],["hadTrigger",es?"¿Había un gatillo?":"Was there a trigger?"]];
+  const chk=document.getElementById("capChk");
+  chk.innerHTML=CHK.map(c=>`<div class="capchkrow"><span>${c[1]}</span><span class="capchkbtns"><button class="yes" data-c="${c[0]}" data-v="1">${es?"sí":"yes"}</button><button class="no" data-c="${c[0]}" data-v="0">no</button></span></div>`).join("");
+  chk.querySelectorAll("button").forEach(b=>b.onclick=()=>{const k=b.dataset.c,v=b.dataset.v==="1";CAPchk[k]=CAPchk[k]===v?null:v;chk.querySelectorAll(`button[data-c="${k}"]`).forEach(x=>x.classList.toggle("on",CAPchk[k]!==null&&(x.dataset.v==="1")===CAPchk[k]));});
   document.getElementById("capReason").value="";
   const emo=document.getElementById("capEmos");
   emo.innerHTML=EMOS.map(e=>`<button class="capemo" data-e="${e[0]}">${es?e[1]:e[2]}</button>`).join("");
@@ -828,7 +859,7 @@ async function saveCap(){
   if(!reason&&!CAPsel){document.getElementById("capErr").textContent=es?"escribe el porqué o elige una emoción":"add a reason or pick an emotion";return;}
   const btn=document.getElementById("capSave");btn.disabled=true;btn.textContent=es?"guardando…":"saving…";
   try{
-    const r=await fetch("/api/tos-capture",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({acct:t.acct,openedAt:t.openedAt,date:S.coach._day,sym:t.sym,side:t.side,entry:t.entry,pnl:t.pnl,reason,emotion:CAPsel||"",shot:CAPshot||undefined})});
+    const r=await fetch("/api/tos-capture",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({acct:t.acct,openedAt:t.openedAt,date:S.coach._day,sym:t.sym,side:t.side,entry:t.entry,pnl:t.pnl,reason,emotion:CAPsel||"",atLevel:CAPchk.atLevel,withBias:CAPchk.withBias,hadTrigger:CAPchk.hadTrigger,shot:CAPshot||undefined})});
     const j=await r.json();if(!j.ok)throw new Error(j.error||"error");
     capMark("mesa-cap-done",S.coach._day,tkey(t));CAPi++;renderCapStep();
   }catch(e){document.getElementById("capErr").textContent=(es?"no se guardó: ":"not saved: ")+String(e.message||e);}
