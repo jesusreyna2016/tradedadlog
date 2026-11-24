@@ -53,7 +53,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .decision.d-GO{color:var(--go)}.decision.d-WAIT{color:var(--wait)}.decision.d-AVOID{color:var(--avoid)}
 .decision.d-REST{color:var(--faint);font-weight:600;font-size:clamp(1.7rem,4.5vw,2.4rem)}
 .decision.d-LOCK{color:var(--muted);font-weight:900;font-size:clamp(1.8rem,4.8vw,2.6rem);opacity:.85}
-.healthline{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;line-height:1.4;color:var(--wait);margin:2px 0 0;max-width:52ch}
+.healthline{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;line-height:1.4;color:var(--wait);margin:2px 0 0 16px;max-width:52ch}
 .discrev{font-family:var(--body);font-size:.9rem;line-height:1.55;color:var(--fg2);margin-top:16px;padding:14px 17px;border:1px solid var(--line);border-radius:14px;background:var(--ink2)}
 .discrev .k{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:9px}
 .discrev .v{color:var(--avoid);font-weight:600}
@@ -93,11 +93,11 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .decrip{font-family:var(--mono);font-size:.7rem;color:var(--muted);text-align:right;padding-bottom:12px;white-space:nowrap}
 @media(max-width:620px){.decrip{text-align:left}}
 .voice{font-family:var(--disp);font-weight:400;font-size:clamp(1rem,2.2vw,1.2rem);line-height:1.5;color:var(--fg);
-  max-width:46ch;margin:14px 0 0;text-wrap:pretty}
+  max-width:46ch;margin:14px 0 0 16px;text-wrap:pretty}
 .voice .hl{color:var(--ember-soft);font-weight:600}
 .voice .warn{color:var(--avoid);font-weight:600}
 .voice .nums{font-family:var(--mono);font-size:.82em;color:var(--fg2)}
-.aside{font-family:var(--body);font-size:.84rem;color:var(--muted);margin-top:16px;padding-top:14px;border-top:1px solid var(--line);max-width:46ch}
+.aside{font-family:var(--body);font-size:.84rem;color:var(--muted);margin:16px 0 0 16px;padding-top:14px;border-top:1px solid var(--line);max-width:46ch}
 .aside .k{font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-right:8px}
 .aside .asrow{margin-bottom:9px;line-height:1.5}
 .aside .asrow b{color:var(--fg2);font-weight:600}
@@ -834,7 +834,7 @@ function capMark(store,date,key){const cur=capLS(store);const keys=cur.date===da
 function capSet(store,date){const o=capLS(store);return o.date===date?new Set(o.keys||[]):new Set();}
 // base de tiempo: la entrevista solo cuenta las entradas DESDE que abres La Mesa (no los trades viejos del dia)
 function capBaseline(date){const k="mesa-cap-base";const o=capLS(k);if(o.date===date&&typeof o.ts==="number")return o.ts;const ts=Date.now();try{localStorage.setItem(k,JSON.stringify({date,ts}));}catch(e){}return ts;}
-function allTrades(){const c=S.coach&&!S.coach.__err?S.coach:null;if(!c)return{opens:[],closed:[],date:null};const date=c._day;const base=capBaseline(date);const bus=new Set((c.captures||[]).map(x=>x.key));const done=capSet("mesa-cap-done",date),skip=capSet("mesa-cap-skip",date);const taken=k=>bus.has(k)||done.has(k)||skip.has(k);const opens=(c.openPositions||[]).filter(o=>o.openedAt&&o.openedAt>=base&&!taken(tkey(o))).map(o=>({...o,_open:true}));const closed=(c.todayTrades||[]).filter(t=>t.openedAt&&t.openedAt>=base&&!taken(tkey(t)));return{opens,closed,date};}
+function allTrades(){const c=S.coach&&!S.coach.__err?S.coach:null;if(!c)return{opens:[],closed:[],date:null};const date=c._day;const base=capBaseline(date);const bus=new Set((c.captures||[]).map(x=>x.key));const done=capSet("mesa-cap-done",date),skip=capSet("mesa-cap-skip",date);const taken=k=>bus.has(k)||done.has(k)||skip.has(k);const openSrc=(S.opennow&&Array.isArray(S.opennow.positions))?S.opennow.positions:(c.openPositions||[]);const opens=openSrc.filter(o=>o.openedAt&&o.openedAt>=base&&!taken(tkey(o))).map(o=>({...o,_open:true}));const closed=(c.todayTrades||[]).filter(t=>t.openedAt&&t.openedAt>=base&&!taken(tkey(t)));return{opens,closed,date};}
 function pendingCaps(){const r=allTrades();return [...r.opens,...r.closed];}
 let CAPq=[],CAPi=0,CAPsel=null,CAPshot=null,CAPchk={atLevel:null,withBias:null,hadTrigger:null};
 const CAPautoPopped=new Set();
@@ -902,17 +902,18 @@ document.getElementById("es").setAttribute("aria-pressed",LANG==="es");document.
    cuando no hay datos nuevos). Conserva el instrumento que elegiste. */
 let LAST_SIG="",LAST_PLAN="",FIRST=true;
 function stampOf(o){if(!o||o.__err)return"";for(const f of["_updatedAt","generatedAt","builtAt","checkedAt","lastRun","asOf","updatedAt"]){if(o[f])return String(o[f]);}return"";}
-function sigOf(){return [S.plan,S.sa,S.coach,S.market,S.crypto,S.parity,S.health,S.edge,S.bars,S.feeds].map(stampOf).join("|");}
+function sigOf(){return [S.plan,S.sa,S.coach,S.market,S.crypto,S.parity,S.health,S.edge,S.bars,S.feeds].map(stampOf).join("|")+"|"+(S.opennow?S.opennow.asOf+":"+(S.opennow.positions||[]).length:"-");}
 function flashFresh(){const el=document.getElementById("liveTxt");if(!el)return;el.classList.remove("fresh");void el.offsetWidth;el.classList.add("fresh");}
 async function loadCal(){const cs=await getJSON(TOS+"/state/contexto-state.json");if(cs&&!cs.__err&&cs.scorecard){S.cal=cs.scorecard;renderConf();}}
 async function load(){
   const barsDate=new Date().toISOString().slice(0,10);
-  const [plan,sa,coach,market,crypto,parity,health,edge,bars,feeds]=await Promise.all([
+  const [plan,sa,coach,market,crypto,parity,health,edge,bars,feeds,opennow]=await Promise.all([
     getJSON(TOS+"/live/plan.json"),getJSON(SA+"/plans/latest.json"),getJSON(TOS+"/live/trader.json"),
     getJSON(TOS+"/live/market.json"),getJSON(TOS+"/plans/crypto-latest.json"),getJSON(TOS+"/live/parity.json"),
     getJSON(TOS+"/live/health.json"),getJSON(TOS+"/live/edge.json"),getJSON(TOS+"/bars/"+barsDate+".json"),
-    getJSON(TOS+"/live/feeds.json")]);
+    getJSON(TOS+"/live/feeds.json"),getJSON("/api/tos-open")]);
   S.bars=bars&&!bars.__err?bars:null;S.feeds=feeds&&!feeds.__err?feeds:null;
+  S.opennow=(opennow&&!opennow.__err&&Array.isArray(opennow.positions))?opennow:null;
   let pl=plan;SAMPLE=false;
   if((!pl||pl.__err)&&typeof PLAN_SEED!=="undefined"){pl=PLAN_SEED;SAMPLE=true;}
   let sap=sa;if((!sap||sap.__err)&&typeof SA_SEED!=="undefined")sap=SA_SEED;

@@ -202,6 +202,12 @@
   to = "/.netlify/functions/tos-capture"
   status = 200
 
+# Trader OS · posiciones abiertas en vivo (feed de 1 min para la entrevista de La Mesa)
+[[redirects]]
+  from = "/api/tos-open"
+  to = "/.netlify/functions/tos-open"
+  status = 200
+
 # Trader OS · admin / limpieza puntual (purga de simbolos fantasma), protegido por secreto
 [[redirects]]
   from = "/api/tos-admin"
