@@ -112,6 +112,20 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .struct .slast{font-family:var(--body);font-size:.82rem;color:var(--muted);line-height:1.5}
 .struct .slast b{color:var(--fg2);font-weight:600}
 .struct .up{color:var(--go)}.struct .dn{color:var(--avoid)}.struct .mid{color:var(--wait)}
+.stakes{margin:38px 0 0}
+.stakes .risklead{display:flex;align-items:center;gap:13px;margin-bottom:4px;flex-wrap:wrap}
+.stakes .rlevel{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;border-radius:7px;padding:5px 11px;border:1px solid;white-space:nowrap}
+.stakes .rnote{font-size:.9rem;color:var(--fg2);line-height:1.5;flex:1;min-width:220px}
+.stakes .sblock{border-top:1px solid var(--line);padding-top:13px;margin-top:14px}
+.stakes .sk{font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:9px;display:block}
+.stakes .driver{margin-bottom:12px}.stakes .driver:last-child{margin-bottom:0}
+.stakes .dhead{font-family:var(--body);font-weight:600;color:var(--fg2);font-size:.88rem;line-height:1.45}
+.stakes .dnote{font-size:.84rem;color:var(--muted);line-height:1.5}
+.stakes .dmeta{font-family:var(--mono);font-size:.56rem;letter-spacing:.06em;color:var(--faint)}
+.stakes .sline{font-size:.86rem;color:var(--muted);line-height:1.55;max-width:62ch}
+.stakes .personal{border:1px solid var(--line);border-left:3px solid var(--ember);border-radius:10px;padding:13px 15px;background:var(--ink2);margin-top:16px}
+.stakes .personal .sline{color:var(--fg2)}
+.stakes .up{color:var(--go)}.stakes .dn{color:var(--avoid)}.stakes .warn{color:var(--wait)}
 .aside b{color:var(--fg2)}
 
 /* ACT II — el terreno */
@@ -224,6 +238,11 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <div class="terrain-head"><h2 id="terrainTitle">El terreno</h2><span class="where" id="where"></span></div>
     <svg id="terrain" viewBox="0 0 820 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="mapa de precio"></svg>
     <div class="tcaption" id="tcaption"></div>
+  </div>
+
+  <div class="stakes" id="stakes" hidden>
+    <div class="pulso-head"><h2 id="stakesTitle">¿Qué está en juego hoy?</h2><span id="stakesMeta"></span></div>
+    <div id="stakesBody"></div>
   </div>
 
   <div class="pulso" id="pulso" hidden>
@@ -489,9 +508,52 @@ function renderEstructura(sym){
     (chips.length?`<div class="schips">${chips.join("")}</div>`:"")+
     (last?`<div class="slast">${last}</div>`:"");
 }
+// ¿Qué está en juego hoy?: brief macro del día compuesto por el cerebro (plan.json), en llano.
+// newsRisk (nivel + nota) · calendarContext · macroContext.drivers (titulares reales + a qué afectan)
+// · crossAsset (VIX/DXY/bonos) · dayThesis[símbolo] · personal (nota de conducta del día).
+function renderStakes(){
+  const el=document.getElementById("stakes");if(!el)return;
+  const body=document.getElementById("stakesBody");const p=S.plan;const es=LANG==="es";
+  if(!p||p.__err){el.hidden=true;return;}
+  const noteTxt=o=>{if(!o)return"";const n=o.note||o.notes;return (n&&(n[LANG]||n.es||n.en))||"";};
+  const nr=p.newsRisk||{},mc=p.macroContext||{},cc=p.calendarContext||{};
+  const dt=p.dayThesis&&p.dayThesis[FOCUS];const per=p.personal||{};
+  const lvl=nr.level||mc.risk||null;
+  const drv=(mc.drivers||[]).slice(0,3);
+  const dtt=dt&&(dt[LANG]||dt.es||dt.en);
+  const pnote=noteTxt(per),cap=per.capLine&&(per.capLine[LANG]||per.capLine.es||per.capLine.en);
+  if(!lvl&&!noteTxt(nr)&&!noteTxt(cc)&&!drv.length&&!dtt&&!pnote){el.hidden=true;return;}
+  el.hidden=false;
+  const ttl=document.getElementById("stakesTitle");if(ttl)ttl.textContent=es?"¿Qué está en juego hoy?":"What's at stake today?";
+  const RL={ALTA:["dn",es?"riesgo alto":"high risk"],ALTO:["dn",es?"riesgo alto":"high risk"],HIGH:["dn","high risk"],
+    MEDIA:["warn",es?"riesgo medio":"medium risk"],MEDIO:["warn",es?"riesgo medio":"medium risk"],MEDIUM:["warn","medium risk"],
+    BAJA:["up",es?"riesgo bajo":"low risk"],BAJO:["up",es?"riesgo bajo":"low risk"],LOW:["up","low risk"]};
+  const col={dn:"--avoid",warn:"--wait",up:"--go"};
+  const rl=RL[String(lvl||"").toUpperCase()];
+  let h="";
+  h+=`<div class="risklead">`;
+  if(rl)h+=`<span class="rlevel" style="color:var(${col[rl[0]]});border-color:var(${col[rl[0]]})">${rl[1]}</span>`;
+  if(noteTxt(nr))h+=`<span class="rnote">${noteTxt(nr)}</span>`;
+  h+=`</div>`;
+  if(noteTxt(cc))h+=`<div class="sblock"><span class="sk">${es?"calendario":"calendar"}</span><div class="sline">${noteTxt(cc)}</div></div>`;
+  if(drv.length){h+=`<div class="sblock"><span class="sk">${es?"qué mueve el mercado":"what's moving the market"}</span>`;
+    for(const d of drv){const dn=noteTxt(d);const aff=(d.affects||[]).join(" · ");
+      const dir=d.dir==="risk-off"?`<span class="dn">${es?"presiona abajo":"risk-off"}</span>`:d.dir==="risk-on"?`<span class="up">${es?"empuja arriba":"risk-on"}</span>`:"";
+      const ago=d.ageH!=null?Math.round(d.ageH)+"h":"";
+      h+=`<div class="driver"><span class="dhead">${d.headline||d.theme||""}</span> <span class="dmeta">${[d.source,ago].filter(Boolean).join(" · ")}</span>`+
+        (dn?`<div class="dnote">${dn}</div>`:"")+
+        ((dir||aff)?`<div class="dmeta">${[dir,aff].filter(Boolean).join(" · ")}</div>`:"")+`</div>`;}
+    h+=`</div>`;}
+  if(noteTxt(mc.crossAsset))h+=`<div class="sblock"><span class="sk">${es?"otros mercados":"cross-asset"}</span><div class="sline">${noteTxt(mc.crossAsset)}</div></div>`;
+  if(dtt)h+=`<div class="sblock"><span class="sk">${es?"la tesis de hoy":"today's thesis"} · ${FOCUS}</span><div class="sline">${gloss(dtt)}</div></div>`;
+  if(pnote||cap)h+=`<div class="personal"><span class="sk" style="color:var(--ember-soft)">${es?"para ti hoy":"for you today"}</span>`+
+    (pnote?`<div class="sline">${pnote}</div>`:"")+(cap?`<div class="sline" style="margin-top:7px;color:var(--muted)">${cap}</div>`:"")+`</div>`;
+  body.innerHTML=h;
+  const meta=document.getElementById("stakesMeta");if(meta)meta.textContent=es?"antes de operar":"before you trade";
+}
 function renderFocus(){
   const p=S.plan;const d=inst(FOCUS);
-  renderPulso(FOCUS);renderGate(FOCUS);renderEstructura(FOCUS);
+  renderPulso(FOCUS);renderGate(FOCUS);renderEstructura(FOCUS);renderStakes();
   const eb=document.getElementById("eyebrow"),dec=document.getElementById("decision"),vo=document.getElementById("voice"),
     dr=document.getElementById("decrip"),as=document.getElementById("aside");
   const hl=document.getElementById("healthline");
