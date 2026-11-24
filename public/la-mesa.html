@@ -57,6 +57,29 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .discrev{font-family:var(--body);font-size:.9rem;line-height:1.55;color:var(--fg2);margin-top:16px;padding:14px 17px;border:1px solid var(--line);border-radius:14px;background:var(--ink2)}
 .discrev .k{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:9px}
 .discrev .v{color:var(--avoid);font-weight:600}
+.discreview{margin-top:16px}
+.discreviewbtn{width:100%;background:var(--ink2);border:1px solid var(--ember);color:var(--ember-soft);border-radius:12px;padding:13px;font-family:var(--body);font-size:.92rem;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px}
+.discreviewbtn .n{font-family:var(--disp);font-weight:900;font-size:1.15rem;color:var(--ember)}
+.discreviewdone{margin-top:16px;font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);text-align:center}
+.capmodal{position:fixed;inset:0;background:rgba(6,5,4,.8);display:flex;align-items:center;justify-content:center;z-index:50;padding:18px}
+.capmodal[hidden]{display:none}
+.capcard{background:var(--panel);border:1px solid var(--line2);border-radius:16px;max-width:460px;width:100%;padding:20px 20px 18px;max-height:92vh;overflow:auto}
+.caphead{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:13px}
+.capx{background:none;border:0;color:var(--muted);font-size:1rem;cursor:pointer;padding:4px;line-height:1}
+.captrade{font-family:var(--mono);font-size:.8rem;color:var(--fg2);background:var(--ink2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:14px;line-height:1.55}
+#capReason{width:100%;background:var(--ink);border:1px solid var(--line2);border-radius:10px;color:var(--fg);font-family:var(--body);font-size:.92rem;padding:11px 12px;resize:vertical;box-sizing:border-box}
+#capReason:focus{outline:none;border-color:var(--ember)}
+.capemos{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.capemo{font-family:var(--mono);font-size:.66rem;letter-spacing:.04em;text-transform:uppercase;color:var(--fg2);background:var(--ink2);border:1px solid var(--line2);border-radius:999px;padding:6px 12px;cursor:pointer}
+.capemo.on{background:var(--ember);border-color:var(--ember);color:#1a1206;font-weight:600}
+.capshot{margin-top:13px;display:flex;align-items:center;gap:12px}
+.capshotbtn{font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ember-soft);border:1px dashed var(--line2);border-radius:10px;padding:9px 13px;cursor:pointer}
+#capShotPrev{max-height:52px;border-radius:8px;border:1px solid var(--line)}
+.capacts{display:flex;gap:10px;margin-top:16px}
+.capskip{flex:none;background:none;border:1px solid var(--line2);color:var(--muted);border-radius:10px;padding:10px 16px;font-family:var(--body);font-size:.85rem;cursor:pointer}
+.capsave{flex:1;background:var(--ember);border:0;color:#1a1206;border-radius:10px;padding:10px 16px;font-family:var(--body);font-weight:600;font-size:.9rem;cursor:pointer}
+.capsave:disabled{opacity:.5;cursor:default}
+.caperr{color:var(--avoid);font-size:.78rem;margin-top:9px;min-height:1em}
 .decrip{font-family:var(--mono);font-size:.7rem;color:var(--muted);text-align:right;padding-bottom:12px;white-space:nowrap}
 @media(max-width:620px){.decrip{text-align:left}}
 .voice{font-family:var(--disp);font-weight:400;font-size:clamp(1rem,2.2vw,1.2rem);line-height:1.5;color:var(--fg);
@@ -192,10 +215,27 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   <div class="pulso" id="disc" hidden>
     <div class="pulso-head"><h2 id="discTitle">¿Cómo vas hoy?</h2><span id="discMeta"></span></div>
     <div class="pulso-grid" id="discGrid"></div>
+    <div class="discreview" id="discReview"></div>
     <div class="discrev" id="discRev" style="display:none"></div>
   </div>
 
   <div class="foot" id="foot"></div>
+</div>
+
+<div class="capmodal" id="capModal" hidden>
+  <div class="capcard" role="dialog" aria-modal="true" aria-label="revisar trade">
+    <div class="caphead"><span id="capProg"></span><button class="capx" id="capClose" aria-label="cerrar">✕</button></div>
+    <div class="captrade" id="capTrade"></div>
+    <textarea id="capReason" rows="3" placeholder="¿Por qué entraste? ¿Qué sentías en ese momento?"></textarea>
+    <div class="capemos" id="capEmos"></div>
+    <div class="capshot">
+      <label class="capshotbtn" for="capFile"><span id="capShotLbl">+ subir captura</span></label>
+      <input type="file" id="capFile" accept="image/*" hidden>
+      <img id="capShotPrev" alt="" hidden>
+    </div>
+    <div class="capacts"><button class="capskip" id="capSkip">Omitir</button><button class="capsave" id="capSave">Guardar y siguiente</button></div>
+    <div class="caperr" id="capErr"></div>
+  </div>
 </div>
 
 <script>
@@ -742,7 +782,65 @@ function renderDisciplina(){
   if(lr&&lr.headline){const hd=String(lr.headline).replace(/\*\*/g,"").replace(/^#+\s*/,"");
     rev.style.display="";rev.innerHTML=`<span class="k">${es?"Última autopsia":"Last review"} · ${lr.date||""}</span>${gloss(hd)}`;}
   else{rev.style.display="none";rev.innerHTML="";}
+  // cola de captura manual (anotar por qué entraste)
+  const rv=document.getElementById("discReview");
+  if(rv){const pend=pendingCaps();
+    if(!Array.isArray(c.todayTrades)||!c.todayTrades.length){rv.innerHTML="";}
+    else if(pend.length){rv.innerHTML=`<button class="discreviewbtn" id="discReviewBtn"><span class="n">${pend.length}</span> ${es?"sin revisar · anota por qué entraste":"to review · log why you entered"}</button>`;const b=document.getElementById("discReviewBtn");if(b)b.onclick=openCapQueue;}
+    else{rv.innerHTML=`<div class="discreviewdone">${es?"todos los trades de hoy revisados":"all of today's trades reviewed"}</div>`;}}
   box.hidden=false;meta.textContent=es?"tus cuentas · hoy":"your accounts · today";
+}
+
+/* captura manual: cola de trades para anotar razon/emocion (+captura de imagen) */
+const EMOS=[["calma","Calma","Calm"],["fomo","Se me escapa","FOMO"],["venganza","Venganza","Revenge"],["aburrimiento","Aburrido","Bored"],["miedo","Miedo","Fear"],["euforia","Euforia","Euphoria"]];
+function capFlagName(f,es){return ({R1_REVENGE:es?"venganza":"revenge",OVER_MAX_TRADES:es?"de más":"over cap",DAY_STOP_HIT:es?"pasó el stop":"past day stop",NO_STOP:es?"sin stop":"no stop",NO_ZONE:es?"fuera de zona":"out of zone"})[f]||"";}
+function tkey(t){return (t.acct?t.acct+":":"")+t.openedAt;}
+function capLS(k){try{return JSON.parse(localStorage.getItem(k)||"{}");}catch(e){return{};}}
+function capMark(store,date,key){const cur=capLS(store);const keys=cur.date===date?(cur.keys||[]):[];if(!keys.includes(key))keys.push(key);try{localStorage.setItem(store,JSON.stringify({date,keys}));}catch(e){}}
+function capSet(store,date){const o=capLS(store);return o.date===date?new Set(o.keys||[]):new Set();}
+function pendingCaps(){const c=S.coach&&!S.coach.__err?S.coach:null;if(!c||!Array.isArray(c.todayTrades))return[];const date=c._day;const bus=new Set((c.captures||[]).map(x=>x.key));const done=capSet("mesa-cap-done",date),skip=capSet("mesa-cap-skip",date);return c.todayTrades.filter(t=>t.openedAt&&!bus.has(tkey(t))&&!done.has(tkey(t))&&!skip.has(tkey(t)));}
+let CAPq=[],CAPi=0,CAPsel=null,CAPshot=null;
+function openCapQueue(){CAPq=pendingCaps();if(!CAPq.length)return;CAPi=0;document.getElementById("capModal").hidden=false;renderCapStep();}
+function closeCapQueue(){document.getElementById("capModal").hidden=true;CAPshot=null;renderDisciplina();}
+function renderCapStep(){
+  const es=LANG==="es";const t=CAPq[CAPi];
+  if(!t){closeCapQueue();return;}
+  CAPsel=null;CAPshot=null;
+  document.getElementById("capProg").textContent=`${es?"revisar":"review"} ${CAPi+1} / ${CAPq.length}`;
+  const side=t.side==="long"?(es?"largo":"long"):(es?"corto":"short");
+  const pnl=t.pnl==null?"":(t.pnl<0?"-$":"+$")+Math.abs(Math.round(t.pnl));
+  const tm=t.openedAt?new Date(t.openedAt).toLocaleTimeString(es?"es-MX":"en-US",{hour:"2-digit",minute:"2-digit"}):"";
+  const flags=(t.flags||[]).map(f=>capFlagName(f,es)).filter(Boolean);
+  document.getElementById("capTrade").innerHTML=`<b>${t.sym} ${side}</b> · ${t.entry!=null?(es?"entró ":"in ")+Math.round(t.entry):""}${t.exit!=null?" → "+Math.round(t.exit):""} · <span style="color:var(${t.pnl<0?"--avoid":"--go"})">${pnl}${t.r!=null?" ("+t.r+"R)":""}</span>${tm?" · "+tm:""}${flags.length?'<br><span style="color:var(--ember-soft)">'+flags.join(" · ")+"</span>":""}`;
+  document.getElementById("capReason").value="";
+  const emo=document.getElementById("capEmos");
+  emo.innerHTML=EMOS.map(e=>`<button class="capemo" data-e="${e[0]}">${es?e[1]:e[2]}</button>`).join("");
+  emo.querySelectorAll(".capemo").forEach(b=>b.onclick=()=>{CAPsel=CAPsel===b.dataset.e?null:b.dataset.e;emo.querySelectorAll(".capemo").forEach(x=>x.classList.toggle("on",x.dataset.e===CAPsel));});
+  const prev=document.getElementById("capShotPrev");prev.hidden=true;prev.src="";
+  document.getElementById("capShotLbl").textContent=es?"+ subir captura":"+ add screenshot";
+  document.getElementById("capErr").textContent="";
+}
+function capDownscale(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const max=1280;let w=img.width,h=img.height;if(w>max||h>max){const s=max/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s);}const cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);res(cv.toDataURL("image/jpeg",0.72));};img.onerror=rej;img.src=r.result;};r.onerror=rej;r.readAsDataURL(file);});}
+async function onCapFile(ev){const f=ev.target.files&&ev.target.files[0];if(!f)return;const es=LANG==="es";try{CAPshot=await capDownscale(f);const prev=document.getElementById("capShotPrev");prev.src=CAPshot;prev.hidden=false;document.getElementById("capShotLbl").textContent=es?"captura lista ✓":"screenshot ready ✓";}catch(e){document.getElementById("capErr").textContent=es?"no pude leer la imagen":"could not read image";}}
+async function saveCap(){
+  const es=LANG==="es";const t=CAPq[CAPi];if(!t)return;
+  const reason=document.getElementById("capReason").value.trim();
+  if(!reason&&!CAPsel){document.getElementById("capErr").textContent=es?"escribe el porqué o elige una emoción":"add a reason or pick an emotion";return;}
+  const btn=document.getElementById("capSave");btn.disabled=true;btn.textContent=es?"guardando…":"saving…";
+  try{
+    const r=await fetch("/api/tos-capture",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({acct:t.acct,openedAt:t.openedAt,date:S.coach._day,sym:t.sym,side:t.side,entry:t.entry,pnl:t.pnl,reason,emotion:CAPsel||"",shot:CAPshot||undefined})});
+    const j=await r.json();if(!j.ok)throw new Error(j.error||"error");
+    capMark("mesa-cap-done",S.coach._day,tkey(t));CAPi++;renderCapStep();
+  }catch(e){document.getElementById("capErr").textContent=(es?"no se guardó: ":"not saved: ")+String(e.message||e);}
+  finally{btn.disabled=false;btn.textContent=es?"Guardar y siguiente":"Save and next";}
+}
+function skipCap(){const t=CAPq[CAPi];if(t)capMark("mesa-cap-skip",S.coach._day,tkey(t));CAPi++;renderCapStep();}
+function capInit(){
+  const f=document.getElementById("capFile");if(f)f.onchange=onCapFile;
+  const s=document.getElementById("capSave");if(s)s.onclick=saveCap;
+  const sk=document.getElementById("capSkip");if(sk)sk.onclick=skipCap;
+  const x=document.getElementById("capClose");if(x)x.onclick=closeCapQueue;
+  const m=document.getElementById("capModal");if(m)m.onclick=(e)=>{if(e.target===m)closeCapQueue();};
 }
 function renderAll(){tick();renderHealth();renderSwitch();renderFocus();renderMinds();renderConf();renderDisciplina();syncStatic();}
 
@@ -780,7 +878,7 @@ async function load(){
   if(sig!==LAST_SIG){LAST_SIG=sig;renderAll();flashFresh();
     if(ps&&ps!==LAST_PLAN){LAST_PLAN=ps;loadCal();}}
 }
-syncStatic();load();
+capInit();syncStatic();load();
 setInterval(tick,30000);
 setInterval(load,45000);
 </script>
