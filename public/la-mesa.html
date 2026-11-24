@@ -835,7 +835,9 @@ function capMark(store,date,key){const cur=capLS(store);const keys=cur.date===da
 function capSet(store,date){const o=capLS(store);return o.date===date?new Set(o.keys||[]):new Set();}
 // base de tiempo: la entrevista solo cuenta las entradas DESDE que abres La Mesa (no los trades viejos del dia)
 function capBaseline(date){const k="mesa-cap-base";const o=capLS(k);if(o.date===date&&typeof o.ts==="number")return o.ts;const ts=Date.now();try{localStorage.setItem(k,JSON.stringify({date,ts}));}catch(e){}return ts;}
-function allTrades(){const c=S.coach&&!S.coach.__err?S.coach:null;if(!c)return{opens:[],closed:[],date:null};const date=c._day;const base=capBaseline(date);const bus=new Set((c.captures||[]).map(x=>x.key));const done=capSet("mesa-cap-done",date),skip=capSet("mesa-cap-skip",date);const taken=k=>bus.has(k)||done.has(k)||skip.has(k);const openSrc=(S.opennow&&Array.isArray(S.opennow.positions))?S.opennow.positions:(c.openPositions||[]);const opens=openSrc.filter(o=>o.openedAt&&o.openedAt>=base&&!taken(tkey(o))).map(o=>({...o,_open:true}));const closed=(c.todayTrades||[]).filter(t=>t.openedAt&&t.openedAt>=base&&!taken(tkey(t)));return{opens,closed,date};}
+function allTrades(){const c=S.coach&&!S.coach.__err?S.coach:null;if(!c)return{opens:[],closed:[],date:null};const date=c._day;const base=capBaseline(date);const bus=new Set((c.captures||[]).map(x=>x.key));const done=capSet("mesa-cap-done",date),skip=capSet("mesa-cap-skip",date);const taken=k=>bus.has(k)||done.has(k)||skip.has(k);const openSrc=(S.opennow&&Array.isArray(S.opennow.positions))?S.opennow.positions:(c.openPositions||[]);
+  // abiertas: SIEMPRE aparecen (son pocas y en vivo, hay que revisarlas). cerradas: solo desde la base (no resurgir los 20+ viejos).
+  const opens=openSrc.filter(o=>o.openedAt&&!taken(tkey(o))).map(o=>({...o,_open:true}));const closed=(c.todayTrades||[]).filter(t=>t.openedAt&&t.openedAt>=base&&!taken(tkey(t)));return{opens,closed,date};}
 function pendingCaps(){const r=allTrades();return [...r.opens,...r.closed];}
 let CAPq=[],CAPi=0,CAPsel=null,CAPshot=null,CAPchk={atLevel:null,withBias:null,hadTrigger:null};
 const CAPautoPopped=new Set();
