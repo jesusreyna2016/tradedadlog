@@ -725,7 +725,15 @@ function drawTerrain(d,symOver){
 }
 function findKL(kl,needle){return kl.find(k=>(k.name||"").toLowerCase().includes(needle));}
 // velas 5m del dia (bars/<fecha>.json): [epoch, open, high, low, close] por simbolo
-function barsFor(sym){try{const k=sym==="ETH"?"ETHUSDT":sym;const a=S.bars.symbols[k];return a&&a.length?a:null;}catch(e){return null;}}
+// apertura de la sesion de trading: futuros reabren 18:00 ET (inicio del dia, igual que el bus); crypto 00:00 UTC
+function sessOpen(sym){const now=Date.now();
+  if(sym==="BTC"||sym==="ETH"||sym==="BTCUSDT"||sym==="ETHUSDT"){const d=new Date(now);return Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate());}
+  const nd=new Date(now),etRef=new Date(nd.toLocaleString("en-US",{timeZone:"America/New_York"})),corr=nd.getTime()-etRef.getTime();
+  const op=new Date(etRef);op.setHours(18,0,0,0);if(etRef.getHours()<18)op.setDate(op.getDate()-1);return op.getTime()+corr;}
+// el archivo de Yahoo trae una ventana rodante de ~24h; recortamos a la sesion actual para que "El terreno" resetee en la apertura
+function barsFor(sym){try{const k=sym==="ETH"?"ETHUSDT":sym;const a=S.bars.symbols[k];if(!a||!a.length)return null;
+  const cut=sessOpen(sym),ms=(t)=>t>1e11?t:t*1000,f=a.filter(b=>ms(b[0])>=cut);
+  return f.length>1?f:a;}catch(e){return null;}}
 // pulso del mercado: dato crudo en vivo del feed del indicador (feeds.json: feed:<SYM>)
 function pget(sym){try{const f=S.feeds;if(!f||f.__err)return null;const w=f["feed:"+sym];if(!w)return null;return w.raw||w;}catch(e){return null;}}
 function tcget(sym){try{const f=S.feeds;if(!f||f.__err)return null;const w=f["trendcl:"+sym];if(!w)return null;return w.raw||w;}catch(e){return null;}}
