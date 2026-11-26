@@ -68,15 +68,19 @@ const RULES_ACTIVE = [
   'R4 nivel invalidado no se reopera', 'G1 parcial + BE en TP1', 'G2 R:R >= 1'
 ];
 
-// inicio del dia de trading en Chicago (ms)
-function chiDayStartMs() {
+// inicio del dia de trading de futuros: reapertura 17:00 CT (tras la pausa de mantenimiento 16:00-17:00). ms epoch
+function tradingDayStartMs() {
   const now = new Date();
-  const d = new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }));
-  d.setHours(0, 0, 0, 0);
-  // compensa el offset entre la hora local del server y Chicago
-  const diff = now.getTime() - new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' })).getTime();
-  return d.getTime() + diff;
+  const chi = new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+  const diff = now.getTime() - chi.getTime(); // offset server -> Chicago
+  const open = new Date(chi); open.setHours(17, 0, 0, 0);
+  if (chi.getHours() < 17) open.setDate(open.getDate() - 1); // antes de las 17:00 -> reapertura de ayer
+  return open.getTime() + diff;
 }
+// fecha (YYYY-MM-DD, hora de Chicago) de un instante
+function ctDate(ms) { return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(new Date(ms)); }
+// clave del dia de trading: la sesion abre 17:00 CT y cierra al dia siguiente; se nombra por su fecha de cierre (RTH), igual que la review
+function tradingDayKey(startMs) { return ctDate(startMs + 10 * 3600e3); }
 
 export async function runCoach() {
   const token = process.env.TOS_BUS_TOKEN;
@@ -87,12 +91,12 @@ export async function runCoach() {
     return { ok: true, note: 'sin MFP_API_KEY: el Coach queda a la espera de fills (o de captura manual)' };
   }
 
-  const since = chiDayStartMs();
+  const since = tradingDayStartMs();
   const now = Date.now();
 
   // prev: se lee aqui arriba para arrastrar la racha Y para auto-sanar una cuenta
   // que falle esta corrida (ver mas abajo).
-  const today = new Date(now).toISOString().slice(0, 10);
+  const today = tradingDayKey(since);
   const prevCur = await ghGet(OWNER, REPO, BRANCH, 'live/trader.json', { token });
   let prev = {};
   try { prev = prevCur?.content ? JSON.parse(prevCur.content) : {}; } catch { prev = {}; }
@@ -258,7 +262,7 @@ export async function runCoach() {
       return { date: dateStr, path: `reviews/${dateStr}.md`, headline };
     } catch { return null; }
   }
-  const yday = new Date(now - 864e5).toISOString().slice(0, 10);
+  const yday = ctDate(since + 10 * 3600e3 - 864e5);
   const lastReview = (await readReview(today)) || (await readReview(yday)) || prev.lastReview || null;
 
   const trader = {
