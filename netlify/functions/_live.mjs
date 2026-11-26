@@ -150,7 +150,13 @@ export async function runLive(nowMs = Date.now()) {
 
     // inactividad: dias de la regla de la firma desde tu ultima operacion
     try {
-      const [pol, lastAt] = await Promise.all([tradingPolicy(a.id), lastClosedAt(a.id)]);
+      st.polCache ||= {};
+      let cp = st.polCache[a.id];
+      if (!cp || (nowMs - cp.at) > 15 * 60e3) {   // politica e inactividad cambian lento: cachear 15 min en vez de pedir cada minuto
+        const [pol0, lastAt0] = await Promise.all([tradingPolicy(a.id), lastClosedAt(a.id)]);
+        cp = st.polCache[a.id] = { pol: pol0, lastAt: lastAt0, at: nowMs };
+      }
+      const pol = cp.pol, lastAt = cp.lastAt;
       policyById[a.id] = pol;
       const rule = (pol.account_rules || []).find((x) => x.id === (a.stage === 'funded' ? 'funded-inactivity' : 'evaluation-inactivity'));
       const limitDays = rule?.parameters?.days || null;

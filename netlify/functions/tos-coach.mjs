@@ -11,6 +11,7 @@
 //
 // _live.mjs ya hace los AVISOS en vivo (push) sobre los mismos datos; esto no los
 // duplica: compone el estado estructurado del cerebro y es el sustrato de la review.
+import { getStore } from '@netlify/blobs';
 import { ghGet, ghPut } from './_gh-bus.mjs';
 import { hasKey, listAccounts, openPositions, workingOrders, closedPositions, hasStop, familyOf } from './_mfp.mjs';
 
@@ -123,15 +124,24 @@ export async function runCoach() {
   // Una cuenta flaky (429 / timeout) NO debe caer en silencio y encoger el conteo:
   // reintenta (respetando retry-after del 429) y, si aun falla, se rellena con lo
   // previo mas abajo. Esto mata la oscilacion de 'used' entre corridas.
+  // El vigilante (live-cron, cada minuto) ya publica las posiciones abiertas CON la marca de stop en el
+  // snapshot del store 'live'. Lo reusamos para no re-pedir openPositions/workingOrders a MFP (mismo dato),
+  // y asi el barrido del Coach no suma GET sobre el limite por key en el minuto que se solapa con live-cron.
+  // Solo los trades CERRADOS van a MFP. Si el snapshot falta o esta rancio (>5 min), se cae a MFP como antes.
+  let snapOpen = null;
+  try {
+    const s = await getStore('live').get('snapshot', { type: 'json' });
+    if (s && s.updatedAt && (now - s.updatedAt) < 5 * 60e3) snapOpen = s.open || {};
+  } catch { snapOpen = null; }
+
   const fetchAcct = async (a) => {
     let lastErr;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        return await Promise.all([
-          closedPositions(a.id, { since, maxPages: 5 }),
-          openPositions(a.id),
-          workingOrders(a.id)
-        ]);
+        const closed = await closedPositions(a.id, { since, maxPages: 5 });
+        if (snapOpen) return [closed, snapOpen[a.id] || [], null];   // abiertas del snapshot (ya con stop)
+        const [open, orders] = await Promise.all([openPositions(a.id), workingOrders(a.id)]);
+        return [closed, open, orders];
       } catch (e) {
         lastErr = e;
         if (attempt < 2) { const w = e.retryAfter ? Math.min(e.retryAfter * 1000, 5000) : 400 * (attempt + 1); await new Promise((r) => setTimeout(r, w)); }
@@ -155,10 +165,14 @@ export async function runCoach() {
       });
     }
     for (const p of open) {
+      // el item del snapshot ya trae `stop` y usa entry/openedAt; el de MFP usa entry_price/opened_at + orders
+      const had = (orders == null) ? !!p.stop : hasStop(p, orders);
+      const entry = +(p.entry_price != null ? p.entry_price : p.entry) || null;
+      const openedAt = (p.opened_at != null ? p.opened_at : p.openedAt) || null;
       openRows.push({
         acct: a.id, name: a.name || a.id, sym: familyOf(p.symbol), side: p.side,
-        size: +p.size || null, entry: +p.entry_price || null, openedAt: p.opened_at || null,
-        hadStop: hasStop(p, orders), flags: hasStop(p, orders) ? [] : ['NO_STOP']
+        size: +p.size || null, entry, openedAt,
+        hadStop: had, flags: had ? [] : ['NO_STOP']
       });
     }
   }
