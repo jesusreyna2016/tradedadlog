@@ -730,6 +730,12 @@ function sessOpen(sym){const now=Date.now();
   if(sym==="BTC"||sym==="ETH"||sym==="BTCUSDT"||sym==="ETHUSDT"){const d=new Date(now);return Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate());}
   const nd=new Date(now),etRef=new Date(nd.toLocaleString("en-US",{timeZone:"America/New_York"})),corr=nd.getTime()-etRef.getTime();
   const op=new Date(etRef);op.setHours(18,0,0,0);if(etRef.getHours()<18)op.setDate(op.getDate()-1);return op.getTime()+corr;}
+// une el archivo del dia UTC anterior con el de hoy (dedup por epoch), para que la sesion de 18:00 ET no se corte al cambiar de fecha UTC
+function mergeBars(prev,cur){const a=prev&&!prev.__err?prev:null,b=cur&&!cur.__err?cur:null;
+  if(!a&&!b)return null;if(!a)return b;if(!b)return a;
+  const out={...b,symbols:{}},keys=new Set([...Object.keys(a.symbols||{}),...Object.keys(b.symbols||{})]);
+  for(const k of keys){const m=new Map();for(const x of (a.symbols[k]||[]))m.set(x[0],x);for(const x of (b.symbols[k]||[]))m.set(x[0],x);out.symbols[k]=[...m.values()].sort((p,q)=>p[0]-q[0]);}
+  return out;}
 // el archivo de Yahoo trae una ventana rodante de ~24h; recortamos a la sesion actual para que "El terreno" resetee en la apertura
 function barsFor(sym){try{const k=sym==="ETH"?"ETHUSDT":sym;const a=S.bars.symbols[k];if(!a||!a.length)return null;
   const cut=sessOpen(sym),ms=(t)=>t>1e11?t:t*1000,f=a.filter(b=>ms(b[0])>=cut);
@@ -1041,12 +1047,14 @@ function flashFresh(){const el=document.getElementById("liveTxt");if(!el)return;
 async function loadCal(){const cs=await getJSON(TOS+"/state/contexto-state.json");if(cs&&!cs.__err&&cs.scorecard){S.cal=cs.scorecard;renderConf();}}
 async function load(){
   const barsDate=new Date().toISOString().slice(0,10);
-  const [plan,sa,coach,market,crypto,parity,health,edge,bars,feeds,opennow]=await Promise.all([
+  const barsPrev=new Date(Date.now()-864e5).toISOString().slice(0,10); // dia UTC anterior: la sesion de futuros (18:00 ET) cruza el cambio de fecha UTC
+  const [plan,sa,coach,market,crypto,parity,health,edge,bars,barsP,feeds,opennow]=await Promise.all([
     getJSON(TOS+"/live/plan.json"),getJSON(SA+"/plans/latest.json"),getJSON(TOS+"/live/trader.json"),
     getJSON(TOS+"/live/market.json"),getJSON(TOS+"/plans/crypto-latest.json"),getJSON(TOS+"/live/parity.json"),
     getJSON(TOS+"/live/health.json"),getJSON(TOS+"/live/edge.json"),getJSON(TOS+"/bars/"+barsDate+".json"),
+    getJSON(TOS+"/bars/"+barsPrev+".json"),
     getJSON(TOS+"/live/feeds.json"),getJSON("/api/tos-open")]);
-  S.bars=bars&&!bars.__err?bars:null;S.feeds=feeds&&!feeds.__err?feeds:null;
+  S.bars=mergeBars(barsP,bars);S.feeds=feeds&&!feeds.__err?feeds:null;
   S.opennow=(opennow&&!opennow.__err&&Array.isArray(opennow.positions))?opennow:null;
   let pl=plan;SAMPLE=false;
   if((!pl||pl.__err)&&typeof PLAN_SEED!=="undefined"){pl=PLAN_SEED;SAMPLE=true;}
