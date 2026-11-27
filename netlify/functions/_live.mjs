@@ -24,6 +24,7 @@ import { getStore } from '@netlify/blobs';
 import { listSubs, sendTo } from './_push.mjs';
 import { latestPrices, trackExcursions, excursionOf } from './_excursion.mjs';
 import { trackPayouts } from './_payouts.mjs';
+import { brakeShadow, brakeConfig } from './_brake.mjs';
 import { hasKey, listAccounts, getAccount, openPositions, workingOrders, closedPositions, hasStop, familyOf, tradingPolicy, lastClosedAt, fillsSince } from './_mfp.mjs';
 
 const chicago = (ms) => {
@@ -120,6 +121,8 @@ export async function runLive(nowMs = Date.now()) {
   const st = (await store.get('state', { type: 'json' }).catch(() => null)) || { positions: {}, lastLoss: {}, lowWarned: {}, firstRun: true };
   const stops = (await store.get('stops', { type: 'json' }).catch(() => null)) || {};
   const log = [];
+  const bcfg = await brakeConfig(st, nowMs);   // freno anti-tilt en sombra (_brake.mjs)
+  const brakeLog = async (ev) => { try { if (await brakeShadow(ev, nowMs)) log.push('freno sombra ' + ev.rule + ' ' + (ev.name || '')); } catch (e) { log.push('freno: ' + e.message); } };
   // el dia de MFP (limite diario y comisiones del dia) cambia a medianoche de Nueva York
   const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(nowMs));
 
@@ -186,6 +189,9 @@ export async function runLive(nowMs = Date.now()) {
         if (!st.firstRun && nowMs - p.opened_at < 30 * 60e3) {
           const sinceLoss = st.lastLoss[a.id] ? p.opened_at - st.lastLoss[a.id] : Infinity;
           if (sinceLoss >= 0 && sinceLoss < cooldown) { st.week.revenge++; await notify(M.revenge(lang, name, fam, Math.round(sinceLoss / 60e3)), 'rev-' + p.id); log.push(name + ' revancha'); }
+          if (sinceLoss >= 0 && sinceLoss < bcfg.pauseMin * 60e3) await brakeLog({ rule: 'R1', acct: a.id, name, posId: p.id, fam, side: p.side, size: p.size, detail: `${Math.round(sinceLoss / 1000)} s tras la perdida (pausa ${bcfg.pauseMin} min)` });
+          const dn = st.dayNet && st.dayNet[a.id];
+          if (dn && dn.date === today && dn.net <= -bcfg.dayStopUsd) await brakeLog({ rule: 'DAY_STOP', acct: a.id, name, posId: p.id, fam, side: p.side, size: p.size, detail: `neto del dia ${dn.net.toFixed(0)} <= -${bcfg.dayStopUsd}` });
           if (lostPause && st.lostAt && p.opened_at - st.lostAt < lostPause && p.opened_at > st.lostAt) { await notify(M.afterLost(lang, name, fam, +cfg.lostPauseH), 'afterlost-' + p.id); log.push(name + ' tras perder cuenta'); }
           const plan = plans.find((x) => x.fam === fam && x.side === p.side && x.status !== 'cancelada' && (!x.acct || x.acct === a.id || x.acct === a.account_number) &&
             p.opened_at >= x.ts - 3 * 60e3 && p.opened_at <= x.ts + matchWin);
@@ -199,8 +205,13 @@ export async function runLive(nowMs = Date.now()) {
             const room = detail.risk?.max_drawdown_room;
             const move = room != null && notional ? +(room / notional * 100).toFixed(2) : null;
             await notify(M.bigSize(lang, name, fam, x.toFixed(1), move), 'size-' + p.id); log.push(name + ' muy grande ' + x.toFixed(1) + 'x');
+            await brakeLog({ rule: 'SIZE', acct: a.id, name, posId: p.id, fam, side: p.side, size: p.size, detail: `${x.toFixed(1)}x la cuenta (tope ${capX}x)` });
           }
         }
+      }
+      if (!stopNow && !k.brakeNoStop && !st.firstRun && nowMs - p.opened_at > bcfg.noStopSec * 1e3) {
+        k.brakeNoStop = true;
+        await brakeLog({ rule: 'NO_STOP', acct: a.id, name, posId: p.id, fam, side: p.side, size: p.size, detail: `${Math.round((nowMs - p.opened_at) / 1000)} s sin stop` });
       }
       if (!stopNow && !k.stopWarned && nowMs - p.opened_at > 60e3) {
         k.stopWarned = true;
@@ -236,6 +247,9 @@ export async function runLive(nowMs = Date.now()) {
         if (!st.fees || st.fees.date !== today) st.fees = { date: today, total: 0, warned: false };
         st.fees.total += +c.fees || 0;
         st.week.n++; st.week.net += net; st.week.fees += +c.fees || 0;
+        st.dayNet ||= {};
+        if (!st.dayNet[acct] || st.dayNet[acct].date !== today) st.dayNet[acct] = { date: today, net: 0 };
+        st.dayNet[acct].net += net;
         if (net < 0) {
           st.lastLoss[acct] = c.closed_at;
           if (nowMs - c.closed_at < 30 * 60e3) { await notify(M.loss(lang, k.name, k.fam, net, chicago(c.closed_at + cooldown).hm), 'loss-' + acct); log.push(k.name + ' perdida'); }
