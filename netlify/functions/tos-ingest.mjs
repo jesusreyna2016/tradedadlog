@@ -15,6 +15,7 @@
 //
 // Un cron aparte (tos-bus-snapshot) espeja estos blobs al repo git trader-os-bus.
 import { getStore } from '@netlify/blobs';
+import { feedToRow, mergeRows, TVBAR_MAX } from './_tvbars.mjs';
 
 // Prefijo pipe -> src (igual que ind-ingest, para heredar FEED1 y el legacy)
 const PREFIX_SRC = {
@@ -108,6 +109,18 @@ export default async (req) => {
         raw: ln.obj, receivedAt: now
       });
       nState++;
+      // FEED1 (una vela de 5m): ademas se archiva la fila vela + contexto (Edgeful)
+      if(ln.src === 'feed'){
+        const fr = feedToRow(ln.obj);
+        if(fr){
+          const k = `tvbar:${fr.day}:${ln.sym}`;
+          let rows = [];
+          try { rows = (await store.get(k, { type: 'json' })) || []; } catch { rows = []; }
+          rows = mergeRows(rows, [fr.row]);
+          if(rows.length > TVBAR_MAX) rows = rows.slice(-TVBAR_MAX);
+          await store.setJSON(k, rows);
+        }
+      }
     } else {
       // evento semantico (Tier B) al log del dia
       const t = Number(ln.obj.time) || Number(ln.obj.t) || Date.now();
