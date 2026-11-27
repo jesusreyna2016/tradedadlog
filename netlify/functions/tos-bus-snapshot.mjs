@@ -22,6 +22,7 @@
 // Invocable por HTTP para pruebas (GET); el schedule vive en tos-bus-cron.mjs.
 import { getStore } from '@netlify/blobs';
 import { ghGet, ghPut } from './_gh-bus.mjs';
+import { TVBAR_FIELDS, mergeRows } from './_tvbars.mjs';
 import newsHandler from './cc-news.mjs';
 import macroHandler from './cc-macro.mjs';
 
@@ -160,6 +161,38 @@ export async function runSnapshot() {
     out.push(await ghPut(OWNER, REPO, BRANCH, `events/${day}.jsonl`, serializeEvents(map),
       `tos: events ${day} (${map.size})`, { token, known: cur }));
   }
+
+  // ---- 2b. Velas de TradingView (FEED1) -> tvbars/<dia>.json (merge-only) ----
+  // Fuente del Lab de Trader OS (lab/stats.py). Una fila por vela de 5m
+  // con el contexto del propio TDL Feed; ver _tvbars.mjs.
+  try {
+    for (const day of daysToProcess()) {
+      if (Date.now() > deadline) break;
+      const add = {};
+      let c2;
+      do {
+        const page = await store.list({ prefix: `tvbar:${day}:`, cursor: c2 });
+        for (const b of page?.blobs || []) {
+          const rows = await store.get(b.key, { type: 'json' });
+          if (Array.isArray(rows) && rows.length) add[b.key.slice(`tvbar:${day}:`.length)] = rows;
+        }
+        c2 = page?.cursor;
+      } while (c2 && Date.now() < deadline);
+      if (!Object.keys(add).length) continue;
+      const path = `tvbars/${day}.json`;
+      const cur = await ghGet(OWNER, REPO, BRANCH, path, { token });
+      let prev = { symbols: {} };
+      try { prev = cur?.content ? JSON.parse(cur.content) : prev; } catch { prev = { symbols: {} }; }
+      if (cur?.sha && !(cur.content || '').trim()) {   // contents API vacio: no pisar
+        out.push({ skipped: true, path, guard: 'empty-read' });
+        continue;
+      }
+      const symbols = { ...(prev.symbols || {}) };
+      for (const [sym, rows] of Object.entries(add)) symbols[sym] = mergeRows(symbols[sym], rows);
+      const body = JSON.stringify({ source: 'tdl_feed', tf: '5', fields: TVBAR_FIELDS, symbols }) + '\n';
+      out.push(await ghPut(OWNER, REPO, BRANCH, path, body, `tos: tvbars ${day}`, { token, known: cur }));
+    }
+  } catch (e) { out.push({ tvbars: true, error: String(e && e.message || e) }); }
 
   // ---- 3. Puente de noticias -> live/news.json (cc-news + cc-macro) ----
   // El Tier 2 lo leera como el SA lee market.json.news. Dedupe por los eventos del

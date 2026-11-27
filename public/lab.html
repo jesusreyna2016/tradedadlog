@@ -1,0 +1,261 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lab · Trader OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Lab · laboratorio de estrategias de Trader OS. Misma tinta que La Mesa. */
+:root{
+  color-scheme: dark;
+  --ink:#0c0b0a; --ink2:#141210; --panel:#191613; --line:#2a2622; --line2:#3b352e;
+  --fg:#efe9df; --fg2:#cbc3b6; --muted:#8c8276; --faint:#5f574c;
+  --ember:#e08a3c; --ember-soft:#f2b06a; --ember-dim:rgba(224,138,60,.13);
+  --go:#5bd48a; --wait:#e8b84b; --avoid:#ff6a5c;
+  --go-dim:rgba(91,212,138,.13); --wait-dim:rgba(232,184,75,.12); --avoid-dim:rgba(255,106,92,.13);
+  --disp:"Fraunces",Georgia,serif; --body:"Inter",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{background:var(--ink);color:var(--fg);font-family:var(--body);margin:0;line-height:1.5;-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(130% 80% at 85% -10%,rgba(224,138,60,.07),transparent 50%)}
+.wrap{max-width:860px;margin:0 auto;padding:0 max(18px,env(safe-area-inset-left,0px)) 72px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.top{display:flex;align-items:center;gap:12px;padding:16px 0 6px;font-family:var(--mono);font-size:.68rem;color:var(--muted);flex-wrap:wrap}
+.top a{color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--faint)}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--faint)}
+.dot.ok{background:var(--go);box-shadow:0 0 8px var(--go)}.dot.warn{background:var(--wait);box-shadow:0 0 8px var(--wait)}
+.dot.bad{background:var(--avoid);box-shadow:0 0 8px var(--avoid)}.dot.off{background:var(--faint)}
+h1{font-family:var(--disp);font-weight:900;font-size:clamp(2rem,7vw,3rem);line-height:1;margin:14px 0 4px;letter-spacing:-.02em}
+h1 em{font-style:normal;color:var(--ember)}
+.lede{color:var(--fg2);font-size:.95rem;margin:0 0 18px;max-width:60ch}
+h2{font-family:var(--disp);font-weight:600;font-size:1.25rem;margin:26px 0 8px}
+h3{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:20px 0 8px;font-weight:500}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:10px 0}
+.verdict{border-left:3px solid var(--ember);padding:10px 14px;background:var(--ember-dim);border-radius:0 10px 10px 0;margin:12px 0;font-size:.92rem}
+.verdict.go{border-color:var(--go);background:var(--go-dim)}.verdict.none{border-color:var(--line2);background:var(--ink2);color:var(--fg2)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0 2px;margin:18px 0 4px;scrollbar-width:none;position:sticky;top:0;background:linear-gradient(var(--ink) 80%,transparent);z-index:5}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;font:500 .8rem var(--body);color:var(--fg2);background:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:7px 13px;cursor:pointer}
+.tab.on{color:var(--ink);background:var(--ember-soft);border-color:var(--ember-soft)}
+.coll{display:grid;grid-template-columns:auto 1fr auto;gap:6px 12px;align-items:center;font-size:.85rem}
+.coll .sym{font-family:var(--mono);font-weight:700}
+.bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ember);border-radius:4px}
+.coll .meta{font-family:var(--mono);font-size:.7rem;color:var(--muted);text-align:right;white-space:nowrap}
+.note{font-size:.78rem;color:var(--muted);margin-top:8px}
+.tbl{width:100%;border-collapse:collapse;font-size:.8rem}
+.tbl th{font:500 .62rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:right;padding:6px 6px;border-bottom:1px solid var(--line)}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl td:first-child{font-family:var(--body);white-space:normal;color:var(--fg)}
+.tbl tr.dim td{color:var(--faint)}
+.scroll{overflow-x:auto;margin:0 -4px;padding:0 4px}
+.pos{color:var(--go)}.neg{color:var(--avoid)}.mut{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 .74rem var(--mono);background:var(--ink2);border:1px solid var(--line);border-radius:8px;padding:5px 8px;color:var(--fg2)}
+.feat{display:grid;grid-template-columns:7.5rem 1fr;gap:6px 10px;align-items:start;margin:6px 0;font-size:.8rem}
+.feat .k{color:var(--muted);font-family:var(--mono);font-size:.72rem;padding-top:5px}
+.lvl{display:grid;grid-template-columns:4.2rem 1fr 3.4rem;gap:8px;align-items:center;font-size:.8rem;margin:5px 0}
+.lvl .bar{height:10px}.lvl.ctrl .bar i{background:var(--faint)}
+.lvl .k{font-family:var(--mono);font-size:.74rem}.lvl.ctrl .k{color:var(--muted)}
+.vr{padding:10px 0;border-bottom:1px solid var(--line)}.vr:last-child{border-bottom:0}
+.vr .nm{font-size:.86rem;color:var(--fg);margin-bottom:5px}.vr.dim .nm{color:var(--faint)}
+.vr .st{display:grid;grid-template-columns:repeat(3,1fr);gap:2px 10px;font-family:var(--mono);font-size:.74rem;font-variant-numeric:tabular-nums}
+.vr .st span{white-space:nowrap}.vr .st b{font-weight:500;color:var(--muted);font-size:.62rem;letter-spacing:.06em;margin-right:5px}
+.vr .wh{font-size:.76rem;color:var(--muted);margin:-2px 0 5px}
+.verdict ul{margin:6px 0 0;padding-left:18px}.verdict li{margin:2px 0}
+.empty{color:var(--fg2);font-size:.9rem;padding:18px 4px;text-align:center}
+.foot{font-size:.72rem;color:var(--faint);margin-top:30px}
+details summary{cursor:pointer;color:var(--fg2);font-size:.85rem;margin:6px 0}
+</style>
+
+<div class="wrap">
+  <div class="top"><span class="dot" id="hdot"></span><span id="hstat">cargando</span><span id="asof"></span><span style="flex:1"></span><a href="/la-mesa.html">La Mesa</a></div>
+  <h1>El <em>Lab</em></h1>
+  <p class="lede">Laboratorio de estrategias con data propia: velas del TDL Feed, TDL KL y el plan. Cada estrategia prueba varias entradas, stops y salidas, y se compara contra entradas al azar.</p>
+
+  <h3>Recolección</h3>
+  <div class="card" id="coll"><div class="empty">cargando</div></div>
+
+  <div class="tabs" id="tabs"></div>
+  <div id="view"></div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+const TOS="https://raw.githubusercontent.com/jesusreyna2016/trader-os-bus/main";
+const TABS=[["ORB","ORB"],["IB","IB"],["SW","Barridas"],["VA80","VA 80%"],["PB","Pullback"],["KL","Niveles KL"]];
+const FAM_NAME={ORB:"Opening Range Breakout",IBB:"Ruptura del IB",IBL:"Niveles del IB (operación)",SWR:"Barrida y reclaim (reversa)",SWC:"Barrida aceptada (continuación)",VA80:"Regla del 80 %",PB:"Pullback a EMA20 / VWAP"};
+const FEAT={vwap:"VWAP",ema:"EMA 20/50",ema200:"EMA200",htf:"Tendencia 1h",klRegime:"Régimen KL",klAlign:"Alineación KL",plan:"Plan pre-NY",
+  chop:"Chop",stretch:"Estiramiento",zone:"Premium/disc.",smt:"SMT",gap:"Gap",time:"Hora",dow:"Día",news:"Noticias",pdClose:"Cierre de ayer",
+  rangeAtr:"Rango/ATR",ibVsVA:"IB vs VA",depth:"Profundidad",openDist:"Dist. al VA",vaWidth:"Ancho VA",nth:"Nº pullback",trendStr:"Fuerza tend.",
+  preNY:"Tomado pre-NY",open:"Abrió"};
+const VAL={favor:"a favor",contra:"en contra",mixed:"mixto",none:"sin",low:"bajo",mid:"medio",high:"alto",chop:"chop",trend:"tendencia",
+  inside:"dentro",outside:"fuera",overlap:"cruza",yes:"sí",no:"no",above:"arriba",below:"abajo",neutral:"neutral",medium:"medio",flat:"plano",resistance:"resistencia",support:"soporte",None:"sin lado",
+  trend_up:"tend. ▲ sin lado",trend_down:"tend. ▼ sin lado",aligned_up:"alin. ▲ sin lado",aligned_down:"alin. ▼ sin lado",
+  cisd_up:"CISD ▲ sin lado",cisd_down:"CISD ▼ sin lado",ASIA:"Asia",LONDON:"Londres",NY:"NY"};
+const TOK={close:"al cierre",retest:"retest",limit:"límite",confirm:"rechazo",opp:"stop lado opuesto",mid:"stop medio",edge:"stop borde",
+  atr:"stop 0.5 ATR",swing:"stop swing",extreme:"stop extremo","extreme+atr":"stop extremo+ATR",eod:"cierre del día",poc:"al POC",far:"otro borde",
+  next:"siguiente nivel",hod:"máx/mín del día",range:"otro lado",ext1:"1x rango","ext0.5":"0.5x rango",be1:"BE en 1R",half1:"½ en 1R",
+  ema20:"EMA20",vwap:"VWAP",asH:"Asia H",asL:"Asia L",loH:"Londres H",loL:"Londres L",onh:"ON H",onl:"ON L",pdh:"PDH",pdl:"PDL"};
+let D=null,H=null,TAB="ORB";
+try{TAB=localStorage.getItem("lab.tab")||"ORB";}catch(e){}
+
+const $=(id)=>document.getElementById(id);
+const esc=(s)=>String(s).replace(/[&<>"]/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const f2=(x)=>x==null?"·":(x>0?"+":"")+Number(x).toFixed(2);
+const cls=(x)=>x==null?"mut":x>0?"pos":x<0?"neg":"mut";
+const pct=(x)=>x==null?"·":Math.round(x)+"%";
+function vlabel(v){return v.split("|").map((t)=>{
+  if(/^s0\./.test(t))return "stop "+t.slice(1)+" IB";
+  if(/^IB-?\d/.test(t))return "IB "+t.slice(2)+"%";
+  return TOK[t]||t;}).join(" · ");}
+function when(w){return Object.entries(w).map(([k,v])=>`${FEAT[k]||k}: ${VAL[v]||v}`).join(" · ");}
+async function getJSON(u){try{const r=await fetch(u+"?t="+Date.now(),{cache:"no-store"});return r.ok?await r.json():null;}catch(e){return null;}}
+
+function renderTop(){
+  const it=H&&(H.items||[]).find((i)=>i.key==="tvbars");
+  $("hdot").className="dot "+(it?it.status:"off");
+  $("hstat").textContent=it?("velas: "+it.note):"sin dato de salud";
+  $("asof").textContent=D?("· cálculo "+new Date(D.asOf).toLocaleString("es-MX",{dateStyle:"short",timeStyle:"short"})):"";
+}
+
+function renderColl(){
+  if(!D){$("coll").innerHTML='<div class="empty">No se pudo leer live/lab.json</div>';return;}
+  const c=D.data.collection||{},need=D.data.walkForwardMinDays||20,by=D.data.bySym||{};
+  let h='<div class="coll">';
+  for(const s of Object.keys(c)){
+    const x=c[s],days=by[s]||0,w=Math.min(100,100*days/need);
+    let meta=`${days} de ${need} días`;
+    if(x.rows&&!x.ohlc)meta="FEED1 sin o/h/l";
+    else if(!x.rows)meta="sin velas";
+    h+=`<span class="sym">${esc(s)}</span><div class="bar"><i style="width:${w}%"></i></div><span class="meta">${meta}</span>`;
+  }
+  h+="</div>";
+  const tot=D.data.trades||0;
+  h+=`<div class="note">${tot.toLocaleString("es-MX")} operaciones simuladas · walk-forward desde ${need} días · costo ${D.costTicks} ticks por operación</div>`;
+  $("coll").innerHTML=h;
+}
+
+function statsRow(v,extra){
+  return `<div class="st"><span><b>N</b>${v.n} · ${v.days??"·"}d</span><span><b>GANA</b>${pct(v.winPct)}</span><span><b>EXPR</b><span class="${cls(v.expR)}">${f2(v.expR)}</span></span>
+    <span><b>LB</b><span class="${cls(v.lb)}">${f2(v.lb)}</span></span>${extra?`<span><b>VS AZAR</b><span class="${cls(v.edgeVsCtrl)}">${f2(v.edgeVsCtrl)}</span></span>
+    <span><b>FALTAN</b>${v.nMore95==null?"·":v.nMore95===0?"✓":v.nMore95}</span>`:""}</div>`;
+}
+function variantsTable(L){
+  const minN=D.minN,rows=(L.variants||[]).slice(0,10);
+  if(!rows.length)return '<div class="empty">Sin operaciones todavía.</div>';
+  let h="";
+  for(const v of rows){
+    h+=`<div class="vr${v.n<minN?" dim":""}"><div class="nm">${esc(vlabel(v.var))}${v.fillPct!=null?` <span class="mut">· se llena ${pct(v.fillPct)}</span>`:""}</div>${statsRow(v,true)}</div>`;
+  }
+  const top=rows[0];
+  if(top&&top.mfe)h+=`<div class="note">Mejor variante: a favor llegó a ${top.mfe.p50}R la mitad de las veces (${top.mfe.p75}R el 25 % mejor); en contra ${top.mae.p50}R.${top.ambPct?` ${pct(top.ambPct)} con stop y target en la misma vela: el real está entre ${f2(top.expR)} y ${f2(top.expROpt)}.`:""}</div>`;
+  return h;
+}
+
+function verdict(L){
+  const wf=L.walkForward||{};
+  if(wf.skipped)return `<div class="verdict none">Recolectando: ${esc(wf.skipped)}. Hasta entonces nada de esto es una señal.</div>`;
+  if(wf.survivors&&wf.survivors.length){
+    const items=[...(wf.variants||[]).filter((x)=>x.holds).map((x)=>vlabel(x.var)),
+                 ...(wf.combos||[]).filter((x)=>x.holds).map((x)=>vlabel(x.var)+" · si "+when(x.when))].slice(0,4);
+    return `<div class="verdict go"><b>Sobrevive fuera de muestra</b> (elegido con ${wf.inDays} días, medido en ${wf.outDays} nuevos):<ul>${items.map((x)=>`<li>${esc(x)}</li>`).join("")}</ul></div>`;
+  }
+  return `<div class="verdict">Nada sobrevivió fuera de muestra: lo que gana con ${wf.inDays} días viejos pierde en los ${wf.outDays} nuevos. Ruido por ahora.</div>`;
+}
+
+function confluence(L){
+  const c=L.confluence||{};const keys=Object.keys(c);
+  if(!keys.length)return "";
+  let h='<h3>Confluencias (todas las variantes)</h3><div class="card">';
+  for(const k of keys){
+    const vals=Object.entries(c[k]);if(!vals.length)continue;
+    h+=`<div class="feat"><span class="k">${esc(FEAT[k]||k)}</span><div class="chips">${vals.map(([v,s])=>`<span class="chip">${esc(VAL[v]||v)} <span class="${cls(s.expR)}">${f2(s.expR)}</span> <span class="mut">${s.n}</span></span>`).join("")}</div></div>`;
+  }
+  return h+"</div>";
+}
+
+function combos(L){
+  const b=(L.best||[]).slice(0,5),w=(L.worst||[]).slice(0,5);
+  if(!b.length)return "";
+  const row=(x)=>`<div class="vr"><div class="nm">${esc(vlabel(x.var))}</div><div class="wh">si ${esc(when(x.when))}</div>${statsRow(x,false)}</div>`;
+  return `<h3>Mejores combinaciones</h3><div class="card">${b.map(row).join("")}</div><details><summary>Peores (qué evitar)</summary><div class="card">${w.map(row).join("")}</div></details>`;
+}
+
+function family(fam){
+  const L=D.lab[fam];
+  let h=`<h2>${FAM_NAME[fam]}</h2>`;
+  if(!L)return h+'<div class="empty">Sin operaciones todavía: empieza a contar cuando lleguen velas de FEED1 con o/h/l.</div>';
+  return h+verdict(L)+'<div class="card">'+variantsTable(L)+"</div>"+confluence(L)+combos(L);
+}
+
+function ibLevels(){
+  const x=D.ibLevels||{},lv=x.levels||{};const ks=Object.keys(lv);
+  if(!ks.length)return "";
+  const ctrl=x.controlAvg&&x.controlAvg.respectPct;
+  let h=`<h2>¿Qué nivel del IB respeta más?</h2><div class="card">`;
+  for(const k of ks){const v=lv[k];if(!v.n)continue;
+    h+=`<div class="lvl${v.control?" ctrl":""}"><span class="k">${esc(k.slice(2))}%${v.control?" ·c":""}</span><div class="bar"><i style="width:${v.respectPct||0}%"></i></div><span class="mono" style="text-align:right">${pct(v.respectPct)} <span class="mut">${v.n}</span></span></div>`;}
+  h+=`<div class="note">Respeta = rebota 0.25 IB antes de cerrar 0.1 IB al otro lado. Los marcados ·c son de control (entre niveles). Promedio del control: ${pct(ctrl)}. Un nivel solo importa si queda claramente arriba de eso.</div></div>`;
+  return h;
+}
+
+function va80(){
+  const v=D.va80;if(!v||!v.days)return "";
+  const a=v.afterReentry||{},c=v.control||{};
+  return `<h2>Regla del 80 %: ¿se cumple?</h2><div class="card"><div class="scroll"><table class="tbl">
+  <tr><th>Medida</th><th>%</th><th>n</th></tr>
+  <tr><td>Abre fuera del VA</td><td>${pct(100*v.openOutside/v.days)}</td><td>${v.days}</td></tr>
+  <tr><td>Vuelve a entrar (2 cierres)</td><td>${pct(v.reentryPct)}</td><td>${v.openOutside}</td></tr>
+  <tr><td>Luego toca el POC</td><td>${pct(a.reachedPocPct)}</td><td>${a.n}</td></tr>
+  <tr><td><b>Luego llega al otro borde</b></td><td><b>${pct(a.reachedFarPct)}</b></td><td>${a.n}</td></tr>
+  <tr class="dim"><td>Control: días que abren dentro y tocan los dos bordes</td><td>${pct(c.insideDaysTouchBothPct)}</td><td></td></tr>
+  <tr class="dim"><td>Control: cualquier día toca los dos bordes</td><td>${pct(c.allDaysTouchBothPct)}</td><td></td></tr>
+  </table></div></div>`;
+}
+
+function trendTest(){
+  const L=D.lab.PB;if(!L||!(L.trendTest||[]).length)return "";
+  const rs=L.trendTest.slice(0,8);
+  return `<h2>¿Importa la tendencia?</h2><div class="card"><div class="scroll"><table class="tbl"><tr><th>Variante</th><th>a favor</th><th>en contra</th><th>dif.</th></tr>${rs.map((x)=>`<tr><td>${esc(vlabel(x.var))}</td><td class="${cls(x.favor.expR)}">${f2(x.favor.expR)} <span class="mut">${x.favor.n}</span></td><td class="${cls(x.contra.expR)}">${f2(x.contra.expR)} <span class="mut">${x.contra.n}</span></td><td class="${cls(x.diffR)}">${f2(x.diffR)}</td></tr>`).join("")}</table></div><div class="note">Mismo pullback con la tendencia de 1h a favor frente a en contra (el control).</div></div>`;
+}
+
+function kl(){
+  const k=D.klLevels;if(!k||!k.all)return '<div class="empty">Sin toques de TDL KL.</div>';
+  let h=`<h2>Niveles de TDL KL</h2><div class="verdict none">${k.touches.toLocaleString("es-MX")} toques desde el 22 nov · aguantan ${pct(k.all.holdPct)} de los que se decidieron (${pct(k.all.decidedPct)}). ${esc(k.note)}</div><div class="card">`;
+  for(const [lv,s] of Object.entries(k.byLevel||{})){
+    h+=`<div class="lvl"><span class="k">${esc(lv)}</span><div class="bar"><i style="width:${s.holdPct||0}%"></i></div><span class="mono" style="text-align:right">${pct(s.holdPct)} <span class="mut">${s.n}</span></span></div>`;}
+  h+="</div>";
+  const NAME={role:"Papel",regime:"Régimen (relativo)",align:"Alineación (relativa)",session:"Sesión"};
+  for(const [f,g] of Object.entries(k.byContext||{})){
+    h+=`<div class="feat"><span class="k">${NAME[f]||f}</span><div class="chips">${Object.entries(g).map(([v,s])=>`<span class="chip">${esc(VAL[v]||v)} ${pct(s.holdPct)} <span class="mut">${s.n}</span></span>`).join("")}</div></div>`;}
+  return h;
+}
+
+function renderTabs(){
+  $("tabs").innerHTML=TABS.map(([k,n])=>`<button class="tab${k===TAB?" on":""}" data-k="${k}">${n}</button>`).join("");
+  $("tabs").onclick=(e)=>{const b=e.target.closest(".tab");if(!b)return;TAB=b.dataset.k;try{localStorage.setItem("lab.tab",TAB);}catch(_){}renderTabs();renderView();};
+}
+
+function renderView(){
+  if(!D){$("view").innerHTML="";return;}
+  let h="";
+  if(TAB==="ORB")h=family("ORB");
+  else if(TAB==="IB")h=ibLevels()+family("IBB")+family("IBL");
+  else if(TAB==="SW")h=family("SWR")+family("SWC");
+  else if(TAB==="VA80")h=va80()+family("VA80");
+  else if(TAB==="PB")h=trendTest()+family("PB");
+  else h=kl();
+  $("view").innerHTML=h;
+}
+
+async function load(){
+  [D,H]=await Promise.all([getJSON(TOS+"/live/lab.json"),getJSON(TOS+"/live/health.json")]);
+  renderTop();renderColl();renderTabs();renderView();
+  $("foot").textContent="expR = resultado medio en R neto de costos · lb = expR menos un error típico agrupado por día · vs azar = expR menos el de una entrada al azar con el mismo riesgo · faltan = operaciones para que la ventaja sea significativa al 95 %, si se mantiene.";
+}
+load();setInterval(load,5*60*1000);
+</script>
