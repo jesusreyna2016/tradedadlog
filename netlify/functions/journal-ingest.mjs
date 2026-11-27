@@ -39,6 +39,8 @@ function cleanDay(d) {
   if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
   return {
     date,
+    // origen del dia: 'mfp' = digest del servidor (solo fills de MFP, sin fichas); sin campo = Mi Mesa / journal
+    ...(d.src === 'mfp' ? { src: 'mfp' } : {}),
     trades: int(d.trades),
     disciplined: bool(d.disciplined),
     maxLossStreak: int(d.maxLossStreak),
@@ -102,7 +104,12 @@ function mergeByDay(existing, incoming) {
   }
   for (const d of incoming || []) {
     const c = cleanDay(d);
-    if (c) map.set(c.date, c); // incoming wins same date
+    if (!c) continue;
+    // incoming gana en la misma fecha, salvo que el entrante sea del servidor ('mfp') y el que hay venga de
+    // Mi Mesa: Mi Mesa tiene las fichas (sesgo, zona, fugas) y el servidor no, asi que no la pisa
+    const cur = map.get(c.date);
+    if (c.src === 'mfp' && cur && cur.src !== 'mfp') continue;
+    map.set(c.date, c);
   }
   return [...map.values()].sort((a, b) => a.date.localeCompare(b.date));
 }
@@ -117,12 +124,14 @@ export async function writeJournalDigest(byDayIn, source) {
   if (!token) return { ok: false, status: 503, error: 'SA_BUS_TOKEN missing' };
 
   let existing = [];
+  let prevSource = null;
   let known = undefined;
   try {
     known = await busGet('live/journal.json', { token });
     if (known && known.content) {
       const prev = JSON.parse(known.content);
       if (prev && Array.isArray(prev.byDay)) existing = prev.byDay;
+      prevSource = prev && typeof prev.source === 'string' ? prev.source : null;
     }
   } catch (e) {
     known = undefined; // fall through: write as create/update without known
@@ -134,7 +143,9 @@ export async function writeJournalDigest(byDayIn, source) {
   const clean = {
     schema: 'journal-digest-1',
     note: 'De-identified discipline digest from the trader journal. No P&L, no balances. Counts and flags only.',
-    source: source || 'trading-journal',
+    // el relleno nocturno del servidor no cambia el origen principal (lo marca por dia con src 'mfp')
+    source: source === 'mfp-server' ? (prevSource || 'mfp-server') : (source || 'trading-journal'),
+    ...(source === 'mfp-server' ? { serverFillAt: now } : {}),
     updatedAt: now,
     window: { days: byDay.length },
     rollup: recomputeRollup(byDay),
