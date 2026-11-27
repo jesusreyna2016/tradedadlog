@@ -112,6 +112,49 @@ export default async function handler() {
     }
   }
 
+  // ---- Velas del TDL Feed para el Lab (tvbars/<dia UTC>.json) ----
+  // Por simbolo: ultima vela, y si trae o/h/l (FEED1 actualizado). Futuros respetan el
+  // horario de mercado; ETH (crypto) se vigila siempre.
+  try {
+    const EDG = ['NQ', 'ES', 'GC', 'CL', 'ETH'];
+    const dayUTC = (ms) => new Date(ms).toISOString().slice(0, 10);
+    const files = await Promise.all([dayUTC(now.getTime() - 864e5), dayUTC(now.getTime())]
+      .map((d) => getJSON(`${RAW}/tvbars/${d}.json`)));
+    const last = {};
+    for (const f of files) {
+      if (!f || !Array.isArray(f.fields)) continue;
+      const ix = Object.fromEntries(f.fields.map((k, i) => [k, i]));
+      for (const [sym, rows] of Object.entries(f.symbols || {})) {
+        for (const r of rows || []) {
+          if (!last[sym] || r[ix.t] > last[sym].t) last[sym] = { t: r[ix.t], ohlc: r[ix.o] != null && r[ix.h] != null && r[ix.l] != null };
+        }
+      }
+    }
+    const probs = [];
+    let worst = 'ok', oldest = null;
+    for (const sym of EDG) {
+      const crypto = sym === 'ETH';
+      const L = last[sym];
+      let st = 'ok', why = '';
+      if (!crypto && closed) { st = 'off'; }
+      else if (!L) { st = 'warn'; why = 'sin velas'; }
+      else {
+        const age = Math.round((now.getTime() - L.t) / 60000) - 5;   // t = apertura de la vela
+        oldest = Math.max(oldest ?? 0, age);
+        if (age >= 120) { st = 'bad'; why = `sin velas hace ${age >= 120 ? Math.round(age / 60) + 'h' : age + 'm'}`; }
+        else if (age >= 45) { st = 'warn'; why = `vieja (${age}m)`; }
+        else if (!L.ohlc) { st = 'warn'; why = 'FEED1 sin o/h/l: actualizar TDL Feed'; }
+      }
+      if (st === 'warn' || st === 'bad') probs.push(`${sym} ${why}`);
+      if (rank(st) > rank(worst)) worst = st;
+    }
+    const note = probs.length ? probs.join(' · ') : (closed ? 'futuros cerrados · ETH al dia' : 'al dia');
+    items.push({ key: 'tvbars', label: 'Velas para el Lab', writer: 'TDL Feed -> tos-ingest -> snapshot', status: worst, ageMin: oldest, at: null, note });
+    if (worst === 'warn' || worst === 'bad') issues.push(`Velas para el Lab: ${note}`);
+  } catch (e) {
+    items.push({ key: 'tvbars', label: 'Velas para el Lab', writer: 'TDL Feed', status: 'warn', ageMin: null, at: null, note: `chequeo fallo: ${e.message}` });
+  }
+
   const overall = items.reduce((w, it) => Math.max(w, rank(it.status)), 0);
   const status = ['ok', 'warn', 'bad'][overall];
 
