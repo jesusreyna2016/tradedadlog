@@ -16,7 +16,7 @@ const num = (v) => { const x = parseFloat(String(v ?? '').replace(/,/g, '')); re
 
 // Contexto de la zona que manda el indicador (v3.4+). Solo numeros y etiquetas cortas.
 const FEAT_NUM = ['score', 'scoreS', 'rr', 'dist', 'chop', 'str', 'mfe', 'mae', 'risk', 'tp2'];
-const FEAT_TXT = ['v', 'gradeS', 'wv', 'wsv', 'al', 'reg', 'sess', 'keys', 'tf', 'bias'];
+const FEAT_TXT = ['v', 'gradeS', 'wv', 'wsv', 'al', 'reg', 'regL', 'sess', 'keys', 'tf', 'bias'];
 function pickFeatures(kv) {
   const f = {};
   for (const k of FEAT_NUM) { const x = num(kv[k]); if (x !== null) f[k] = x; }

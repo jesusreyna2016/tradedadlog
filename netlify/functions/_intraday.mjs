@@ -327,7 +327,7 @@ export function trackZones(prevPlan, plan, f) {
 //   MM1;t=<ms>;news=<ms>,<ms>;NQ=<sesgo>/<confianza>/<regimen>/<L|S>:<lo>:<hi>:<grado>:<estado>,...
 // Campos vacios = sin dato. Sin espacios ni '=' dentro de los valores.
 // Version vigente de tdl-indicators/mi_mesa_zonas.pine (cambiala junto con VER en el script)
-export const IND_VERSION = '3.5';
+export const IND_VERSION = '3.6';
 const encW = (w) => Object.entries(mergeWeights(w)).map(([k, v]) => k + ':' + (+v.toFixed(3))).join(',');
 export function buildTvSync(plan, news = [], nowMs = Date.now(), weights = null) {
   const clean = (s) => String(s ?? '').replace(/[;=/,:\s]/g, '');
