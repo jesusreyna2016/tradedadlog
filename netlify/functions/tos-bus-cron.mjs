@@ -6,11 +6,21 @@ import { runSnapshot } from './tos-bus-snapshot.mjs';
 import { runMarket } from './tos-market.mjs';
 import { runCoach } from './tos-coach.mjs';
 import { runEdge } from './tos-edge.mjs';
+import { getStore } from '@netlify/blobs';
 import { ghBatchStart, ghBatchCommit, ghBatchAbort } from './_gh-bus.mjs';
 
 export const config = { schedule: '*/15 * * * *' };
 
 export default async () => {
+  // Netlify a veces dispara el mismo cron dos veces seguidas (visto 2026-11-27 22:45 CT): la segunda se salta
+  try {
+    const store = getStore('tos');
+    const last = await store.get('cron:lastPass', { type: 'json' });
+    if (last && Date.now() - last.t < 5 * 60 * 1000) {
+      return new Response(JSON.stringify({ skipped: 'pasada repetida', lastAt: new Date(last.t).toISOString() }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    await store.setJSON('cron:lastPass', { t: Date.now() });
+  } catch (e) { /* si el guardia falla, se corre igual */ }
   // todas las escrituras de esta pasada van en UN commit (ver _gh-bus.mjs, modo lote)
   ghBatchStart('jesusreyna2016', 'trader-os-bus', 'main');
   let commit;
