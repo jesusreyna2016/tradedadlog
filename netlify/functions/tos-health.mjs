@@ -116,7 +116,7 @@ export default async function handler() {
   // Por simbolo: ultima vela, y si trae o/h/l (FEED1 actualizado). Futuros respetan el
   // horario de mercado; ETH (crypto) se vigila siempre.
   try {
-    const EDG = ['NQ', 'ES', 'GC', 'CL', 'ETH'];
+    const EDG = ['NQ', 'ES', 'GC', 'CL', 'ETH', 'BTC'];
     const dayUTC = (ms) => new Date(ms).toISOString().slice(0, 10);
     const files = await Promise.all([dayUTC(now.getTime() - 864e5), dayUTC(now.getTime())]
       .map((d) => getJSON(`${RAW}/tvbars/${d}.json`)));
@@ -133,7 +133,7 @@ export default async function handler() {
     const probs = [];
     let worst = 'ok', oldest = null;
     for (const sym of EDG) {
-      const crypto = sym === 'ETH';
+      const crypto = sym === 'ETH' || sym === 'BTC';
       const L = last[sym];
       let st = 'ok', why = '';
       if (!crypto && closed) { st = 'off'; }
