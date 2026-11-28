@@ -88,16 +88,17 @@ details summary{cursor:pointer;color:var(--fg2);font-size:.85rem;margin:6px 0}
 
 <script>
 const TOS="https://raw.githubusercontent.com/jesusreyna2016/trader-os-bus/main";
-const TABS=[["RIF","Rango iFVG"],["ZON","Zonas"],["ORB","ORB"],["IB","IB"],["SW","Barridas"],["VA80","VA 80%"],["VP","Volume profile"],["PB","Pullback"],["KL","Niveles KL"]];
-const FAM_NAME={ORB:"Opening Range Breakout",IBB:"Ruptura del IB",IBL:"Niveles del IB (operación)",SWR:"Barrida y reclaim (reversa)",SWC:"Barrida aceptada (continuación)",VA80:"Regla del 80 %",PB:"Pullback a EMA20 / VWAP",RIF:"Rango → ruptura → iFVG",RBO:"Ruptura de rango sola (comparación)",ZON:"Zonas de Mi Mesa",VAO:"Apertura frente al valor",VAE:"Rechazo o aceptación en VAH / VAL",NPOC:"Naked POC como imán"};
+const TABS=[["RIF","Rango iFVG"],["ZON","Zonas"],["ORB","ORB"],["IB","IB"],["SW","Barridas"],["VA80","VA 80%"],["VP","Volume profile"],["MAP","Mapa"],["PB","Pullback"],["KL","Niveles KL"]];
+const FAM_NAME={ORB:"Opening Range Breakout",IBB:"Ruptura del IB",IBL:"Niveles del IB (operación)",SWR:"Barrida y reclaim (reversa)",SWC:"Barrida aceptada (continuación)",VA80:"Regla del 80 %",PB:"Pullback a EMA20 / VWAP",RIF:"Rango → ruptura → iFVG",RBO:"Ruptura de rango sola (comparación)",ZON:"Zonas de Mi Mesa",VAO:"Apertura frente al valor",VAE:"Rechazo o aceptación en VAH / VAL",NPOC:"Naked POC como imán",MAP:"Eventos en niveles de tiempo (TDL Map)"};
 const FEAT={vwap:"VWAP",ema:"EMA 20/50",ema200:"EMA200",htf:"Tendencia 1h",klRegime:"Régimen KL",klAlign:"Alineación KL",plan:"Plan pre-NY",
   chop:"Chop",stretch:"Estiramiento",zone:"Premium/disc.",smt:"SMT",gap:"Gap",time:"Hora",dow:"Día",news:"Noticias",pdClose:"Cierre de ayer",
-  rangeAtr:"Rango/ATR",ibVsVA:"IB vs VA",depth:"Profundidad",openDist:"Dist. al VA",npocDist:"Dist. al POC",edge:"Borde",vaWidth:"Ancho VA",nth:"Nº pullback",trendStr:"Fuerza tend.",
+  rangeAtr:"Rango/ATR",ibVsVA:"IB vs VA",depth:"Profundidad",openDist:"Dist. al VA",npocDist:"Dist. al POC",edge:"Borde",kind:"Evidencia",lvlFam:"Familia de nivel",accDist:"Dist. del cierre",mapDir:"Mapa (agrupado)",mapRaw:"Mapa (voto a voto)",rpD:"Rango del día",rpW:"Rango semanal",vaWidth:"Ancho VA",nth:"Nº pullback",trendStr:"Fuerza tend.",
   preNY:"Tomado pre-NY",open:"Abrió",priorTrend:"Tendencia previa",sweptOpp:"Barrió el otro lado",fakeBefore:"Fakeout antes",
   rangeBars:"Duración rango",boToInv:"Velas BO→inversión",fvgAge:"Edad del FVG",side:"Lado",grade:"Grado",zoneBias:"Sesgo de la zona",zoneChop:"Chop (zona)",
   stretchVwap:"Estirado VWAP",rrTp1:"R hasta TP1",k_loH:"Con loH",k_sh5:"Con sh5",k_ibh:"Con IBH",k_pdh:"Con PDH",k_sh4h:"Con sh4h",k_ema200:"Con EMA200"};
 const VAL={favor:"a favor",contra:"en contra",mixed:"mixto",none:"sin",low:"bajo",mid:"medio",high:"alto",chop:"chop",trend:"tendencia",
   inside:"dentro",outside:"fuera",overlap:"cruza",yes:"sí",no:"no",above:"arriba",below:"abajo",neutral:"neutral",medium:"medio",flat:"plano",resistance:"resistencia",support:"soporte",None:"sin lado",
+  accept:"aceptado",reject:"rechazado",disc:"descuento",prem:"premium",
   trend_up:"tend. ▲ sin lado",trend_down:"tend. ▼ sin lado",aligned_up:"alin. ▲ sin lado",aligned_down:"alin. ▼ sin lado",
   cisd_up:"CISD ▲ sin lado",cisd_down:"CISD ▼ sin lado",ASIA:"Asia",LONDON:"Londres",NY:"NY",asia:"Asia",london:"Londres",ny:"NY",close:"cierre",long:"largo",short:"corto"};
 const TOK={close:"al cierre",retest:"retest",limit:"límite",confirm:"rechazo",opp:"stop lado opuesto",mid:"stop medio",edge:"stop borde",
@@ -105,6 +106,7 @@ const TOK={close:"al cierre",retest:"retest",limit:"límite",confirm:"rechazo",o
   next:"siguiente nivel",ifvg:"retest del iFVG",ce:"CE del iFVG",rangeRt:"retest del rango",ifvgFar:"stop tras el iFVG",rangeOpp:"stop otro lado del rango",rangeMid:"stop medio del rango",mm:"medida del rango",hold:"fin de ventana",trigger:"al cierre del gatillo",trigRt:"gatillo + límite",tp1:"TP1",
   PD:"día anterior",PW:"semana anterior",C3:"3 días",ON:"overnight",D1:"POC de ayer",Dn:"POC de días previos",W:"POC semanal",
   back:"vuelta al POC",run:"runner",reject:"rechazo",accept:"aceptación",ext:"stop extremo",atr1:"stop 1 ATR",pocStop:"stop en el POC",
+  acc:"aceptado",rej:"rechazado",lvl:"stop tras el nivel",
   open:"en la apertura",half:"stop a media distancia",full:"stop a la misma distancia",hod:"máx/mín del día",range:"otro lado",ext1:"1x rango","ext0.5":"0.5x rango",be1:"BE en 1R",half1:"½ en 1R",
   ema20:"EMA20",vwap:"VWAP",asH:"Asia H",asL:"Asia L",loH:"Londres H",loL:"Londres L",onh:"ON H",onl:"ON L",pdh:"PDH",pdl:"PDL"};
 let D=null,H=null,TAB="ORB";
@@ -263,6 +265,30 @@ function volumeProfile(){
   return h+family("VAO")+family("VAE")+family("NPOC");
 }
 
+const LFAM={DO:"Apertura del día",D1:"Ayer (PDH / PDL)",Dn:"Días previos con nombre",WO:"Apertura semanal",PW:"Semana anterior",MO:"Apertura mensual",PM:"Mes anterior","4O":"Apertura 4H","4H":"Vela 4H anterior",CTRL:"Control (al azar)"};
+const EVK=[["iFVG","iFVG"],["FVG","FVG"],["barrida","Barrida"],["fallida","Ruptura fallida"],["mecha","Mecha de rechazo"],["cierres","2 cierres al otro lado"]];
+function cmpCell(v){return v&&v.n?`<span class="${cls(v.expR)}">${f2(v.expR)}</span> <span class="mut">${v.n} · ${pct(v.winPct)}</span>`:"·";}
+function levelMap(){
+  const m=D.levelMap;
+  if(!m)return '<div class="empty">Sin datos del mapa todavía.</div>';
+  let h=`<h2>¿Qué evidencia vale algo?</h2><div class="verdict none">Mismo motor que TDL Level Map, sobre niveles reales y sobre niveles de control a ± 4 ATR. Cada evento abre una operación hacia el lado que queda (stop 0.25 ATR tras el nivel, objetivo 2R). La evidencia solo aporta si el nivel real gana claramente más que su control.</div>`;
+  const ev=m.byEvidence||{};
+  const row=(acc,k,n)=>{const x=ev[acc+"|"+k];if(!x)return "";const d=x.real&&x.ctrl&&x.real.expR!=null&&x.ctrl.expR!=null?x.real.expR-x.ctrl.expR:null;
+    return `<div class="vr${(x.real.n||0)<D.minN?" dim":""}"><div class="nm">${esc(n)}</div><div class="st3"><span><b>NIVEL REAL</b>${cmpCell(x.real)}</span><span><b>CONTROL</b>${cmpCell(x.ctrl)}</span><span><b>DIFERENCIA</b><span class="${cls(d)}">${f2(d)}</span></span></div></div>`;};
+  const acc=EVK.map(([k,n])=>row("acc",k,n)).join(""),rej=EVK.map(([k,n])=>row("rej",k,n)).join("");
+  if(acc)h+=`<h3>Aceptado (rompe y se queda)</h3><div class="card">${acc}</div>`;
+  if(rej)h+=`<h3>Rechazado (el nivel aguanta)</h3><div class="card">${rej}</div>`;
+  const fm=m.byLevelFamily||{};const fk=Object.keys(LFAM).filter((k)=>fm[k]);
+  if(fk.length)h+=`<h3>Por familia de nivel</h3><div class="card">${fk.map((k)=>`<div class="vr${k==="CTRL"?" dim":""}"><div class="nm">${esc(LFAM[k])}</div><div class="st3"><span><b>ACEPTADO</b>${cmpCell(fm[k].acc)}</span><span><b>RECHAZADO</b>${cmpCell(fm[k].rej)}</span><span></span></div></div>`).join("")}<div class="note">expR neto · n · % que gana, con stop tras el nivel y 2R. "Días previos con nombre" son los máximos y mínimos de antes de ayer (Lun H, Mar L...).</div></div>`;
+  const st=(m.scoreTest||{}).grouped||{};const bk=["≤-0.65","-0.65/-0.35","-0.35/0.35","0.35/0.65","≥0.65"].filter((k)=>st[k]);
+  if(bk.length){
+    const nm={"≤-0.65":"Cortos fuerte","-0.65/-0.35":"Cortos","-0.35/0.35":"Mixto","0.35/0.65":"Largos","≥0.65":"Largos fuerte"};
+    const c=(x)=>x?`<span class="${cls(x.meanAtr)}">${f2(x.meanAtr)}</span>${x.hitPct!=null?` <span class="mut">${pct(x.hitPct)}</span>`:""}`:"·";
+    h+=`<h2>¿La puntuación de dirección acierta?</h2><div class="card"><div class="scroll"><table class="tbl"><tr><th>Lectura</th><th>n</th><th>1 hora</th><th>4 horas</th></tr>${bk.map((k)=>`<tr><td>${nm[k]}</td><td>${st[k].n}</td><td>${c(st[k].h1)}</td><td>${c(st[k].h4)}</td></tr>`).join("")}</table></div><div class="note">Movimiento medio en ATR de 5m (positivo = sube) y % de veces que fue hacia donde decía la lectura. Al azar sería ~50 %. Una muestra por hora en punto.</div></div>`;
+  }
+  return h+family("MAP");
+}
+
 function rangeIfvg(){
   const x=D.rangeIfvg;if(!x||!x.breaks)return "";
   let h=`<h2>¿Cuántas rupturas invierten un FVG?</h2><div class="card"><div class="scroll"><table class="tbl">
@@ -318,6 +344,7 @@ function renderView(){
   else if(TAB==="SW")h=family("SWR")+family("SWC");
   else if(TAB==="VA80")h=va80()+family("VA80");
   else if(TAB==="VP")h=volumeProfile();
+  else if(TAB==="MAP")h=levelMap();
   else if(TAB==="PB")h=trendTest()+family("PB");
   else h=kl();
   $("view").innerHTML=h;
