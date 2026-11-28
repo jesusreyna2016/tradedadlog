@@ -86,19 +86,20 @@ details summary{cursor:pointer;color:var(--fg2);font-size:.85rem;margin:6px 0}
 
 <script>
 const TOS="https://raw.githubusercontent.com/jesusreyna2016/trader-os-bus/main";
-const TABS=[["ORB","ORB"],["IB","IB"],["SW","Barridas"],["VA80","VA 80%"],["PB","Pullback"],["KL","Niveles KL"]];
-const FAM_NAME={ORB:"Opening Range Breakout",IBB:"Ruptura del IB",IBL:"Niveles del IB (operación)",SWR:"Barrida y reclaim (reversa)",SWC:"Barrida aceptada (continuación)",VA80:"Regla del 80 %",PB:"Pullback a EMA20 / VWAP"};
+const TABS=[["RIF","Rango iFVG"],["ORB","ORB"],["IB","IB"],["SW","Barridas"],["VA80","VA 80%"],["PB","Pullback"],["KL","Niveles KL"]];
+const FAM_NAME={ORB:"Opening Range Breakout",IBB:"Ruptura del IB",IBL:"Niveles del IB (operación)",SWR:"Barrida y reclaim (reversa)",SWC:"Barrida aceptada (continuación)",VA80:"Regla del 80 %",PB:"Pullback a EMA20 / VWAP",RIF:"Rango → ruptura → iFVG",RBO:"Ruptura de rango sola (comparación)"};
 const FEAT={vwap:"VWAP",ema:"EMA 20/50",ema200:"EMA200",htf:"Tendencia 1h",klRegime:"Régimen KL",klAlign:"Alineación KL",plan:"Plan pre-NY",
   chop:"Chop",stretch:"Estiramiento",zone:"Premium/disc.",smt:"SMT",gap:"Gap",time:"Hora",dow:"Día",news:"Noticias",pdClose:"Cierre de ayer",
   rangeAtr:"Rango/ATR",ibVsVA:"IB vs VA",depth:"Profundidad",openDist:"Dist. al VA",vaWidth:"Ancho VA",nth:"Nº pullback",trendStr:"Fuerza tend.",
-  preNY:"Tomado pre-NY",open:"Abrió"};
+  preNY:"Tomado pre-NY",open:"Abrió",priorTrend:"Tendencia previa",sweptOpp:"Barrió el otro lado",fakeBefore:"Fakeout antes",
+  rangeBars:"Duración rango",boToInv:"Velas BO→inversión",fvgAge:"Edad del FVG"};
 const VAL={favor:"a favor",contra:"en contra",mixed:"mixto",none:"sin",low:"bajo",mid:"medio",high:"alto",chop:"chop",trend:"tendencia",
   inside:"dentro",outside:"fuera",overlap:"cruza",yes:"sí",no:"no",above:"arriba",below:"abajo",neutral:"neutral",medium:"medio",flat:"plano",resistance:"resistencia",support:"soporte",None:"sin lado",
   trend_up:"tend. ▲ sin lado",trend_down:"tend. ▼ sin lado",aligned_up:"alin. ▲ sin lado",aligned_down:"alin. ▼ sin lado",
-  cisd_up:"CISD ▲ sin lado",cisd_down:"CISD ▼ sin lado",ASIA:"Asia",LONDON:"Londres",NY:"NY"};
+  cisd_up:"CISD ▲ sin lado",cisd_down:"CISD ▼ sin lado",ASIA:"Asia",LONDON:"Londres",NY:"NY",asia:"Asia",london:"Londres",ny:"NY",close:"cierre"};
 const TOK={close:"al cierre",retest:"retest",limit:"límite",confirm:"rechazo",opp:"stop lado opuesto",mid:"stop medio",edge:"stop borde",
   atr:"stop 0.5 ATR",swing:"stop swing",extreme:"stop extremo","extreme+atr":"stop extremo+ATR",eod:"cierre del día",poc:"al POC",far:"otro borde",
-  next:"siguiente nivel",hod:"máx/mín del día",range:"otro lado",ext1:"1x rango","ext0.5":"0.5x rango",be1:"BE en 1R",half1:"½ en 1R",
+  next:"siguiente nivel",ifvg:"retest del iFVG",ce:"CE del iFVG",rangeRt:"retest del rango",ifvgFar:"stop tras el iFVG",rangeOpp:"stop otro lado del rango",rangeMid:"stop medio del rango",mm:"medida del rango",hold:"fin de ventana",hod:"máx/mín del día",range:"otro lado",ext1:"1x rango","ext0.5":"0.5x rango",be1:"BE en 1R",half1:"½ en 1R",
   ema20:"EMA20",vwap:"VWAP",asH:"Asia H",asL:"Asia L",loH:"Londres H",loL:"Londres L",onh:"ON H",onl:"ON L",pdh:"PDH",pdl:"PDL"};
 let D=null,H=null,TAB="ORB";
 try{TAB=localStorage.getItem("lab.tab")||"ORB";}catch(e){}
@@ -217,6 +218,18 @@ function va80(){
   </table></div></div>`;
 }
 
+function rangeIfvg(){
+  const x=D.rangeIfvg;if(!x||!x.breaks)return "";
+  let h=`<h2>¿Cuántas rupturas invierten un FVG?</h2><div class="card"><div class="scroll"><table class="tbl">
+  <tr><th>Medida</th><th>valor</th></tr>
+  <tr><td>Rupturas de rango (como TDL PA, 5m)</td><td>${x.breaks}</td></tr>
+  <tr><td>Con FVG en contra invertido en ≤ 20 velas</td><td>${x.withInversion} · ${pct(x.inversionPct)}</td></tr></table></div>
+  <div class="note">Tendencia previa a favor = continuación; en contra = reversa (tu setup: bajista, rango, rompe al alza).</div></div>`;
+  const v=(x.vsBreakout||[]).slice(0,6);
+  if(v.length)h+=`<h3>¿El iFVG aporta sobre la ruptura sola?</h3><div class="card">${v.map((r)=>`<div class="vr"><div class="nm">${esc(vlabel(r.var))}</div><div class="st"><span><b>CON iFVG</b><span class="${cls(r.rif.expR)}">${f2(r.rif.expR)}</span> <span class="mut">${r.rif.n}</span></span><span><b>RUPTURA</b><span class="${cls(r.rbo.expR)}">${f2(r.rbo.expR)}</span> <span class="mut">${r.rbo.n}</span></span><span><b>DIF.</b><span class="${cls(r.diffR)}">${f2(r.diffR)}</span></span></div></div>`).join("")}<div class="note">Mismo stop y target; la ruptura sola entra al cierre de la vela de ruptura.</div></div>`;
+  return h;
+}
+
 function trendTest(){
   const L=D.lab.PB;if(!L||!(L.trendTest||[]).length)return "";
   const rs=L.trendTest.slice(0,8);
@@ -243,7 +256,8 @@ function renderTabs(){
 function renderView(){
   if(!D){$("view").innerHTML="";return;}
   let h="";
-  if(TAB==="ORB")h=family("ORB");
+  if(TAB==="RIF")h=rangeIfvg()+family("RIF")+family("RBO");
+  else if(TAB==="ORB")h=family("ORB");
   else if(TAB==="IB")h=ibLevels()+family("IBB")+family("IBL");
   else if(TAB==="SW")h=family("SWR")+family("SWC");
   else if(TAB==="VA80")h=va80()+family("VA80");
