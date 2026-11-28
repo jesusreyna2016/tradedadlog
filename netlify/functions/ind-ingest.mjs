@@ -11,6 +11,7 @@ import { getStore } from '@netlify/blobs';
 import { checkZoneAlerts, notifyTvEvents } from './_push.mjs';
 import { parseMmz, recordTvEvents, parseHb, recordHb } from './_tvzones.mjs';
 import { appendZoneEvents } from './_zonelearn.mjs';
+import { tosIngestBody } from './_tos-core.mjs';
 
 const PREFIX_SRC = {
   R3R1: '3reads', DRB1: 'drbias', SRZ1: 'srzones', HCZ1: 'htfzones', TDL1: 'orb',
@@ -107,6 +108,8 @@ export default async (req) => {
 
   const store = getStore('cc');
   await store.setJSON(`ind:${src}:${sym}`, record);
+  // Trader OS + Lab con la misma alerta (antes hacia falta otra a tos-ingest); nunca rompe la ingesta
+  try { await tosIngestBody(body); } catch (e) { /* secundario */ }
   if(src === 'regime') await appendRegimeLog(store, sym, kv);
   if(src === 'trendcl') await appendTrendLog(store, sym, kv);
   // Mi Mesa: aviso push si el precio se acerca o entra a una zona A/A+ (nunca rompe la ingesta)
