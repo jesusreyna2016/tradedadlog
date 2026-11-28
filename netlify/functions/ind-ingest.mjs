@@ -109,7 +109,9 @@ export default async (req) => {
   const store = getStore('cc');
   await store.setJSON(`ind:${src}:${sym}`, record);
   // Trader OS + Lab con la misma alerta (antes hacia falta otra a tos-ingest); nunca rompe la ingesta
-  try { await tosIngestBody(body); } catch (e) { /* secundario */ }
+  if (new URL(req.url).searchParams.get('noTos') !== '1') {
+    try { await tosIngestBody(body); } catch (e) { /* secundario */ }
+  }
   if(src === 'regime') await appendRegimeLog(store, sym, kv);
   if(src === 'trendcl') await appendTrendLog(store, sym, kv);
   // Mi Mesa: aviso push si el precio se acerca o entra a una zona A/A+ (nunca rompe la ingesta)

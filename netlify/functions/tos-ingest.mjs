@@ -23,7 +23,20 @@ export default async (req) => {
   const key = new URL(req.url).searchParams.get('key');
   if(!secret || key !== secret) return new Response('unauthorized', { status: 401 });
 
-  const r = await tosIngestBody(await req.text());
+  const body = await req.text();
+  const r = await tosIngestBody(body);
+  // Las lineas de indicadores del Session Analyst (FEED1, CMDC1, RGM1, TCL1...) tambien van a
+  // ind-ingest: si la alerta de TradingView apunta solo aqui, el Session Analyst no se queda sin
+  // feed (2026-11-28: la alerta nueva de TDL Feed iba solo a tos-ingest y el SA paso 11 h sin datos).
+  // noTos=1 evita que ind-ingest lo vuelva a mandar aqui.
+  if(/^\s*(FEED1|CMDC1|RGM1|TCL1|R3R1|DRB1|SRZ1|HCZ1|MMZ1)\|/.test(body) && process.env.CC_INGEST_SECRET){
+    try {
+      const u = new URL('/.netlify/functions/ind-ingest', req.url);
+      u.searchParams.set('key', process.env.CC_INGEST_SECRET);
+      u.searchParams.set('noTos', '1');
+      await fetch(u, { method: 'POST', body, signal: AbortSignal.timeout(6000) });
+    } catch (e) { /* secundario: no rompe la ingesta de Trader OS */ }
+  }
   if(!r) return new Response('bad payload (esperaba JSON {"src":...} o PREFIJO|k=v|...)', { status: 400 });
   return new Response(`ok · tos · estado ${r.nState} · eventos ${r.nEvent} · ${r.now}`, { status: 200 });
 };
