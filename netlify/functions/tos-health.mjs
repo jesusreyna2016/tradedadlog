@@ -22,9 +22,9 @@ const CONTRACT = [
   { key: 'edge',      path: 'live/edge.json',           label: 'Edge medido',            writer: 'lente Edge',                      kind: 'live',   warnMin: 90,   badMin: 300,  market: true },
   { key: 'bars',      path: 'bars/__TODAY__.json',      label: 'Velas 5m del dia',       writer: 'tos-bus-bars (cada hora)',        kind: 'hourly', warnMin: 120,  badMin: 240,  market: true },
   { key: 'trader',    path: 'live/trader.json',         label: 'Estado del trader (Coach)', writer: 'tos-coach',                    kind: 'passive',warnMin: 4320, badMin: 10080, market: false },
-  { key: 'plan',      path: 'live/plan-heartbeat.json', label: 'Plan de futuros (pre-asia)', writer: 'lente Contexto (17:20 CT)',   kind: 'daily',  badMin: 3000, dueH: 17.5,  dueTZ: 'CT',  market: false },
+  { key: 'plan',      path: 'live/plan-heartbeat.json', label: 'Plan de futuros (pre-asia)', writer: 'lente Contexto (17:20 CT)',   kind: 'daily',  badMin: 3000, dueH: 17.5,  dueTZ: 'CT',  days: [0, 1, 2, 3, 4], market: false },
   { key: 'crypto',    path: 'live/crypto-heartbeat.json', label: 'Plan de cripto',       writer: 'lente Contexto (00:15Z)',         kind: 'daily',  badMin: 3000, dueH: 0.75,  dueTZ: 'UTC', market: false },
-  { key: 'parity',    path: 'live/parity.json',         label: 'Paridad (Paso 4)',       writer: 'parity.py en pre-asia',           kind: 'daily',  badMin: 3600, dueH: 17.7,  dueTZ: 'CT',  market: false },
+  { key: 'parity',    path: 'live/parity.json',         label: 'Paridad (Paso 4)',       writer: 'parity.py en pre-asia',           kind: 'daily',  badMin: 3600, dueH: 17.7,  dueTZ: 'CT',  days: [0, 1, 2, 3, 4], market: false },
 ];
 
 // Varios archivos guardan la hora en campos distintos; probamos los habituales.
@@ -91,7 +91,10 @@ export default async function handler() {
           const nowDay = nref.toISOString().slice(0, 10);
           const nowH = nref.getUTCHours() + nref.getUTCMinutes() / 60;
           const ranToday = stampDay === nowDay && stampH >= c.dueH - 1;
+          // dias en que toca (0 = domingo); el pre-asia de futuros no corre viernes ni sabado (no hay sesion al dia siguiente)
+          const dueToday = !c.days || c.days.includes(nref.getUTCDay());
           if (ranToday) { status = 'ok'; note = 'al dia'; }
+          else if (!dueToday) { status = 'ok'; note = 'hoy no toca'; }
           else if (nowH >= c.dueH) { status = ageMin >= c.badMin ? 'bad' : 'warn'; note = `no corrio hoy (esperado ${c.dueH}${utc ? 'Z' : 'h CT'})`; }
           else { status = 'ok'; note = 'espera la corrida de hoy'; }
         }
