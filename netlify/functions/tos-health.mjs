@@ -174,6 +174,13 @@ export default async function handler() {
   if (token) {
     try {
       const cur = await ghGet(OWNER, REPO, BRANCH, 'live/health.json', { token });
+      // sin cambios de estado ni de avisos, se reescribe como mucho una vez por hora (antes: un commit cada 15 min)
+      let prev = null;
+      try { prev = cur && cur.content ? JSON.parse(cur.content) : null; } catch { prev = null; }
+      const sig = (h) => JSON.stringify([h.status, h.marketOpen, h.issues, (h.items || []).map((it) => [it.key, it.status, it.note])]);
+      if (prev && sig(prev) === sig(health) && now.getTime() - Date.parse(prev.checkedAt || 0) < 60 * 60 * 1000) {
+        return new Response(JSON.stringify({ ...health, write: 'sin cambios' }), { status: 200, headers: { 'content-type': 'application/json' } });
+      }
       await ghPut(OWNER, REPO, BRANCH, 'live/health.json', JSON.stringify(health, null, 1),
         `tos: health ${status}`, { token, known: cur });
     } catch (e) {

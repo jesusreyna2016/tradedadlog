@@ -10,7 +10,7 @@
 // Cada hora a :09 baja los ultimos 2 dias de Yahoo y reescribe los archivos de
 // hoy y ayer (union por timestamp, asi una vela tardia de Yahoo no borra nada).
 // Formato compacto: { builtAt, tf: "5m", source, symbols: { NQ: [[tSec,o,h,l,c], ...] } }
-import { ghGet, ghPut } from './_gh-bus.mjs';
+import { ghGet, ghPut, ghBatchStart, ghBatchCommit, ghBatchAbort } from './_gh-bus.mjs';
 
 export const config = { schedule: '9 * * * *' };
 
@@ -64,6 +64,8 @@ export async function runBars(){
       for(const b of list) m.set(b[0], b);
       symbols[k] = [...m.values()].sort((a, b) => a[0] - b[0]);
     }
+    // sin velas nuevas no se reescribe (antes builtAt cambiaba cada hora y eran 4 commits por hora sin datos nuevos)
+    if(JSON.stringify(symbols) === JSON.stringify(prev.symbols || {})){ written.push({ day, skipped: true }); continue; }
     const body = JSON.stringify({ builtAt: new Date().toISOString(), tf: '5m', source: 'yahoo', symbols }) + '\n';
     try {
       const r = await ghPut(OWNER, REPO, BRANCH, path, body, `tos: bars ${day}`, { token, known: cur });
@@ -74,7 +76,14 @@ export async function runBars(){
 }
 
 export default async () => {
-  const r = await runBars();
+  // todos los dias en un solo commit
+  ghBatchStart(OWNER, REPO, BRANCH);
+  let r;
+  try { r = await runBars(); }
+  finally {
+    try { r && (r.commit = await ghBatchCommit({ message: `tos: bars ${new Date().toISOString()}`, token: process.env.TOS_BUS_TOKEN })); }
+    catch(e){ ghBatchAbort(); if(r) r.commitError = String(e.message || e); }
+  }
   return new Response(JSON.stringify(r), {
     status: r.ok ? 200 : 503,
     headers: { 'content-type': 'application/json', 'cache-control': 'no-store' }
