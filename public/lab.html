@@ -88,11 +88,11 @@ details summary{cursor:pointer;color:var(--fg2);font-size:.85rem;margin:6px 0}
 
 <script>
 const TOS="https://raw.githubusercontent.com/jesusreyna2016/trader-os-bus/main";
-const TABS=[["RIF","Rango iFVG"],["ZON","Zonas"],["ORB","ORB"],["IB","IB"],["SW","Barridas"],["VA80","VA 80%"],["PB","Pullback"],["KL","Niveles KL"]];
-const FAM_NAME={ORB:"Opening Range Breakout",IBB:"Ruptura del IB",IBL:"Niveles del IB (operación)",SWR:"Barrida y reclaim (reversa)",SWC:"Barrida aceptada (continuación)",VA80:"Regla del 80 %",PB:"Pullback a EMA20 / VWAP",RIF:"Rango → ruptura → iFVG",RBO:"Ruptura de rango sola (comparación)",ZON:"Zonas de Mi Mesa"};
+const TABS=[["RIF","Rango iFVG"],["ZON","Zonas"],["ORB","ORB"],["IB","IB"],["SW","Barridas"],["VA80","VA 80%"],["VP","Volume profile"],["PB","Pullback"],["KL","Niveles KL"]];
+const FAM_NAME={ORB:"Opening Range Breakout",IBB:"Ruptura del IB",IBL:"Niveles del IB (operación)",SWR:"Barrida y reclaim (reversa)",SWC:"Barrida aceptada (continuación)",VA80:"Regla del 80 %",PB:"Pullback a EMA20 / VWAP",RIF:"Rango → ruptura → iFVG",RBO:"Ruptura de rango sola (comparación)",ZON:"Zonas de Mi Mesa",VAO:"Apertura frente al valor",VAE:"Rechazo o aceptación en VAH / VAL",NPOC:"Naked POC como imán"};
 const FEAT={vwap:"VWAP",ema:"EMA 20/50",ema200:"EMA200",htf:"Tendencia 1h",klRegime:"Régimen KL",klAlign:"Alineación KL",plan:"Plan pre-NY",
   chop:"Chop",stretch:"Estiramiento",zone:"Premium/disc.",smt:"SMT",gap:"Gap",time:"Hora",dow:"Día",news:"Noticias",pdClose:"Cierre de ayer",
-  rangeAtr:"Rango/ATR",ibVsVA:"IB vs VA",depth:"Profundidad",openDist:"Dist. al VA",vaWidth:"Ancho VA",nth:"Nº pullback",trendStr:"Fuerza tend.",
+  rangeAtr:"Rango/ATR",ibVsVA:"IB vs VA",depth:"Profundidad",openDist:"Dist. al VA",npocDist:"Dist. al POC",edge:"Borde",vaWidth:"Ancho VA",nth:"Nº pullback",trendStr:"Fuerza tend.",
   preNY:"Tomado pre-NY",open:"Abrió",priorTrend:"Tendencia previa",sweptOpp:"Barrió el otro lado",fakeBefore:"Fakeout antes",
   rangeBars:"Duración rango",boToInv:"Velas BO→inversión",fvgAge:"Edad del FVG",side:"Lado",grade:"Grado",zoneBias:"Sesgo de la zona",zoneChop:"Chop (zona)",
   stretchVwap:"Estirado VWAP",rrTp1:"R hasta TP1",k_loH:"Con loH",k_sh5:"Con sh5",k_ibh:"Con IBH",k_pdh:"Con PDH",k_sh4h:"Con sh4h",k_ema200:"Con EMA200"};
@@ -102,7 +102,10 @@ const VAL={favor:"a favor",contra:"en contra",mixed:"mixto",none:"sin",low:"bajo
   cisd_up:"CISD ▲ sin lado",cisd_down:"CISD ▼ sin lado",ASIA:"Asia",LONDON:"Londres",NY:"NY",asia:"Asia",london:"Londres",ny:"NY",close:"cierre",long:"largo",short:"corto"};
 const TOK={close:"al cierre",retest:"retest",limit:"límite",confirm:"rechazo",opp:"stop lado opuesto",mid:"stop medio",edge:"stop borde",
   atr:"stop 0.5 ATR",swing:"stop swing",extreme:"stop extremo","extreme+atr":"stop extremo+ATR",eod:"cierre del día",poc:"al POC",far:"otro borde",
-  next:"siguiente nivel",ifvg:"retest del iFVG",ce:"CE del iFVG",rangeRt:"retest del rango",ifvgFar:"stop tras el iFVG",rangeOpp:"stop otro lado del rango",rangeMid:"stop medio del rango",mm:"medida del rango",hold:"fin de ventana",trigger:"al cierre del gatillo",trigRt:"gatillo + límite",tp1:"TP1",hod:"máx/mín del día",range:"otro lado",ext1:"1x rango","ext0.5":"0.5x rango",be1:"BE en 1R",half1:"½ en 1R",
+  next:"siguiente nivel",ifvg:"retest del iFVG",ce:"CE del iFVG",rangeRt:"retest del rango",ifvgFar:"stop tras el iFVG",rangeOpp:"stop otro lado del rango",rangeMid:"stop medio del rango",mm:"medida del rango",hold:"fin de ventana",trigger:"al cierre del gatillo",trigRt:"gatillo + límite",tp1:"TP1",
+  PD:"día anterior",PW:"semana anterior",C3:"3 días",ON:"overnight",D1:"POC de ayer",Dn:"POC de días previos",W:"POC semanal",
+  back:"vuelta al POC",run:"runner",reject:"rechazo",accept:"aceptación",ext:"stop extremo",atr1:"stop 1 ATR",pocStop:"stop en el POC",
+  open:"en la apertura",half:"stop a media distancia",full:"stop a la misma distancia",hod:"máx/mín del día",range:"otro lado",ext1:"1x rango","ext0.5":"0.5x rango",be1:"BE en 1R",half1:"½ en 1R",
   ema20:"EMA20",vwap:"VWAP",asH:"Asia H",asL:"Asia L",loH:"Londres H",loL:"Londres L",onh:"ON H",onl:"ON L",pdh:"PDH",pdl:"PDL"};
 let D=null,H=null,TAB="ORB";
 try{TAB=localStorage.getItem("lab.tab")||"ORB";}catch(e){}
@@ -221,6 +224,37 @@ function va80(){
   </table></div></div>`;
 }
 
+const PROF=[["PD","Día anterior"],["PW","Semana anterior"],["C3","Compuesto 3 días"],["ON","Overnight"]];
+const NAKED=[["D1","POC de ayer"],["Dn","POC de días previos"],["W","POC semanal"]];
+function vpCompare(fam,ref,title,keys){
+  const c=((D.volumeProfile||{}).compare||{})[fam];const r=c&&c.ref&&c.ref[ref];
+  if(!r||!Object.keys(r).length)return "";
+  const rows=keys.filter(([k])=>r[k]).map(([k,n])=>{const v=r[k];
+    return `<tr${v.n<D.minN?' class="dim"':""}><td>${n}</td><td>${v.n}</td><td>${pct(v.winPct)}</td><td class="${cls(v.expR)}">${f2(v.expR)}</td><td class="${cls(v.edgeVsCtrl)}">${f2(v.edgeVsCtrl)}</td></tr>`;}).join("");
+  return `<div class="card"><div class="nm" style="font-size:.86rem;margin-bottom:4px">${esc(title)}</div><div class="mut" style="font-size:.74rem">${esc(vlabel(ref))}</div><div class="scroll"><table class="tbl"><tr><th>Perfil</th><th>n</th><th>gana</th><th>expR</th><th>vs azar</th></tr>${rows}</table></div></div>`;
+}
+function volumeProfile(){
+  const v=D.volumeProfile;
+  if(!v)return '<div class="empty">Sin datos de volume profile todavía.</div>';
+  let h=`<h2>¿Qué perfil acierta más?</h2><div class="verdict none">Las mismas reglas sobre cada perfil: el del día anterior (el que manda el TDL Feed) frente a la semana anterior, el compuesto de 3 días y el overnight, que el Lab arma con el volumen de las velas de 5 m. Atenuado = menos de ${D.minN} operaciones.</div>`;
+  h+=vpCompare("VAE","reject|close|ext|poc","Rechazo en VAH / VAL hacia el POC",PROF);
+  h+=vpCompare("VAE","accept|close|edge|2R","Aceptación fuera de VAH / VAL",PROF);
+  h+=vpCompare("VAO","back|ext|poc","Abre fuera del VA → vuelve al POC",PROF);
+  h+=vpCompare("VAO","run|ext|2R","Abre fuera del rango → runner",PROF);
+  h+=vpCompare("NPOC","open|half","Naked POC: hacia él desde la apertura",NAKED);
+  const best=Object.entries(((v.compare||{}).VAE||{}).best||{}).concat(Object.entries(((v.compare||{}).VAO||{}).best||{}));
+  if(best.length)h+=`<details><summary>Mejor variante de cada perfil</summary><div class="card">${best.map(([p,x])=>`<div class="vr"><div class="nm">${esc(vlabel(x.var))}</div>${statsRow(x,true)}</div>`).join("")}</div></details>`;
+  const op=v.open||{},ed=v.edges||{},nk=v.naked||{};
+  const name=(k)=>(PROF.concat(NAKED).find((x)=>x[0]===k)||[k,k])[1];
+  const ord=(o,list)=>list.map(([k])=>k).filter((k)=>o[k]);
+  if(Object.keys(op).length)h+=`<h3>Cómo abre frente a cada perfil</h3><div class="card">${ord(op,PROF).map((k)=>{const o=op[k];return `<div class="vr"><div class="nm">${name(k)} <span class="mut">· ${o.days} días</span></div><div class="st3"><span><b>DENTRO</b>${pct(o.insidePct)}</span><span><b>FUERA DEL VA</b>${pct(o.outVAPct)}</span><span><b>FUERA DEL RANGO</b>${pct(o.outRangePct)}</span><span><b>TOCA AMBOS</b>${pct(o.insideTouchBothPct)}</span><span><b>LUEGO AL POC</b>${pct(o.outVAReachedPocPct)}</span><span><b>CIERRA FUERA</b>${pct(o.outRangeHeldPct)}</span></div></div>`;}).join("")}<div class="note">Cada columna de abajo es de los días de arriba: si abre dentro, cuántos tocan los dos bordes; si abre fuera del VA, cuántos llegan al POC; si abre fuera del rango, cuántos cierran fuera.</div></div>`;
+  if(Object.keys(ed).length)h+=`<h3>Primera prueba de VAH / VAL</h3><div class="card"><div class="scroll"><table class="tbl"><tr><th>Perfil</th><th>pruebas</th><th>rechazo</th><th>aceptación</th></tr>${ord(ed,PROF).map((k)=>[k,ed[k]]).map(([k,e])=>`<tr><td>${name(k)}</td><td>${e.tests}</td><td>${pct(e.rejectPct)}</td><td>${pct(e.acceptPct)}</td></tr>`).join("")}</table></div></div>`;
+  if(Object.keys(nk).length)h+=`<h3>¿El naked POC atrae?</h3><div class="card"><div class="scroll"><table class="tbl"><tr><th>Nivel</th><th>n</th><th>llega</th><th>espejo</th></tr>${ord(nk,NAKED).map((k)=>[k,nk[k]]).map(([k,x])=>`<tr><td>${name(k)}</td><td>${x.n}</td><td>${pct(x.reachedPct)}</td><td class="mut">${pct(x.mirrorPct)}</td></tr>`).join("")}</table></div><div class="note">Espejo = un nivel a la misma distancia del otro lado de la apertura. El POC solo atrae si llega claramente más que el espejo.</div></div>`;
+  const ov=v.ownVsFeed;
+  if(ov)h+=`<div class="note">Control de calidad: el perfil del día anterior que arma el Lab difiere del de TradingView en ${ov.poc} ticks en el POC, ${ov.vah} en VAH y ${ov.val} en VAL (mediana de ${ov.n} días).</div>`;
+  return h+family("VAO")+family("VAE")+family("NPOC");
+}
+
 function rangeIfvg(){
   const x=D.rangeIfvg;if(!x||!x.breaks)return "";
   let h=`<h2>¿Cuántas rupturas invierten un FVG?</h2><div class="card"><div class="scroll"><table class="tbl">
@@ -275,6 +309,7 @@ function renderView(){
   else if(TAB==="IB")h=ibLevels()+family("IBB")+family("IBL");
   else if(TAB==="SW")h=family("SWR")+family("SWC");
   else if(TAB==="VA80")h=va80()+family("VA80");
+  else if(TAB==="VP")h=volumeProfile();
   else if(TAB==="PB")h=trendTest()+family("PB");
   else h=kl();
   $("view").innerHTML=h;
