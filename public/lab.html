@@ -197,7 +197,11 @@ function family(fam){
   let h=`<h2>${FAM_NAME[fam]}</h2>`;
   if(!L){
     const ok=Object.values((D.data||{}).collection||{}).some((x)=>x.ohlc>0);
-    return h+`<div class="empty">${ok?"Sin operaciones todavía: faltan sesiones completas con velas del TDL Feed (el Lab mide de lunes a viernes, 9:30 a 16:00 NY).":"Sin operaciones todavía: empieza a contar cuando lleguen velas de FEED1 con o/h/l."}</div>`;
+    const why=!ok?"empieza a contar cuando lleguen velas de FEED1 con o/h/l."
+      :(fam==="RIF"||fam==="RBO")?"los rangos son los de TDL PA y usan el ATR de 100 velas: hacen falta 100 velas completas seguidas y luego que se forme y rompa un rango (a cualquier hora, también cripto)."
+      :fam==="ZON"?"hacen falta velas en las mismas horas que los eventos de zonas de Mi Mesa."
+      :"faltan sesiones completas con velas del TDL Feed (esta familia mide de lunes a viernes, 9:30 a 16:00 NY).";
+    return h+`<div class="empty">Sin operaciones todavía: ${why}</div>`;
   }
   return h+verdict(L)+'<div class="card">'+variantsTable(L)+"</div>"+confluence(L)+combos(L);
 }
