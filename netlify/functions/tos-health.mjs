@@ -114,9 +114,9 @@ export default async function handler() {
 
   // ---- Velas del TDL Feed para el Lab (tvbars/<dia UTC>.json) ----
   // Por simbolo: ultima vela, y si trae o/h/l (FEED1 actualizado). Futuros respetan el
-  // horario de mercado; ETH (crypto) se vigila siempre.
+  // horario de mercado; ETH y BTC (crypto) se vigilan siempre.
   try {
-    const EDG = ['NQ', 'ES', 'GC', 'CL', 'ETH'];
+    const EDG = ['NQ', 'ES', 'GC', 'CL', 'ETH', 'BTC'];
     const dayUTC = (ms) => new Date(ms).toISOString().slice(0, 10);
     const files = await Promise.all([dayUTC(now.getTime() - 864e5), dayUTC(now.getTime())]
       .map((d) => getJSON(`${RAW}/tvbars/${d}.json`)));
@@ -133,7 +133,7 @@ export default async function handler() {
     const probs = [];
     let worst = 'ok', oldest = null;
     for (const sym of EDG) {
-      const crypto = sym === 'ETH';
+      const crypto = sym === 'ETH' || sym === 'BTC';
       const L = last[sym];
       let st = 'ok', why = '';
       if (!crypto && closed) { st = 'off'; }
@@ -148,7 +148,7 @@ export default async function handler() {
       if (st === 'warn' || st === 'bad') probs.push(`${sym} ${why}`);
       if (rank(st) > rank(worst)) worst = st;
     }
-    const note = probs.length ? probs.join(' · ') : (closed ? 'futuros cerrados · ETH al dia' : 'al dia');
+    const note = probs.length ? probs.join(' · ') : (closed ? 'futuros cerrados · crypto al dia' : 'al dia');
     items.push({ key: 'tvbars', label: 'Velas para el Lab', writer: 'TDL Feed -> tos-ingest -> snapshot', status: worst, ageMin: oldest, at: null, note });
     if (worst === 'warn' || worst === 'bad') issues.push(`Velas para el Lab: ${note}`);
   } catch (e) {

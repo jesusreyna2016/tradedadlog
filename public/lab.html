@@ -64,6 +64,8 @@ h3{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:
 .vr .st{display:grid;grid-template-columns:repeat(3,1fr);gap:2px 10px;font-family:var(--mono);font-size:.74rem;font-variant-numeric:tabular-nums}
 .vr .st span{white-space:nowrap}.vr .st b{font-weight:500;color:var(--muted);font-size:.62rem;letter-spacing:.06em;margin-right:5px}
 .vr .wh{font-size:.76rem;color:var(--muted);margin:-2px 0 5px}
+.st3{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 10px;font-family:var(--mono);font-size:.74rem;font-variant-numeric:tabular-nums}
+.st3 b{display:block;font-weight:500;color:var(--muted);font-size:.6rem;letter-spacing:.06em}
 .verdict ul{margin:6px 0 0;padding-left:18px}.verdict li{margin:2px 0}
 .empty{color:var(--fg2);font-size:.9rem;padding:18px 4px;text-align:center}
 .foot{font-size:.72rem;color:var(--faint);margin-top:30px}
@@ -86,20 +88,21 @@ details summary{cursor:pointer;color:var(--fg2);font-size:.85rem;margin:6px 0}
 
 <script>
 const TOS="https://raw.githubusercontent.com/jesusreyna2016/trader-os-bus/main";
-const TABS=[["RIF","Rango iFVG"],["ORB","ORB"],["IB","IB"],["SW","Barridas"],["VA80","VA 80%"],["PB","Pullback"],["KL","Niveles KL"]];
-const FAM_NAME={ORB:"Opening Range Breakout",IBB:"Ruptura del IB",IBL:"Niveles del IB (operación)",SWR:"Barrida y reclaim (reversa)",SWC:"Barrida aceptada (continuación)",VA80:"Regla del 80 %",PB:"Pullback a EMA20 / VWAP",RIF:"Rango → ruptura → iFVG",RBO:"Ruptura de rango sola (comparación)"};
+const TABS=[["RIF","Rango iFVG"],["ZON","Zonas"],["ORB","ORB"],["IB","IB"],["SW","Barridas"],["VA80","VA 80%"],["PB","Pullback"],["KL","Niveles KL"]];
+const FAM_NAME={ORB:"Opening Range Breakout",IBB:"Ruptura del IB",IBL:"Niveles del IB (operación)",SWR:"Barrida y reclaim (reversa)",SWC:"Barrida aceptada (continuación)",VA80:"Regla del 80 %",PB:"Pullback a EMA20 / VWAP",RIF:"Rango → ruptura → iFVG",RBO:"Ruptura de rango sola (comparación)",ZON:"Zonas de Mi Mesa"};
 const FEAT={vwap:"VWAP",ema:"EMA 20/50",ema200:"EMA200",htf:"Tendencia 1h",klRegime:"Régimen KL",klAlign:"Alineación KL",plan:"Plan pre-NY",
   chop:"Chop",stretch:"Estiramiento",zone:"Premium/disc.",smt:"SMT",gap:"Gap",time:"Hora",dow:"Día",news:"Noticias",pdClose:"Cierre de ayer",
   rangeAtr:"Rango/ATR",ibVsVA:"IB vs VA",depth:"Profundidad",openDist:"Dist. al VA",vaWidth:"Ancho VA",nth:"Nº pullback",trendStr:"Fuerza tend.",
   preNY:"Tomado pre-NY",open:"Abrió",priorTrend:"Tendencia previa",sweptOpp:"Barrió el otro lado",fakeBefore:"Fakeout antes",
-  rangeBars:"Duración rango",boToInv:"Velas BO→inversión",fvgAge:"Edad del FVG"};
+  rangeBars:"Duración rango",boToInv:"Velas BO→inversión",fvgAge:"Edad del FVG",side:"Lado",grade:"Grado",zoneBias:"Sesgo de la zona",zoneChop:"Chop (zona)",
+  stretchVwap:"Estirado VWAP",rrTp1:"R hasta TP1",k_loH:"Con loH",k_sh5:"Con sh5",k_ibh:"Con IBH",k_pdh:"Con PDH",k_sh4h:"Con sh4h",k_ema200:"Con EMA200"};
 const VAL={favor:"a favor",contra:"en contra",mixed:"mixto",none:"sin",low:"bajo",mid:"medio",high:"alto",chop:"chop",trend:"tendencia",
   inside:"dentro",outside:"fuera",overlap:"cruza",yes:"sí",no:"no",above:"arriba",below:"abajo",neutral:"neutral",medium:"medio",flat:"plano",resistance:"resistencia",support:"soporte",None:"sin lado",
   trend_up:"tend. ▲ sin lado",trend_down:"tend. ▼ sin lado",aligned_up:"alin. ▲ sin lado",aligned_down:"alin. ▼ sin lado",
-  cisd_up:"CISD ▲ sin lado",cisd_down:"CISD ▼ sin lado",ASIA:"Asia",LONDON:"Londres",NY:"NY",asia:"Asia",london:"Londres",ny:"NY",close:"cierre"};
+  cisd_up:"CISD ▲ sin lado",cisd_down:"CISD ▼ sin lado",ASIA:"Asia",LONDON:"Londres",NY:"NY",asia:"Asia",london:"Londres",ny:"NY",close:"cierre",long:"largo",short:"corto"};
 const TOK={close:"al cierre",retest:"retest",limit:"límite",confirm:"rechazo",opp:"stop lado opuesto",mid:"stop medio",edge:"stop borde",
   atr:"stop 0.5 ATR",swing:"stop swing",extreme:"stop extremo","extreme+atr":"stop extremo+ATR",eod:"cierre del día",poc:"al POC",far:"otro borde",
-  next:"siguiente nivel",ifvg:"retest del iFVG",ce:"CE del iFVG",rangeRt:"retest del rango",ifvgFar:"stop tras el iFVG",rangeOpp:"stop otro lado del rango",rangeMid:"stop medio del rango",mm:"medida del rango",hold:"fin de ventana",hod:"máx/mín del día",range:"otro lado",ext1:"1x rango","ext0.5":"0.5x rango",be1:"BE en 1R",half1:"½ en 1R",
+  next:"siguiente nivel",ifvg:"retest del iFVG",ce:"CE del iFVG",rangeRt:"retest del rango",ifvgFar:"stop tras el iFVG",rangeOpp:"stop otro lado del rango",rangeMid:"stop medio del rango",mm:"medida del rango",hold:"fin de ventana",trigger:"al cierre del gatillo",trigRt:"gatillo + límite",tp1:"TP1",hod:"máx/mín del día",range:"otro lado",ext1:"1x rango","ext0.5":"0.5x rango",be1:"BE en 1R",half1:"½ en 1R",
   ema20:"EMA20",vwap:"VWAP",asH:"Asia H",asL:"Asia L",loH:"Londres H",loL:"Londres L",onh:"ON H",onl:"ON L",pdh:"PDH",pdl:"PDL"};
 let D=null,H=null,TAB="ORB";
 try{TAB=localStorage.getItem("lab.tab")||"ORB";}catch(e){}
@@ -230,6 +233,16 @@ function rangeIfvg(){
   return h;
 }
 
+function zones(){
+  const z=D.zones;if(!z)return "";
+  let h=`<h2>¿Cómo conviene entrar a las zonas?</h2><div class="verdict none">Límite = orden en la entrada de <b>toda</b> zona tocada (la honesta: no sabe si se va a armar). Gatillo = al cierre de la vela que la arma. Gatillo + límite = después del gatillo, si regresa a la entrada.${z.touched?` · ${z.touched} tocadas · ${z.armed} armadas`:""}</div>`;
+  const rows=z.byEntry||[];
+  if(!rows.length)return h+'<div class="empty">Sin zonas medidas todavía: empieza cuando haya velas del TDL Feed en las mismas horas que los eventos.</div>';
+  const cell=(v)=>v?`<span class="${cls(v.expR)}">${f2(v.expR)}</span> <span class="mut">${v.n}${v.fillPct!=null?" · "+pct(v.fillPct):""}</span>`:"·";
+  h+=`<div class="card">${rows.map((r)=>`<div class="vr"><div class="nm">Salida: ${esc(vlabel(r.exit))}</div><div class="st3"><span><b>LÍMITE</b>${cell(r.limit)}</span><span><b>GATILLO</b>${cell(r.trigger)}</span><span><b>GATILLO+LÍM.</b>${cell(r.trigRt)}</span></div></div>`).join("")}<div class="note">expR neto · n · % de llenado. Mismo stop: el de la zona.</div></div>`;
+  return h;
+}
+
 function trendTest(){
   const L=D.lab.PB;if(!L||!(L.trendTest||[]).length)return "";
   const rs=L.trendTest.slice(0,8);
@@ -257,6 +270,7 @@ function renderView(){
   if(!D){$("view").innerHTML="";return;}
   let h="";
   if(TAB==="RIF")h=rangeIfvg()+family("RIF")+family("RBO");
+  else if(TAB==="ZON")h=zones()+family("ZON");
   else if(TAB==="ORB")h=family("ORB");
   else if(TAB==="IB")h=ibLevels()+family("IBB")+family("IBL");
   else if(TAB==="SW")h=family("SWR")+family("SWC");
