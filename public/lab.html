@@ -195,7 +195,10 @@ function combos(L){
 function family(fam){
   const L=D.lab[fam];
   let h=`<h2>${FAM_NAME[fam]}</h2>`;
-  if(!L)return h+'<div class="empty">Sin operaciones todavía: empieza a contar cuando lleguen velas de FEED1 con o/h/l.</div>';
+  if(!L){
+    const ok=Object.values((D.data||{}).collection||{}).some((x)=>x.ohlc>0);
+    return h+`<div class="empty">${ok?"Sin operaciones todavía: faltan sesiones completas con velas del TDL Feed (el Lab mide de lunes a viernes, 9:30 a 16:00 NY).":"Sin operaciones todavía: empieza a contar cuando lleguen velas de FEED1 con o/h/l."}</div>`;
+  }
   return h+verdict(L)+'<div class="card">'+variantsTable(L)+"</div>"+confluence(L)+combos(L);
 }
 
@@ -237,6 +240,7 @@ function volumeProfile(){
   const v=D.volumeProfile;
   if(!v)return '<div class="empty">Sin datos de volume profile todavía.</div>';
   let h=`<h2>¿Qué perfil acierta más?</h2><div class="verdict none">Las mismas reglas sobre cada perfil: el del día anterior (el que manda el TDL Feed) frente a la semana anterior, el compuesto de 3 días y el overnight, que el Lab arma con el volumen de las velas de 5 m. Atenuado = menos de ${D.minN} operaciones.</div>`;
+  if(!Object.keys(v.compare||{}).length)h+=`<div class="card"><div class="note" style="margin:0">Cada perfil necesita días completos de velas con volumen antes de la sesión que mide:<ul style="margin:6px 0 0;padding-left:18px"><li><b>Día anterior y overnight</b>: desde la primera sesión de lunes a viernes con el día previo completo.</li><li><b>Compuesto de 3 días</b> y <b>naked POC de días previos</b>: con 3 días completos.</li><li><b>Semana anterior</b> y <b>POC semanal</b>: con una semana completa.</li></ul></div></div>`;
   h+=vpCompare("VAE","reject|close|ext|poc","Rechazo en VAH / VAL hacia el POC",PROF);
   h+=vpCompare("VAE","accept|close|edge|2R","Aceptación fuera de VAH / VAL",PROF);
   h+=vpCompare("VAO","back|ext|poc","Abre fuera del VA → vuelve al POC",PROF);
