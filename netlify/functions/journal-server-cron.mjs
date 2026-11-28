@@ -6,7 +6,7 @@
 // eso lo hace el analista con los fills (method/plan_vs_exec.py). Los dias con src 'mfp' nunca pisan un dia
 // que ya mando Mi Mesa (writeJournalDigest), y Mi Mesa si los pisa cuando se abre.
 import { getStore } from '@netlify/blobs';
-import { writeJournalDigest } from './journal-ingest.mjs';
+import { writeJournalDigest, touchJournalChecked } from './journal-ingest.mjs';
 import { hasKey, listAccounts, closedPositions } from './_mfp.mjs';
 
 export const config = { schedule: '40 4 * * *' };   // 04:40 UTC = 22:40 / 23:40 Chicago, tras el cierre de NY
@@ -60,7 +60,12 @@ export async function runJournalServer(nowMs = Date.now()) {
     try { all.push(...(await closedPositions(a.id, { since, maxPages: 3 }))); } catch (e) { errs.push(a.account_number + ': ' + e.message); }
   }
   const byDay = digestFromPositions(all, { cooldownMin: +cfg.cooldownMin || 15, maxTrades: 5 });
-  if (!byDay.length) return { ok: true, note: 'sin trades en ' + DAYS + ' dias', accounts: accounts.length, errs };
+  if (!byDay.length) {
+    const note = 'sin trades en ' + DAYS + ' dias';
+    let touch;
+    try { touch = errs.length ? { skipped: 'errores MFP' } : await touchJournalChecked(note); } catch (e) { touch = { ok: false, error: String(e) }; }
+    return { ok: true, note, accounts: accounts.length, errs, touch };
+  }
   const r = await writeJournalDigest(byDay, 'mfp-server');
   return { ...r, accounts: accounts.length, days: byDay.map((d) => d.date), errs };
 }

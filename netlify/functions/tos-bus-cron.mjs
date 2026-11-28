@@ -6,10 +6,23 @@ import { runSnapshot } from './tos-bus-snapshot.mjs';
 import { runMarket } from './tos-market.mjs';
 import { runCoach } from './tos-coach.mjs';
 import { runEdge } from './tos-edge.mjs';
+import { ghBatchStart, ghBatchCommit, ghBatchAbort } from './_gh-bus.mjs';
 
 export const config = { schedule: '*/15 * * * *' };
 
 export default async () => {
+  // todas las escrituras de esta pasada van en UN commit (ver _gh-bus.mjs, modo lote)
+  ghBatchStart('jesusreyna2016', 'trader-os-bus', 'main');
+  let commit;
+  try {
+    return await pass();
+  } finally {
+    try { commit = await ghBatchCommit({ message: `tos: snapshot ${new Date().toISOString()}`, token: process.env.TOS_BUS_TOKEN }); }
+    catch (e) { console.error('tos-bus-cron commit', e); ghBatchAbort(); }
+  }
+};
+
+async function pass() {
   const snapshot = await runSnapshot();
   let market = { skipped: 'snapshot fallo' };
   if (snapshot.ok !== false) {
@@ -26,4 +39,4 @@ export default async () => {
     status: ok ? 200 : 500,
     headers: { 'content-type': 'application/json' }
   });
-};
+}

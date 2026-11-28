@@ -160,6 +160,21 @@ export async function writeJournalDigest(byDayIn, source) {
   }
 }
 
+// El relleno nocturno sin trades no escribia nada y el watchdog marcaba el journal como rancio (> 72 h)
+// aunque solo no se hubiera operado. Esto deja constancia de la revision: updatedAt y serverCheckedAt.
+export async function touchJournalChecked(note) {
+  const token = process.env.SA_BUS_TOKEN;
+  if (!token) return { ok: false, status: 503, error: 'SA_BUS_TOKEN missing' };
+  const now = new Date().toISOString();
+  const known = await busGet('live/journal.json', { token });
+  if (!known || !known.content) return { ok: false, error: 'sin live/journal.json' };
+  const prev = JSON.parse(known.content);
+  const next = { ...prev, updatedAt: now, serverCheckedAt: now, serverNote: note || null };
+  const body = JSON.stringify(next, null, 2) + '\n';
+  const r = await busPut('live/journal.json', body, `sa-bus: journal checked ${now}`, { token, known });
+  return { ok: true, touched: true, ...r };
+}
+
 export default async (req) => {
   const origin = req.headers.get('origin') || '*';
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(origin) });
