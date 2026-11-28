@@ -17,6 +17,7 @@
 // Invocable por HTTP para pruebas (GET); el schedule vive en scalp-bus-cron.mjs.
 import { getStore } from '@netlify/blobs';
 import { busGet, busPut } from './_scalp-bus.mjs';
+import { mirrorOrIb } from './_orib-mirror.mjs';
 
 function daysToProcess() {
   const now = new Date();
@@ -176,6 +177,11 @@ export async function runSnapshot() {
     }
   }
 
+  // --- Fase C: señales OR / IB del Plan Agent -> plan/<dia>.jsonl ---
+  let orib = [];
+  try { orib = await mirrorOrIb({ token, deadline: Date.now() + Math.max(3000, deadline + 6000 - Date.now()) }); }
+  catch (e) { orib = [{ error: String(e.message || e) }]; }
+
   // espeja report.json / state.json del repo a Blobs para que el dashboard los
   // sirva sin el retraso de cache de raw.githubusercontent
   const mirrored = [];
@@ -192,7 +198,7 @@ export async function runSnapshot() {
   // freshness marker read by session-feed -> live/market.json -> SA watchdog
   try { await store.setJSON('meta:lastSnapshot', { at: new Date().toISOString(), wrote: out.filter((w) => !w.skipped).length }); } catch { /* best effort */ }
 
-  return { ok: true, wrote: out, mirrored };
+  return { ok: true, wrote: out, orib, mirrored };
 }
 
 // invocable por HTTP para pruebas: GET /api/scalp-bus-snapshot

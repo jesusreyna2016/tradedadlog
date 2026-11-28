@@ -51,14 +51,17 @@ export default async (req) => {
     const tf = kv.tf || '?';
     const sigId = kv.sigId || `${sym}-${tf}-${Date.now()}-${stored.length}`;
 
+    // Las señales OR / IB del Plan Agent tienen sigId sin simbolo ni tf (ORAsia-<hora>-S):
+    // NQ y ES, o 5m y 15m, comparten la hora y se pisaban en la misma clave. uid las separa.
+    const uid = sigId.toUpperCase().startsWith(sym) ? sigId : `${sym}-${tf}-${sigId}`;
     const record = {
-      evt, sym, tf, sigId,
+      evt, sym, tf, sigId, uid,
       ver: kv.ver || null,
       ts: kv.ts || null,
       raw: kv,
       receivedAt: now.toISOString(),
     };
-    await store.setJSON(`ev/${day}/${safeKey(sigId)}__${evt}`, record);
+    await store.setJSON(`ev/${day}/${safeKey(uid)}__${evt}`, record);
     await store.setJSON('last', record);
     stored.push(`${evt}:${sym}${tf}:${sigId}`);
   }
